@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
-import nextSafe from "next-safe";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const nextSafe = require("next-safe");
 
 const nextConfig: NextConfig = {
     async headers() {
