@@ -8,7 +8,7 @@ import { defineConfig } from 'orval';
  */
 export default defineConfig({
   api: {
-    input: './Endpoints/endpoints.json',
+    input: './endpoints/endpoints.json',
     output: {
       mode: 'tags-split',
       target: 'src/api/endpoints',
@@ -25,7 +25,7 @@ export default defineConfig({
     },
   },
   zod: {
-    input: './Endpoints/endpoints.json',
+    input: './endpoints/endpoints.json',
     output: {
       mode: 'tags-split',
       client: 'zod',

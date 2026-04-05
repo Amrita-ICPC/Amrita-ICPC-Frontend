@@ -16,29 +16,42 @@ interface UseSessionInterceptorProps {
 export function useSessionInterceptor({ sseEndpointUrl }: UseSessionInterceptorProps) {
     useEffect(() => {
         let eventSource: EventSource | null = null;
+        let reconnectTimeoutId: NodeJS.Timeout | null = null;
+        let disposed = false;
 
         const connect = () => {
+            if (disposed) return;
+            if (eventSource) eventSource.close();
+            
             eventSource = new EventSource(sseEndpointUrl, { withCredentials: true });
 
             eventSource.addEventListener("SESSION_OVERRIDE", () => {
+                if (disposed) return;
                 console.warn("[Session Integrity] Concurrent login detected. Purging session...");
                 localStorage.clear();
                 sessionStorage.clear();
                 signOut({ callbackUrl: "/auth/login?error=SessionOverride" });
             });
 
-            eventSource.onerror = (err) => {
-                console.error("[Session Interceptor] SSE connection lost. Attempting reconnect...");
+            eventSource.onerror = () => {
+                if (disposed) return;
+                console.error("[Session Interceptor] SSE connection lost. Attempting reconnect in 5s...");
                 eventSource?.close();
-                setTimeout(connect, 5000);
+                // Clear any existing timeout before setting a new one
+                if (reconnectTimeoutId) clearTimeout(reconnectTimeoutId);
+                reconnectTimeoutId = setTimeout(connect, 5000);
             };
         };
 
         connect();
 
         return () => {
+            disposed = true;
             if (eventSource) {
                 eventSource.close();
+            }
+            if (reconnectTimeoutId) {
+                clearTimeout(reconnectTimeoutId);
             }
         };
     }, [sseEndpointUrl]);

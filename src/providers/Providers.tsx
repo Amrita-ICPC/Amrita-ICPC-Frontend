@@ -5,6 +5,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { SessionProvider } from "next-auth/react";
 import { useState } from "react";
 
+import { AxiosAuthProvider } from "./AxiosAuthProvider";
+
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(
         () =>
@@ -21,8 +23,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <SessionProvider>
             <QueryClientProvider client={queryClient}>
-                {children}
-                <ReactQueryDevtools initialIsOpen={false} />
+                <AxiosAuthProvider>
+                    {children}
+                </AxiosAuthProvider>
+                {process.env.NODE_ENV === "development" && (
+                    <ReactQueryDevtools initialIsOpen={false} />
+                )}
             </QueryClientProvider>
         </SessionProvider>
     );

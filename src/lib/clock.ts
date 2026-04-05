@@ -1,3 +1,5 @@
+"use client";
+
 let serverDelta = 0;
 let isSynchronized = false;
 
@@ -13,8 +15,12 @@ export async function synchronizeClock(healthEndpointUrl: string): Promise<void>
         const latency = (fetchEnd - fetchStart) / 2;
         
         const data = await response.json();
-        // Assuming the backend returns the current IST timestamp in milliseconds as `timestamp`
-        const serverTimestamp = typeof data.timestamp === 'number' ? data.timestamp : Date.now(); 
+        
+        if (typeof data.timestamp !== 'number') {
+            throw new Error(`Invalid or missing timestamp from server: ${JSON.stringify(data)}`);
+        }
+        
+        const serverTimestamp = data.timestamp;
         
         // serverDelta = (Server Time + Latency) - Local Time
         serverDelta = (serverTimestamp + latency) - Date.now();

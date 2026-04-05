@@ -4,7 +4,6 @@ import { getSession, signIn } from 'next-auth/react';
 
 /**
  * Global Axios Instance
- * Handles JWT injection and automatic 401 token refresh.
  */
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
@@ -13,51 +12,66 @@ const axiosInstance = axios.create({
     },
 });
 
+// Passive token storage set by AxiosAuthProvider
+let currentToken: string | null = null;
+
+export const setAxiosToken = (token: string | null) => {
+    currentToken = token;
+};
+
 axiosInstance.interceptors.request.use(
-    async (config: InternalAxiosRequestConfig) => {
-        const session = await getSession();
-
-        if (session && session.accessToken) {
-            config.headers.Authorization = `Bearer ${session.accessToken}`;
+    (config: InternalAxiosRequestConfig) => {
+        // Use passively stored token to avoid N+1 /api/auth/session requests
+        if (currentToken) {
+            config.headers.Authorization = `Bearer ${currentToken}`;
         }
-
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-        console.error('[Axios Error Global Hook]', error.message, error.response?.data);
+        const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
+        
+        if (isDev) {
+            console.error('[Axios Error Global Hook]', error.message, error.response?.data);
+        } else {
+            // Production: Sanitize logs to avoid PII or token leakage
+            console.error('[Axios Error]', error.message, { 
+                status: error.response?.status,
+                endpoint: error.config?.url 
+            });
+        }
         return Promise.reject(error);
     }
 );
 
+
+/**
+ * Refresh Authentication Logic
+ */
 const refreshAuthLogic = async (failedRequest: any) => {
     try {
+        // Explicitly fetch the session for token rotation only when 401 occurs
         const session = await getSession();
-        const refreshToken = session?.refreshToken;
-
-        if (!refreshToken) {
-            throw new Error("No refresh token available");
+        
+        if (!session?.accessToken || session.error === "RefreshAccessTokenError") {
+            throw new Error("Session expired or refresh failed");
         }
 
-        const tokenRefreshResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/refresh`, {
-            refresh_token: refreshToken
-        });
-
-        const newAccessToken = tokenRefreshResponse.data.access_token;
-
-        failedRequest.response.config.headers.Authorization = `Bearer ${newAccessToken}`;
-
+        // Update local memory and the failed request
+        setAxiosToken(session.accessToken);
+        failedRequest.response.config.headers.Authorization = `Bearer ${session.accessToken}`;
+        
         return Promise.resolve();
     } catch (err) {
-        console.error("Token refresh failed. Redirecting to login.", err);
+        console.error("[Axios] Token refresh failed. Triggering re-auth.", err);
+        
         if (typeof window !== 'undefined') {
-            signIn('keycloak');
+            const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
+            signIn(isDev ? 'credentials' : 'keycloak');
         }
         return Promise.reject(err);
     }
@@ -68,18 +82,18 @@ createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
 });
 
 export const axiosWithAuth = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
-    const source = axios.CancelToken.source();
+    const abortController = new AbortController();
 
     const promise = axiosInstance({
         ...config,
         ...options,
-        cancelToken: source.token,
+        signal: abortController.signal,
     }).then(({ data }) => data);
 
-    // Allow Orval to cancel requests if needed
+    // Allow Orval to cancel requests via the standard AbortController
     // @ts-ignore
     promise.cancel = () => {
-        source.cancel('Query was cancelled');
+        abortController.abort('Query was cancelled');
     };
 
     return promise;

@@ -34,13 +34,25 @@ export default async function DashboardLayout({
                 <main className="flex-grow p-4 md:p-8">
                     {children}
                     <div className="w-full">
-                        {roles.includes("ADMIN") && admin}
-                        {roles.includes("COACH") && coach}
-                        {roles.includes("MANAGER") && manager}
-                        {roles.includes("STUDENT") && student}
+                        {(() => {
+                            const showAdmin = roles.includes("ADMIN");
+                            const showCoach = roles.includes("COACH");
+                            const showManager = roles.includes("MANAGER");
+                            const showStudent = roles.includes("STUDENT");
+                            const renderedAny = showAdmin || showCoach || showManager || showStudent;
 
-                        {roles.length === 0 && <AccessDenied />}
+                            return (
+                                <>
+                                    {showAdmin && admin}
+                                    {showCoach && coach}
+                                    {showManager && manager}
+                                    {showStudent && student}
+                                    {!renderedAny && <AccessDenied />}
+                                </>
+                            );
+                        })()}
                     </div>
+
                 </main>
             </div>
         </AuthGuard>
