@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponse,
   BankQuestionBulk,
   BankQuestionCopyRequest,
   ExceptionResponse,
@@ -67,7 +68,7 @@ export const addQuestionsToBankApiV1BanksBankIdQuestionsPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/banks/${bankId}/questions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: bankQuestionBulk, signal
@@ -149,7 +150,7 @@ export const removeQuestionsFromBankApiV1BanksBankIdQuestionsDelete = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/banks/${bankId}/questions`, method: 'DELETE',
       headers: {'Content-Type': 'application/json', },
       data: bankQuestionBulk, signal
@@ -231,7 +232,7 @@ export const getBankQuestionsApiV1BanksBankIdQuestionsGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/banks/${bankId}/questions`, method: 'GET',
         params, signal
     },
@@ -350,7 +351,7 @@ export const copyQuestionsToBankApiV1BanksSourceBankIdQuestionsCopyPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/banks/${sourceBankId}/questions/copy`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: bankQuestionCopyRequest, signal
@@ -432,7 +433,7 @@ export const getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/banks/${bankId}/questions/${questionId}`, method: 'GET', signal
     },
       options);

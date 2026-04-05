@@ -28,6 +28,7 @@ import type {
   ExceptionResponse,
   HTTPValidationError,
   QuestionCreate,
+  QuestionResponse,
   QuestionUpdate
 } from '../../model';
 
@@ -61,7 +62,7 @@ export const createQuestionApiV1QuestionsPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<QuestionResponse>(
       {url: `/api/v1/questions/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: questionCreate, signal
@@ -139,7 +140,7 @@ export const getQuestionApiV1QuestionsQuestionIdGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<QuestionResponse>(
       {url: `/api/v1/questions/${questionId}`, method: 'GET', signal
     },
       options);
@@ -247,7 +248,7 @@ export const updateQuestionApiV1QuestionsQuestionIdPatch = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<QuestionResponse>(
       {url: `/api/v1/questions/${questionId}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: questionUpdate, signal

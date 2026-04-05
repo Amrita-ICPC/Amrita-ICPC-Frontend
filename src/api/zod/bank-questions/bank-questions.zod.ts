@@ -66,7 +66,28 @@ export const RemoveQuestionsFromBankApiV1BanksBankIdQuestionsDeleteBody = zod.ob
   "question_ids": zod.array(zod.uuid()).describe('List of target question IDs to assign or strip array')
 }).describe('Schema for processing a bulk bank question manipulation target request.\n\nContains a robust list of keys executing against Bank operations explicitly.')
 
-export const RemoveQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponse = zod.unknown()
+export const removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseSuccessDefault = true;
+export const removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseStatusDefault = 200;
+export const removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseMessageDefault = `Success`;
+
+export const RemoveQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponse = zod.object({
+  "success": zod.boolean().default(removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseSuccessDefault),
+  "status": zod.number().default(removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseStatusDefault),
+  "message": zod.string().default(removeQuestionsFromBankApiV1BanksBankIdQuestionsDeleteResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({})
+})
+})
 
 /**
  * Retrieve a summary list of questions associated with a bank.
@@ -106,7 +127,28 @@ export const GetBankQuestionsApiV1BanksBankIdQuestionsGetQueryParams = zod.objec
   "limit": zod.number().min(1).max(getBankQuestionsApiV1BanksBankIdQuestionsGetQueryLimitMax).default(getBankQuestionsApiV1BanksBankIdQuestionsGetQueryLimitDefault)
 })
 
-export const GetBankQuestionsApiV1BanksBankIdQuestionsGetResponse = zod.unknown()
+export const getBankQuestionsApiV1BanksBankIdQuestionsGetResponseSuccessDefault = true;
+export const getBankQuestionsApiV1BanksBankIdQuestionsGetResponseStatusDefault = 200;
+export const getBankQuestionsApiV1BanksBankIdQuestionsGetResponseMessageDefault = `Success`;
+
+export const GetBankQuestionsApiV1BanksBankIdQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getBankQuestionsApiV1BanksBankIdQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getBankQuestionsApiV1BanksBankIdQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getBankQuestionsApiV1BanksBankIdQuestionsGetResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({})
+})
+})
 
 /**
  * Copy questions from one bank to another.
@@ -172,5 +214,26 @@ export const GetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetParams = zod.o
   "question_id": zod.uuid()
 })
 
-export const GetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponse = zod.unknown()
+export const getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseSuccessDefault = true;
+export const getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseStatusDefault = 200;
+export const getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseMessageDefault = `Success`;
+
+export const GetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseStatusDefault),
+  "message": zod.string().default(getBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({})
+})
+})
 

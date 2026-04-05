@@ -11,12 +11,54 @@ import * as zod from 'zod';
 /**
  * @summary Get Users
  */
-export const GetUsersApiV1UsersGetResponse = zod.unknown()
+export const getUsersApiV1UsersGetResponseSuccessDefault = true;
+export const getUsersApiV1UsersGetResponseStatusDefault = 200;
+export const getUsersApiV1UsersGetResponseMessageDefault = `Success`;
+
+export const GetUsersApiV1UsersGetResponse = zod.object({
+  "success": zod.boolean().default(getUsersApiV1UsersGetResponseSuccessDefault),
+  "status": zod.number().default(getUsersApiV1UsersGetResponseStatusDefault),
+  "message": zod.string().default(getUsersApiV1UsersGetResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({})
+})
+})
 
 /**
  * @summary Create User
  */
-export const CreateUserApiV1UsersPostResponse = zod.unknown()
+export const createUserApiV1UsersPostResponseSuccessDefault = true;
+export const createUserApiV1UsersPostResponseStatusDefault = 200;
+export const createUserApiV1UsersPostResponseMessageDefault = `Success`;
+
+export const CreateUserApiV1UsersPostResponse = zod.object({
+  "success": zod.boolean().default(createUserApiV1UsersPostResponseSuccessDefault),
+  "status": zod.number().default(createUserApiV1UsersPostResponseStatusDefault),
+  "message": zod.string().default(createUserApiV1UsersPostResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({})
+})
+})
 
 /**
  * Get current logged-in user details from JWT.

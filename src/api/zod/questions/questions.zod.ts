@@ -62,7 +62,24 @@ export const GetQuestionApiV1QuestionsQuestionIdGetParams = zod.object({
   "question_id": zod.uuid()
 })
 
-export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.unknown()
+export const getQuestionApiV1QuestionsQuestionIdGetResponseTimeLimitMsExclusiveMin = 0;
+
+export const getQuestionApiV1QuestionsQuestionIdGetResponseMemoryLimitMbExclusiveMin = 0;
+
+
+
+export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.object({
+  "question_text": zod.string().describe('The problem statement and description'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "allowed_languages": zod.array(zod.string()).describe('List of allowed programming languages'),
+  "testcases": zod.array(zod.record(zod.string(), zod.unknown())).describe('List of testcases with input\/output and visibility'),
+  "time_limit_ms": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
+  "memory_limit_mb": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
+  "id": zod.uuid(),
+  "created_by": zod.uuid(),
+  "created_at": zod.iso.datetime({}),
+  "updated_at": zod.iso.datetime({})
+})
 
 /**
  * Update a question.
@@ -103,7 +120,24 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchBody = zod.object({
   "memory_limit_mb": zod.union([zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional()
 })
 
-export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.unknown()
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseTimeLimitMsExclusiveMin = 0;
+
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseMemoryLimitMbExclusiveMin = 0;
+
+
+
+export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.object({
+  "question_text": zod.string().describe('The problem statement and description'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "allowed_languages": zod.array(zod.string()).describe('List of allowed programming languages'),
+  "testcases": zod.array(zod.record(zod.string(), zod.unknown())).describe('List of testcases with input\/output and visibility'),
+  "time_limit_ms": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
+  "memory_limit_mb": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
+  "id": zod.uuid(),
+  "created_by": zod.uuid(),
+  "created_at": zod.iso.datetime({}),
+  "updated_at": zod.iso.datetime({})
+})
 
 /**
  * Delete a question by ID.

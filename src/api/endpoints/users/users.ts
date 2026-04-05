@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponse,
   ExceptionResponse,
   UserProfile,
   UserSyncResponse
@@ -46,7 +47,7 @@ export const getUsersApiV1UsersGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/users/`, method: 'GET', signal
     },
       options);
@@ -136,7 +137,7 @@ export const createUserApiV1UsersPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/users/`, method: 'POST', signal
     },
       options);

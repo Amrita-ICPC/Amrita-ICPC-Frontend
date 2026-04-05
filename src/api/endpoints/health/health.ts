@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponse,
   ExceptionResponse
 } from '../../model';
 
@@ -41,7 +42,7 @@ export const healthCheckApiHealthGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/health`, method: 'GET', signal
     },
       options);
