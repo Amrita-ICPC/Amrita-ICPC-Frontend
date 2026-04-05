@@ -10,6 +10,9 @@ export const proxy = auth((req) => {
     const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
     const host = req.headers.get("host");
 
+    // Helper: checks if the url is exactly the segment or starts with the segment + "/"
+    const matchesSegment = (path: string, segment: string) => path === segment || path.startsWith(`${segment}/`);
+
     // Short-circuit check: only allow dev-bypass on development env
     if (isDev) {
         return NextResponse.next();
@@ -21,18 +24,17 @@ export const proxy = auth((req) => {
     // Define protected routes that require specific roles
     const urlPath = nextUrl.pathname;
 
-    const isApiAuthRoute = urlPath.startsWith("/api/auth");
-    const isPublicRoute = urlPath === "/" || urlPath.startsWith("/auth/login") || urlPath === "/access-denied";
+    const isApiAuthRoute = matchesSegment(urlPath, "/api/auth");
+    const isPublicRoute = urlPath === "/" || matchesSegment(urlPath, "/auth/login") || urlPath === "/access-denied";
 
     if (isApiAuthRoute) {
         return NextResponse.next();
     }
 
     // Helper: checks if the url is exactly the segment or starts with the segment + "/"
-    const matchesSegment = (path: string, segment: string) => path === segment || path.startsWith(`${segment}/`);
 
     // Redirect to base dashboard if user is authenticated but on a login page
-    if (isLoggedIn && urlPath.startsWith("/auth/login")) {
+    if (isLoggedIn && matchesSegment(urlPath, "/auth/login")) {
         return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
 
