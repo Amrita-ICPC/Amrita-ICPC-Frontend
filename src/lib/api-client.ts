@@ -70,8 +70,8 @@ const refreshAuthLogic = async (failedRequest: { response: { config: { headers: 
         console.error("[Axios] Token refresh failed. Triggering re-auth.", err);
         
         if (typeof window !== 'undefined') {
-            const isDevClient = process.env.NEXT_PUBLIC_APP_MODE === "Development";
-            signIn(isDevClient ? 'credentials' : 'keycloak');
+            const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
+            signIn(isDev ? 'credentials' : 'keycloak');
         }
         return Promise.reject(err);
     }

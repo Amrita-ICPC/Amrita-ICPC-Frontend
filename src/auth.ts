@@ -10,7 +10,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
  * 1. Development: Uses CredentialsProvider for a one-click bypass.
  * 2. Production: Keycloak-based OIDC.
  */
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
 const authSecret = process.env.AUTH_SECRET;
 
 if (!authSecret) {
@@ -112,12 +112,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                            : (keycloakProfile?.realm_access?.roles || []),
                     groups: keycloakProfile?.groups || [],
                     provider: account.provider,
-                };
+                } as JWT;
             }
 
             // Handle manual session updates (if any)
             if (trigger === "update" && session) {
-                return { ...token, ...session };
+                // Return previous token if session content is invalid
+                if (typeof session !== "object" || session === null) return token;
+
+                // Explicitly whitelist non-auth fields that are safe to update from the client
+                const updatedToken: JWT = { ...token };
+                if (session.name) updatedToken.name = session.name;
+                if (session.email) updatedToken.email = session.email;
+                if (session.picture) updatedToken.picture = session.picture;
+                if (session.user && typeof session.user === "object") {
+                    if (session.user.name) updatedToken.name = session.user.name;
+                    if (session.user.email) updatedToken.email = session.user.email;
+                    if (session.user.image) updatedToken.picture = session.user.image;
+                }
+
+                return updatedToken;
             }
 
             // Fallback for Development Mode (Mocking expiry)

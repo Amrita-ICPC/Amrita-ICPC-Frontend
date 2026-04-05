@@ -26,7 +26,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <AxiosAuthProvider>
                     {children}
                 </AxiosAuthProvider>
-                {process.env.NODE_ENV === "development" && (
+                {process.env.NEXT_PUBLIC_APP_MODE === "Development" && (
                     <ReactQueryDevtools initialIsOpen={false} />
                 )}
             </QueryClientProvider>

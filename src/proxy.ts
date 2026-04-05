@@ -7,7 +7,7 @@ import { hasAccess } from "@/lib/auth/utils";
  * Handles route protection and role-based redirects.
  */
 export const proxy = auth((req) => {
-    const isDev = process.env.NODE_ENV === "development";
+    const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
     const host = req.headers.get("host");
 
     // Short-circuit check: only allow dev-bypass on development env
