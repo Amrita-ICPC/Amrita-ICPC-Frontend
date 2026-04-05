@@ -17,7 +17,7 @@ export default async function Home() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/auth/login"
-            className="group flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full text-lg font-bold hover:scale-103 transition-all shadow-xl shadow-primary/20"
+            className="group flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full text-lg font-bold hover:scale-[1.03] transition-all shadow-xl shadow-primary/20"
           >
             Enter
             <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

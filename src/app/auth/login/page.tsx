@@ -63,7 +63,7 @@ export default function LoginPage() {
               className={`w-full py-4 font-bold rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:hover:scale-100 ${isDev
                 ? "bg-yellow-500 text-black hover:bg-yellow-400 shadow-yellow-500/20"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
-                } hover:scale-[1.01] active:scale-[0.98]`}
+                } hover:scale-[1.03] active:scale-[0.98]`}
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
