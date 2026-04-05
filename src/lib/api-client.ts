@@ -84,13 +84,16 @@ createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
 export const axiosWithAuth = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
     const abortController = new AbortController();
 
+    // Preserve caller's signal (from Orval/React Query) or fallback to internal controller
+    const signal = config.signal ?? options?.signal ?? abortController.signal;
+
     const promise = axiosInstance({
         ...config,
         ...options,
-        signal: abortController.signal,
+        signal,
     }).then(({ data }) => data) as Promise<T> & { cancel?: () => void };
 
-    // Allow Orval to cancel requests via the standard AbortController
+    // Internal cancellation helper
     promise.cancel = () => {
         abortController.abort('Query was cancelled');
     };

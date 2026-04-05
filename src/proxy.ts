@@ -16,7 +16,7 @@ export const proxy = auth((req) => {
     }
 
     const { nextUrl } = req;
-    const isLoggedIn = !!req.auth;
+    const isLoggedIn = !!req.auth && req.auth.error !== "RefreshAccessTokenError";
 
     // Define protected routes that require specific roles
     const urlPath = nextUrl.pathname;
