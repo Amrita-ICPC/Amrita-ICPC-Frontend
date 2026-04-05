@@ -52,7 +52,7 @@ axiosInstance.interceptors.response.use(
 /**
  * Refresh Authentication Logic
  */
-const refreshAuthLogic = async (failedRequest: any) => {
+const refreshAuthLogic = async (failedRequest: { response: { config: { headers: { Authorization: string } } } }) => {
     try {
         // Explicitly fetch the session for token rotation only when 401 occurs
         const session = await getSession();
@@ -70,8 +70,8 @@ const refreshAuthLogic = async (failedRequest: any) => {
         console.error("[Axios] Token refresh failed. Triggering re-auth.", err);
         
         if (typeof window !== 'undefined') {
-            const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
-            signIn(isDev ? 'credentials' : 'keycloak');
+            const isDevClient = process.env.NEXT_PUBLIC_APP_MODE === "Development";
+            signIn(isDevClient ? 'credentials' : 'keycloak');
         }
         return Promise.reject(err);
     }
@@ -88,10 +88,9 @@ export const axiosWithAuth = <T>(config: AxiosRequestConfig, options?: AxiosRequ
         ...config,
         ...options,
         signal: abortController.signal,
-    }).then(({ data }) => data);
+    }).then(({ data }) => data) as Promise<T> & { cancel?: () => void };
 
     // Allow Orval to cancel requests via the standard AbortController
-    // @ts-ignore
     promise.cancel = () => {
         abortController.abort('Query was cancelled');
     };

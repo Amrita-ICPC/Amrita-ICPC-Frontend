@@ -8,9 +8,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
  * 
  * Supports two modes:
  * 1. Development: Uses CredentialsProvider for a one-click bypass.
- * 2. Production: Uses KeycloakProvider for official OIDC authentication.
+ * 2. Production: Keycloak-based OIDC.
  */
-const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
+const isDev = process.env.NODE_ENV === "development";
 const authSecret = process.env.AUTH_SECRET;
 
 if (!authSecret) {
@@ -82,7 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     username: { label: "Username", type: "text", placeholder: "admin" },
                     password: { label: "Password", type: "password" }
                 },
-                async authorize() {
+                async authorize(credentials, req) {
                     return { 
                         id: "dev-mock-id", 
                         name: "Developer", 
@@ -96,8 +96,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async jwt({ token, account, profile, trigger, session }) {
             // Initial sign in (Handles both Keycloak and Credentials)
             if (account) {
-                // Determine if we are logging in via Dev Bypass (Credentials)
-                const isCredentials = account.provider === "credentials";
+                // Type safe Keycloak profile extraction
+                const keycloakProfile = profile as { 
+                    realm_access?: { roles?: string[] };
+                    groups?: string[];
+                } | undefined;
 
                 return {
                     ...token,
@@ -106,8 +109,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     expiresAt: account.expires_at || Math.floor(Date.now() / 1000) + 86400, // +1 day mock
                     roles: isDev 
                            ? [(process.env.NEXT_PUBLIC_DEV_USER_ROLE || "ADMIN")] 
-                           : ((profile as any)?.realm_access?.roles || []),
-                    groups: (profile as any)?.groups || [],
+                           : (keycloakProfile?.realm_access?.roles || []),
+                    groups: keycloakProfile?.groups || [],
                     provider: account.provider,
                 };
             }

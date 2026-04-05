@@ -6,10 +6,14 @@ import { hasAccess } from "@/lib/auth/utils";
  * Global Edge Proxy
  * Handles route protection and role-based redirects.
  */
-export const proxy = auth((req: any) => {
-    const isDev = process.env.NEXT_PUBLIC_APP_MODE === "Development";
-    // Short-circuit all checks in local dev for a smoother experience
-    if (isDev) return NextResponse.next();
+export const proxy = auth((req) => {
+    const isDev = process.env.NODE_ENV === "development";
+    const host = req.headers.get("host");
+
+    // Short-circuit check: only allow dev-bypass on development env
+    if (isDev) {
+        return NextResponse.next();
+    }
 
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
@@ -41,8 +45,8 @@ export const proxy = auth((req: any) => {
     }
 
     // Role-Based Authorization Enforcement
-    const userRoles = (req.auth?.user as any)?.roles || [];
-    const userGroups = (req.auth?.user as any)?.groups || [];
+    const userRoles = req.auth?.user?.roles || [];
+    const userGroups = req.auth?.user?.groups || [];
 
     // Dashboard Sub-path Protection (RBAC)
     const subRouteMappings = [
