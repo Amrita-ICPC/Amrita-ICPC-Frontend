@@ -5,7 +5,6 @@ import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lock } from "lucide-react";
-import { logger } from "@/lib/logger";
 import { hasAccess } from "@/lib/auth/permissions";
 
 interface AuthGuardProps {
@@ -42,7 +41,7 @@ export function AuthGuard({
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            logger.warn("Unauthenticated user accessing protected resource, redirecting to login");
+            console.warn("Unauthenticated user accessing protected resource, redirecting to login");
             router.push("/auth/login");
             return;
         }
@@ -56,7 +55,7 @@ export function AuthGuard({
             );
 
             if (!hasRequiredAccess) {
-                logger.warn(
+                console.warn(
                     {
                         userId: session.user.id,
                         userRoles: session.user.roles,

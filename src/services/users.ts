@@ -4,7 +4,6 @@
  */
 
 import { api } from "@/lib/api-client";
-import { logger } from "@/lib/logger";
 
 export interface UserProfile {
     id: string;
@@ -28,10 +27,10 @@ export interface CreateUserPayload {
  */
 export async function getCurrentUser(): Promise<UserProfile> {
     try {
-        logger.info("Fetching current user profile");
+        console.info("Fetching current user profile");
         return await api.get<UserProfile>("/api/v1/users/me");
     } catch (error) {
-        logger.error({ error }, "Failed to fetch current user");
+        console.error("Failed to fetch current user", error);
         throw error;
     }
 }
@@ -44,10 +43,10 @@ export async function getAllUsers(
     page_size = 10,
 ): Promise<{ data: UserProfile[]; total: number }> {
     try {
-        logger.info({ page, page_size }, "Fetching all users");
+        console.info({ page, page_size }, "Fetching all users");
         return await api.get(`/api/v1/users?page=${page}&page_size=${page_size}`);
     } catch (error) {
-        logger.error({ error }, "Failed to fetch users");
+        console.error("Failed to fetch users", error);
         throw error;
     }
 }
@@ -57,10 +56,10 @@ export async function getAllUsers(
  */
 export async function createUser(payload: CreateUserPayload): Promise<UserProfile> {
     try {
-        logger.info({ email: payload.email }, "Creating new user");
+        console.info({ email: payload.email }, "Creating new user");
         return await api.post<UserProfile>("/api/v1/users", payload);
     } catch (error) {
-        logger.error({ error, email: payload.email }, "Failed to create user");
+        console.error({ error, email: payload.email }, "Failed to create user");
         throw error;
     }
 }
@@ -70,10 +69,10 @@ export async function createUser(payload: CreateUserPayload): Promise<UserProfil
  */
 export async function getUserById(userId: string): Promise<UserProfile> {
     try {
-        logger.info({ userId }, "Fetching user by ID");
+        console.info({ userId }, "Fetching user by ID");
         return await api.get<UserProfile>(`/api/v1/users/${userId}`);
     } catch (error) {
-        logger.error({ error, userId }, "Failed to fetch user");
+        console.error({ error, userId }, "Failed to fetch user");
         throw error;
     }
 }
@@ -86,10 +85,10 @@ export async function updateUser(
     payload: Partial<CreateUserPayload>,
 ): Promise<UserProfile> {
     try {
-        logger.info({ userId }, "Updating user");
+        console.info({ userId }, "Updating user");
         return await api.patch<UserProfile>(`/api/v1/users/${userId}`, payload);
     } catch (error) {
-        logger.error({ error, userId }, "Failed to update user");
+        console.error({ error, userId }, "Failed to update user");
         throw error;
     }
 }
@@ -99,10 +98,10 @@ export async function updateUser(
  */
 export async function deleteUser(userId: string): Promise<void> {
     try {
-        logger.info({ userId }, "Deleting user");
+        console.info({ userId }, "Deleting user");
         await api.delete(`/api/v1/users/${userId}`);
     } catch (error) {
-        logger.error({ error, userId }, "Failed to delete user");
+        console.error({ error, userId }, "Failed to delete user");
         throw error;
     }
 }

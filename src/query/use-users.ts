@@ -15,7 +15,6 @@ import {
     deleteUser,
     type CreateUserPayload,
 } from "@/services/users";
-import { logger } from "@/lib/logger";
 import { toast } from "@/lib/hooks/use-toast";
 
 // Query keys for invalidation
@@ -73,7 +72,7 @@ export function useCreateUser() {
     return useMutation({
         mutationFn: createUser,
         onSuccess: (newUser) => {
-            logger.info({ userId: newUser.id }, "User created successfully");
+            console.info({ userId: newUser.id }, "User created successfully");
             // Invalidate user lists to refetch
             queryClient.invalidateQueries({ queryKey: userQueryKeys.lists() });
             // Add new user to cache
@@ -81,7 +80,7 @@ export function useCreateUser() {
             toast.success(`User ${newUser.email} created successfully`);
         },
         onError: (error) => {
-            logger.error({ error }, "Failed to create user");
+            console.error({ error }, "Failed to create user");
             toast.error("Failed to create user");
         },
     });
@@ -96,7 +95,7 @@ export function useUpdateUser(userId: string) {
     return useMutation({
         mutationFn: (payload: Partial<CreateUserPayload>) => updateUser(userId, payload),
         onSuccess: (updatedUser) => {
-            logger.info({ userId }, "User updated successfully");
+            console.info({ userId }, "User updated successfully");
             // Update cache
             queryClient.setQueryData(userQueryKeys.detail(userId), updatedUser);
             // Invalidate lists
@@ -104,7 +103,7 @@ export function useUpdateUser(userId: string) {
             toast.success("User updated successfully");
         },
         onError: (error) => {
-            logger.error({ error, userId }, "Failed to update user");
+            console.error({ error, userId }, "Failed to update user");
             toast.error("Failed to update user");
         },
     });
@@ -119,7 +118,7 @@ export function useDeleteUser() {
     return useMutation({
         mutationFn: deleteUser,
         onSuccess: (_, userId) => {
-            logger.info({ userId }, "User deleted successfully");
+            console.info({ userId }, "User deleted successfully");
             // Remove from cache
             queryClient.removeQueries({ queryKey: userQueryKeys.detail(userId) });
             // Invalidate lists
@@ -127,7 +126,7 @@ export function useDeleteUser() {
             toast.success("User deleted successfully");
         },
         onError: (error) => {
-            logger.error({ error }, "Failed to delete user");
+            console.error("Failed to delete user", error);
             toast.error("Failed to delete user");
         },
     });

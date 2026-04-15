@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
                 source: "/:path*",
                 headers: nextSafe({
                     isDev,
+                    permissionsPolicyDirectiveSupport: ["standard"],
+                    permissionsPolicy: false,
                     contentSecurityPolicy: {
                         "base-uri": "'self'",
                         "default-src": "'self'",
@@ -19,7 +21,9 @@ const nextConfig: NextConfig = {
                         "style-src": "'self' 'unsafe-inline'",
                         "img-src": "'self' data: blob:",
                         "font-src": "'self' data:",
-                        "connect-src": isDev ? "'self' ws: wss: https:" : "'self' https:",
+                        "connect-src": isDev
+                            ? "'self' http://10.10.10.23:8000 ws: wss: https: webpack://*"
+                            : "'self' https:",
                         "frame-ancestors": "'none'",
                         "object-src": "'none'",
                         "form-action": "'self'",

@@ -7,7 +7,6 @@
 
 import { useEffect, useRef } from "react";
 import { setServerTimeDelta, computeTimeDelta } from "@/lib/clock";
-import { logger } from "@/lib/logger";
 
 interface HealthResponse {
     timestamp?: number;
@@ -35,13 +34,17 @@ export function useServerClockSync(): void {
                 // Fetch health endpoint which returns server time
                 const response = await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL || "http://10.10.10.23:8000"}/api/health`,
-                    { method: "GET" },
+                    {
+                        method: "GET",
+                        // ✅ FIX: Allow cookies/sessions to be sent to the backend
+                        credentials: "include",
+                    },
                 );
 
                 const clientTimeAfter = Date.now();
 
                 if (!response.ok) {
-                    logger.warn(
+                    console.warn(
                         { status: response.status },
                         "Health check failed, skipping clock sync",
                     );
@@ -54,7 +57,7 @@ export function useServerClockSync(): void {
                 const serverTimestamp = data.timestamp || data.server_time || data.now;
 
                 if (!serverTimestamp || typeof serverTimestamp !== "number") {
-                    logger.warn(
+                    console.warn(
                         { responseKeys: Object.keys(data) },
                         "Could not find timestamp in health response",
                     );
@@ -69,7 +72,7 @@ export function useServerClockSync(): void {
                 const delta = computeTimeDelta(serverTimestamp);
                 setServerTimeDelta(delta);
 
-                logger.info(
+                console.info(
                     {
                         delta,
                         roundTripTime,
@@ -79,7 +82,7 @@ export function useServerClockSync(): void {
                     "Clock synchronized with server",
                 );
             } catch (error) {
-                logger.error({ error }, "Failed to sync server clock");
+                console.error("Failed to sync server clock:", error);
                 // Don't crash - continue with local time
             }
         };
@@ -96,11 +99,15 @@ export async function syncServerClockOnDemand(): Promise<number | null> {
     try {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || "http://10.10.10.23:8000"}/api/health`,
-            { method: "GET" },
+            {
+                method: "GET",
+                // ✅ FIX: Allow cookies/sessions to be sent to the backend
+                credentials: "include",
+            },
         );
 
         if (!response.ok) {
-            logger.warn({ status: response.status }, "Health check failed");
+            console.warn({ status: response.status }, "Health check failed");
             return null;
         }
 
@@ -108,17 +115,17 @@ export async function syncServerClockOnDemand(): Promise<number | null> {
         const serverTimestamp = data.timestamp || data.server_time || data.now;
 
         if (!serverTimestamp || typeof serverTimestamp !== "number") {
-            logger.warn("Could not find timestamp in health response");
+            console.warn("Could not find timestamp in health response");
             return null;
         }
 
         const delta = computeTimeDelta(serverTimestamp);
         setServerTimeDelta(delta);
 
-        logger.info({ delta }, "Clock re-synced on demand");
+        console.info({ delta }, "Clock re-synced on demand");
         return delta;
     } catch (error) {
-        logger.error({ error }, "Failed to re-sync server clock");
+        console.error("Failed to re-sync server clock:", error);
         return null;
     }
 }

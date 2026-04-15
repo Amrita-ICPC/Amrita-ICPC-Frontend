@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/lib/auth/auth";
-import { Banknote, LayoutDashboard, LogOut, Settings, Trophy, Users } from "lucide-react";
+import { Banknote, LayoutDashboard, LogOut, Settings, Trophy, Users, Shield } from "lucide-react";
 
 function getInitials(name?: string | null, email?: string | null) {
     const source = name || email || "User";
@@ -68,6 +68,23 @@ export default async function Sidenavbar() {
                     <Settings className="h-4 w-4" />
                     Settings
                 </Link>
+
+                {/* Admin section */}
+                {(user?.roles as string[] | undefined)?.includes("admin") && (
+                    <>
+                        <div className="my-4 border-t border-white/10" />
+                        <div className="text-xs font-semibold uppercase tracking-[0.1em] text-white/40 px-4 py-2">
+                            Admin
+                        </div>
+                        <Link
+                            href="/admin/users"
+                            className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
+                        >
+                            <Shield className="h-4 w-4" />
+                            Users
+                        </Link>
+                    </>
+                )}
             </nav>
 
             <div className="mt-6 border-t border-white/10 pt-6">
