@@ -5,6 +5,34 @@ enum UserType {
     STUDENT = "student",
 }
 
+/**
+ * Map Keycloak roles to application roles
+ * Converts Keycloak default roles to our application role names
+ */
+export function mapKeycloakRolesToAppRoles(keycloakRoles: string[]): string[] {
+    const roleMap: Record<string, string> = {
+        // Keycloak default roles mapping
+        "default-roles-icpc": "student", // Default role maps to student
+        // Add more mappings as needed based on your Keycloak setup
+    };
+
+    // Start with mapped roles
+    let appRoles = keycloakRoles.map((role) => roleMap[role] || role).filter(Boolean);
+
+    // Remove duplicate role-related entries
+    appRoles = [...new Set(appRoles)];
+
+    // If we don't have a clear role, default to student
+    if (
+        appRoles.length === 0 ||
+        !appRoles.some((r) => ["admin", "instructor", "student"].includes(r))
+    ) {
+        appRoles.push("student");
+    }
+
+    return appRoles;
+}
+
 // Utility function to check if user has any of the required roles
 export function hasRequiredRole(userRole: string | undefined, requiredRoles: UserType[]): boolean {
     if (!userRole || requiredRoles.length === 0) return false;
@@ -51,8 +79,27 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
     let groups: string[] = [];
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
-        roles = decodedJWT.realm_access?.roles || [];
-        groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
+        // Get realm roles
+        const realmRoles = decodedJWT.realm_access?.roles || [];
+        // Extract groups and strip leading slash
+        const rawGroups = (decodedJWT.groups || []).map((group: string) =>
+            group.replace(/^\//, ""),
+        );
+        groups = rawGroups;
+
+        // Map groups to application roles
+        // Groups like 'admin', 'instructor', 'student' become roles
+        const groupBasedRoles = rawGroups.filter((group: string) =>
+            ["admin", "instructor", "student"].includes(group),
+        );
+
+        // Combine realm roles and group-based roles, removing duplicates
+        roles = [...new Set([...realmRoles, ...groupBasedRoles])];
+
+        // If no roles determined, default to student
+        if (roles.length === 0) {
+            roles = ["student"];
+        }
     }
     return { roles, groups };
 }

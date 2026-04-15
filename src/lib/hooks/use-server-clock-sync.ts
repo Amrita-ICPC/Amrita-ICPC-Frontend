@@ -122,7 +122,7 @@ export async function syncServerClockOnDemand(): Promise<number | null> {
         const delta = computeTimeDelta(serverTimestamp);
         setServerTimeDelta(delta);
 
-        console.info({ delta }, "Clock re-synced on demand");
+        console.info("Clock re-synced on demand", { delta, serverTimestamp });
         return delta;
     } catch (error) {
         console.error("Failed to re-sync server clock:", error);

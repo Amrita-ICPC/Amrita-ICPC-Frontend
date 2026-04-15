@@ -9,6 +9,7 @@ import {
     Users,
     Shield,
     BookOpen,
+    User,
 } from "lucide-react";
 
 function getInitials(name?: string | null, email?: string | null) {
@@ -50,7 +51,12 @@ export default async function Sidenavbar() {
                     Home
                 </Link>
                 <Link
-                    href="/contest"
+                    href={
+                        (user?.roles as string[] | undefined)?.includes("instructor") ||
+                        (user?.roles as string[] | undefined)?.includes("admin")
+                            ? "/instructor/contests"
+                            : "/contest"
+                    }
                     className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
                 >
                     <Trophy className="h-4 w-4" />
@@ -114,11 +120,14 @@ export default async function Sidenavbar() {
             </nav>
 
             <div className="mt-6 border-t border-white/10 pt-6">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <Link
+                    href="/profile"
+                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10 hover:border-white/30"
+                >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xs font-semibold">
                         {getInitials(user?.name, user?.email)}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold">
                             {user?.name || "ICPC User"}
                         </div>
@@ -126,8 +135,15 @@ export default async function Sidenavbar() {
                             {user?.email || "Signed in"}
                         </div>
                     </div>
-                </div>
-                <form action={handleSignOut} className="mt-3">
+                </Link>
+                <Link
+                    href="/profile"
+                    className="mt-2 flex w-full items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:border-white/40 hover:text-white"
+                >
+                    <User className="h-4 w-4" />
+                    My Profile
+                </Link>
+                <form action={handleSignOut} className="mt-2">
                     <button
                         type="submit"
                         className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:border-white/40 hover:text-white"

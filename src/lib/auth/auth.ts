@@ -35,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return baseUrl;
         },
         async jwt({ token, account, user }) {
-            // Initial sign-in
+            // Initial sign-in from Keycloak
             if (account && user) {
                 const decoded = decodeJwt(account.access_token!);
                 const { roles, groups } = processDecodedToken(decoded as DecodedJWT);
@@ -69,7 +69,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Token still valid
             if (token.expires_at && Date.now() < token.expires_at * 1000 - 15 * 1000) {
                 return token;
-            } // Try to refresh
+            }
+
+            // Try to refresh
             if (token.refresh_token) {
                 const refreshedToken = await refreshKeycloakAccessToken(token as KeycloakToken);
                 // If refresh returns null (session expired), invalidate the session
