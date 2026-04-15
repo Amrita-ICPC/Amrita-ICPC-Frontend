@@ -107,6 +107,47 @@ export async function restoreContest(id: string): Promise<Contest> {
 }
 
 /**
+ * Instructor types for contest management
+ */
+export interface Instructor {
+    id: string;
+    user_id: string;
+    name?: string;
+    email?: string;
+}
+
+export interface AddInstructorPayload {
+    user_id: string;
+}
+
+/**
+ * Get all instructors for a contest
+ */
+export async function getContestInstructors(contestId: string): Promise<Instructor[]> {
+    return api.get(`/api/v1/contests/${contestId}/instructors`);
+}
+
+/**
+ * Add instructor to contest
+ */
+export async function addContestInstructor(
+    contestId: string,
+    payload: AddInstructorPayload,
+): Promise<Instructor> {
+    return api.post(`/api/v1/contests/${contestId}/instructors`, payload);
+}
+
+/**
+ * Remove instructor from contest
+ */
+export async function removeContestInstructor(
+    contestId: string,
+    instructorId: string,
+): Promise<void> {
+    return api.delete(`/api/v1/contests/${contestId}/instructors/${instructorId}`);
+}
+
+/**
  * Get contest problems/questions
  */
 export async function getContestProblems(

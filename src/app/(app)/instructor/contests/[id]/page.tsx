@@ -16,6 +16,7 @@ import {
     useRestoreContest,
 } from "@/query/use-paginated-contests";
 import { PublishContestDialog } from "@/components/instructor/publish-contest-dialog";
+import { InstructorsManagement } from "@/components/instructor/instructors-management";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -235,6 +236,9 @@ function ContestDetailContent() {
                     <Badge variant="outline">{contest.team_approval_mode || "AUTO_APPROVE"}</Badge>
                 </div>
             </Card>
+
+            {/* Instructors Management */}
+            <InstructorsManagement contestId={contestId} />
 
             {/* Action Buttons */}
             <Card className="p-6">
