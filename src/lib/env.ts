@@ -8,6 +8,10 @@ const envSchema = z.object({
     AUTH_KEYCLOAK_ID: z.string().min(1, "AUTH_KEYCLOAK_ID is required"),
     AUTH_KEYCLOAK_SECRET: z.string().min(1, "AUTH_KEYCLOAK_SECRET is required"),
     AUTH_KEYCLOAK_ISSUER: z.string().url("AUTH_KEYCLOAK_ISSUER must be a valid URL"),
+    NEXT_PUBLIC_API_URL: z
+        .string()
+        .url("NEXT_PUBLIC_API_URL must be a valid URL")
+        .default("http://localhost:8000"),
     FEATURE_FLAGS: z.string().optional(),
     NEXT_PUBLIC_FEATURE_FLAGS: z.string().optional(),
 });
