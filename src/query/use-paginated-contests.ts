@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     getAllContests,
+    getContestById,
     createContest,
     updateContest,
     deleteContest,
@@ -16,10 +17,23 @@ import { toast } from "sonner";
 
 export const CONTESTS_QUERY_KEY = ["contests"] as const;
 export const PAGINATED_CONTESTS_QUERY_KEY = ["contests", "paginated"] as const;
+export const CONTEST_DETAIL_QUERY_KEY = ["contest"] as const;
 
 export interface PaginationState {
     pageIndex: number;
     pageSize: number;
+}
+
+/**
+ * Fetch single contest by ID
+ */
+export function useContest(contestId: string | null) {
+    return useQuery({
+        queryKey: [...CONTEST_DETAIL_QUERY_KEY, contestId],
+        queryFn: () => getContestById(contestId!),
+        enabled: !!contestId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
 }
 
 /**
