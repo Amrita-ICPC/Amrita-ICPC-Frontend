@@ -117,10 +117,12 @@ export function UsersTable({ onUserSelect }: UsersTableProps) {
         },
     ];
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data: data?.data || [],
         columns: columnsWithActions,
         rowCount: data?.total || 0,
+        // ... rest of your config
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true,
         state: {
