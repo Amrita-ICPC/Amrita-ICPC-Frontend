@@ -10,6 +10,9 @@ import {
     createContest,
     updateContest,
     deleteContest,
+    publishContest,
+    softDeleteContest,
+    restoreContest,
     type CreateContestPayload,
     type UpdateContestPayload,
 } from "@/services/contests";
@@ -118,6 +121,68 @@ export function useDeleteContest() {
         },
         onError: (error: Error) => {
             toast.error(`Failed to delete contest: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Publish contest
+ * Makes contest visible for registration/participation
+ */
+export function usePublishContest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (contestId: string) => publishContest(contestId),
+        onSuccess: (_, contestId) => {
+            toast.success("Contest published successfully");
+            // Invalidate both list and detail caches
+            queryClient.invalidateQueries({ queryKey: PAGINATED_CONTESTS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: [...CONTEST_DETAIL_QUERY_KEY, contestId] });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to publish contest: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Soft delete contest
+ * Marks contest as deleted without physically removing it
+ */
+export function useSoftDeleteContest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (contestId: string) => softDeleteContest(contestId),
+        onSuccess: (_, contestId) => {
+            toast.success("Contest deleted successfully");
+            // Invalidate both list and detail caches
+            queryClient.invalidateQueries({ queryKey: PAGINATED_CONTESTS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: [...CONTEST_DETAIL_QUERY_KEY, contestId] });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to delete contest: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Restore soft-deleted contest
+ */
+export function useRestoreContest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (contestId: string) => restoreContest(contestId),
+        onSuccess: (_, contestId) => {
+            toast.success("Contest restored successfully");
+            // Invalidate both list and detail caches
+            queryClient.invalidateQueries({ queryKey: PAGINATED_CONTESTS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: [...CONTEST_DETAIL_QUERY_KEY, contestId] });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to restore contest: ${error.message}`);
         },
     });
 }

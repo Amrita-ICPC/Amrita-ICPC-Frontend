@@ -6,9 +6,16 @@
  * Instructor-only role protection
  */
 
+import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AuthGuard } from "@/components/auth/auth-guard";
-import { useContest } from "@/query/use-paginated-contests";
+import {
+    useContest,
+    usePublishContest,
+    useSoftDeleteContest,
+    useRestoreContest,
+} from "@/query/use-paginated-contests";
+import { PublishContestDialog } from "@/components/instructor/publish-contest-dialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,8 +28,12 @@ function ContestDetailContent() {
     const router = useRouter();
     const params = useParams();
     const contestId = params?.id as string;
+    const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
 
     const { data: contest, isLoading, error } = useContest(contestId);
+    const publishMutation = usePublishContest();
+    const softDeleteMutation = useSoftDeleteContest();
+    const restoreMutation = useRestoreContest();
 
     if (isLoading) {
         return (
@@ -241,12 +252,11 @@ function ContestDetailContent() {
                     {!hasStarted && (
                         <Button
                             className="gap-2"
-                            onClick={() => {
-                                /* TODO: Implement publish action */
-                            }}
+                            onClick={() => setIsPublishDialogOpen(true)}
+                            disabled={publishMutation.isPending}
                         >
                             <CheckCircle className="w-4 h-4" />
-                            Publish Contest
+                            {publishMutation.isPending ? "Publishing..." : "Publish Contest"}
                         </Button>
                     )}
 
@@ -266,11 +276,14 @@ function ContestDetailContent() {
                             variant="destructive"
                             className="gap-2"
                             onClick={() => {
-                                /* TODO: Implement delete/soft-delete */
+                                if (confirm("Delete this contest? This action cannot be undone.")) {
+                                    softDeleteMutation.mutate(contestId);
+                                }
                             }}
+                            disabled={softDeleteMutation.isPending}
                         >
                             <Trash2 className="w-4 h-4" />
-                            Delete Contest
+                            {softDeleteMutation.isPending ? "Deleting..." : "Delete Contest"}
                         </Button>
                     )}
 
@@ -278,16 +291,28 @@ function ContestDetailContent() {
                         <Button
                             variant="outline"
                             className="gap-2"
-                            onClick={() => {
-                                /* TODO: Implement restore if soft-deleted */
-                            }}
+                            onClick={() => restoreMutation.mutate(contestId)}
+                            disabled={restoreMutation.isPending}
                         >
                             <RotateCcw className="w-4 h-4" />
-                            Restore
+                            {restoreMutation.isPending ? "Restoring..." : "Restore"}
                         </Button>
                     )}
                 </div>
             </Card>
+
+            {/* Publish Dialog */}
+            {contest && (
+                <PublishContestDialog
+                    isOpen={isPublishDialogOpen}
+                    onClose={() => setIsPublishDialogOpen(false)}
+                    onConfirm={async () => {
+                        await publishMutation.mutateAsync(contestId);
+                    }}
+                    contestName={contest.name}
+                    isLoading={publishMutation.isPending}
+                />
+            )}
         </div>
     );
 }

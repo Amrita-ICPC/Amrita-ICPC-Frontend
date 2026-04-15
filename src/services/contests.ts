@@ -84,6 +84,29 @@ export async function deleteContest(id: string): Promise<void> {
 }
 
 /**
+ * Publish a contest (instructor only)
+ * Makes contest visible to students for registration and participation
+ */
+export async function publishContest(id: string): Promise<Contest> {
+    return api.post(`/api/v1/contests/${id}/publish`);
+}
+
+/**
+ * Soft delete a contest (instructor only)
+ * Marks contest as deleted without physically removing it
+ */
+export async function softDeleteContest(id: string): Promise<Contest> {
+    return api.delete(`/api/v1/contests/${id}/soft-delete`);
+}
+
+/**
+ * Restore a soft-deleted contest (instructor only)
+ */
+export async function restoreContest(id: string): Promise<Contest> {
+    return api.post(`/api/v1/contests/${id}/restore`);
+}
+
+/**
  * Get contest problems/questions
  */
 export async function getContestProblems(

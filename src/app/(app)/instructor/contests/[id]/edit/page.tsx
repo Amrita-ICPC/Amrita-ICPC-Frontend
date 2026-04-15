@@ -68,7 +68,9 @@ function ContestEditContent() {
     }, [contest, reset]);
 
     // Calculate duration
+    // eslint-disable-next-line react-hooks/incompatible-library
     const startTime = watch("start_time");
+
     const endTime = watch("end_time");
     const duration =
         startTime && endTime
