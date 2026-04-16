@@ -65,3 +65,66 @@ export async function updateBank(id: string, payload: UpdateBankPayload): Promis
 export async function deleteBank(id: string): Promise<void> {
     return api.delete(`/api/v1/banks/${id}`);
 }
+
+/**
+ * Question types and interfaces
+ */
+export interface Question {
+    id: string;
+    bank_id?: string;
+    title: string;
+    statement?: string;
+    difficulty?: "easy" | "medium" | "hard";
+    language?: string;
+    time_limit?: number;
+    memory_limit?: number;
+    created_at?: string;
+    updated_at?: string;
+    author?: string;
+}
+
+export interface BankQuestion extends Question {
+    order?: number;
+}
+
+export interface AddQuestionPayload {
+    question_id: string;
+}
+
+/**
+ * Get all questions in a bank
+ */
+export async function getBankQuestions(
+    bankId: string,
+    page = 1,
+    page_size = 10,
+): Promise<{
+    data: BankQuestion[];
+    total: number;
+}> {
+    return api.get(`/api/v1/banks/${bankId}/questions?page=${page}&page_size=${page_size}`);
+}
+
+/**
+ * Get single question from bank
+ */
+export async function getBankQuestion(bankId: string, questionId: string): Promise<BankQuestion> {
+    return api.get(`/api/v1/banks/${bankId}/questions/${questionId}`);
+}
+
+/**
+ * Add question to bank
+ */
+export async function addQuestionToBank(
+    bankId: string,
+    payload: AddQuestionPayload,
+): Promise<BankQuestion> {
+    return api.post(`/api/v1/banks/${bankId}/questions`, payload);
+}
+
+/**
+ * Remove question from bank
+ */
+export async function removeQuestionFromBank(bankId: string, questionId: string): Promise<void> {
+    return api.delete(`/api/v1/banks/${bankId}/questions/${questionId}`);
+}

@@ -10,14 +10,20 @@ import {
     getBankById,
     updateBank,
     deleteBank,
+    getBankQuestions,
+    getBankQuestion,
+    addQuestionToBank,
+    removeQuestionFromBank,
     type CreateBankPayload,
     type UpdateBankPayload,
+    type AddQuestionPayload,
 } from "@/services/banks";
 import { toast } from "sonner";
 
 export const BANKS_QUERY_KEY = ["banks"] as const;
 export const PAGINATED_BANKS_QUERY_KEY = ["banks", "paginated"] as const;
 export const BANK_DETAIL_QUERY_KEY = ["bank"] as const;
+export const BANK_QUESTIONS_QUERY_KEY = ["bank-questions"] as const;
 
 export interface PaginationState {
     pageIndex: number;
@@ -114,6 +120,74 @@ export function useDeleteBank() {
         },
         onError: (error: Error) => {
             toast.error(`Failed to delete bank: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Fetch paginated questions in a bank
+ */
+export function useBankQuestions(bankId: string | null, pagination: PaginationState) {
+    return useQuery({
+        queryKey: [...BANK_QUESTIONS_QUERY_KEY, bankId, pagination.pageIndex, pagination.pageSize],
+        queryFn: () => getBankQuestions(bankId!, pagination.pageIndex + 1, pagination.pageSize),
+        enabled: !!bankId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+}
+
+/**
+ * Fetch single question from bank
+ */
+export function useBankQuestion(bankId: string | null, questionId: string | null) {
+    return useQuery({
+        queryKey: [...BANK_QUESTIONS_QUERY_KEY, bankId, questionId],
+        queryFn: () => getBankQuestion(bankId!, questionId!),
+        enabled: !!bankId && !!questionId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+}
+
+/**
+ * Add question to bank
+ */
+export function useAddQuestionToBank() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ bankId, payload }: { bankId: string; payload: AddQuestionPayload }) =>
+            addQuestionToBank(bankId, payload),
+        onSuccess: (_, variables) => {
+            toast.success("Question added to bank successfully");
+            // Invalidate questions list cache
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_QUESTIONS_QUERY_KEY, variables.bankId],
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to add question: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Remove question from bank
+ */
+export function useRemoveQuestionFromBank() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ bankId, questionId }: { bankId: string; questionId: string }) =>
+            removeQuestionFromBank(bankId, questionId),
+        onSuccess: (_, variables) => {
+            toast.success("Question removed from bank");
+            // Invalidate questions list cache
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_QUESTIONS_QUERY_KEY, variables.bankId],
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to remove question: ${error.message}`);
         },
     });
 }
