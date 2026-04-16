@@ -35,9 +35,9 @@ function LoginContent() {
             className={`${spaceGrotesk.variable} relative min-h-screen overflow-hidden bg-[#0b0d12] text-white`}
         >
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute left-1/2 top-[-18rem] h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-[#38bdf8]/25 blur-[140px]" />
-                <div className="absolute bottom-[-16rem] left-6 h-[420px] w-[420px] rounded-full bg-[#f97316]/20 blur-[140px]" />
-                <div className="absolute right-12 top-24 h-[320px] w-[320px] rounded-full bg-[#5eead4]/20 blur-[120px]" />
+                <div className="absolute left-1/2 -top-72 h-96 w-96 -translate-x-1/2 rounded-full bg-[#38bdf8]/25 blur-[140px]" />
+                <div className="absolute -bottom-64 left-6 h-105 w-105 rounded-full bg-[#f97316]/20 blur-[140px]" />
+                <div className="absolute right-12 top-24 h-80 w-80 rounded-full bg-[#5eead4]/20 blur-[120px]" />
             </div>
 
             <div className="relative flex min-h-screen items-center justify-center px-6 text-center">

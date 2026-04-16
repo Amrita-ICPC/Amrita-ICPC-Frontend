@@ -31,7 +31,7 @@ export default async function Sidenavbar() {
     return (
         <aside className="flex h-screen w-72 flex-col border-r border-white/10 bg-[#0b0d12] px-6 py-8 text-white">
             <div className="mb-10 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#5eead4] to-[#38bdf8] p-[2px]">
+                <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[#5eead4] to-[#38bdf8] p-0.5">
                     <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-[#0b0d12] text-sm font-semibold">
                         IC
                     </div>
@@ -88,7 +88,7 @@ export default async function Sidenavbar() {
                 {(user?.roles as string[] | undefined)?.includes("instructor") && (
                     <>
                         <div className="my-4 border-t border-white/10" />
-                        <div className="text-xs font-semibold uppercase tracking-[0.1em] text-white/40 px-4 py-2">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-white/40 px-4 py-2">
                             Instructor
                         </div>
                         <Link
@@ -105,7 +105,7 @@ export default async function Sidenavbar() {
                 {(user?.roles as string[] | undefined)?.includes("admin") && (
                     <>
                         <div className="my-4 border-t border-white/10" />
-                        <div className="text-xs font-semibold uppercase tracking-[0.1em] text-white/40 px-4 py-2">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-white/40 px-4 py-2">
                             Admin
                         </div>
                         <Link

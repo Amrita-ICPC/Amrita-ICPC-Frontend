@@ -4,7 +4,8 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { usePlatformLanguages, useCreateQuestion } from "@/query/use-questions";
+import { useEffect } from "react";
+import { usePlatformLanguages, useUpdateQuestion, useQuestion } from "@/query/use-questions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ const templateSchema = z.object({
     solution_code: z.string().default(""),
 });
 
-const createQuestionSchema = z.object({
+const editQuestionSchema = z.object({
     title: z.string().min(1, "Title required").max(255),
     statement: z.string().optional(),
     difficulty: z.enum(["easy", "medium", "hard"]).optional(),
@@ -57,7 +58,7 @@ const createQuestionSchema = z.object({
     templates: z.record(z.string(), templateSchema).optional(),
 });
 
-type CreateQuestionFormData = z.infer<typeof createQuestionSchema>;
+type EditQuestionFormData = z.infer<typeof editQuestionSchema>;
 
 function DeleteConfirmDialog({
     onConfirm,
@@ -86,19 +87,21 @@ function DeleteConfirmDialog({
     );
 }
 
-export function CreateQuestionForm() {
+export function EditQuestionForm({ questionId }: { questionId: string }) {
     const router = useRouter();
     const { data: languages = [], isLoading: languagesLoading } = usePlatformLanguages();
-    const createQuestion = useCreateQuestion();
+    const { data: question, isLoading: questionLoading } = useQuestion(questionId);
+    const updateQuestion = useUpdateQuestion();
     const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
 
     const {
         register,
         handleSubmit,
         control,
+        reset,
         formState: { errors },
-    } = useForm<CreateQuestionFormData>({
-        resolver: zodResolver(createQuestionSchema),
+    } = useForm<EditQuestionFormData>({
+        resolver: zodResolver(editQuestionSchema),
         defaultValues: {
             allowed_languages: [],
             tag_ids: [],
@@ -117,21 +120,44 @@ export function CreateQuestionForm() {
         name: "test_cases",
     });
 
-    const onSubmit = async (data: CreateQuestionFormData) => {
-        createQuestion.mutate(
+    // Load question data into form
+    useEffect(() => {
+        if (question) {
+            reset({
+                title: question.title,
+                statement: question.statement,
+                difficulty: question.difficulty,
+                language: question.language,
+                time_limit: question.time_limit,
+                memory_limit: question.memory_limit,
+                allowed_languages: question.allowed_languages,
+                tag_ids: question.tag_ids,
+                test_cases: question.test_cases,
+                templates: question.templates,
+            });
+        }
+    }, [question, reset]);
+
+    const onSubmit = async (data: EditQuestionFormData) => {
+        updateQuestion.mutate(
             {
-                title: data.title,
-                statement: data.statement || undefined,
-                difficulty: data.difficulty,
-                language: data.language,
-                time_limit: data.time_limit ? Math.floor(data.time_limit) : undefined,
-                memory_limit: data.memory_limit ? Math.floor(data.memory_limit) : undefined,
-                allowed_languages: data.allowed_languages?.length
-                    ? data.allowed_languages
-                    : undefined,
-                tag_ids: data.tag_ids?.length ? data.tag_ids : undefined,
-                test_cases: data.test_cases?.length ? data.test_cases : undefined,
-                templates: Object.keys(data.templates || {}).length ? data.templates : undefined,
+                id: questionId,
+                payload: {
+                    title: data.title,
+                    statement: data.statement || undefined,
+                    difficulty: data.difficulty,
+                    language: data.language,
+                    time_limit: data.time_limit ? Math.floor(data.time_limit) : undefined,
+                    memory_limit: data.memory_limit ? Math.floor(data.memory_limit) : undefined,
+                    allowed_languages: data.allowed_languages?.length
+                        ? data.allowed_languages
+                        : undefined,
+                    tag_ids: data.tag_ids?.length ? data.tag_ids : undefined,
+                    test_cases: data.test_cases?.length ? data.test_cases : undefined,
+                    templates: Object.keys(data.templates || {}).length
+                        ? data.templates
+                        : undefined,
+                },
             },
             {
                 onSuccess: () => {
@@ -141,17 +167,28 @@ export function CreateQuestionForm() {
         );
     };
 
+    if (questionLoading) {
+        return (
+            <div className="space-y-6">
+                <Skeleton className="h-10 w-full" />
+                <Card>
+                    <Skeleton className="h-96 w-full" />
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-2">
                     <ArrowLeft className="w-4 h-4" />
                     Back
                 </Button>
             </div>
 
             <Card className="p-6">
-                <h1 className="text-2xl font-bold mb-6">Create New Question</h1>
+                <h1 className="text-2xl font-bold mb-6">Edit Question</h1>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <Tabs defaultValue="basic" className="w-full">
@@ -296,7 +333,7 @@ export function CreateQuestionForm() {
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Allowed Languages (for submissions)
+                                    Allowed Languages
                                 </label>
                                 {languagesLoading ? (
                                     <Skeleton className="h-24 w-full" />
@@ -338,7 +375,6 @@ export function CreateQuestionForm() {
                                                             className="text-sm font-medium cursor-pointer"
                                                         >
                                                             {lang.name}
-                                                            {lang.version && ` (${lang.version})`}
                                                         </label>
                                                     </div>
                                                 ))}
@@ -347,28 +383,14 @@ export function CreateQuestionForm() {
                                     />
                                 )}
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Tags</label>
-                                <p className="text-xs text-gray-500">
-                                    Tag system integration coming soon
-                                </p>
-                            </div>
                         </TabsContent>
 
                         {/* TAB 2: TEST CASES */}
                         <TabsContent value="test-cases" className="space-y-4 pt-4">
-                            <p className="text-sm text-gray-600">
-                                Add test cases that will be used to validate student solutions.
-                            </p>
-
                             <div className="rounded border">
                                 {testCaseFields.length === 0 ? (
                                     <div className="p-6 text-center text-gray-500">
-                                        <p>No test cases added yet.</p>
-                                        <p className="text-xs mt-1">
-                                            Add your first test case using the button below.
-                                        </p>
+                                        <p>No test cases</p>
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
@@ -494,11 +516,6 @@ export function CreateQuestionForm() {
 
                         {/* TAB 3: TEMPLATES */}
                         <TabsContent value="templates" className="space-y-4 pt-4">
-                            <p className="text-sm text-gray-600">
-                                Provide starter code, driver code, and solution templates for each
-                                language.
-                            </p>
-
                             {languagesLoading ? (
                                 <Skeleton className="h-64 w-full" />
                             ) : (
@@ -509,7 +526,6 @@ export function CreateQuestionForm() {
                                             className="space-y-3 p-4 border rounded-lg"
                                         >
                                             <h4 className="font-medium">{lang.name}</h4>
-
                                             <div>
                                                 <label className="text-xs font-medium">
                                                     Starter Code
@@ -519,7 +535,7 @@ export function CreateQuestionForm() {
                                                     control={control}
                                                     render={({ field }) => (
                                                         <Textarea
-                                                            placeholder="Code template for students to start with..."
+                                                            placeholder="Starter code..."
                                                             rows={4}
                                                             value={field.value || ""}
                                                             onChange={field.onChange}
@@ -528,7 +544,6 @@ export function CreateQuestionForm() {
                                                     )}
                                                 />
                                             </div>
-
                                             <div>
                                                 <label className="text-xs font-medium">
                                                     Driver Code
@@ -538,7 +553,7 @@ export function CreateQuestionForm() {
                                                     control={control}
                                                     render={({ field }) => (
                                                         <Textarea
-                                                            placeholder="Code to handle I/O and testing..."
+                                                            placeholder="Driver code..."
                                                             rows={4}
                                                             value={field.value || ""}
                                                             onChange={field.onChange}
@@ -547,7 +562,6 @@ export function CreateQuestionForm() {
                                                     )}
                                                 />
                                             </div>
-
                                             <div>
                                                 <label className="text-xs font-medium">
                                                     Solution Code
@@ -557,7 +571,7 @@ export function CreateQuestionForm() {
                                                     control={control}
                                                     render={({ field }) => (
                                                         <Textarea
-                                                            placeholder="Reference solution..."
+                                                            placeholder="Solution code..."
                                                             rows={4}
                                                             value={field.value || ""}
                                                             onChange={field.onChange}
@@ -585,10 +599,9 @@ export function CreateQuestionForm() {
                         <Button
                             type="submit"
                             className="flex-1 gap-2"
-                            disabled={createQuestion.isPending}
+                            disabled={updateQuestion.isPending}
                         >
-                            <Plus className="w-4 h-4" />
-                            {createQuestion.isPending ? "Creating..." : "Create Question"}
+                            {updateQuestion.isPending ? "Updating..." : "Update Question"}
                         </Button>
                     </div>
                 </form>
