@@ -5,7 +5,6 @@
  * Allows instructors to share a question bank with other users
  */
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,19 +13,12 @@ import {
     useShareBankWithUser,
     useUnshareBankFromUser,
 } from "@/query/use-banks";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Trash2, Share2, Plus } from "lucide-react";
-import { Card } from "@/components/ui/card";
 
 const shareSchema = z.object({
     user_id: z.string().min(1, "User ID or email is required"),
@@ -36,12 +28,12 @@ type ShareFormData = z.infer<typeof shareSchema>;
 
 interface ShareBankModalProps {
     isOpen: boolean;
-    onClose: () => void;
+    onOpenChange: (open: boolean) => void;
     bankId: string;
     bankName: string;
 }
 
-export function ShareBankModal({ isOpen, onClose, bankId, bankName }: ShareBankModalProps) {
+export function ShareBankModal({ isOpen, onOpenChange, bankId, bankName }: ShareBankModalProps) {
     const { data: sharedUsers, isLoading } = useBankSharedUsers(isOpen ? bankId : null);
     const shareMutation = useShareBankWithUser();
     const unshareMutation = useUnshareBankFromUser();
@@ -75,7 +67,7 @@ export function ShareBankModal({ isOpen, onClose, bankId, bankName }: ShareBankM
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -162,12 +154,6 @@ export function ShareBankModal({ isOpen, onClose, bankId, bankName }: ShareBankM
                         )}
                     </div>
                 </div>
-
-                <DialogFooter>
-                    <Button type="button" variant="outline" onClick={onClose}>
-                        Close
-                    </Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
