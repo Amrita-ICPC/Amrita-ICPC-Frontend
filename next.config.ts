@@ -17,9 +17,11 @@ const nextConfig: NextConfig = {
                             ? "'self' 'unsafe-inline' 'unsafe-eval'"
                             : "'self' 'unsafe-inline'",
                         "style-src": "'self' 'unsafe-inline'",
-                        "img-src": "'self' data: blob:",
+                        "img-src": "'self' data: blob: https:",
                         "font-src": "'self' data:",
-                        "connect-src": isDev ? "'self' ws: wss: https:" : "'self' https:",
+                        "connect-src": isDev
+                            ? "'self' ws: wss: https: http://10.10.10.23:8000"
+                            : "'self' https:",
                         "frame-ancestors": "'none'",
                         "object-src": "'none'",
                         "form-action": "'self'",

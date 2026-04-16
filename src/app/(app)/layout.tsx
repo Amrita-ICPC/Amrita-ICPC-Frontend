@@ -12,9 +12,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div className="flex min-h-screen bg-[#0b0d12] text-white">
+        <div className="flex h-screen overflow-hidden bg-[#0b0d12] text-white">
             <Sidenavbar />
-            <main className="flex-1 px-8 py-8">{children}</main>
+            <main className="flex-1 h-full overflow-y-auto px-8 py-8">{children}</main>
         </div>
     );
 }

@@ -5,6 +5,7 @@ export interface KeycloakToken {
     session_expires_at?: number;
     groups: string[];
     roles?: string[];
+    permissions?: string[];
     id_token?: string;
     error?: string;
     id?: string;
@@ -16,6 +17,12 @@ export interface DecodedJWT {
     realm_access?: {
         roles?: string[];
     };
+    resource_access?: Record<
+        string,
+        {
+            roles?: string[];
+        }
+    >;
     groups?: string[];
     [key: string]: unknown;
 }
