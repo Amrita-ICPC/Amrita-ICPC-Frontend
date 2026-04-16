@@ -128,3 +128,41 @@ export async function addQuestionToBank(
 export async function removeQuestionFromBank(bankId: string, questionId: string): Promise<void> {
     return api.delete(`/api/v1/banks/${bankId}/questions/${questionId}`);
 }
+
+/**
+ * Bank sharing types
+ */
+export interface SharedUser {
+    user_id: string;
+    name?: string;
+    email?: string;
+    shared_at?: string;
+}
+
+export interface ShareBankPayload {
+    user_id: string;
+}
+
+/**
+ * Get users a bank is shared with
+ */
+export async function getBankSharedUsers(bankId: string): Promise<SharedUser[]> {
+    return api.get(`/api/v1/banks/${bankId}/shared-users`);
+}
+
+/**
+ * Share bank with a user
+ */
+export async function shareBankWithUser(
+    bankId: string,
+    payload: ShareBankPayload,
+): Promise<SharedUser> {
+    return api.post(`/api/v1/banks/${bankId}/share`, payload);
+}
+
+/**
+ * Unshare bank from a user
+ */
+export async function unshareBankFromUser(bankId: string, userId: string): Promise<void> {
+    return api.post(`/api/v1/banks/${bankId}/unshare`, { user_id: userId });
+}

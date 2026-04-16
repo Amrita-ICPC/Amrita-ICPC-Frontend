@@ -16,13 +16,14 @@ import {
     useDeleteBank,
     useRemoveQuestionFromBank,
 } from "@/query/use-banks";
+import { ShareBankModal } from "@/components/instructor/share-bank-modal";
 import { BankQuestion } from "@/services/banks";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, BookOpen, Edit, Trash2, Plus, Code2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, BookOpen, Edit, Trash2, Plus, Code2, Share2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface PaginationState {
@@ -38,6 +39,7 @@ function BankDetailContent() {
         pageIndex: 0,
         pageSize: 10,
     });
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     const { data: bank, isLoading: bankLoading, error: bankError } = useBank(bankId);
     const { data: questionsData, isLoading: questionsLoading } = useBankQuestions(
@@ -199,6 +201,14 @@ function BankDetailContent() {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => setIsShareModalOpen(true)}
+                    >
+                        <Share2 className="w-4 h-4" />
+                        Share
+                    </Button>
                     <Button
                         variant="outline"
                         className="gap-2"
@@ -379,6 +389,16 @@ function BankDetailContent() {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Share Bank Modal */}
+            {bank && (
+                <ShareBankModal
+                    isOpen={isShareModalOpen}
+                    onOpenChange={setIsShareModalOpen}
+                    bankId={bankId}
+                    bankName={bank.name}
+                />
             )}
         </div>
     );

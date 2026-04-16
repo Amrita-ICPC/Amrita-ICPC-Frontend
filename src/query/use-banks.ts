@@ -14,9 +14,13 @@ import {
     getBankQuestion,
     addQuestionToBank,
     removeQuestionFromBank,
+    getBankSharedUsers,
+    shareBankWithUser,
+    unshareBankFromUser,
     type CreateBankPayload,
     type UpdateBankPayload,
     type AddQuestionPayload,
+    type ShareBankPayload,
 } from "@/services/banks";
 import { toast } from "sonner";
 
@@ -24,6 +28,7 @@ export const BANKS_QUERY_KEY = ["banks"] as const;
 export const PAGINATED_BANKS_QUERY_KEY = ["banks", "paginated"] as const;
 export const BANK_DETAIL_QUERY_KEY = ["bank"] as const;
 export const BANK_QUESTIONS_QUERY_KEY = ["bank-questions"] as const;
+export const BANK_SHARED_USERS_QUERY_KEY = ["bank-shared-users"] as const;
 
 export interface PaginationState {
     pageIndex: number;
@@ -188,6 +193,62 @@ export function useRemoveQuestionFromBank() {
         },
         onError: (error: Error) => {
             toast.error(`Failed to remove question: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Fetch users a bank is shared with
+ */
+export function useBankSharedUsers(bankId: string | null) {
+    return useQuery({
+        queryKey: [...BANK_SHARED_USERS_QUERY_KEY, bankId],
+        queryFn: () => getBankSharedUsers(bankId!),
+        enabled: !!bankId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+}
+
+/**
+ * Share bank with user
+ */
+export function useShareBankWithUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ bankId, payload }: { bankId: string; payload: ShareBankPayload }) =>
+            shareBankWithUser(bankId, payload),
+        onSuccess: (_, variables) => {
+            toast.success("Bank shared successfully");
+            // Invalidate shared users list cache
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_SHARED_USERS_QUERY_KEY, variables.bankId],
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to share bank: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Unshare bank from user
+ */
+export function useUnshareBankFromUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ bankId, userId }: { bankId: string; userId: string }) =>
+            unshareBankFromUser(bankId, userId),
+        onSuccess: (_, variables) => {
+            toast.success("Bank access removed");
+            // Invalidate shared users list cache
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_SHARED_USERS_QUERY_KEY, variables.bankId],
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to remove access: ${error.message}`);
         },
     });
 }
