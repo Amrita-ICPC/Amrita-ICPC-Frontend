@@ -17,6 +17,7 @@ import {
     useRemoveQuestionFromBank,
 } from "@/query/use-banks";
 import { ShareBankModal } from "@/components/instructor/share-bank-modal";
+import { AddQuestionsToBankModal } from "@/components/instructor/add-questions-to-bank-modal";
 import { BankQuestion } from "@/services/banks";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ function BankDetailContent() {
         pageSize: 10,
     });
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isAddQuestionsModalOpen, setIsAddQuestionsModalOpen] = useState(false);
 
     const { data: bank, isLoading: bankLoading, error: bankError } = useBank(bankId);
     const { data: questionsData, isLoading: questionsLoading } = useBankQuestions(
@@ -262,10 +264,7 @@ function BankDetailContent() {
             {/* Questions Section */}
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">Questions ({bank.question_count || 0})</h2>
-                <Button
-                    className="gap-2"
-                    onClick={() => router.push(`/instructor/banks/${bankId}/add-question`)}
-                >
+                <Button className="gap-2" onClick={() => setIsAddQuestionsModalOpen(true)}>
                     <Plus className="w-4 h-4" />
                     Add Question
                 </Button>
@@ -400,6 +399,13 @@ function BankDetailContent() {
                     bankName={bank.name}
                 />
             )}
+
+            {/* Add Questions to Bank Modal */}
+            <AddQuestionsToBankModal
+                isOpen={isAddQuestionsModalOpen}
+                onOpenChange={setIsAddQuestionsModalOpen}
+                bankId={bankId}
+            />
         </div>
     );
 }
