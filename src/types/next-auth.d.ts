@@ -10,6 +10,7 @@ declare module "next-auth" {
             image?: string | null;
             roles: string[];
             groups: string[];
+            permissions: string[];
         };
         access_token: string;
         error?: string | null;
@@ -22,12 +23,14 @@ declare module "next-auth" {
         image?: string | null;
         roles: string[];
         groups: string[];
+        permissions: string[];
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
         roles?: string[];
+        permissions?: string[];
         access_token?: string;
         refresh_token?: string;
         expires_at?: number;

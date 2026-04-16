@@ -5,10 +5,33 @@ enum UserType {
     STUDENT = "student",
 }
 
+export interface AuthUserClaims {
+    roles?: string[];
+    groups?: string[];
+    permissions?: string[];
+}
+
 // Utility function to check if user has any of the required roles
 export function hasRequiredRole(userRole: string | undefined, requiredRoles: UserType[]): boolean {
     if (!userRole || requiredRoles.length === 0) return false;
     return requiredRoles.includes(userRole as UserType);
+}
+
+// Utility function to check if user has any of the required permissions
+export function hasRequiredPermission(
+    userPermissions: string[] | undefined,
+    requiredPermissions: string[],
+): boolean {
+    if (!userPermissions || requiredPermissions.length === 0) return false;
+    return requiredPermissions.some((permission) => userPermissions.includes(permission));
+}
+
+// Wrapper helper for session.user style objects.
+export function hasPermission(
+    user: AuthUserClaims | null | undefined,
+    requiredPermissions: string[],
+): boolean {
+    return hasRequiredPermission(user?.permissions, requiredPermissions);
 }
 
 // Utility function to check if user belongs to any of the required groups
@@ -18,6 +41,14 @@ export function belongsToRequiredGroup(
 ): boolean {
     if (!userGroups || requiredGroups.length === 0) return false;
     return requiredGroups.some((group) => userGroups.includes(group));
+}
+
+// Wrapper helper for session.user style objects.
+export function belongsToGroup(
+    user: AuthUserClaims | null | undefined,
+    requiredGroups: string[],
+): boolean {
+    return belongsToRequiredGroup(user?.groups, requiredGroups);
 }
 
 // Combined utility function to check both roles and groups
@@ -46,15 +77,26 @@ import { logger } from "../logger";
 export function processDecodedToken(decoded: DecodedJWT | null): {
     roles: string[];
     groups: string[];
+    permissions: string[];
 } {
     let roles: string[] = [];
     let groups: string[] = [];
+    let permissions: string[] = [];
+
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
-        roles = decodedJWT.realm_access?.roles || [];
+        const realmRoles = decodedJWT.realm_access?.roles || [];
+        const resourceRoles = Object.values(decodedJWT.resource_access || {})
+            .flatMap((resource) => resource.roles || [])
+            .filter((role): role is string => typeof role === "string");
+
+        permissions = [...new Set(resourceRoles)];
+        // Preserve backwards compatibility: include all role-like claims in roles.
+        roles = [...new Set([...realmRoles, ...permissions])];
         groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
     }
-    return { roles, groups };
+
+    return { roles, groups, permissions };
 }
 
 export async function refreshKeycloakAccessToken(
@@ -114,7 +156,7 @@ export async function refreshKeycloakAccessToken(
         }
 
         const decoded = decodeJwt(refreshedTokens.access_token);
-        const { roles, groups } = processDecodedToken(decoded as DecodedJWT);
+        const { roles, groups, permissions } = processDecodedToken(decoded as DecodedJWT);
 
         logger.info("Successfully refreshed access token");
         return {
@@ -124,6 +166,7 @@ export async function refreshKeycloakAccessToken(
             expires_at: Math.floor(Date.now() / 1000) + refreshedTokens.expires_in,
             roles: roles,
             groups: groups,
+            permissions: permissions,
             id_token: refreshedTokens.id_token ?? token.id_token,
             error: undefined,
         };
