@@ -143,6 +143,11 @@ export interface ShareBankPayload {
     user_id: string;
 }
 
+export interface CloneQuestionsPayload {
+    source_bank_id: string;
+    question_ids?: string[]; // If empty, clone all questions
+}
+
 /**
  * Get users a bank is shared with
  */
@@ -165,4 +170,14 @@ export async function shareBankWithUser(
  */
 export async function unshareBankFromUser(bankId: string, userId: string): Promise<void> {
     return api.post(`/api/v1/banks/${bankId}/unshare`, { user_id: userId });
+}
+
+/**
+ * Clone questions from source bank to destination bank
+ */
+export async function cloneQuestions(
+    destBankId: string,
+    payload: CloneQuestionsPayload,
+): Promise<{ cloned_count: number }> {
+    return api.post(`/api/v1/banks/${destBankId}/questions/clone`, payload);
 }

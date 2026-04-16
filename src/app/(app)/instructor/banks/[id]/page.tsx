@@ -18,13 +18,24 @@ import {
 } from "@/query/use-banks";
 import { ShareBankModal } from "@/components/instructor/share-bank-modal";
 import { AddQuestionsToBankModal } from "@/components/instructor/add-questions-to-bank-modal";
+import { CloneQuestionsModal } from "@/components/instructor/clone-questions-modal";
 import { BankQuestion } from "@/services/banks";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, BookOpen, Edit, Trash2, Plus, Code2, Share2 } from "lucide-react";
+import {
+    AlertCircle,
+    ArrowLeft,
+    BookOpen,
+    Edit,
+    Trash2,
+    Plus,
+    Code2,
+    Share2,
+    Copy,
+} from "lucide-react";
 import { format } from "date-fns";
 
 interface PaginationState {
@@ -42,6 +53,7 @@ function BankDetailContent() {
     });
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isAddQuestionsModalOpen, setIsAddQuestionsModalOpen] = useState(false);
+    const [isCloneQuestionsModalOpen, setIsCloneQuestionsModalOpen] = useState(false);
 
     const { data: bank, isLoading: bankLoading, error: bankError } = useBank(bankId);
     const { data: questionsData, isLoading: questionsLoading } = useBankQuestions(
@@ -210,6 +222,14 @@ function BankDetailContent() {
                     >
                         <Share2 className="w-4 h-4" />
                         Share
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => setIsCloneQuestionsModalOpen(true)}
+                    >
+                        <Copy className="w-4 h-4" />
+                        Clone Questions
                     </Button>
                     <Button
                         variant="outline"
@@ -405,6 +425,13 @@ function BankDetailContent() {
                 isOpen={isAddQuestionsModalOpen}
                 onOpenChange={setIsAddQuestionsModalOpen}
                 bankId={bankId}
+            />
+
+            {/* Clone Questions Modal */}
+            <CloneQuestionsModal
+                isOpen={isCloneQuestionsModalOpen}
+                onOpenChange={setIsCloneQuestionsModalOpen}
+                destBankId={bankId}
             />
         </div>
     );

@@ -17,10 +17,12 @@ import {
     getBankSharedUsers,
     shareBankWithUser,
     unshareBankFromUser,
+    cloneQuestions,
     type CreateBankPayload,
     type UpdateBankPayload,
     type AddQuestionPayload,
     type ShareBankPayload,
+    type CloneQuestionsPayload,
 } from "@/services/banks";
 import { toast } from "sonner";
 
@@ -249,6 +251,37 @@ export function useUnshareBankFromUser() {
         },
         onError: (error: Error) => {
             toast.error(`Failed to remove access: ${error.message}`);
+        },
+    });
+}
+
+/**
+ * Clone questions from source bank to destination bank
+ */
+export function useCloneQuestions() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            destBankId,
+            payload,
+        }: {
+            destBankId: string;
+            payload: CloneQuestionsPayload;
+        }) => cloneQuestions(destBankId, payload),
+        onSuccess: (data, variables) => {
+            toast.success(`Successfully cloned ${data.cloned_count} question(s)`);
+            // Invalidate questions list cache for destination bank
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_QUESTIONS_QUERY_KEY, variables.destBankId],
+            });
+            // Invalidate bank detail cache
+            queryClient.invalidateQueries({
+                queryKey: [...BANK_DETAIL_QUERY_KEY, variables.destBankId],
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to clone questions: ${error.message}`);
         },
     });
 }
