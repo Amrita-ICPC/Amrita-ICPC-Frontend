@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { publicEnv } from "../env-public";
+import { publicEnv } from "../public-env";
 
 export function useSessionIntegrity() {
     const { data: session, status } = useSession();

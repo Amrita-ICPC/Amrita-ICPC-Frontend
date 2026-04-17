@@ -12,6 +12,9 @@ interface ProviderProps {
     children: ReactNode;
 }
 
+import { SessionIntegrityProvider } from "./session-integrity-provider";
+import { ClockSyncProvider } from "./clock-sync-provider";
+
 export default function Provider({ children }: ProviderProps) {
     const [queryClient] = useState(
         () =>
@@ -26,23 +29,25 @@ export default function Provider({ children }: ProviderProps) {
     );
 
     return (
-        <TooltipProvider>
-            <SessionProvider>
-                <QueryClientProvider client={queryClient}>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        {children}
-                        <Toaster position="top-right" richColors closeButton duration={3000} />
-                        {process.env.NODE_ENV === "development" ? (
-                            <ReactQueryDevtools initialIsOpen={false} />
-                        ) : null}
-                    </ThemeProvider>
-                </QueryClientProvider>
-            </SessionProvider>
-        </TooltipProvider>
+        <SessionProvider>
+            <SessionIntegrityProvider>
+                <ClockSyncProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="system"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            {children}
+                            <Toaster position="top-right" richColors closeButton duration={3000} />
+                            {process.env.NODE_ENV === "development" ? (
+                                <ReactQueryDevtools initialIsOpen={false} />
+                            ) : null}
+                        </ThemeProvider>
+                    </QueryClientProvider>
+                </ClockSyncProvider>
+            </SessionIntegrityProvider>
+        </SessionProvider>
     );
 }
