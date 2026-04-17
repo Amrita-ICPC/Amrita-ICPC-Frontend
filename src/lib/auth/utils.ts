@@ -95,9 +95,16 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
             .flatMap((resource) => resource.roles || [])
             .filter((role): role is string => typeof role === "string");
 
-        permissions = [...new Set(resourceRoles)];
-        // Preserve backwards compatibility: include all role-like claims in roles.
-        roles = [...new Set([...realmRoles, ...permissions])];
+        // Extract realm roles
+        roles = decodedJWT.realm_access?.roles || [];
+
+        // Extract client roles if AUTH_KEYCLOAK_ID is defined
+        const clientId = process.env.AUTH_KEYCLOAK_ID;
+        if (clientId && decodedJWT.resource_access?.[clientId]?.roles) {
+            roles = [...roles, ...(decodedJWT.resource_access[clientId].roles || [])];
+        }
+
+        // Extract groups and normalize them (remove leading slash)
         groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
 
         // IMPORTANT: Many setups use groups as roles. Merge groups into roles for easier RBAC.
@@ -151,14 +158,11 @@ export async function refreshKeycloakAccessToken(
                 return null;
             }
 
-            logger.error(
-                {
-                    status: response.status,
-                    statusText: response.statusText,
-                    error: refreshedTokens,
-                },
-                "Failed to refresh access token",
-            );
+            logger.error("Failed to refresh access token", {
+                status: response.status,
+                statusText: response.statusText,
+                error: refreshedTokens,
+            });
             throw new Error(
                 `Token refresh failed: ${
                     refreshedTokens.error_description || refreshedTokens.error || "Unknown error"
@@ -182,7 +186,7 @@ export async function refreshKeycloakAccessToken(
             error: undefined,
         };
     } catch (error: unknown) {
-        logger.error({ err: error }, "Error refreshing access token");
+        logger.error("Error refreshing access token", { err: error });
 
         let errorMessage = "RefreshAccessTokenError";
         if (error instanceof Error) {
