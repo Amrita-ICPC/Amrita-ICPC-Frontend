@@ -14,7 +14,8 @@ export interface AuthUserClaims {
 // Utility function to check if user has any of the required roles
 export function hasRequiredRole(userRole: string | undefined, requiredRoles: UserType[]): boolean {
     if (!userRole || requiredRoles.length === 0) return false;
-    return requiredRoles.includes(userRole as UserType);
+    const normalizedUserRole = userRole.toLowerCase();
+    return requiredRoles.some((role) => role.toLowerCase() === normalizedUserRole);
 }
 
 // Utility function to check if user has any of the required permissions
@@ -58,14 +59,18 @@ export function hasAccess(
     requiredRoles: UserType[] = [],
     requiredGroups: string[] = [],
 ): boolean {
-    const hasRole =
-        requiredRoles.length === 0 ||
-        (userRoles?.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
-    const hasGroup =
-        requiredGroups.length === 0 || belongsToRequiredGroup(userGroups, requiredGroups);
+    // If no requirements, grant access
+    if (requiredRoles.length === 0 && requiredGroups.length === 0) return true;
 
-    // User needs to satisfy both role and group requirements if both are specified
-    return hasRole && hasGroup;
+    const hasRole =
+        requiredRoles.length > 0 &&
+        (userRoles?.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
+
+    const hasGroup =
+        requiredGroups.length > 0 && belongsToRequiredGroup(userGroups, requiredGroups);
+
+    // Grant access if user satisfies EITHER role or group requirements
+    return hasRole || hasGroup;
 }
 
 export { UserType };
@@ -94,6 +99,12 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
         // Preserve backwards compatibility: include all role-like claims in roles.
         roles = [...new Set([...realmRoles, ...permissions])];
         groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
+
+        // IMPORTANT: Many setups use groups as roles. Merge groups into roles for easier RBAC.
+        roles = [...roles, ...groups];
+
+        // Deduplicate roles
+        roles = Array.from(new Set(roles));
     }
 
     return { roles, groups, permissions };
