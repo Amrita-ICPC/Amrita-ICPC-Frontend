@@ -32,7 +32,7 @@ export default async function AppLayout({
     return (
         <div className="flex h-screen overflow-hidden bg-[#0b0d12] text-white">
             <Sidenavbar />
-            <main className="flex-1 px-8 py-8 flex flex-col">
+            <main className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
                 {/* Main page content (e.g., Dashboard) */}
                 <div className="mb-8">
                     <AuthGuard>{children}</AuthGuard>

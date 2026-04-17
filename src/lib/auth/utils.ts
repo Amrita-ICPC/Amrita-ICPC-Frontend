@@ -86,7 +86,7 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
 } {
     let roles: string[] = [];
     let groups: string[] = [];
-    const permissions: string[] = [];
+    let permissions: string[] = [];
 
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
@@ -94,10 +94,15 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
         // Extract realm roles
         roles = decodedJWT.realm_access?.roles || [];
 
-        // Extract client roles if AUTH_KEYCLOAK_ID is defined
-        const clientId = process.env.AUTH_KEYCLOAK_ID;
-        if (clientId && decodedJWT.resource_access?.[clientId]?.roles) {
-            roles = [...roles, ...(decodedJWT.resource_access[clientId].roles || [])];
+        // Extract roles from ALL clients in resource_access.
+        // AUTH_KEYCLOAK_ID is the frontend client — permissions live under the backend
+        // client (e.g. "icpc-backend"), so we must not restrict to a single key.
+        if (decodedJWT.resource_access) {
+            for (const client of Object.values(decodedJWT.resource_access)) {
+                if (client?.roles) {
+                    roles = [...roles, ...client.roles];
+                }
+            }
         }
 
         // Extract groups and normalize them (remove leading slash)
@@ -108,6 +113,11 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
 
         // Deduplicate roles
         roles = Array.from(new Set(roles));
+
+        // Permissions are Keycloak roles scoped with a colon (e.g. "contests:create").
+        // Separate them out so hasPermission() works correctly.
+        permissions = roles.filter((r) => r.includes(":"));
+        roles = roles.filter((r) => !r.includes(":"));
     }
 
     return { roles, groups, permissions };
