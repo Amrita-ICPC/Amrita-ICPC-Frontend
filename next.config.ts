@@ -19,9 +19,13 @@ const nextConfig: NextConfig = {
                         "style-src": "'self' 'unsafe-inline'",
                         "img-src": "'self' data: blob: https:",
                         "font-src": "'self' data:",
+<<<<<<< HEAD
                         "connect-src": isDev
                             ? "'self' ws: wss: https: http://10.10.10.23:8000"
                             : "'self' https:",
+=======
+                        "connect-src": isDev ? "'self' ws: wss: http: https:" : "'self' https:",
+>>>>>>> c5f5ae5 (feat:add infrastructure and core utilities)
                         "frame-ancestors": "'none'",
                         "object-src": "'none'",
                         "form-action": "'self'",
