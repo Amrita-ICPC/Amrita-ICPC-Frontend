@@ -315,6 +315,7 @@ export const GetBankApiV1BanksBankIdGetResponse = zod.object({
                                 testcases: zod
                                     .array(
                                         zod.object({
+                                            id: zod.union([zod.uuid(), zod.null()]).optional(),
                                             input: zod.string(),
                                             output: zod.string(),
                                             is_hidden: zod.boolean(),
@@ -326,6 +327,7 @@ export const GetBankApiV1BanksBankIdGetResponse = zod.object({
                                 templates: zod
                                     .array(
                                         zod.object({
+                                            id: zod.union([zod.uuid(), zod.null()]).optional(),
                                             language_id: zod.number(),
                                             starter_code: zod.string(),
                                             driver_code: zod.union([zod.string(), zod.null()]),

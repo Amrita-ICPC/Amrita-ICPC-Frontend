@@ -120,6 +120,179 @@ export const GetBankQuestionsApiV1BanksBankIdQuestionsGetQueryParams = zod.objec
 export const GetBankQuestionsApiV1BanksBankIdQuestionsGetResponse = zod.unknown();
 
 /**
+ * Append multiple test cases to a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing test cases to add.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase payload is invalid.
+ * @summary Add Testcases To Question
+ */
+export const AddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemIsHiddenDefault = true;
+export const addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemWeightDefault = 1;
+
+export const addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemOrderOneMin = 0;
+
+export const AddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBody = zod
+    .object({
+        testcases: zod
+            .array(
+                zod.object({
+                    input: zod.string(),
+                    output: zod.string(),
+                    is_hidden: zod
+                        .boolean()
+                        .default(
+                            addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemIsHiddenDefault,
+                        ),
+                    weight: zod
+                        .number()
+                        .min(1)
+                        .default(
+                            addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemWeightDefault,
+                        ),
+                    order: zod
+                        .union([
+                            zod
+                                .number()
+                                .min(
+                                    addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostBodyTestcasesItemOrderOneMin,
+                                ),
+                            zod.null(),
+                        ])
+                        .optional(),
+                }),
+            )
+            .describe("List of test cases to add to the question"),
+    })
+    .describe("Request model for adding multiple test cases to an existing question.");
+
+/**
+ * Remove multiple test cases from a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing testcase IDs to remove.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase IDs are invalid.
+ * @summary Remove Testcases From Question
+ */
+export const RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteBody = zod
+    .object({
+        testcase_ids: zod
+            .array(zod.uuid())
+            .describe("List of test case IDs to remove from the question"),
+    })
+    .describe("Request model for removing multiple test cases from an existing question.");
+
+export const RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteResponse =
+    zod.unknown();
+
+/**
+ * Replace all test cases of a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing replacement testcases.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase payload is invalid.
+ * @summary Update Testcases Of Question
+ */
+export const UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemIsHiddenDefault = true;
+export const updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemWeightDefault = 1;
+
+export const updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemOrderOneMin = 0;
+
+export const UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBody = zod
+    .object({
+        testcases: zod
+            .array(
+                zod.object({
+                    input: zod.string(),
+                    output: zod.string(),
+                    is_hidden: zod
+                        .boolean()
+                        .default(
+                            updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemIsHiddenDefault,
+                        ),
+                    weight: zod
+                        .number()
+                        .min(1)
+                        .default(
+                            updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemWeightDefault,
+                        ),
+                    order: zod
+                        .union([
+                            zod
+                                .number()
+                                .min(
+                                    updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutBodyTestcasesItemOrderOneMin,
+                                ),
+                            zod.null(),
+                        ])
+                        .optional(),
+                }),
+            )
+            .describe("List of test cases to add to the question"),
+    })
+    .describe("Request model for adding multiple test cases to an existing question.");
+
+export const UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutResponse =
+    zod.unknown();
+
+/**
  * Clone questions from one bank to another bank.
 
 Args:
@@ -190,3 +363,250 @@ export const GetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetParams = zod.o
 });
 
 export const GetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGetResponse = zod.unknown();
+
+/**
+ * Update question metadata (text, difficulty, limits, languages, tags) in a bank.
+
+Allows updating question metadata fields without modifying testcases or templates.
+All fields are optional for partial updates. At least one field must be provided.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing metadata fields to update.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question with new metadata.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    QuestionNotFoundError: If the question does not exist.
+    InvalidQuestionError: If metadata validation fails or no fields provided.
+ * @summary Update Question Metadata
+ */
+export const UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchParams = zod.object({
+    bank_id: zod.uuid(),
+    question_id: zod.uuid(),
+});
+
+export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin = 0;
+
+export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin = 0;
+
+export const UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBody = zod
+    .object({
+        question_text: zod
+            .union([zod.string(), zod.null()])
+            .optional()
+            .describe("Updated problem statement and description"),
+        difficulty: zod
+            .union([
+                zod
+                    .enum(["EASY", "MEDIUM", "HARD"])
+                    .describe(
+                        "Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.",
+                    ),
+                zod.null(),
+            ])
+            .optional()
+            .describe("Updated difficulty level"),
+        time_limit_ms: zod
+            .union([
+                zod
+                    .number()
+                    .gt(
+                        updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin,
+                    ),
+                zod.null(),
+            ])
+            .optional()
+            .describe("Updated time limit in milliseconds"),
+        memory_limit_mb: zod
+            .union([
+                zod
+                    .number()
+                    .gt(
+                        updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin,
+                    ),
+                zod.null(),
+            ])
+            .optional()
+            .describe("Updated memory limit in megabytes"),
+        allowed_languages: zod
+            .union([zod.array(zod.number()), zod.null()])
+            .optional()
+            .describe("Updated list of allowed language IDs"),
+        tag_ids: zod
+            .union([zod.array(zod.uuid()), zod.null()])
+            .optional()
+            .describe("Updated list of tag IDs"),
+    })
+    .describe(
+        "Request model for updating question metadata without modifying test cases or templates.\n\nAllows updating question text, difficulty level, execution limits, allowed languages, and tags.\nAll fields are optional for partial updates.",
+    );
+
+export const UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchResponse = zod.unknown();
+
+/**
+ * Add multiple templates to an existing question in a bank.
+
+This endpoint allows adding code templates (starter, driver, and solution code)
+for multiple languages to an already existing question. It validates that:
+- The question exists and is associated with the bank
+- The user has update permission for the bank
+- Template language IDs are unique within the request
+- No template already exists for each specified language
+
+Args:
+    request: FastAPI request object.
+    bank_id: ID of the bank containing the question.
+    question_id: ID of the question to add templates to.
+    payload: Request body containing list of templates to add.
+    user_id: Authenticated user ID performing the operation.
+    service: Injected BankQuestionService instance.
+
+Returns:
+    API response with success message indicating templates were added.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If the user lacks update permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    QuestionNotFoundError: If the question does not exist.
+    QuestionPermissionError: If the user lacks permission to modify the question.
+    BankValidationError: If template language IDs are not unique in the request.
+    TemplateAlreadyExistsError: If a template already exists for any language.
+ * @summary Add Templates To Question
+ */
+export const AddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostBodyTemplatesItemLanguageIdExclusiveMin = 0;
+
+export const AddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostBody = zod
+    .object({
+        templates: zod
+            .array(
+                zod.object({
+                    language_id: zod
+                        .number()
+                        .gt(
+                            addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostBodyTemplatesItemLanguageIdExclusiveMin,
+                        ),
+                    starter_code: zod.string(),
+                    driver_code: zod.union([zod.string(), zod.null()]).optional(),
+                    solution_code: zod.union([zod.string(), zod.null()]).optional(),
+                }),
+            )
+            .describe("List of templates to add to the question"),
+    })
+    .describe(
+        "Request model for adding multiple templates to an existing question.\n\nEach template is associated with a language and contains starter code\nplus optional driver and solution code.",
+    );
+
+/**
+ * Remove multiple templates from a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing language IDs to remove.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If language IDs are invalid.
+ * @summary Remove Templates From Question
+ */
+export const RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteBodyLanguageIdsItemExclusiveMin = 0;
+
+export const RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteBody = zod
+    .object({
+        language_ids: zod
+            .array(
+                zod
+                    .number()
+                    .gt(
+                        removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteBodyLanguageIdsItemExclusiveMin,
+                    ),
+            )
+            .describe("List of language IDs whose templates should be removed"),
+    })
+    .describe("Request model for removing multiple templates from an existing question.");
+
+export const RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteResponse =
+    zod.unknown();
+
+/**
+ * Replace all templates of a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing replacement templates.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If template language IDs are invalid.
+ * @summary Update Templates Of Question
+ */
+export const UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutParams =
+    zod.object({
+        bank_id: zod.uuid(),
+        question_id: zod.uuid(),
+    });
+
+export const updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutBodyTemplatesItemLanguageIdExclusiveMin = 0;
+
+export const UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutBody = zod
+    .object({
+        templates: zod
+            .array(
+                zod.object({
+                    language_id: zod
+                        .number()
+                        .gt(
+                            updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutBodyTemplatesItemLanguageIdExclusiveMin,
+                        ),
+                    starter_code: zod.string(),
+                    driver_code: zod.union([zod.string(), zod.null()]).optional(),
+                    solution_code: zod.union([zod.string(), zod.null()]).optional(),
+                }),
+            )
+            .describe("List of templates to add to the question"),
+    })
+    .describe(
+        "Request model for adding multiple templates to an existing question.\n\nEach template is associated with a language and contains starter code\nplus optional driver and solution code.",
+    );
+
+export const UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutResponse =
+    zod.unknown();

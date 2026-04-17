@@ -11,7 +11,7 @@ export default defineConfig({
             mock: false,
             override: {
                 mutator: {
-                    path: "src/lib/api-client.ts",
+                    path: "./src/lib/api-client.ts",
                     name: "axiosWithAuth",
                 },
             },

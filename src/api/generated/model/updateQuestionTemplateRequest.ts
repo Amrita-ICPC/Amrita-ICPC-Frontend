@@ -6,10 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface QuestionTemplateResponse {
-    id?: string | null;
-    language_id: number;
-    starter_code: string;
-    driver_code: string | null;
-    solution_code: string | null;
+export interface UpdateQuestionTemplateRequest {
+    language_id?: number | null;
+    starter_code?: string | null;
+    driver_code?: string | null;
+    solution_code?: string | null;
 }

@@ -7,6 +7,7 @@
  */
 
 export interface QuestionTestCaseResponse {
+    id?: string | null;
     input: string;
     output: string;
     is_hidden: boolean;

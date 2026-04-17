@@ -22,11 +22,16 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+    AddQuestionTemplatesRequest,
+    AddQuestionTestCasesRequest,
     BankQuestionBulk,
     BankQuestionCloneRequest,
     ExceptionResponse,
     GetBankQuestionsApiV1BanksBankIdQuestionsGetParams,
     HTTPValidationError,
+    RemoveQuestionTemplatesRequest,
+    RemoveQuestionTestCasesRequest,
+    UpdateQuestionMetadataRequest,
 } from "../model";
 
 import { axiosWithAuth } from "../../../lib/api-client";
@@ -419,6 +424,415 @@ export function useGetBankQuestionsApiV1BanksBankIdQuestionsGet<
 }
 
 /**
+ * Append multiple test cases to a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing test cases to add.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase payload is invalid.
+ * @summary Add Testcases To Question
+ */
+export const addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost = (
+    bankId: string,
+    questionId: string,
+    addQuestionTestCasesRequest: AddQuestionTestCasesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/testcases`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addQuestionTestCasesRequest,
+        signal,
+    });
+};
+
+export const getAddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost
+                >
+            >,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type AddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost
+            >
+        >
+    >;
+export type AddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostMutationBody =
+    AddQuestionTestCasesRequest;
+export type AddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Add Testcases To Question
+ */
+export const useAddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<typeof addTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPost>
+    >,
+    TError,
+    { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+    TContext
+> => {
+    return useMutation(
+        getAddTestcasesToQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPostMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
+/**
+ * Remove multiple test cases from a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing testcase IDs to remove.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase IDs are invalid.
+ * @summary Remove Testcases From Question
+ */
+export const removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete = (
+    bankId: string,
+    questionId: string,
+    removeQuestionTestCasesRequest: RemoveQuestionTestCasesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/testcases`,
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        data: removeQuestionTestCasesRequest,
+        signal,
+    });
+};
+
+export const getRemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: RemoveQuestionTestCasesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: RemoveQuestionTestCasesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+                >
+            >,
+            { bankId: string; questionId: string; data: RemoveQuestionTestCasesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+            >
+        >
+    >;
+export type RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteMutationBody =
+    RemoveQuestionTestCasesRequest;
+export type RemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteMutationError =
+    ExceptionResponse | HTTPValidationError;
+
+/**
+ * @summary Remove Testcases From Question
+ */
+export const useRemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: RemoveQuestionTestCasesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<
+            typeof removeTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDelete
+        >
+    >,
+    TError,
+    { bankId: string; questionId: string; data: RemoveQuestionTestCasesRequest },
+    TContext
+> => {
+    return useMutation(
+        getRemoveTestcasesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesDeleteMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
+/**
+ * Replace all test cases of a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing replacement testcases.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If testcase payload is invalid.
+ * @summary Update Testcases Of Question
+ */
+export const updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut = (
+    bankId: string,
+    questionId: string,
+    addQuestionTestCasesRequest: AddQuestionTestCasesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/testcases`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data: addQuestionTestCasesRequest,
+        signal,
+    });
+};
+
+export const getUpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut
+                >
+            >,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut
+            >
+        >
+    >;
+export type UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutMutationBody =
+    AddQuestionTestCasesRequest;
+export type UpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Update Testcases Of Question
+ */
+export const useUpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<typeof updateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPut>
+    >,
+    TError,
+    { bankId: string; questionId: string; data: AddQuestionTestCasesRequest },
+    TContext
+> => {
+    return useMutation(
+        getUpdateTestcasesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTestcasesPutMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
+/**
  * Clone questions from one bank to another bank.
 
 Args:
@@ -737,3 +1151,541 @@ export function useGetBankQuestionApiV1BanksBankIdQuestionsQuestionIdGet<
 
     return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Update question metadata (text, difficulty, limits, languages, tags) in a bank.
+
+Allows updating question metadata fields without modifying testcases or templates.
+All fields are optional for partial updates. At least one field must be provided.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing metadata fields to update.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question with new metadata.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    QuestionNotFoundError: If the question does not exist.
+    InvalidQuestionError: If metadata validation fails or no fields provided.
+ * @summary Update Question Metadata
+ */
+export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch = (
+    bankId: string,
+    questionId: string,
+    updateQuestionMetadataRequest: UpdateQuestionMetadataRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}`,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        data: updateQuestionMetadataRequest,
+        signal,
+    });
+};
+
+export const getUpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>>,
+        TError,
+        { bankId: string; questionId: string; data: UpdateQuestionMetadataRequest },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>>,
+    TError,
+    { bankId: string; questionId: string; data: UpdateQuestionMetadataRequest },
+    TContext
+> => {
+    const mutationKey = ["updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>>,
+        { bankId: string; questionId: string; data: UpdateQuestionMetadataRequest }
+    > = (props) => {
+        const { bankId, questionId, data } = props ?? {};
+
+        return updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch(
+            bankId,
+            questionId,
+            data,
+        );
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchMutationResult =
+    NonNullable<
+        Awaited<ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>>
+    >;
+export type UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchMutationBody =
+    UpdateQuestionMetadataRequest;
+export type UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Update Question Metadata
+ */
+export const useUpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>
+            >,
+            TError,
+            { bankId: string; questionId: string; data: UpdateQuestionMetadataRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatch>>,
+    TError,
+    { bankId: string; questionId: string; data: UpdateQuestionMetadataRequest },
+    TContext
+> => {
+    return useMutation(
+        getUpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Add multiple templates to an existing question in a bank.
+
+This endpoint allows adding code templates (starter, driver, and solution code)
+for multiple languages to an already existing question. It validates that:
+- The question exists and is associated with the bank
+- The user has update permission for the bank
+- Template language IDs are unique within the request
+- No template already exists for each specified language
+
+Args:
+    request: FastAPI request object.
+    bank_id: ID of the bank containing the question.
+    question_id: ID of the question to add templates to.
+    payload: Request body containing list of templates to add.
+    user_id: Authenticated user ID performing the operation.
+    service: Injected BankQuestionService instance.
+
+Returns:
+    API response with success message indicating templates were added.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If the user lacks update permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    QuestionNotFoundError: If the question does not exist.
+    QuestionPermissionError: If the user lacks permission to modify the question.
+    BankValidationError: If template language IDs are not unique in the request.
+    TemplateAlreadyExistsError: If a template already exists for any language.
+ * @summary Add Templates To Question
+ */
+export const addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost = (
+    bankId: string,
+    questionId: string,
+    addQuestionTemplatesRequest: AddQuestionTemplatesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/templates`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addQuestionTemplatesRequest,
+        signal,
+    });
+};
+
+export const getAddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost
+                >
+            >,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type AddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost
+            >
+        >
+    >;
+export type AddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostMutationBody =
+    AddQuestionTemplatesRequest;
+export type AddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Add Templates To Question
+ */
+export const useAddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<typeof addTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPost>
+    >,
+    TError,
+    { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+    TContext
+> => {
+    return useMutation(
+        getAddTemplatesToQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPostMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
+/**
+ * Remove multiple templates from a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing language IDs to remove.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If language IDs are invalid.
+ * @summary Remove Templates From Question
+ */
+export const removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete = (
+    bankId: string,
+    questionId: string,
+    removeQuestionTemplatesRequest: RemoveQuestionTemplatesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/templates`,
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        data: removeQuestionTemplatesRequest,
+        signal,
+    });
+};
+
+export const getRemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: RemoveQuestionTemplatesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: RemoveQuestionTemplatesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+                >
+            >,
+            { bankId: string; questionId: string; data: RemoveQuestionTemplatesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+            >
+        >
+    >;
+export type RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteMutationBody =
+    RemoveQuestionTemplatesRequest;
+export type RemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteMutationError =
+    ExceptionResponse | HTTPValidationError;
+
+/**
+ * @summary Remove Templates From Question
+ */
+export const useRemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: RemoveQuestionTemplatesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<
+            typeof removeTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDelete
+        >
+    >,
+    TError,
+    { bankId: string; questionId: string; data: RemoveQuestionTemplatesRequest },
+    TContext
+> => {
+    return useMutation(
+        getRemoveTemplatesFromQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesDeleteMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
+/**
+ * Replace all templates of a question in a bank.
+
+Args:
+    request: FastAPI request object.
+    bank_id: Target bank ID.
+    question_id: Target question ID.
+    payload: Request body containing replacement templates.
+    user_id: Authenticated user ID.
+    service: Injected BankQuestionService.
+
+Returns:
+    API response containing the updated question.
+
+Raises:
+    BankNotFoundError: If the bank does not exist.
+    BankAccessDeniedError: If user lacks edit permission for the bank.
+    BankQuestionNotFoundError: If the question is not linked to the bank.
+    InvalidQuestionError: If template language IDs are invalid.
+ * @summary Update Templates Of Question
+ */
+export const updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut = (
+    bankId: string,
+    questionId: string,
+    addQuestionTemplatesRequest: AddQuestionTemplatesRequest,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<unknown>({
+        url: `/api/v1/banks/${bankId}/questions/${questionId}/templates`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data: addQuestionTemplatesRequest,
+        signal,
+    });
+};
+
+export const getUpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutMutationOptions =
+    <TError = ExceptionResponse | HTTPValidationError, TContext = unknown>(options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+            TContext
+        >;
+    }): UseMutationOptions<
+        Awaited<
+            ReturnType<
+                typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut
+            >
+        >,
+        TError,
+        { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+        TContext
+    > => {
+        const mutationKey = [
+            "updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut",
+        ];
+        const { mutation: mutationOptions } = options
+            ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+                ? options
+                : { ...options, mutation: { ...options.mutation, mutationKey } }
+            : { mutation: { mutationKey } };
+
+        const mutationFn: MutationFunction<
+            Awaited<
+                ReturnType<
+                    typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut
+                >
+            >,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest }
+        > = (props) => {
+            const { bankId, questionId, data } = props ?? {};
+
+            return updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut(
+                bankId,
+                questionId,
+                data,
+            );
+        };
+
+        return { mutationFn, ...mutationOptions };
+    };
+
+export type UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutMutationResult =
+    NonNullable<
+        Awaited<
+            ReturnType<
+                typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut
+            >
+        >
+    >;
+export type UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutMutationBody =
+    AddQuestionTemplatesRequest;
+export type UpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Update Templates Of Question
+ */
+export const useUpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<
+                    typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut
+                >
+            >,
+            TError,
+            { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<
+        ReturnType<typeof updateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPut>
+    >,
+    TError,
+    { bankId: string; questionId: string; data: AddQuestionTemplatesRequest },
+    TContext
+> => {
+    return useMutation(
+        getUpdateTemplatesOfQuestionApiV1BanksBankIdQuestionsQuestionIdTemplatesPutMutationOptions(
+            options,
+        ),
+        queryClient,
+    );
+};
