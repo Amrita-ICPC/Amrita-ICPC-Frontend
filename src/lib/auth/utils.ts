@@ -86,14 +86,10 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
 } {
     let roles: string[] = [];
     let groups: string[] = [];
-    let permissions: string[] = [];
+    const permissions: string[] = [];
 
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
-        const realmRoles = decodedJWT.realm_access?.roles || [];
-        const resourceRoles = Object.values(decodedJWT.resource_access || {})
-            .flatMap((resource) => resource.roles || [])
-            .filter((role): role is string => typeof role === "string");
 
         // Extract realm roles
         roles = decodedJWT.realm_access?.roles || [];

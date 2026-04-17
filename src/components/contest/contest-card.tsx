@@ -1,5 +1,6 @@
-import { Calendar, Users, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, Users, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,10 +44,11 @@ export function ContestCard({ contest }: ContestCardProps) {
             <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 {contest.image && !imageError ? (
                     <>
-                        <img
+                        <Image
                             src={contest.image}
                             alt={contest.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={() => setImageError(true)}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
