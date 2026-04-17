@@ -4,7 +4,7 @@ import { decodeJwt } from "jose";
 import { KeycloakToken, DecodedJWT } from "./types";
 import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
 import { logger } from "../logger";
-import { env } from "../env";
+import { env } from "@/lib/env";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [

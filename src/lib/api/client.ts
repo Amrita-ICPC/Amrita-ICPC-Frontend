@@ -2,10 +2,10 @@
 
 import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
 import { getSession } from "next-auth/react";
-import { publicEnv } from "../public-env";
+import { env } from "@/lib/env";
 
 export const apiClient = axios.create({
-    baseURL: publicEnv.NEXT_PUBLIC_API_URL,
+    baseURL: env.NEXT_PUBLIC_API_URL,
     headers: {
         "Content-Type": "application/json",
     },

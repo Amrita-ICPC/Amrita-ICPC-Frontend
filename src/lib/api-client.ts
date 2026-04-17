@@ -1,9 +1,9 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getSession, signOut } from "next-auth/react";
-import { publicEnv } from "./env-public";
+import { env } from "@/lib/env";
 
 export const axiosInstance = axios.create({
-    baseURL: publicEnv.NEXT_PUBLIC_API_URL,
+    baseURL: env.NEXT_PUBLIC_API_URL,
     headers: {
         "Content-Type": "application/json",
     },

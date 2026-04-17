@@ -3,7 +3,7 @@ import "server-only";
 import axios, { AxiosHeaders, type AxiosInstance } from "axios";
 
 import { auth } from "@/lib/auth/auth";
-import { publicEnv } from "@/lib/public-env";
+import { env } from "@/lib/env";
 
 /**
  * Server-side Axios client factory.
@@ -22,7 +22,7 @@ export async function getServerApiClient(): Promise<AxiosInstance> {
     });
 
     return axios.create({
-        baseURL: publicEnv.NEXT_PUBLIC_API_URL,
+        baseURL: env.NEXT_PUBLIC_API_URL,
         headers,
     });
 }

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { publicEnv } from "../public-env";
+import { env } from "@/lib/env";
 
 export function useSessionIntegrity() {
     const { data: session, status } = useSession();
@@ -12,7 +12,7 @@ export function useSessionIntegrity() {
             return;
         }
 
-        const sseUrl = `${publicEnv.NEXT_PUBLIC_API_URL}/api/v1/sessions/stream?userId=${session.user.id}`;
+        const sseUrl = `${env.NEXT_PUBLIC_API_URL}/api/v1/sessions/stream?userId=${session.user.id}`;
 
         // We use a controller to close the connection on cleanup
         const ctrl = new AbortController();
