@@ -4,13 +4,18 @@ import Loading from "@/app/loading";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { UserType, hasAccess } from "@/lib/auth/utils";
+import {
+    UserType,
+    type Role,
+    belongsToRequiredGroup,
+    hasRequiredPermission,
+} from "@/lib/auth/utils";
 import AccessDenied from "./access-denied";
 
 interface AuthGuardProps {
     children: React.ReactNode;
-    requiredRoles?: UserType[];
-    requiredGroups?: string[];
+    requiredRoles?: Role[];
+    requiredGroups?: UserType[];
     fallbackComponent?: React.ReactNode;
 }
 
@@ -40,10 +45,16 @@ export default function AuthGuard({
     }
 
     // Check if user has required access
-    const userRoles = session.user.roles;
+    const userRoles = session.user.roles; // permission strings
     const userGroups = session.user.groups;
 
-    if (!hasAccess(userRoles, userGroups, requiredRoles, requiredGroups)) {
+    const hasGroups =
+        requiredGroups.length === 0 ? true : belongsToRequiredGroup(userGroups, requiredGroups);
+
+    const hasRoles =
+        requiredRoles.length === 0 ? true : hasRequiredPermission(userRoles, requiredRoles);
+
+    if (!hasGroups || !hasRoles) {
         return <>{fallbackComponent}</>;
     }
 

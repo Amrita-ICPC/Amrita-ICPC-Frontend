@@ -27,9 +27,13 @@ export default async function AppLayout({
         redirect("/auth/login");
     }
 
-    const userRoles = session.user.roles || [];
+    const userRoleCandidates = [
+        ...(session.user.groups || []),
+        ...((session.user.roles || []).filter((r) => !r.includes(":")) ?? []),
+    ];
+
     const hasRole = (role: UserType) =>
-        userRoles.some((r) => r.toLowerCase() === role.toLowerCase());
+        userRoleCandidates.some((r) => r.toLowerCase() === role.toLowerCase());
 
     const hasAnyRole =
         hasRole(UserType.ADMIN) ||
@@ -39,7 +43,7 @@ export default async function AppLayout({
 
     if (!hasAnyRole) {
         logger.warn(
-            `User ${session.user.email} (ID: ${session.user.id}) has no recognized roles. Roles found: ${userRoles.join(", ")}`,
+            `User ${session.user.email} (ID: ${session.user.id}) has no recognized roles. Groups found: ${(session.user.groups || []).join(", ")}`,
         );
     }
 
@@ -53,13 +57,13 @@ export default async function AppLayout({
                 {/* Role-specific parallel route slot */}
                 <div className="flex-1">
                     {hasRole(UserType.ADMIN) ? (
-                        <AuthGuard requiredRoles={[UserType.ADMIN]}>{admin}</AuthGuard>
+                        <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
                     ) : hasRole(UserType.MANAGER) ? (
-                        <AuthGuard requiredRoles={[UserType.MANAGER]}>{manager}</AuthGuard>
+                        <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
                     ) : hasRole(UserType.INSTRUCTOR) ? (
-                        <AuthGuard requiredRoles={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
+                        <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
                     ) : hasRole(UserType.STUDENT) ? (
-                        <AuthGuard requiredRoles={[UserType.STUDENT]}>{student}</AuthGuard>
+                        <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
                     ) : (
                         <AccessDenied />
                     )}

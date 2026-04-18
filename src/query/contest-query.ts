@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { ApiResponse } from "@/types/api";
 import type { Contest, GetContestsParams } from "@/types/contest";
+import { api } from "@/lib/api/client";
 
 const contestKeys = {
     all: ["contests"] as const,
@@ -18,34 +19,17 @@ const contestKeys = {
 };
 
 async function fetchContests(params: GetContestsParams): Promise<ApiResponse<Contest[]>> {
-    const searchParams = new URLSearchParams();
+    const queryParams: Record<string, string> = {};
 
-    if (params.page) searchParams.set("page", String(params.page));
-    if (params.page_size) searchParams.set("page_size", String(params.page_size));
-    if (params.search) searchParams.set("search", params.search);
-    if (params.contest_status) searchParams.set("contest_status", String(params.contest_status));
-    if (typeof params.is_public === "boolean")
-        searchParams.set("is_public", String(params.is_public));
+    if (params.page) queryParams.page = String(params.page);
+    if (params.page_size) queryParams.page_size = String(params.page_size);
+    if (params.search) queryParams.search = params.search;
+    if (params.contest_status) queryParams.contest_status = String(params.contest_status);
+    if (typeof params.is_public === "boolean") queryParams.is_public = String(params.is_public);
 
-    const url = `/api/contests${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<Contest[]>>("/contests", { params: queryParams });
 
-    const res = await fetch(url, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        cache: "no-store", // Bypass browser HTTP caching
-    });
-
-    const json = (await res.json()) as unknown;
-
-    if (!res.ok) {
-        const message =
-            typeof json === "object" && json !== null && "message" in json
-                ? String((json as { message: unknown }).message)
-                : "Failed to load contests";
-        throw new Error(message);
-    }
-
-    return json as ApiResponse<Contest[]>;
+    return response.data;
 }
 
 export function useContests(params: GetContestsParams = {}) {
