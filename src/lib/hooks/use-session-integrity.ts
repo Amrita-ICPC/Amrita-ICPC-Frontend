@@ -42,30 +42,49 @@ export function useSessionIntegrity() {
 
                 while (true) {
                     const { value, done } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        // Flush any remaining characters in the decoder's internal state
+                        buffer += decoder.decode();
+                        break;
+                    }
 
-                    // Accumulate decoded bytes; `stream: true` defers flushing incomplete
-                    // multi-byte sequences so we don't corrupt UTF-8 boundaries.
+                    // Accumulate decoded bytes; `stream: true` handles multi-byte characters
+                    // across chunk boundaries.
                     buffer += decoder.decode(value, { stream: true });
 
-                    // SSE events are delimited by a blank line ("\n\n").
-                    // Split on that boundary and keep any trailing incomplete fragment.
-                    const events = buffer.split("\n\n");
-                    buffer = events.pop() ?? "";
+                    // SSE events are separated by a blank line (\n\n, \r\n\r\n, or \r\r).
+                    // Use a regex that covers \n\n, \r\n\r\n, \r\r, and \n\r\n.
+                    const parts = buffer.split(/\r\n\r\n|\n\n|\r\r/);
+                    // The last part might be an incomplete event.
+                    buffer = parts.pop() ?? "";
 
-                    for (const event of events) {
-                        for (const line of event.split("\n")) {
+                    for (const event of parts) {
+                        if (!event.trim()) continue;
+
+                        // Process one event. An event consists of multiple lines.
+                        // Each line can be "data: ...", "event: ...", "id: ...", etc.
+                        // We are interested in "data:" lines.
+                        let dataPayload = "";
+                        const lines = event.split(/\r\n|\r|\n/);
+
+                        for (const line of lines) {
                             if (line.startsWith("data:")) {
-                                try {
-                                    const data = JSON.parse(line.slice("data:".length).trim());
-                                    if (data.type === "SESSION_OVERRIDE") {
-                                        signOut({
-                                            callbackUrl: "/auth/login?reason=session_override",
-                                        });
-                                    }
-                                } catch {
-                                    // Ignore malformed JSON lines
+                                // Join consecutive data lines with a newline as per SSE spec
+                                const data = line.slice("data:".length).trim();
+                                dataPayload += (dataPayload ? "\n" : "") + data;
+                            }
+                        }
+
+                        if (dataPayload) {
+                            try {
+                                const data = JSON.parse(dataPayload);
+                                if (data.type === "SESSION_OVERRIDE") {
+                                    signOut({
+                                        callbackUrl: "/auth/login?reason=session_override",
+                                    });
                                 }
+                            } catch {
+                                // Ignore malformed JSON payloads
                             }
                         }
                     }
