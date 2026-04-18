@@ -10,17 +10,14 @@ import axios, {
 import { getSession, signOut } from "next-auth/react";
 import { env } from "@/lib/env";
 
-export const axiosInstance = axios.create({
+export const api = axios.create({
     baseURL: env.NEXT_PUBLIC_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-/** @deprecated Use `axiosInstance` directly. */
-export const apiClient = axiosInstance;
-
-axiosInstance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     const session = await getSession();
     const accessToken = session?.access_token;
 
@@ -36,7 +33,7 @@ axiosInstance.interceptors.request.use(async (config: InternalAxiosRequestConfig
     return config;
 });
 
-axiosInstance.interceptors.response.use(
+api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
         // `error.config` can be undefined in Axios v1 (e.g. for network errors before
@@ -62,7 +59,7 @@ axiosInstance.interceptors.response.use(
                 );
                 headers.set("Authorization", `Bearer ${session.access_token}`);
                 originalRequest.headers = headers;
-                return axiosInstance(originalRequest);
+                return api(originalRequest);
             } else {
                 // If we still don't have a token, the refresh failed or session is dead.
                 await signOut({ callbackUrl: "/auth/login" });
@@ -74,7 +71,7 @@ axiosInstance.interceptors.response.use(
 );
 
 export const axiosWithAuth = <T>(config: AxiosRequestConfig): Promise<T> => {
-    return axiosInstance(config).then((response: AxiosResponse<T>) => response.data);
+    return api(config).then((response: AxiosResponse<T>) => response.data);
 };
 
 export default axiosWithAuth;

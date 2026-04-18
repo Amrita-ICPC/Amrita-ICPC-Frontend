@@ -5,7 +5,6 @@ export interface KeycloakToken {
     session_expires_at?: number;
     groups: string[];
     roles?: string[];
-    permissions?: string[];
     id_token?: string;
     error?: string;
     id?: string;
