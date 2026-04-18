@@ -34,9 +34,7 @@ export default async function AppLayout({
             <Sidenavbar />
             <main className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
                 {/* Main page content (e.g., Dashboard) */}
-                <div className="mb-8">
-                    <AuthGuard>{children}</AuthGuard>
-                </div>
+                <div className="mb-8">{children}</div>
 
                 {/* Role-specific parallel route slot */}
                 <div className="flex-1">
