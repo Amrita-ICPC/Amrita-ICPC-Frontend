@@ -4,7 +4,7 @@ import { decodeJwt } from "jose";
 import { KeycloakToken, DecodedJWT } from "./types";
 import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
 import { logger } from "../logger";
-import { env } from "../env";
+import { env } from "@/lib/env";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -111,17 +111,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     if (response.ok) {
                         logger.info("Keycloak session terminated successfully");
                     } else {
-                        logger.error(
-                            {
-                                status: response.status,
-                                statusText: response.statusText,
-                            },
-                            "Keycloak logout failed",
-                        );
+                        logger.error("Keycloak logout failed", {
+                            status: response.status,
+                            statusText: response.statusText,
+                        });
                     }
-                    logger.info("Keycloak session terminated successfully");
                 } catch (error) {
-                    logger.error({ err: error }, "Error terminating Keycloak session");
+                    logger.error("Error terminating Keycloak session", { err: error });
                 }
             }
         },

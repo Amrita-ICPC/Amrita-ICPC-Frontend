@@ -1,28 +1,50 @@
-import { Logger, ConsoleTransport, LOG_LEVEL, COLOR } from "@origranot/ts-logger";
+/**
+ * Log levels for the application.
+ */
+export enum LOG_LEVEL {
+    DEBUG = 0,
+    INFO = 1,
+    WARN = 2,
+    ERROR = 3,
+    FATAL = 4,
+}
 
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
- * Singleton logger instance for the application.
- * Configured with console transport and colored output.
+ * Browser-safe singleton logger instance for the application.
  */
-export const logger = new Logger({
-    name: "Amrita ICPC",
-    timestamps: true,
-    transports: [
-        new ConsoleTransport({
-            threshold: isDev ? LOG_LEVEL.DEBUG : LOG_LEVEL.INFO,
-        }),
-    ],
-    override: {
-        logLevelColors: {
-            [LOG_LEVEL.DEBUG]: COLOR.BLUE,
-            [LOG_LEVEL.INFO]: COLOR.GREEN,
-            [LOG_LEVEL.WARN]: COLOR.YELLOW,
-            [LOG_LEVEL.ERROR]: COLOR.RED,
-            [LOG_LEVEL.FATAL]: COLOR.MAGENTA,
-        },
-    },
-});
+class SimpleLogger {
+    private name: string;
 
-export { LOG_LEVEL };
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    private format(level: string, message: string) {
+        const timestamp = new Date().toISOString();
+        return `[${timestamp}] [${this.name}] [${level}] ${message}`;
+    }
+
+    debug(message: string, ...args: unknown[]) {
+        if (isDev) console.debug(this.format("DEBUG", message), ...args);
+    }
+
+    info(message: string, ...args: unknown[]) {
+        console.info(this.format("INFO", message), ...args);
+    }
+
+    warn(message: string, ...args: unknown[]) {
+        console.warn(this.format("WARN", message), ...args);
+    }
+
+    error(message: string, ...args: unknown[]) {
+        console.error(this.format("ERROR", message), ...args);
+    }
+
+    fatal(message: string, ...args: unknown[]) {
+        console.error(this.format("FATAL", message), ...args);
+    }
+}
+
+export const logger = new SimpleLogger("Amrita ICPC");

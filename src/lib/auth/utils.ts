@@ -14,7 +14,8 @@ export interface AuthUserClaims {
 // Utility function to check if user has any of the required roles
 export function hasRequiredRole(userRole: string | undefined, requiredRoles: UserType[]): boolean {
     if (!userRole || requiredRoles.length === 0) return false;
-    return requiredRoles.includes(userRole as UserType);
+    const normalizedUserRole = userRole.toLowerCase();
+    return requiredRoles.some((role) => role.toLowerCase() === normalizedUserRole);
 }
 
 // Utility function to check if user has any of the required permissions
@@ -58,14 +59,18 @@ export function hasAccess(
     requiredRoles: UserType[] = [],
     requiredGroups: string[] = [],
 ): boolean {
-    const hasRole =
-        requiredRoles.length === 0 ||
-        (userRoles?.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
-    const hasGroup =
-        requiredGroups.length === 0 || belongsToRequiredGroup(userGroups, requiredGroups);
+    // If no requirements, grant access
+    if (requiredRoles.length === 0 && requiredGroups.length === 0) return true;
 
-    // User needs to satisfy both role and group requirements if both are specified
-    return hasRole && hasGroup;
+    const hasRole =
+        requiredRoles.length > 0 &&
+        (userRoles?.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
+
+    const hasGroup =
+        requiredGroups.length > 0 && belongsToRequiredGroup(userGroups, requiredGroups);
+
+    // Grant access if user satisfies EITHER role or group requirements
+    return hasRole || hasGroup;
 }
 
 export { UserType };
@@ -85,15 +90,34 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
 
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
-        const realmRoles = decodedJWT.realm_access?.roles || [];
-        const resourceRoles = Object.values(decodedJWT.resource_access || {})
-            .flatMap((resource) => resource.roles || [])
-            .filter((role): role is string => typeof role === "string");
 
-        permissions = [...new Set(resourceRoles)];
-        // Preserve backwards compatibility: include all role-like claims in roles.
-        roles = [...new Set([...realmRoles, ...permissions])];
+        // Extract realm roles
+        roles = decodedJWT.realm_access?.roles || [];
+
+        // Extract roles from ALL clients in resource_access.
+        // AUTH_KEYCLOAK_ID is the frontend client — permissions live under the backend
+        // client (e.g. "icpc-backend"), so we must not restrict to a single key.
+        if (decodedJWT.resource_access) {
+            for (const client of Object.values(decodedJWT.resource_access)) {
+                if (client?.roles) {
+                    roles = [...roles, ...client.roles];
+                }
+            }
+        }
+
+        // Extract groups and normalize them (remove leading slash)
         groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
+
+        // IMPORTANT: Many setups use groups as roles. Merge groups into roles for easier RBAC.
+        roles = [...roles, ...groups];
+
+        // Deduplicate roles
+        roles = Array.from(new Set(roles));
+
+        // Permissions are Keycloak roles scoped with a colon (e.g. "contests:create").
+        // Separate them out so hasPermission() works correctly.
+        permissions = roles.filter((r) => r.includes(":"));
+        roles = roles.filter((r) => !r.includes(":"));
     }
 
     return { roles, groups, permissions };
@@ -140,14 +164,11 @@ export async function refreshKeycloakAccessToken(
                 return null;
             }
 
-            logger.error(
-                {
-                    status: response.status,
-                    statusText: response.statusText,
-                    error: refreshedTokens,
-                },
-                "Failed to refresh access token",
-            );
+            logger.error("Failed to refresh access token", {
+                status: response.status,
+                statusText: response.statusText,
+                error: refreshedTokens,
+            });
             throw new Error(
                 `Token refresh failed: ${
                     refreshedTokens.error_description || refreshedTokens.error || "Unknown error"
@@ -171,7 +192,7 @@ export async function refreshKeycloakAccessToken(
             error: undefined,
         };
     } catch (error: unknown) {
-        logger.error({ err: error }, "Error refreshing access token");
+        logger.error("Error refreshing access token", { err: error });
 
         let errorMessage = "RefreshAccessTokenError";
         if (error instanceof Error) {

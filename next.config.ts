@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
                         "img-src": "'self' data: blob: https:",
                         "font-src": "'self' data:",
                         "connect-src": isDev
-                            ? "'self' ws: wss: https: http://10.10.10.23:8000"
+                            ? "'self' ws: wss: https: http://10.10.10.23:8000 http://localhost:8000"
                             : "'self' https:",
                         "frame-ancestors": "'none'",
                         "object-src": "'none'",
