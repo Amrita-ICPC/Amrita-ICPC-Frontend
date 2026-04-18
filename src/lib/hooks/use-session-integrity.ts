@@ -101,5 +101,5 @@ export function useSessionIntegrity() {
         return () => {
             ctrl.abort();
         };
-    }, [session, status]);
+    }, [session?.user?.id, session?.access_token, status]);
 }
