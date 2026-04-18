@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Sidenavbar from "@/components/global/sidenavbar";
 import { UserType } from "@/lib/auth/utils";
 import AuthGuard from "@/components/global/auth-guard";
+import AccessDenied from "@/components/global/access-denied";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,18 @@ export default async function AppLayout({
     const hasRole = (role: UserType) =>
         userRoles.some((r) => r.toLowerCase() === role.toLowerCase());
 
+    const hasAnyRole =
+        hasRole(UserType.ADMIN) ||
+        hasRole(UserType.MANAGER) ||
+        hasRole(UserType.INSTRUCTOR) ||
+        hasRole(UserType.STUDENT);
+
+    if (!hasAnyRole) {
+        logger.warn(
+            `User ${session.user.email} (ID: ${session.user.id}) has no recognized roles. Roles found: ${userRoles.join(", ")}`,
+        );
+    }
+
     return (
         <div className="flex h-screen overflow-hidden bg-[#0b0d12] text-white">
             <Sidenavbar />
@@ -46,7 +60,9 @@ export default async function AppLayout({
                         <AuthGuard requiredRoles={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
                     ) : hasRole(UserType.STUDENT) ? (
                         <AuthGuard requiredRoles={[UserType.STUDENT]}>{student}</AuthGuard>
-                    ) : null}
+                    ) : (
+                        <AccessDenied />
+                    )}
                 </div>
             </main>
         </div>
