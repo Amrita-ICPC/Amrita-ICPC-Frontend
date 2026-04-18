@@ -1,8 +1,7 @@
 /**
- * Environment variable validation using @t3-oss/env-nuxt (which re-exports
+ * Environment variable validation using @t3-oss/env-nextjs (which re-exports
  * @t3-oss/env-core's createEnv). We use the core API directly so we can pass
- * `runtimeEnv` — the Nuxt-specific runtime config API is not used here since
- * this is a Next.js project, but the validation and type-safety benefit is identical.
+ * `runtimeEnv` — the validation and type-safety benefit is identical.
  */
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
