@@ -38,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Initial sign-in
             if (account && user) {
                 const decoded = decodeJwt(account.access_token!);
-                const { roles, groups, permissions } = processDecodedToken(decoded as DecodedJWT);
+                const { groups, permissions } = processDecodedToken(decoded as DecodedJWT);
                 // Calculate session expiry based on Keycloak's refresh token expiry
                 const refreshExpiresIn =
                     typeof account.refresh_expires_in === "number"
@@ -52,9 +52,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     id_token: account.id_token,
                     expires_at: account.expires_at,
                     session_expires_at: sessionExpiresAt,
-                    roles: roles,
                     groups: groups,
-                    permissions: permissions,
+                    // Expose permissions as `roles` (and do not keep a separate permissions field)
+                    roles: permissions,
                     id: account.providerAccountId,
                 };
             }
@@ -89,7 +89,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 session.user.id = token.id as string; // Ensure id is correctly assigned
                 session.user.roles = token.roles as string[];
                 session.user.groups = token.groups as string[];
-                session.user.permissions = token.permissions as string[];
                 session.access_token = token.access_token as string;
                 if (token.error) {
                     session.error = token.error as string;

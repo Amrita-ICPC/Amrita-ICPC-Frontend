@@ -5,10 +5,18 @@ enum UserType {
     STUDENT = "student",
 }
 
+// Permission-style roles (stored in `session.user.roles`)
+export const Roles = {
+    CONTEST_READ: "contests:read",
+    CONTEST_CREATE: "contests:create",
+} as const;
+
+export type Role = (typeof Roles)[keyof typeof Roles];
+
 export interface AuthUserClaims {
-    roles?: string[];
     groups?: string[];
-    permissions?: string[];
+    // In this app, `roles` represents permission strings (e.g. "contests:read").
+    roles?: string[];
 }
 
 // Utility function to check if user has any of the required roles
@@ -32,7 +40,7 @@ export function hasPermission(
     user: AuthUserClaims | null | undefined,
     requiredPermissions: string[],
 ): boolean {
-    return hasRequiredPermission(user?.permissions, requiredPermissions);
+    return hasRequiredPermission(user?.roles, requiredPermissions);
 }
 
 // Utility function to check if user belongs to any of the required groups
@@ -62,9 +70,11 @@ export function hasAccess(
     // If no requirements, grant access
     if (requiredRoles.length === 0 && requiredGroups.length === 0) return true;
 
+    const roleCandidates = [...(userRoles ?? []), ...(userGroups ?? [])];
+
     const hasRole =
         requiredRoles.length > 0 &&
-        (userRoles?.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
+        (roleCandidates.some((role) => hasRequiredRole(role, requiredRoles)) ?? false);
 
     const hasGroup =
         requiredGroups.length > 0 && belongsToRequiredGroup(userGroups, requiredGroups);
@@ -80,19 +90,17 @@ import { DecodedJWT, KeycloakToken } from "./types";
 import { logger } from "../logger";
 
 export function processDecodedToken(decoded: DecodedJWT | null): {
-    roles: string[];
     groups: string[];
     permissions: string[];
 } {
-    let roles: string[] = [];
     let groups: string[] = [];
     let permissions: string[] = [];
 
     if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
         const decodedJWT = decoded as DecodedJWT;
 
-        // Extract realm roles
-        roles = decodedJWT.realm_access?.roles || [];
+        // Extract realm/client roles (these may include permission-like strings).
+        let rawRoles: string[] = decodedJWT.realm_access?.roles || [];
 
         // Extract roles from ALL clients in resource_access.
         // AUTH_KEYCLOAK_ID is the frontend client — permissions live under the backend
@@ -100,27 +108,23 @@ export function processDecodedToken(decoded: DecodedJWT | null): {
         if (decodedJWT.resource_access) {
             for (const client of Object.values(decodedJWT.resource_access)) {
                 if (client?.roles) {
-                    roles = [...roles, ...client.roles];
+                    rawRoles = [...rawRoles, ...client.roles];
                 }
             }
         }
 
+        // Deduplicate
+        rawRoles = Array.from(new Set(rawRoles));
+
         // Extract groups and normalize them (remove leading slash)
         groups = (decodedJWT.groups || []).map((group: string) => group.replace(/^\//, ""));
 
-        // IMPORTANT: Many setups use groups as roles. Merge groups into roles for easier RBAC.
-        roles = [...roles, ...groups];
-
-        // Deduplicate roles
-        roles = Array.from(new Set(roles));
-
         // Permissions are Keycloak roles scoped with a colon (e.g. "contests:create").
-        // Separate them out so hasPermission() works correctly.
-        permissions = roles.filter((r) => r.includes(":"));
-        roles = roles.filter((r) => !r.includes(":"));
+        // Do NOT mix non-permission roles into the permissions list.
+        permissions = rawRoles.filter((r) => r.includes(":"));
     }
 
-    return { roles, groups, permissions };
+    return { groups, permissions };
 }
 
 export async function refreshKeycloakAccessToken(
@@ -177,7 +181,7 @@ export async function refreshKeycloakAccessToken(
         }
 
         const decoded = decodeJwt(refreshedTokens.access_token);
-        const { roles, groups, permissions } = processDecodedToken(decoded as DecodedJWT);
+        const { groups, permissions } = processDecodedToken(decoded as DecodedJWT);
 
         logger.info("Successfully refreshed access token");
         return {
@@ -185,9 +189,9 @@ export async function refreshKeycloakAccessToken(
             access_token: refreshedTokens.access_token,
             refresh_token: refreshedTokens.refresh_token ?? token.refresh_token,
             expires_at: Math.floor(Date.now() / 1000) + refreshedTokens.expires_in,
-            roles: roles,
             groups: groups,
-            permissions: permissions,
+            // Expose permissions as `roles`.
+            roles: permissions,
             id_token: refreshedTokens.id_token ?? token.id_token,
             error: undefined,
         };

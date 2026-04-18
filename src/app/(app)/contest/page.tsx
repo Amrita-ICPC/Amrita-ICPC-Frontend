@@ -2,11 +2,12 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import type { GetContestsParams } from "@/types/contest";
-import { hasPermission } from "@/lib/auth/utils";
+import { Roles } from "@/lib/auth/utils";
 import { auth } from "@/lib/auth/auth";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ContestClient } from "@/components/contest/contest-client";
+import AuthGuard from "@/components/global/auth-guard";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -37,9 +38,6 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
     };
     const session = await auth();
 
-    const isContestRead = hasPermission(session?.user, ["contests:read"]);
-    const isContestCreate = hasPermission(session?.user, ["contests:create"]);
-
     return (
         <div className="flex h-full flex-col space-y-6 p-8">
             <div className="flex items-center justify-between">
@@ -49,7 +47,7 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
                         Manage and explore upcoming programming contests.
                     </p>
                 </div>
-                {isContestCreate && (
+                <AuthGuard requiredRoles={[Roles.CONTEST_CREATE]} fallbackComponent={null}>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button asChild>
@@ -63,20 +61,23 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
                             <p>Set up a new programming contest</p>
                         </TooltipContent>
                     </Tooltip>
-                )}
+                </AuthGuard>
             </div>
-
-            {isContestRead ? (
+            <AuthGuard
+                requiredRoles={[Roles.CONTEST_READ]}
+                fallbackComponent={
+                    <div className="flex w-full min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center p-8">
+                        <h3 className="mb-2 text-xl font-semibold">Access Denied</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                            You do not have the required permissions to view the contests list.
+                            Please contact your system administrator if you believe this is an
+                            error.
+                        </p>
+                    </div>
+                }
+            >
                 <ContestClient initialParams={params} />
-            ) : (
-                <div className="flex w-full min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center p-8">
-                    <h3 className="mb-2 text-xl font-semibold">Access Denied</h3>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                        You do not have the required permissions to view the contests list. Please
-                        contact your system administrator if you believe this is an error.
-                    </p>
-                </div>
-            )}
+            </AuthGuard>
         </div>
     );
 }
