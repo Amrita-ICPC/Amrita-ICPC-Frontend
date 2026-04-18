@@ -31,7 +31,7 @@ export default auth((req) => {
 
     // Check RBAC
     for (const { path, roles } of roleMappedPaths) {
-        if (currentPath.startsWith(path)) {
+        if (currentPath === path || currentPath.startsWith(path + "/")) {
             if (!hasAccess(userRoles, userGroups, roles)) {
                 return NextResponse.redirect(new URL("/not-found", nextUrl)); // Or a specialized Access Denied page
             }
