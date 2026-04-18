@@ -9,9 +9,9 @@ import { env } from "@/lib/env";
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
         Keycloak({
-            clientId: process.env.AUTH_KEYCLOAK_ID || env.AUTH_KEYCLOAK_ID,
-            clientSecret: process.env.AUTH_KEYCLOAK_SECRET || env.AUTH_KEYCLOAK_SECRET,
-            issuer: process.env.AUTH_KEYCLOAK_ISSUER || env.AUTH_KEYCLOAK_ISSUER,
+            clientId: env.AUTH_KEYCLOAK_ID,
+            clientSecret: env.AUTH_KEYCLOAK_SECRET,
+            issuer: env.AUTH_KEYCLOAK_ISSUER,
             authorization: {
                 params: {
                     prompt: "login",
@@ -27,7 +27,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         strategy: "jwt",
     },
     trustHost: true,
-    secret: process.env.NEXTAUTH_SECRET || env.NEXTAUTH_SECRET,
+    secret: env.NEXTAUTH_SECRET,
     callbacks: {
         async redirect({ url, baseUrl }) {
             if (url.startsWith("/")) return `${baseUrl}${url}`;

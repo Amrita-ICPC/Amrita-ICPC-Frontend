@@ -13,7 +13,7 @@ interface ProviderProps {
 
 import { SessionIntegrityProvider } from "./session-integrity-provider";
 import { ClockSyncProvider } from "./clock-sync-provider";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function Provider({ children }: ProviderProps) {
     const [queryClient] = useState(

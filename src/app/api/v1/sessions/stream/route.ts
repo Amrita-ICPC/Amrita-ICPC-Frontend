@@ -1,11 +1,11 @@
 import { auth } from "@/lib/auth/auth";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 function buildBackendUrl(userId: string) {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-    const url = new URL("/api/v1/sessions/stream", apiBaseUrl);
+    const url = new URL("/api/v1/sessions/stream", env.NEXT_PUBLIC_API_URL);
     url.searchParams.set("userId", userId);
     return url;
 }

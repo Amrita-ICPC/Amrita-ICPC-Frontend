@@ -39,6 +39,12 @@ axiosInstance.interceptors.request.use(async (config: InternalAxiosRequestConfig
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
+        // `error.config` can be undefined in Axios v1 (e.g. for network errors before
+        // a request is dispatched), so guard before accessing it.
+        if (!error.config) {
+            return Promise.reject(error);
+        }
+
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -49,9 +55,13 @@ axiosInstance.interceptors.response.use(
             const session = await getSession();
 
             if (session?.access_token) {
-                if (originalRequest.headers) {
-                    originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
-                }
+                // Use AxiosHeaders API to safely set the Authorization header; Axios v1
+                // uses AxiosHeaders instances internally and direct assignment can fail.
+                const headers = AxiosHeaders.from(
+                    originalRequest.headers as Record<string, string> | undefined,
+                );
+                headers.set("Authorization", `Bearer ${session.access_token}`);
+                originalRequest.headers = headers;
                 return axiosInstance(originalRequest);
             } else {
                 // If we still don't have a token, the refresh failed or session is dead.
