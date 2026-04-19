@@ -12,23 +12,28 @@ import { env } from "@/lib/env";
 
 export const api = axios.create({
     baseURL: env.NEXT_PUBLIC_API_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
 });
 
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+    const headers =
+        config.headers instanceof AxiosHeaders ? config.headers : AxiosHeaders.from(config.headers);
+
+    // If the payload is FormData (file upload), do not force JSON content-type.
+    // Axios will set the correct multipart boundary automatically.
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+        headers.delete("Content-Type");
+    } else if (!headers.get("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
+
     const session = await getSession();
     const accessToken = session?.access_token;
 
     if (accessToken) {
-        const headers =
-            config.headers instanceof AxiosHeaders
-                ? config.headers
-                : AxiosHeaders.from(config.headers);
         headers.set("Authorization", `Bearer ${accessToken}`);
-        config.headers = headers;
     }
+
+    config.headers = headers;
 
     return config;
 });
