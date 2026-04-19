@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { auth, signOut } from "@/lib/auth/auth";
-import { Banknote, LayoutDashboard, LogOut, Settings, Trophy, Users } from "lucide-react";
+import {
+    Banknote,
+    LayoutDashboard,
+    LogOut,
+    Settings,
+    Trophy,
+    Users,
+    UsersRound,
+} from "lucide-react";
+import AuthGuard from "@/components/global/auth-guard";
+import { UserType } from "@/lib/auth/utils";
 
 function getInitials(name?: string | null, email?: string | null) {
     const source = name || email || "User";
@@ -54,6 +64,17 @@ export default async function Sidenavbar() {
                     <Users className="h-4 w-4" />
                     Teams
                 </Link>
+
+                <AuthGuard requiredGroups={[UserType.ADMIN]} fallbackComponent={null}>
+                    <Link
+                        href="/audiences"
+                        className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
+                    >
+                        <UsersRound className="h-4 w-4" />
+                        Manage Users
+                    </Link>
+                </AuthGuard>
+
                 <Link
                     href="/bank"
                     className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"

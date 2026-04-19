@@ -2,6 +2,7 @@
 
 import { Calendar, Users, ArrowRight, Trash2 } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -215,11 +216,12 @@ export function ContestCard({ contest }: ContestCardProps) {
                 <div className="relative aspect-video w-full overflow-hidden bg-muted">
                     {showImage ? (
                         <>
-                            {/* Plain <img> — no hostname config, onError silently falls back */}
-                            <img
+                            <Image
                                 src={contest.image ?? ""}
                                 alt={contest.name}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                fill
+                                sizes="(min-width: 768px) 50vw, 100vw"
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                                 onError={() => setImageError(true)}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />

@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -120,7 +121,6 @@ export function CreateContestClient() {
         handleSubmit,
         control,
         setValue,
-        watch,
         formState: { errors, isSubmitting },
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -143,7 +143,7 @@ export function CreateContestClient() {
         mode: "onTouched",
     });
 
-    const imageUrl = watch("image") ?? null;
+    const imageUrl = useWatch({ control, name: "image" }) ?? null;
 
     const [uploadedImage, setUploadedImage] = useState<ImageUploadResponse | null>(null);
     const uploadImageMutation = useUploadContestImage();
@@ -515,11 +515,13 @@ export function CreateContestClient() {
 
                                 {imageUrl ? (
                                     <div className="space-y-2">
-                                        <div className="overflow-hidden rounded-md border bg-muted">
-                                            <img
+                                        <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
+                                            <Image
                                                 src={imageUrl}
                                                 alt="Contest image preview"
-                                                className="aspect-video w-full object-cover"
+                                                fill
+                                                sizes="(min-width: 1024px) 33vw, 100vw"
+                                                className="object-cover"
                                             />
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
@@ -543,11 +545,13 @@ export function CreateContestClient() {
                                                                 Preview the uploaded banner.
                                                             </DialogDescription>
                                                         </DialogHeader>
-                                                        <div className="overflow-hidden rounded-md border bg-muted">
-                                                            <img
+                                                        <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
+                                                            <Image
                                                                 src={imageUrl}
                                                                 alt="Contest image"
-                                                                className="h-full w-full object-contain"
+                                                                fill
+                                                                sizes="(min-width: 1024px) 768px, 100vw"
+                                                                className="object-contain"
                                                             />
                                                         </div>
                                                     </DialogContent>

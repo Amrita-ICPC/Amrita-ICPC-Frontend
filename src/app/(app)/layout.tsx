@@ -6,8 +6,6 @@ import AuthGuard from "@/components/global/auth-guard";
 import AccessDenied from "@/components/global/access-denied";
 import { logger } from "@/lib/logger";
 
-export const dynamic = "force-dynamic";
-
 export default async function AppLayout({
     children,
     student,
