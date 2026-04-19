@@ -4,28 +4,13 @@ import Link from "next/link";
 import type { GetContestsParams } from "@/types/contest";
 import { Roles } from "@/lib/auth/utils";
 import { auth } from "@/lib/auth/auth";
+import { getSingleValue, parseBoolean, parsePage } from "@/lib/search-params";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ContestClient } from "@/components/contest/contest-client";
 import AuthGuard from "@/components/global/auth-guard";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-
-function getSingleValue(value: string | string[] | undefined) {
-    return Array.isArray(value) ? value[0] : value;
-}
-
-function parsePage(value: string | string[] | undefined, fallback: number) {
-    const parsed = Number.parseInt(getSingleValue(value) ?? "", 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
-
-function parseBoolean(value: string | string[] | undefined) {
-    const normalized = getSingleValue(value);
-    if (normalized === "true") return true;
-    if (normalized === "false") return false;
-    return undefined;
-}
 
 export default async function ContestPage(props: { searchParams?: Promise<SearchParams> }) {
     const resolvedParams = await props.searchParams;
@@ -36,7 +21,7 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
         search: getSingleValue(resolvedParams?.search) ?? undefined,
         is_public: parseBoolean(resolvedParams?.is_public),
     };
-    const session = await auth();
+    await auth();
 
     return (
         <div className="flex h-full flex-col space-y-6 p-8">
