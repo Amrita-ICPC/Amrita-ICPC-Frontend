@@ -1,6 +1,6 @@
 export type ContestStatus = "DRAFT" | "SCHEDULED" | "RUNNING" | "PAUSED" | "FINISHED" | "CANCELLED";
 
-export type TeamApprovalMode = "AUTO_APPROVE" | "MANUAL";
+export type TeamApprovalMode = "AUTO_APPROVE" | "INSTRUCTOR_REVIEW";
 
 export interface Contest {
     id: string;

@@ -9,6 +9,7 @@ enum UserType {
 export const Roles = {
     CONTEST_READ: "contests:read",
     CONTEST_CREATE: "contests:create",
+    CONTEST_DELETE: "contests:delete",
 } as const;
 
 export type Role = (typeof Roles)[keyof typeof Roles];

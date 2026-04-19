@@ -1,5 +1,11 @@
-// This file is intentionally kept as a re-export shim so that Orval-generated
-// API clients (which reference this path in the mutator config) keep working
-// without modification. All implementation lives in `./api/client`.
-export { axiosInstance, axiosWithAuth, apiClient } from "@/lib/api/client";
-export { default } from "@/lib/api/client";
+// This file is intentionally kept as a stable Orval mutator entry.
+// Orval expects a concrete named export (not just a re-export).
+
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
+import { api } from "./api/client";
+
+export const axiosWithAuth = <T>(config: AxiosRequestConfig): Promise<T> => {
+    return api(config).then((response: AxiosResponse<T>) => response.data);
+};
+
+export default axiosWithAuth;
