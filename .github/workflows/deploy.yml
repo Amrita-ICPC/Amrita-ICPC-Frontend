@@ -1,0 +1,30 @@
+name: Build and Deploy ICPC Frontend
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [staging]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, icpc]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          set -e
+          set -a && source /home/amrita/Amrita-ICPC/frontend/.env && set +a
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            -t icpc-frontend:latest \
+            .
+
+      - name: Restart container via Compose
+        run: docker compose -f /home/amrita/Amrita-ICPC/frontend/docker-compose.yml up -d --force-recreate --no-deps
+
+      - name: Cleanup old images
+        run: docker image prune -f

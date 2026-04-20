@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextSafe = require("next-safe");
 
 const nextConfig: NextConfig = {
+    output: "standalone",
     async headers() {
         const isDev = process.env.NODE_ENV !== "production";
         return [
