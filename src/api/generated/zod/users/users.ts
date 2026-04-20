@@ -8,16 +8,6 @@
 import * as zod from "zod";
 
 /**
- * @summary Get Users
- */
-export const GetUsersApiV1UsersGetResponse = zod.unknown();
-
-/**
- * @summary Create User
- */
-export const CreateUserApiV1UsersPostResponse = zod.unknown();
-
-/**
  * Get current logged-in user details from JWT.
  * @summary Get Me
  */
@@ -68,4 +58,114 @@ export const SyncKeycloakUsersApiV1UsersSyncKeycloakUsersPostResponse = zod.obje
         )
         .default(syncKeycloakUsersApiV1UsersSyncKeycloakUsersPostResponseSkippedUsersDefault),
     synced_by: zod.record(zod.string(), zod.unknown()),
+});
+
+/**
+ * List users with filtering and pagination.
+
+This endpoint is accessible only to administrators.
+
+Args:
+    request: FastAPI request context.
+    db: Database session.
+    page: Page number for pagination.
+    page_size: Number of items per page.
+    role: Optional filter for user role.
+    q: Optional search query for name, email, or phone number.
+
+Returns:
+    Paginated list of users.
+ * @summary List users
+ */
+export const listUsersApiV1UsersGetQueryPageDefault = 1;
+
+export const listUsersApiV1UsersGetQueryPageSizeDefault = 10;
+export const listUsersApiV1UsersGetQueryPageSizeMax = 100;
+
+export const ListUsersApiV1UsersGetQueryParams = zod.object({
+    page: zod
+        .number()
+        .min(1)
+        .default(listUsersApiV1UsersGetQueryPageDefault)
+        .describe("Page number (starts from 1)"),
+    page_size: zod
+        .number()
+        .min(1)
+        .max(listUsersApiV1UsersGetQueryPageSizeMax)
+        .default(listUsersApiV1UsersGetQueryPageSizeDefault)
+        .describe("Number of items per page"),
+    role: zod
+        .union([
+            zod
+                .enum(["student", "instructor", "admin", "manager"])
+                .describe(
+                    "Enumeration of user roles within the ICPC backend system.\n\nDefines the hierarchical roles that control access permissions\nand determine what actions users can perform.\n\nAttributes:\n    student: Regular students who can participate in contests and join teams.\n    instructor: Instructors who can create and manage contests for their courses.\n    admin: System administrators with full access to all system features.\n    manager: Organizational managers with elevated permissions across contests.",
+                ),
+            zod.null(),
+        ])
+        .optional()
+        .describe("Filter by user role"),
+    q: zod
+        .union([zod.string(), zod.null()])
+        .optional()
+        .describe("Search by name, email, or phone number"),
+});
+
+export const listUsersApiV1UsersGetResponseSuccessDefault = true;
+export const listUsersApiV1UsersGetResponseStatusDefault = 200;
+export const listUsersApiV1UsersGetResponseMessageDefault = `Success`;
+export const listUsersApiV1UsersGetResponseDataOneItemAudienceLinksDefault = [];
+
+export const ListUsersApiV1UsersGetResponse = zod.object({
+    success: zod.boolean().default(listUsersApiV1UsersGetResponseSuccessDefault),
+    status: zod.number().default(listUsersApiV1UsersGetResponseStatusDefault),
+    message: zod.string().default(listUsersApiV1UsersGetResponseMessageDefault),
+    data: zod
+        .union([
+            zod.array(
+                zod.object({
+                    id: zod.uuid(),
+                    user_id: zod.string(),
+                    name: zod.string(),
+                    email: zod.email(),
+                    phone_no: zod.union([zod.string(), zod.null()]).optional(),
+                    role: zod
+                        .enum(["student", "instructor", "admin", "manager"])
+                        .describe(
+                            "Enumeration of user roles within the ICPC backend system.\n\nDefines the hierarchical roles that control access permissions\nand determine what actions users can perform.\n\nAttributes:\n    student: Regular students who can participate in contests and join teams.\n    instructor: Instructors who can create and manage contests for their courses.\n    admin: System administrators with full access to all system features.\n    manager: Organizational managers with elevated permissions across contests.",
+                        ),
+                    gender: zod.union([zod.string(), zod.null()]).optional(),
+                    dob: zod.union([zod.iso.date(), zod.null()]).optional(),
+                    created_at: zod.iso.datetime({}),
+                    last_updated: zod.iso.datetime({}),
+                    audience_links: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .default(listUsersApiV1UsersGetResponseDataOneItemAudienceLinksDefault),
+                }),
+            ),
+            zod.null(),
+        ])
+        .optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
 });

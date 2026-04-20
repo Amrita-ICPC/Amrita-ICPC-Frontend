@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { userKeys } from "./user-query";
 
 import { getAudiences } from "@/api/generated/audiences/audiences";
 import type {
@@ -6,6 +7,7 @@ import type {
     AudienceResponse,
     AudienceType,
     AudienceUpdate,
+    AudienceUserBulkDataEmail,
     AudienceUsersBulkRequest,
     AudienceUsersResponse,
     ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams,
@@ -52,7 +54,7 @@ const audienceKeys = {
     users: (
         audienceId: string,
         params: ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams = {},
-    ) => [...audienceKeys.detail(audienceId), "users", params.page, params.page_size] as const,
+    ) => [...audienceKeys.detail(audienceId), "users", "list", params] as const,
 };
 
 async function fetchAudiences(
@@ -255,8 +257,11 @@ export function useAddAudienceUsers() {
     return useMutation({
         mutationFn: addUsersToAudience,
         onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: audienceKeys.users(variables.audienceId) });
+            queryClient.invalidateQueries({
+                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
+            });
             queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
+            queryClient.refetchQueries({ queryKey: userKeys.all });
         },
     });
 }
@@ -285,8 +290,45 @@ export function useRemoveAudienceUsers() {
     return useMutation({
         mutationFn: removeUsersFromAudience,
         onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: audienceKeys.users(variables.audienceId) });
+            queryClient.invalidateQueries({
+                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
+            });
             queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
+            queryClient.refetchQueries({ queryKey: userKeys.all });
+        },
+    });
+}
+
+async function addUsersToAudienceByEmail(input: {
+    audienceId: string;
+    payload: AudienceUserBulkDataEmail;
+}) {
+    const response =
+        await audiencesApi.addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost(
+            input.audienceId,
+            input.payload,
+        );
+
+    if (response?.success === false) {
+        throw new ApiError(response.message ?? "Failed to add users by email", {
+            status: response.status,
+        });
+    }
+
+    return response;
+}
+
+export function useAddAudienceUsersByEmail() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: addUsersToAudienceByEmail,
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
+            });
+            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
+            queryClient.refetchQueries({ queryKey: userKeys.all });
         },
     });
 }

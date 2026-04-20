@@ -5,23 +5,16 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { UserProfile, UserSyncResponse } from "../model";
+import type {
+    APIResponseListUserResponse,
+    ListUsersApiV1UsersGetParams,
+    UserProfile,
+    UserSyncResponse,
+} from "../model";
 
 import { axiosWithAuth } from "../../../lib/api-client";
 
 export const getUsers = () => {
-    /**
-     * @summary Get Users
-     */
-    const getUsersApiV1UsersGet = () => {
-        return axiosWithAuth<unknown>({ url: `/api/v1/users/`, method: "GET" });
-    };
-    /**
-     * @summary Create User
-     */
-    const createUserApiV1UsersPost = () => {
-        return axiosWithAuth<unknown>({ url: `/api/v1/users/`, method: "POST" });
-    };
     /**
      * Get current logged-in user details from JWT.
      * @summary Get Me
@@ -54,19 +47,36 @@ Raises:
             method: "POST",
         });
     };
+    /**
+ * List users with filtering and pagination.
+
+This endpoint is accessible only to administrators.
+
+Args:
+    request: FastAPI request context.
+    db: Database session.
+    page: Page number for pagination.
+    page_size: Number of items per page.
+    role: Optional filter for user role.
+    q: Optional search query for name, email, or phone number.
+
+Returns:
+    Paginated list of users.
+ * @summary List users
+ */
+    const listUsersApiV1UsersGet = (params?: ListUsersApiV1UsersGetParams) => {
+        return axiosWithAuth<APIResponseListUserResponse>({
+            url: `/api/v1/users/`,
+            method: "GET",
+            params,
+        });
+    };
     return {
-        getUsersApiV1UsersGet,
-        createUserApiV1UsersPost,
         getMeApiV1UsersMeGet,
         syncKeycloakUsersApiV1UsersSyncKeycloakUsersPost,
+        listUsersApiV1UsersGet,
     };
 };
-export type GetUsersApiV1UsersGetResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getUsers>["getUsersApiV1UsersGet"]>>
->;
-export type CreateUserApiV1UsersPostResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getUsers>["createUserApiV1UsersPost"]>>
->;
 export type GetMeApiV1UsersMeGetResult = NonNullable<
     Awaited<ReturnType<ReturnType<typeof getUsers>["getMeApiV1UsersMeGet"]>>
 >;
@@ -74,4 +84,7 @@ export type SyncKeycloakUsersApiV1UsersSyncKeycloakUsersPostResult = NonNullable
     Awaited<
         ReturnType<ReturnType<typeof getUsers>["syncKeycloakUsersApiV1UsersSyncKeycloakUsersPost"]>
     >
+>;
+export type ListUsersApiV1UsersGetResult = NonNullable<
+    Awaited<ReturnType<ReturnType<typeof getUsers>["listUsersApiV1UsersGet"]>>
 >;

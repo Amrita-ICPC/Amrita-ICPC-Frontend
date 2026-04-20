@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function AudienceSkeleton() {
     return (
         <Card className="flex flex-col overflow-hidden">
-            <CardHeader className="p-3 pb-1">
+            <CardHeader className="p-4 pb-2">
                 <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                         <Skeleton className="h-5 w-3/4" />
@@ -14,7 +14,7 @@ export function AudienceSkeleton() {
                 </div>
             </CardHeader>
 
-            <CardContent className="p-3 pt-2">
+            <CardContent className="p-4 pt-2">
                 <div className="grid grid-cols-2 gap-2">
                     <Skeleton className="h-7 w-full" />
                     <Skeleton className="h-7 w-full" />
@@ -23,7 +23,7 @@ export function AudienceSkeleton() {
                 </div>
             </CardContent>
 
-            <CardFooter className="p-3 pt-0">
+            <CardFooter className="p-4 pt-0">
                 <Skeleton className="h-8 w-full" />
             </CardFooter>
         </Card>

@@ -7,12 +7,14 @@
  */
 import type {
     APIResponse,
+    APIResponseAudienceAddUsersByEmailResponse,
     APIResponseAudienceResponse,
     APIResponseAudienceUsersResponse,
     APIResponseInt,
     APIResponseListAudienceResponse,
     AudienceCreate,
     AudienceUpdate,
+    AudienceUserBulkDataEmail,
     AudienceUsersBulkRequest,
     ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams,
     ListAudiencesApiV1AudiencesGetParams,
@@ -155,6 +157,8 @@ Args:
     audience_id: Audience identifier.
     page: Page number (1-indexed).
     page_size: Page size.
+    q: Optional substring filter applied to user name, email, or phone number.
+    role: Optional role filter.
     current_user: Authenticated user payload from Keycloak.
     service: Injected audience service.
 
@@ -236,6 +240,35 @@ Raises:
             data: audienceUsersBulkRequest,
         });
     };
+    /**
+ * Add users to an audience by their email addresses.
+
+Args:
+    request: FastAPI request context.
+    audience_id: Audience identifier.
+    payload: Bulk user emails to add.
+    current_user: Authenticated user payload from Keycloak.
+    service: Injected audience service.
+
+Returns:
+    Standard APIResponse with a success message.
+
+Raises:
+    AudienceNotFoundError: If the audience does not exist.
+    PermissionDeniedError: If the caller is not an admin.
+ * @summary Add users to an audience in bulk by email
+ */
+    const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost = (
+        audienceId: string,
+        audienceUserBulkDataEmail: AudienceUserBulkDataEmail,
+    ) => {
+        return axiosWithAuth<APIResponseAudienceAddUsersByEmailResponse>({
+            url: `/api/v1/audiences/${audienceId}/users/email`,
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            data: audienceUserBulkDataEmail,
+        });
+    };
     return {
         createAudienceApiV1AudiencesPost,
         listAudiencesApiV1AudiencesGet,
@@ -245,6 +278,7 @@ Raises:
         listAudienceUsersApiV1AudiencesAudienceIdUsersGet,
         addUsersToAudienceApiV1AudiencesAudienceIdUsersPost,
         removeUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete,
+        addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost,
     };
 };
 export type CreateAudienceApiV1AudiencesPostResult = NonNullable<
@@ -286,6 +320,15 @@ export type RemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDeleteResult = N
             ReturnType<
                 typeof getAudiences
             >["removeUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete"]
+        >
+    >
+>;
+export type AddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResult = NonNullable<
+    Awaited<
+        ReturnType<
+            ReturnType<
+                typeof getAudiences
+            >["addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost"]
         >
     >
 >;
