@@ -259,9 +259,16 @@ export function AudienceUsersTableCard({
                                                 size="sm"
                                                 disabled={isRemovingUsers}
                                                 className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-2"
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     // Immediately remove just this one, skipping mass selection
-                                                    onRemoveUsers([u.id]);
+                                                    const success = await onRemoveUsers([u.id]);
+                                                    if (success !== false) {
+                                                        setSelectedIds((previous) => {
+                                                            const next = new Set(previous);
+                                                            next.delete(u.id);
+                                                            return next;
+                                                        });
+                                                    }
                                                 }}
                                             >
                                                 <Trash2 className="h-3.5 w-3.5 mr-1" />

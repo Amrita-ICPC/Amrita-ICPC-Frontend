@@ -16,7 +16,9 @@ export async function extractEmailsFromFile(file: File): Promise<string[]> {
 
                 // Get the first sheet
                 const firstSheetName = workbook.SheetNames[0];
+                if (!firstSheetName) return resolve([]);
                 const worksheet = workbook.Sheets[firstSheetName];
+                if (!worksheet) return resolve([]);
 
                 // Convert sheet to an array of arrays
                 const rows = xlsx.utils.sheet_to_json<unknown[]>(worksheet, { header: 1 });

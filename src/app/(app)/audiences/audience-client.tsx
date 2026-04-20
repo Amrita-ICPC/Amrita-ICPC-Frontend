@@ -19,6 +19,7 @@ import { AudienceCard } from "@/components/audience/audience-card";
 import { AudienceSkeleton } from "@/components/audience/audience-skeleton";
 import { useAudiences } from "@/query/audience-query";
 import type { AudienceType } from "@/api/generated/model";
+import { clampPage, clampPageSize } from "@/lib/utils/pagination";
 
 const AUDIENCE_TYPES = ["class", "department", "batch", "campus"] as const;
 
@@ -56,9 +57,8 @@ export function AudienceClient({ initialParams }: { initialParams: InitialParams
     );
 
     const query = useAudiences({
-        page: Number.isFinite(params.page) && params.page > 0 ? params.page : 1,
-        page_size:
-            Number.isFinite(params.page_size) && params.page_size > 0 ? params.page_size : 10,
+        page: clampPage(Number.isFinite(params.page) ? params.page : 1),
+        page_size: clampPageSize(Number.isFinite(params.page_size) ? params.page_size : 10),
         q: params.q?.trim() ? params.q.trim() : null,
         audience_type: selectedType,
     });

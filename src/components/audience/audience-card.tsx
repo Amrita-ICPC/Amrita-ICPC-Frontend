@@ -74,7 +74,9 @@ export function AudienceCard({ audience }: { audience: AudienceResponse }) {
                         variant="outline"
                         className={`shrink-0 border text-[11px] ${styles.badge}`}
                     >
-                        {formatAudienceType(String(audience.audience_type))}
+                        {audience.audience_type
+                            ? formatAudienceType(String(audience.audience_type))
+                            : "UNKNOWN"}
                     </Badge>
                 </div>
             </CardHeader>

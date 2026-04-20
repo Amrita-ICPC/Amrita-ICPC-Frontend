@@ -8,7 +8,8 @@ export function isUserInAudience(
     user: UserResponse,
     audienceId: string | number | null | undefined,
 ): boolean {
-    if (!user || !user.audience_links || !audienceId) return false;
+    if (!user || !user.audience_links || audienceId === null || audienceId === undefined)
+        return false;
 
     const targetId = String(audienceId);
     return user.audience_links.some((link) => String(link.id) === targetId);

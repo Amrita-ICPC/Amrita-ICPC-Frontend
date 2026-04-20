@@ -70,7 +70,7 @@ function CreateAudienceDialogContent(props: { onClose: () => void }) {
     const formSchema = useMemo(
         () =>
             z.object({
-                name: z.string().min(1, "Name is required").max(255),
+                name: z.string().trim().min(1, "Name is required").max(255),
                 audience_type: z.enum([
                     AudienceType.class,
                     AudienceType.department,
@@ -105,7 +105,7 @@ function CreateAudienceDialogContent(props: { onClose: () => void }) {
         setErrorStatus(undefined);
 
         const payload: AudienceCreate = {
-            name: values.name.trim(),
+            name: values.name,
             audience_type: values.audience_type,
             description: values.description?.trim() ? values.description.trim() : null,
         };
@@ -162,7 +162,7 @@ function CreateAudienceDialogContent(props: { onClose: () => void }) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label>Audience Type</Label>
+                    <Label htmlFor="audience-type">Audience Type</Label>
                     <Select
                         disabled={isPending || isSuccess}
                         defaultValue={AudienceType.class}
@@ -173,7 +173,7 @@ function CreateAudienceDialogContent(props: { onClose: () => void }) {
                             })
                         }
                     >
-                        <SelectTrigger>
+                        <SelectTrigger id="audience-type">
                             <SelectValue placeholder="Select a type" />
                         </SelectTrigger>
                         <SelectContent>

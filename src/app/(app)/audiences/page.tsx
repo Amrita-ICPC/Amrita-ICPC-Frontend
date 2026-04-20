@@ -1,4 +1,7 @@
 import { AudienceClient } from "@/app/(app)/audiences/audience-client";
+import AccessDenied from "@/components/global/access-denied";
+import AuthGuard from "@/components/global/auth-guard";
+import { UserType } from "@/lib/auth/utils";
 
 import { getSingleValue, parsePage, parsePageSize } from "@/lib/search-params";
 
@@ -13,5 +16,9 @@ export default async function AudiencesPage(props: { searchParams?: Promise<Sear
         audience_type: getSingleValue(resolvedParams?.audience_type) ?? "",
     };
 
-    return <AudienceClient initialParams={initialParams} />;
+    return (
+        <AuthGuard requiredGroups={[UserType.ADMIN]} fallbackComponent={<AccessDenied />}>
+            <AudienceClient initialParams={initialParams} />
+        </AuthGuard>
+    );
 }

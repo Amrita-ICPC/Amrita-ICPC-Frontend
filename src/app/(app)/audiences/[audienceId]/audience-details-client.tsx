@@ -56,7 +56,7 @@ export function AudienceDetailsClient({
     const [isRemovingUsers, setIsRemovingUsers] = useState(false);
     const [isAddUsersOpen, setIsAddUsersOpen] = useState(false);
 
-    const [localSearch, setLocalSearch] = useState("");
+    const [localSearch, setLocalSearch] = useState(searchParams.get("q") ?? "");
     const debouncedLocalSearch = useDebounce(localSearch, 250);
 
     const page = clampPage(
@@ -108,6 +108,15 @@ export function AudienceDetailsClient({
         router.replace(`${pathname}?${newParams.toString()}`);
     };
 
+    const setSearch = (nextSearch: string) => {
+        setLocalSearch(nextSearch);
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.set("page", "1");
+        if (nextSearch.trim()) newParams.set("q", nextSearch.trim());
+        else newParams.delete("q");
+        router.replace(`${pathname}?${newParams.toString()}`);
+    };
+
     const audienceError = audienceQuery.error ? toApiError(audienceQuery.error) : null;
     const usersError = usersQuery.error ? toApiError(usersQuery.error) : null;
 
@@ -124,12 +133,18 @@ export function AudienceDetailsClient({
             const emails = await extractEmailsFromFile(file);
             if (emails.length === 0) {
                 toast("No valid emails found in the uploaded file.");
+                setSelectedFileName(null);
+                setParsedEmails(null);
+                setIsConfirmingUpload(false);
                 return;
             }
             setParsedEmails(emails);
             setIsConfirmingUpload(true);
         } catch (_error) {
             toast("Failed to parse file.");
+            setSelectedFileName(null);
+            setParsedEmails(null);
+            setIsConfirmingUpload(false);
         } finally {
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
@@ -271,7 +286,7 @@ export function AudienceDetailsClient({
                 roleFilter={roleFilter}
                 onRoleChange={setRole}
                 localSearch={localSearch}
-                onLocalSearchChange={setLocalSearch}
+                onLocalSearchChange={setSearch}
                 users={visibleUsers}
                 pagination={
                     pagination
