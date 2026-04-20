@@ -20,6 +20,10 @@ jobs:
           set -a && source /home/amrita/Amrita-ICPC/frontend/.env && set +a
           docker build \
             --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            --build-arg NEXTAUTH_SECRET="$NEXTAUTH_SECRET" \
+            --build-arg AUTH_KEYCLOAK_ID="$AUTH_KEYCLOAK_ID" \
+            --build-arg AUTH_KEYCLOAK_SECRET="$AUTH_KEYCLOAK_SECRET" \
+            --build-arg AUTH_KEYCLOAK_ISSUER="$AUTH_KEYCLOAK_ISSUER" \
             -t icpc-frontend:latest \
             .
 
