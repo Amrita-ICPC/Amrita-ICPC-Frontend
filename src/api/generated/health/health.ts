@@ -15,8 +15,18 @@ export const getHealth = () => {
     const healthCheckApiHealthGet = () => {
         return axiosWithAuth<unknown>({ url: `/api/health`, method: "GET" });
     };
-    return { healthCheckApiHealthGet };
+    /**
+     * Execute a system health check monitored against active database connections natively.
+     * @summary Health Check
+     */
+    const healthCheckApiV1HealthHealthGet = () => {
+        return axiosWithAuth<unknown>({ url: `/api/v1/health/health`, method: "GET" });
+    };
+    return { healthCheckApiHealthGet, healthCheckApiV1HealthHealthGet };
 };
 export type HealthCheckApiHealthGetResult = NonNullable<
     Awaited<ReturnType<ReturnType<typeof getHealth>["healthCheckApiHealthGet"]>>
+>;
+export type HealthCheckApiV1HealthHealthGetResult = NonNullable<
+    Awaited<ReturnType<ReturnType<typeof getHealth>["healthCheckApiV1HealthHealthGet"]>>
 >;

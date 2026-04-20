@@ -498,6 +498,8 @@ Args:
     audience_id: Audience identifier.
     page: Page number (1-indexed).
     page_size: Page size.
+    q: Optional substring filter applied to user name, email, or phone number.
+    role: Optional role filter.
     current_user: Authenticated user payload from Keycloak.
     service: Injected audience service.
 
@@ -530,6 +532,10 @@ export const ListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryParams = zod.
         .max(listAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryPageSizeMax)
         .default(listAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryPageSizeDefault)
         .describe("Number of items per page"),
+    q: zod
+        .union([zod.string(), zod.null()])
+        .optional()
+        .describe("Optional search by name, email, or phone number"),
     role: zod
         .union([
             zod
@@ -546,6 +552,8 @@ export const ListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryParams = zod.
 export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseSuccessDefault = true;
 export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseStatusDefault = 200;
 export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseMessageDefault = `Success`;
+export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseDataOneUsersItemAudienceLinksDefault =
+    [];
 export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseDataOneManagerCountDefault = 0;
 export const listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseDataOneManagerCountMin = 0;
 
@@ -586,6 +594,16 @@ export const ListAudienceUsersApiV1AudiencesAudienceIdUsersGetResponse = zod.obj
                                 dob: zod.union([zod.iso.date(), zod.null()]).optional(),
                                 created_at: zod.iso.datetime({}),
                                 last_updated: zod.iso.datetime({}),
+                                audience_links: zod
+                                    .array(
+                                        zod.object({
+                                            id: zod.uuid(),
+                                            name: zod.string(),
+                                        }),
+                                    )
+                                    .default(
+                                        listAudienceUsersApiV1AudiencesAudienceIdUsersGetResponseDataOneUsersItemAudienceLinksDefault,
+                                    ),
                             }),
                         )
                         .describe("Users in the requested page"),
@@ -749,6 +767,127 @@ export const RemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDeleteResponse 
         .string()
         .default(removeUsersFromAudienceApiV1AudiencesAudienceIdUsersDeleteResponseMessageDefault),
     data: zod.union([zod.number(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
+ * Add users to an audience by their email addresses.
+
+Args:
+    request: FastAPI request context.
+    audience_id: Audience identifier.
+    payload: Bulk user emails to add.
+    current_user: Authenticated user payload from Keycloak.
+    service: Injected audience service.
+
+Returns:
+    Standard APIResponse with a success message.
+
+Raises:
+    AudienceNotFoundError: If the audience does not exist.
+    PermissionDeniedError: If the caller is not an admin.
+ * @summary Add users to an audience in bulk by email
+ */
+export const AddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostParams = zod.object({
+    audience_id: zod.uuid(),
+});
+
+export const AddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostBody = zod.object({
+    emails: zod.array(zod.string()),
+});
+
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseSuccessDefault = true;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseStatusDefault = 200;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseMessageDefault = `Success`;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAlreadyPresentDefault = 0;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAlreadyPresentMin = 0;
+
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAddedDefault = 0;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAddedMin = 0;
+
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneNotFoundDefault = 0;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneNotFoundMin = 0;
+
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneTotalDefault = 0;
+export const addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneTotalMin = 0;
+
+export const AddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(
+            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseSuccessDefault,
+        ),
+    status: zod
+        .number()
+        .default(
+            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseStatusDefault,
+        ),
+    message: zod
+        .string()
+        .default(
+            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseMessageDefault,
+        ),
+    data: zod
+        .union([
+            zod
+                .object({
+                    already_present: zod
+                        .number()
+                        .min(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAlreadyPresentMin,
+                        )
+                        .default(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAlreadyPresentDefault,
+                        )
+                        .describe("Number of emails already present in the audience"),
+                    added: zod
+                        .number()
+                        .min(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAddedMin,
+                        )
+                        .default(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneAddedDefault,
+                        )
+                        .describe("Number of users successfully added to the audience"),
+                    not_found: zod
+                        .number()
+                        .min(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneNotFoundMin,
+                        )
+                        .default(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneNotFoundDefault,
+                        )
+                        .describe("Number of emails that did not correspond to any user"),
+                    total: zod
+                        .number()
+                        .min(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneTotalMin,
+                        )
+                        .default(
+                            addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPostResponseDataOneTotalDefault,
+                        )
+                        .describe("Total number of emails processed"),
+                })
+                .describe("Response payload for adding users to an audience by email."),
+            zod.null(),
+        ])
+        .optional(),
     pagination: zod
         .union([
             zod.object({

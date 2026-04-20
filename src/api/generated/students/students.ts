@@ -7,28 +7,14 @@
  */
 import type {
     GetAvailableContestsApiV1StudentsContestsGetParams,
-    GetAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGetParams,
-    GetMyTeamsApiV1StudentsTeamsGetParams,
     GetPastContestsApiV1StudentsContestsPastGetParams,
     GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams,
-    StudentCodeRunRequest,
-    StudentCodeRunResponse,
     StudentContestDetailsResponse,
     StudentContestListResponse,
     StudentContestProblemsListResponse,
     StudentContestRegistrationRequest,
     StudentContestRegistrationResponse,
-    StudentLeaveTeamResponse,
     StudentRegisteredContestListResponse,
-    StudentTeamAddMemberRequest,
-    StudentTeamAddMemberResponse,
-    StudentTeamCreateAndJoinResponse,
-    StudentTeamCreateRequest,
-    StudentTeamJoinRequest,
-    StudentTeamJoinResponse,
-    StudentTeamListResponse,
-    StudentTeamRemoveMemberResponse,
-    StudentTeamResponse,
 } from "../model";
 
 import { axiosWithAuth } from "../../../lib/api-client";
@@ -165,210 +151,6 @@ Returns:
             data: studentContestRegistrationRequest,
         });
     };
-    /**
- * Get all teams student is a member of.
-
-Args:
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-    limit: Pagination limit
-    offset: Pagination offset
-
-Returns:
-    List of teams
- * @summary List my teams
- */
-    const getMyTeamsApiV1StudentsTeamsGet = (params?: GetMyTeamsApiV1StudentsTeamsGetParams) => {
-        return axiosWithAuth<StudentTeamListResponse>({
-            url: `/api/v1/students/teams`,
-            method: "GET",
-            params,
-        });
-    };
-    /**
- * Create a new team and join it.
-
-Only for public contests.
-
-Args:
-    request: Team creation request
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-
-Returns:
-    Created team details
- * @summary Create and join team
- */
-    const createAndJoinTeamApiV1StudentsTeamsPost = (
-        studentTeamCreateRequest: StudentTeamCreateRequest,
-    ) => {
-        return axiosWithAuth<StudentTeamCreateAndJoinResponse>({
-            url: `/api/v1/students/teams`,
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            data: studentTeamCreateRequest,
-        });
-    };
-    /**
- * Get team details including members.
-
-Args:
-    team_id: Team UUID
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-
-Returns:
-    Team details with member list
- * @summary Get team details
- */
-    const getTeamDetailsApiV1StudentsTeamsTeamIdGet = (teamId: string) => {
-        return axiosWithAuth<StudentTeamResponse>({
-            url: `/api/v1/students/teams/${teamId}`,
-            method: "GET",
-        });
-    };
-    /**
- * Get teams available to join in a contest.
-
-Teams must have available slots.
-
-Args:
-    contest_id: Contest UUID
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-    limit: Pagination limit
-    offset: Pagination offset
-
-Returns:
-    List of available teams
- * @summary Get available teams to join
- */
-    const getAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGet = (
-        contestId: string,
-        params?: GetAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGetParams,
-    ) => {
-        return axiosWithAuth<StudentTeamListResponse>({
-            url: `/api/v1/students/teams/contests/${contestId}/available`,
-            method: "GET",
-            params,
-        });
-    };
-    /**
- * Join an existing team.
-
-Args:
-    team_id: Team UUID to join
-    request: Join request
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-
-Returns:
-    Join confirmation
- * @summary Join existing team
- */
-    const joinTeamApiV1StudentsTeamsTeamIdJoinPost = (
-        teamId: string,
-        studentTeamJoinRequest: StudentTeamJoinRequest,
-    ) => {
-        return axiosWithAuth<StudentTeamJoinResponse>({
-            url: `/api/v1/students/teams/${teamId}/join`,
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            data: studentTeamJoinRequest,
-        });
-    };
-    /**
- * Leave a team.
-
-Args:
-    team_id: Team UUID to leave
-    user_id: Current authenticated user
-    service: StudentTeamService instance
-
-Returns:
-    Leave confirmation
- * @summary Leave team
- */
-    const leaveTeamApiV1StudentsTeamsTeamIdLeavePost = (teamId: string) => {
-        return axiosWithAuth<StudentLeaveTeamResponse>({
-            url: `/api/v1/students/teams/${teamId}/leave`,
-            method: "POST",
-        });
-    };
-    /**
- * Add members to team (leader only).
-
-Only the team leader can add new members. Follows the same strategy as
-the regular team endpoints.
-
-All member additions are assumed to be within the student's current contest context.
-The method determines the contest from the team's relationship.
-
-Args:
-    team_id: Team UUID
-    request: Add members request with list of user_ids
-    user_id: Current authenticated user (must be leader)
-    service: StudentTeamService instance
-
-Returns:
-    Updated team members list and confirmation
-
-Raises:
-    PermissionDenied: If user is not the team leader
-    TeamNotFound: If team does not exist
-    UserNotFound: If any user IDs don't exist
-    InvalidTeamSize: If adding members would exceed team size limit
- * @summary Add members to team (leader only)
- */
-    const addMemberToTeamApiV1StudentsTeamsTeamIdMembersPost = (
-        teamId: string,
-        studentTeamAddMemberRequest: StudentTeamAddMemberRequest,
-    ) => {
-        return axiosWithAuth<StudentTeamAddMemberResponse>({
-            url: `/api/v1/students/teams/${teamId}/members`,
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            data: studentTeamAddMemberRequest,
-        });
-    };
-    /**
- * Remove a member from team (leader only).
-
-Args:
-    team_id: Team UUID
-    member_id: Member UUID to remove
-    user_id: Current authenticated user (must be leader)
-    service: StudentTeamService instance
-
-Returns:
-    Removal confirmation
- * @summary Remove member from team (leader only)
- */
-    const removeMemberFromTeamApiV1StudentsTeamsTeamIdMembersMemberIdDelete = (
-        teamId: string,
-        memberId: string,
-    ) => {
-        return axiosWithAuth<StudentTeamRemoveMemberResponse>({
-            url: `/api/v1/students/teams/${teamId}/members/${memberId}`,
-            method: "DELETE",
-        });
-    };
-    /**
-     * Run student code against a single test case for immediate feedback
-     * @summary Test code against a test case
-     */
-    const runStudentCodeApiV1ContestsContestIdQuestionsQuestionIdRunPost = (
-        contestId: string,
-        questionId: string,
-        studentCodeRunRequest: StudentCodeRunRequest,
-    ) => {
-        return axiosWithAuth<StudentCodeRunResponse>({
-            url: `/api/v1/contests/${contestId}/questions/${questionId}/run`,
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            data: studentCodeRunRequest,
-        });
-    };
     return {
         getAvailableContestsApiV1StudentsContestsGet,
         getRegisteredContestsApiV1StudentsContestsRegisteredGet,
@@ -376,15 +158,6 @@ Returns:
         getContestDetailsApiV1StudentsContestsContestIdGet,
         getContestProblemsApiV1StudentsContestsContestIdProblemsGet,
         registerForContestApiV1StudentsContestsContestIdRegisterPost,
-        getMyTeamsApiV1StudentsTeamsGet,
-        createAndJoinTeamApiV1StudentsTeamsPost,
-        getTeamDetailsApiV1StudentsTeamsTeamIdGet,
-        getAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGet,
-        joinTeamApiV1StudentsTeamsTeamIdJoinPost,
-        leaveTeamApiV1StudentsTeamsTeamIdLeavePost,
-        addMemberToTeamApiV1StudentsTeamsTeamIdMembersPost,
-        removeMemberFromTeamApiV1StudentsTeamsTeamIdMembersMemberIdDelete,
-        runStudentCodeApiV1ContestsContestIdQuestionsQuestionIdRunPost,
     };
 };
 export type GetAvailableContestsApiV1StudentsContestsGetResult = NonNullable<
@@ -428,57 +201,6 @@ export type RegisterForContestApiV1StudentsContestsContestIdRegisterPostResult =
             ReturnType<
                 typeof getStudents
             >["registerForContestApiV1StudentsContestsContestIdRegisterPost"]
-        >
-    >
->;
-export type GetMyTeamsApiV1StudentsTeamsGetResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getStudents>["getMyTeamsApiV1StudentsTeamsGet"]>>
->;
-export type CreateAndJoinTeamApiV1StudentsTeamsPostResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getStudents>["createAndJoinTeamApiV1StudentsTeamsPost"]>>
->;
-export type GetTeamDetailsApiV1StudentsTeamsTeamIdGetResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getStudents>["getTeamDetailsApiV1StudentsTeamsTeamIdGet"]>>
->;
-export type GetAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGetResult = NonNullable<
-    Awaited<
-        ReturnType<
-            ReturnType<
-                typeof getStudents
-            >["getAvailableTeamsApiV1StudentsTeamsContestsContestIdAvailableGet"]
-        >
-    >
->;
-export type JoinTeamApiV1StudentsTeamsTeamIdJoinPostResult = NonNullable<
-    Awaited<ReturnType<ReturnType<typeof getStudents>["joinTeamApiV1StudentsTeamsTeamIdJoinPost"]>>
->;
-export type LeaveTeamApiV1StudentsTeamsTeamIdLeavePostResult = NonNullable<
-    Awaited<
-        ReturnType<ReturnType<typeof getStudents>["leaveTeamApiV1StudentsTeamsTeamIdLeavePost"]>
-    >
->;
-export type AddMemberToTeamApiV1StudentsTeamsTeamIdMembersPostResult = NonNullable<
-    Awaited<
-        ReturnType<
-            ReturnType<typeof getStudents>["addMemberToTeamApiV1StudentsTeamsTeamIdMembersPost"]
-        >
-    >
->;
-export type RemoveMemberFromTeamApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResult = NonNullable<
-    Awaited<
-        ReturnType<
-            ReturnType<
-                typeof getStudents
-            >["removeMemberFromTeamApiV1StudentsTeamsTeamIdMembersMemberIdDelete"]
-        >
-    >
->;
-export type RunStudentCodeApiV1ContestsContestIdQuestionsQuestionIdRunPostResult = NonNullable<
-    Awaited<
-        ReturnType<
-            ReturnType<
-                typeof getStudents
-            >["runStudentCodeApiV1ContestsContestIdQuestionsQuestionIdRunPost"]
         >
     >
 >;

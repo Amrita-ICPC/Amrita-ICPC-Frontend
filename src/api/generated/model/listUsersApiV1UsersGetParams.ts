@@ -7,7 +7,7 @@
  */
 import type { UserRole } from "./userRole";
 
-export type ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams = {
+export type ListUsersApiV1UsersGetParams = {
     /**
      * Page number (starts from 1)
      * @minimum 1
@@ -20,11 +20,11 @@ export type ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams = {
      */
     page_size?: number;
     /**
-     * Optional search by name, email, or phone number
-     */
-    q?: string | null;
-    /**
-     * Optional role filter
+     * Filter by user role
      */
     role?: UserRole | null;
+    /**
+     * Search by name, email, or phone number
+     */
+    q?: string | null;
 };

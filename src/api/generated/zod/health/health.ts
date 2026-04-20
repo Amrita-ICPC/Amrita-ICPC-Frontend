@@ -12,3 +12,9 @@ import * as zod from "zod";
  * @summary Health Check
  */
 export const HealthCheckApiHealthGetResponse = zod.unknown();
+
+/**
+ * Execute a system health check monitored against active database connections natively.
+ * @summary Health Check
+ */
+export const HealthCheckApiV1HealthHealthGetResponse = zod.unknown();

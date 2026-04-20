@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { AudienceBasicInfo } from "./audienceBasicInfo";
 import type { UserRole } from "./userRole";
 
 export interface UserResponse {
@@ -18,4 +19,5 @@ export interface UserResponse {
     dob?: string | null;
     created_at: string;
     last_updated: string;
+    audience_links?: AudienceBasicInfo[];
 }
