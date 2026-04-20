@@ -261,7 +261,7 @@ export function useAddAudienceUsers() {
                 queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
             });
             queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.refetchQueries({ queryKey: userKeys.all });
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
         },
     });
 }
@@ -294,7 +294,7 @@ export function useRemoveAudienceUsers() {
                 queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
             });
             queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.refetchQueries({ queryKey: userKeys.all });
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
         },
     });
 }
@@ -328,7 +328,7 @@ export function useAddAudienceUsersByEmail() {
                 queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
             });
             queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.refetchQueries({ queryKey: userKeys.all });
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
         },
     });
 }

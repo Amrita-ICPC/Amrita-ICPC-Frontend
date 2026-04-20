@@ -15,7 +15,10 @@ export default async function AudienceDetailsPage(props: {
 
     const initialPage = parsePage(resolvedParams?.page, 1);
     const initialPageSize = parsePageSize(resolvedParams?.page_size, 10);
-    const initialRole = getSingleValue(resolvedParams?.role) ?? "all";
+    const roleParam = getSingleValue(resolvedParams?.role);
+    const initialRole = ["student", "instructor", "manager", "admin"].includes(roleParam ?? "")
+        ? roleParam!
+        : "all";
 
     return (
         <AuthGuard requiredGroups={[UserType.ADMIN]} fallbackComponent={<AccessDenied />}>

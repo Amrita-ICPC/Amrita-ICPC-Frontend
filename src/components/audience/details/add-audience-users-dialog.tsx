@@ -56,11 +56,24 @@ export function AddAudienceUsersDialog({
     const [page, setPage] = useState(1);
     const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
 
+    const resetDialogState = () => {
+        setSelectedUsers(new Set());
+        setLocalSearch("");
+        setRoleFilter("all");
+        setPage(1);
+    };
+
+    const handleOpenChange = (open: boolean) => {
+        if (!open) resetDialogState();
+        onOpenChange(open);
+    };
+
     const {
         data: usersResponse,
         isLoading,
         isError,
         error,
+        refetch,
     } = useUsers({
         page,
         page_size: 5,
@@ -121,7 +134,7 @@ export function AddAudienceUsersDialog({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden shadow-2xl rounded-xl border-border bg-background">
                 <DialogHeader className="px-6 py-6 pb-4">
                     <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
@@ -227,7 +240,10 @@ export function AddAudienceUsersDialog({
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => setPage(1)}
+                                                    onClick={() => {
+                                                        setPage(1);
+                                                        void refetch();
+                                                    }}
                                                     className="mt-2 h-8"
                                                 >
                                                     Retry
@@ -350,7 +366,7 @@ export function AddAudienceUsersDialog({
                         <Button
                             variant="ghost"
                             className="font-medium hover:bg-muted/50"
-                            onClick={() => onOpenChange(false)}
+                            onClick={() => handleOpenChange(false)}
                         >
                             Cancel
                         </Button>

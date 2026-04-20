@@ -31,7 +31,17 @@ export function ConfirmBulkUploadDialog({
     onCancel,
 }: ConfirmBulkUploadDialogProps) {
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (isPending) return;
+                if (!open) {
+                    onCancel();
+                    return;
+                }
+                onOpenChange(open);
+            }}
+        >
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Confirm Bulk Addition</DialogTitle>
