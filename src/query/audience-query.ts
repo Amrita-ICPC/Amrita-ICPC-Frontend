@@ -227,8 +227,9 @@ export function useDeleteAudience() {
 
     return useMutation({
         mutationFn: deleteAudience,
-        onSuccess: () => {
+        onSuccess: (_data, audienceId) => {
             queryClient.invalidateQueries({ queryKey: audienceKeys.all });
+            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(audienceId) });
         },
     });
 }

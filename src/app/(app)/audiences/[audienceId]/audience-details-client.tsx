@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, UserPlus } from "lucide-react";
+import { Pencil, Trash2, Upload, UserPlus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { UserRole } from "@/api/generated/model";
+import { AudienceDeleteDialog } from "@/components/audience/audience-delete-dialog";
+import { AudienceEditDialog } from "@/components/audience/audience-edit-dialog";
 import { Button } from "@/components/ui/button";
 import { AudienceDetailsHeader } from "@/components/audience/details/audience-details-header";
 import { AudienceStatsGrid } from "@/components/audience/details/audience-stats-grid";
@@ -21,6 +23,7 @@ import {
     useAudienceUsers,
     useRemoveAudienceUsers,
     useAddAudienceUsersByEmail,
+    useDeleteAudience,
 } from "@/query/audience-query";
 
 const USER_ROLES = ["student", "instructor", "manager", "admin"] as const;
@@ -77,6 +80,9 @@ export function AudienceDetailsClient({
 
     const removeUsersMutation = useRemoveAudienceUsers();
     const addUsersByEmailMutation = useAddAudienceUsersByEmail();
+    const deleteAudienceMutation = useDeleteAudience();
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     const audience = audienceQuery.data;
     const usersResponse = usersQuery.data?.data;
@@ -140,7 +146,7 @@ export function AudienceDetailsClient({
             }
             setParsedEmails(emails);
             setIsConfirmingUpload(true);
-        } catch (_error) {
+        } catch {
             toast("Failed to parse file.");
             setSelectedFileName(null);
             setParsedEmails(null);
@@ -211,12 +217,41 @@ export function AudienceDetailsClient({
         }
     }
 
+    async function onConfirmDeleteAudience() {
+        try {
+            await deleteAudienceMutation.mutateAsync(audienceId);
+            toast("Audience deleted");
+            router.push("/audiences");
+            router.refresh();
+        } catch (error) {
+            const apiError = toApiError(error);
+            toast(apiError.detail ?? apiError.message ?? "Failed to delete audience");
+        } finally {
+            setIsDeleteOpen(false);
+        }
+    }
+
     return (
         <div className="flex h-full flex-col space-y-6 p-8">
             <AddAudienceUsersDialog
                 audienceId={audienceId}
                 isOpen={isAddUsersOpen}
                 onOpenChange={setIsAddUsersOpen}
+            />
+
+            <AudienceDeleteDialog
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                audienceName={audience?.name}
+                isPending={deleteAudienceMutation.isPending}
+                onConfirm={onConfirmDeleteAudience}
+            />
+
+            <AudienceEditDialog
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                audienceId={audienceId}
+                audience={audience ?? null}
             />
 
             <AudienceDetailsHeader
@@ -235,6 +270,15 @@ export function AudienceDetailsClient({
                         />
 
                         <div className="flex flex-wrap items-center justify-end gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsEditOpen(true)}
+                                disabled={audienceQuery.isLoading || !audience}
+                            >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                            </Button>
                             <Button type="button" variant="outline" onClick={onAddUsers}>
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Add Users
@@ -243,6 +287,16 @@ export function AudienceDetailsClient({
                             <Button type="button" onClick={onPickFile}>
                                 <Upload className="mr-2 h-4 w-4" />
                                 Upload CSV/Excel
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={() => setIsDeleteOpen(true)}
+                                disabled={deleteAudienceMutation.isPending}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
                             </Button>
                         </div>
 

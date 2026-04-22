@@ -1,12 +1,18 @@
 "use client";
 
-import { UsersRound } from "lucide-react";
+import { Pencil, Trash2, UsersRound } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import type { AudienceResponse } from "@/api/generated/model";
+import { AudienceDeleteDialog } from "@/components/audience/audience-delete-dialog";
+import { AudienceEditDialog } from "@/components/audience/audience-edit-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { useDeleteAudience } from "@/query/audience-query";
+import { toast } from "@/lib/hooks/use-toast";
+import { toApiError } from "@/lib/api/error";
 
 function formatAudienceType(value: string) {
     return value.replace(/_/g, " ").toUpperCase();
@@ -49,9 +55,39 @@ export function AudienceCard({ audience }: { audience: AudienceResponse }) {
         audience.audience_type ? String(audience.audience_type) : null,
     );
 
+    const deleteMutation = useDeleteAudience();
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+
+    async function onConfirmDelete() {
+        try {
+            await deleteMutation.mutateAsync(audience.id);
+            toast(`Deleted audience: ${audience.name}`);
+            setIsDeleteOpen(false);
+        } catch (error) {
+            const apiError = toApiError(error);
+            toast(apiError.detail ?? apiError.message ?? "Failed to delete audience");
+        }
+    }
+
     return (
         <Card className="group relative flex h-full flex-col gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/20 focus-within:ring-2 focus-within:ring-ring/50">
             <div className={`absolute inset-x-0 top-0 h-1 ${styles.accent}`} />
+
+            <AudienceDeleteDialog
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                audienceName={audience.name}
+                isPending={deleteMutation.isPending}
+                onConfirm={onConfirmDelete}
+            />
+
+            <AudienceEditDialog
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                audienceId={audience.id}
+                audience={audience}
+            />
 
             <CardHeader className="p-4 pb-2">
                 <div className="flex items-start justify-between gap-3">
@@ -111,12 +147,35 @@ export function AudienceCard({ audience }: { audience: AudienceResponse }) {
             </CardContent>
 
             <CardFooter className="mt-auto p-4 pt-0">
-                <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href={`/audiences/${audience.id}`}>
-                        <UsersRound className="mr-2 h-3.5 w-3.5" />
-                        View Users
-                    </Link>
-                </Button>
+                <div className="flex w-full items-center gap-2">
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                        <Link href={`/audiences/${audience.id}`}>
+                            <UsersRound className="mr-2 h-3.5 w-3.5" />
+                            View Users
+                        </Link>
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => setIsEditOpen(true)}
+                        aria-label="Edit audience"
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => setIsDeleteOpen(true)}
+                        disabled={deleteMutation.isPending}
+                        aria-label="Delete audience"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
             </CardFooter>
         </Card>
     );
