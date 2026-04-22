@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Users, ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, Calendar, Clock3, Lock, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -21,6 +21,12 @@ import { Roles } from "@/lib/auth/utils";
 import { toApiError } from "@/lib/api/error";
 import { useSoftDeleteContest } from "@/query/contest-query";
 import type { ContestSummaryResponse } from "@/api/generated/model";
+import {
+    formatContestDateTime,
+    formatContestLabel,
+    getContestStatusBadgeClass,
+    isAllowedContestImage,
+} from "./contest-util";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -130,19 +136,6 @@ function ContestFallbackBanner({ id, name }: { id: string; name: string }) {
 
 // ─── Status colours ───────────────────────────────────────────────────────────
 
-function getStatusColor(status: string): string {
-    switch (status) {
-        case "RUNNING":
-            return "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20";
-        case "SCHEDULED":
-            return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
-        case "FINISHED":
-            return "bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20";
-        default:
-            return "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20";
-    }
-}
-
 // ─── ContestCard ─────────────────────────────────────────────────────────────
 
 interface ContestCardProps {
@@ -170,19 +163,12 @@ export function ContestCard({ contest }: ContestCardProps) {
         });
     }
 
-    const startDate = new Date(contest.start_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
-    const endDate = new Date(contest.end_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    const startDate = formatContestDateTime(contest.start_time);
+    const endDate = formatContestDateTime(contest.end_time);
+    const createdAt = formatContestDateTime(contest.created_at);
 
     // Use onError to handle any broken/invalid/unconfigured URL silently.
-    const showImage = !!contest.image && !imageError;
+    const showImage = isAllowedContestImage(contest.image) && !imageError;
 
     return (
         <>
@@ -229,22 +215,33 @@ export function ContestCard({ contest }: ContestCardProps) {
                     ) : (
                         <ContestFallbackBanner id={contest.id} name={contest.name} />
                     )}
-
-                    <div className="absolute right-3 top-3">
-                        <Badge
-                            variant="outline"
-                            className={`border-transparent backdrop-blur-md font-semibold tracking-wide ${getStatusColor(String(contest.status))}`}
-                        >
-                            {String(contest.status).replace("_", " ")}
-                        </Badge>
-                    </div>
                 </div>
 
-                <CardHeader className="p-5 pb-3">
+                <CardHeader className="p-4 pb-2">
                     <div className="flex items-start justify-between gap-3">
-                        <h3 className="line-clamp-1 text-xl font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors">
-                            {contest.name}
-                        </h3>
+                        <div className="space-y-3">
+                            <div>
+                                <h3 className="line-clamp-1 text-xl font-bold tracking-tight text-foreground/90 transition-colors group-hover:text-primary">
+                                    {contest.name}
+                                </h3>
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <Badge
+                                        variant="outline"
+                                        className={`border-transparent font-semibold tracking-wide ${getContestStatusBadgeClass(String(contest.status))}`}
+                                    >
+                                        {formatContestLabel(String(contest.status))}
+                                    </Badge>
+                                    <Badge variant="secondary" className="gap-1.5">
+                                        {contest.is_public ? (
+                                            <ShieldCheck className="h-3.5 w-3.5" />
+                                        ) : (
+                                            <Lock className="h-3.5 w-3.5" />
+                                        )}
+                                        {contest.is_public ? "Public" : "Restricted"}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </div>
 
                         <AuthGuard requiredRoles={[Roles.CONTEST_DELETE]} fallbackComponent={null}>
                             <Tooltip>
@@ -273,29 +270,65 @@ export function ContestCard({ contest }: ContestCardProps) {
                     </p>
                 </CardHeader>
 
-                <CardContent className="flex-1 px-5 py-2">
-                    <div className="flex flex-col gap-3 text-sm font-medium text-muted-foreground/90">
-                        <div className="flex items-center gap-2.5">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <Calendar className="h-4 w-4" />
+                <CardContent className="flex-1 px-4 py-2">
+                    <div className="space-y-3">
+                        <div className="rounded-lg border bg-muted/20 p-3">
+                            <div className="flex flex-col gap-2 text-sm">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Calendar className="h-4 w-4 text-primary" />
+                                    <span className="font-medium text-foreground">Start:</span>
+                                    <span className="truncate">{startDate}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Clock3 className="h-4 w-4 text-primary" />
+                                    <span className="font-medium text-foreground">End:</span>
+                                    <span className="truncate">{endDate}</span>
+                                </div>
+                                <div className="mt-1 flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline" className="border-border/60">
+                                        {formatContestLabel(String(contest.team_approval_mode))}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                        Created {createdAt}
+                                    </span>
+                                </div>
                             </div>
-                            <span>
-                                {startDate} <span className="opacity-50 mx-1">—</span> {endDate}
-                            </span>
                         </div>
-                        <div className="flex items-center gap-2.5">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <Users className="h-4 w-4" />
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    Audiences
+                                </p>
+                                {contest.audiences?.length ? (
+                                    <Badge variant="secondary" className="px-2 py-0.5 text-xs">
+                                        {contest.audiences.length}
+                                    </Badge>
+                                ) : null}
                             </div>
-                            <span className="capitalize">
-                                {String(contest.team_approval_mode).replace("_", " ").toLowerCase()}{" "}
-                                Teams
-                            </span>
+                            <div className="flex flex-wrap gap-2">
+                                {contest.audiences && contest.audiences.length > 0 ? (
+                                    contest.audiences.map((audience) => (
+                                        <Badge
+                                            key={audience.id}
+                                            variant="secondary"
+                                            className="max-w-full gap-1.5"
+                                        >
+                                            <span className="truncate">{audience.name}</span>
+                                            <span className="text-muted-foreground">
+                                                {formatContestLabel(String(audience.audience_type))}
+                                            </span>
+                                        </Badge>
+                                    ))
+                                ) : (
+                                    <Badge variant="outline">No linked audiences</Badge>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </CardContent>
 
-                <CardFooter className="p-5 pt-4 border-t border-border/40">
+                <CardFooter className="p-4 pt-3 border-t border-border/40">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button

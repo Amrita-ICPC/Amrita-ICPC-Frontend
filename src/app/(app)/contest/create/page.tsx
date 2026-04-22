@@ -16,7 +16,7 @@ export default async function CreateContestPage() {
     }
 
     return (
-        <div className="flex h-full flex-col gap-6 p-8">
+        <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 p-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Create Contest</h1>
                 <p className="text-muted-foreground">

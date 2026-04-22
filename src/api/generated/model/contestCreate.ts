@@ -44,4 +44,6 @@ export interface ContestCreate {
     scoring_type?: ScoringType;
     /** How teams are approved in this contest */
     team_approval_mode?: TeamApprovalMode;
+    /** List of audience IDs to link to this contest */
+    audience_ids?: string[];
 }

@@ -8,6 +8,7 @@
 import type {
     APIResponse,
     APIResponseContestDetailResponse,
+    APIResponseListContestAudienceResponse,
     APIResponseListContestQuestionResponse,
     APIResponseListContestSummaryResponse,
     APIResponseListInstructorResponse,
@@ -18,6 +19,7 @@ import type {
     AddQuestionAllowedLanguagesRequest,
     AddQuestionTemplatesRequest,
     AddQuestionTestCasesRequest,
+    ContestAudienceManageRequest,
     ContestCreate,
     ContestUpdate,
     GetAllContestsApiV1ContestsGetParams,
@@ -524,6 +526,75 @@ Raises:
         });
     };
     /**
+ * Assign audiences to a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    audience_request (ContestAudienceManageRequest): Request containing audience IDs.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Assign audiences to contest
+ */
+    const assignAudiencesToContestApiV1ContestsContestIdAudiencesPost = (
+        contestId: string,
+        contestAudienceManageRequest: ContestAudienceManageRequest,
+    ) => {
+        return axiosWithAuth<APIResponse>({
+            url: `/api/v1/contests/${contestId}/audiences`,
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            data: contestAudienceManageRequest,
+        });
+    };
+    /**
+ * Remove audiences from a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    audience_request (ContestAudienceManageRequest): Request containing audience IDs to remove.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Remove audiences from contest
+ */
+    const removeAudiencesFromContestApiV1ContestsContestIdAudiencesDelete = (
+        contestId: string,
+        contestAudienceManageRequest: ContestAudienceManageRequest,
+    ) => {
+        return axiosWithAuth<APIResponse>({
+            url: `/api/v1/contests/${contestId}/audiences`,
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            data: contestAudienceManageRequest,
+        });
+    };
+    /**
+ * Get audiences for a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: List of audiences for the contest.
+ * @summary Get contest audiences
+ */
+    const getContestAudiencesApiV1ContestsContestIdAudiencesGet = (contestId: string) => {
+        return axiosWithAuth<APIResponseListContestAudienceResponse>({
+            url: `/api/v1/contests/${contestId}/audiences`,
+            method: "GET",
+        });
+    };
+    /**
      * Update metadata fields of a question linked to a contest.
      * @summary Update contest question metadata
      */
@@ -743,6 +814,9 @@ Raises:
         assignInstructorsToContestApiV1ContestsContestIdInstructorsPost,
         removeInstructorsFromContestApiV1ContestsContestIdInstructorsDelete,
         getContestInstructorsApiV1ContestsContestIdInstructorsGet,
+        assignAudiencesToContestApiV1ContestsContestIdAudiencesPost,
+        removeAudiencesFromContestApiV1ContestsContestIdAudiencesDelete,
+        getContestAudiencesApiV1ContestsContestIdAudiencesGet,
         updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch,
         addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost,
         removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete,
@@ -856,6 +930,31 @@ export type GetContestInstructorsApiV1ContestsContestIdInstructorsGetResult = No
             ReturnType<
                 typeof getContests
             >["getContestInstructorsApiV1ContestsContestIdInstructorsGet"]
+        >
+    >
+>;
+export type AssignAudiencesToContestApiV1ContestsContestIdAudiencesPostResult = NonNullable<
+    Awaited<
+        ReturnType<
+            ReturnType<
+                typeof getContests
+            >["assignAudiencesToContestApiV1ContestsContestIdAudiencesPost"]
+        >
+    >
+>;
+export type RemoveAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResult = NonNullable<
+    Awaited<
+        ReturnType<
+            ReturnType<
+                typeof getContests
+            >["removeAudiencesFromContestApiV1ContestsContestIdAudiencesDelete"]
+        >
+    >
+>;
+export type GetContestAudiencesApiV1ContestsContestIdAudiencesGetResult = NonNullable<
+    Awaited<
+        ReturnType<
+            ReturnType<typeof getContests>["getContestAudiencesApiV1ContestsContestIdAudiencesGet"]
         >
     >
 >;

@@ -88,6 +88,10 @@ export const CreateContestApiV1ContestsPostBody = zod
             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
             .default(createContestApiV1ContestsPostBodyTeamApprovalModeDefault)
             .describe("How teams are approved in this contest"),
+        audience_ids: zod
+            .array(zod.uuid())
+            .optional()
+            .describe("List of audience IDs to link to this contest"),
     })
     .describe("Schema for creating a contest.");
 
@@ -189,6 +193,20 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
                         team_approval_mode: zod
                             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
                             .describe("How teams are approved in this contest"),
+                        audiences: zod
+                            .array(
+                                zod
+                                    .object({
+                                        id: zod.uuid().describe("Audience ID"),
+                                        name: zod.string().describe("Audience name"),
+                                        audience_type: zod
+                                            .enum(["class", "department", "batch", "campus"])
+                                            .describe("Audience type"),
+                                    })
+                                    .describe("Schema for audience information within a contest."),
+                            )
+                            .optional()
+                            .describe("List of audiences linked to this contest"),
                     })
                     .describe("Schema for contest summary response (List view)."),
             ),
@@ -307,6 +325,20 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
                         team_approval_mode: zod
                             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
                             .describe("How teams are approved in this contest"),
+                        audiences: zod
+                            .array(
+                                zod
+                                    .object({
+                                        id: zod.uuid().describe("Audience ID"),
+                                        name: zod.string().describe("Audience name"),
+                                        audience_type: zod
+                                            .enum(["class", "department", "batch", "campus"])
+                                            .describe("Audience type"),
+                                    })
+                                    .describe("Schema for audience information within a contest."),
+                            )
+                            .optional()
+                            .describe("List of audiences linked to this contest"),
                     })
                     .describe("Schema for contest summary response (List view)."),
             ),
@@ -1797,6 +1829,194 @@ export const GetContestInstructorsApiV1ContestsContestIdInstructorsGetResponse =
                         created_at: zod.iso.datetime({}).describe("Account creation time (UTC)"),
                     })
                     .describe("Schema for instructor response."),
+            ),
+            zod.null(),
+        ])
+        .optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
+ * Assign audiences to a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    audience_request (ContestAudienceManageRequest): Request containing audience IDs.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Assign audiences to contest
+ */
+export const AssignAudiencesToContestApiV1ContestsContestIdAudiencesPostParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const AssignAudiencesToContestApiV1ContestsContestIdAudiencesPostBody = zod
+    .object({
+        audience_ids: zod.array(zod.uuid()).describe("List of audience IDs to assign or remove"),
+    })
+    .describe("Schema for managing audiences in a contest.");
+
+export const assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseSuccessDefault = true;
+export const assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseStatusDefault = 200;
+export const assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseMessageDefault = `Success`;
+
+export const AssignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseSuccessDefault),
+    status: zod
+        .number()
+        .default(assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseStatusDefault),
+    message: zod
+        .string()
+        .default(assignAudiencesToContestApiV1ContestsContestIdAudiencesPostResponseMessageDefault),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
+ * Remove audiences from a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    audience_request (ContestAudienceManageRequest): Request containing audience IDs to remove.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Remove audiences from contest
+ */
+export const RemoveAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const RemoveAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteBody = zod
+    .object({
+        audience_ids: zod.array(zod.uuid()).describe("List of audience IDs to assign or remove"),
+    })
+    .describe("Schema for managing audiences in a contest.");
+
+export const removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseSuccessDefault = true;
+export const removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseStatusDefault = 200;
+export const removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseMessageDefault = `Success`;
+
+export const RemoveAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(
+            removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseSuccessDefault,
+        ),
+    status: zod
+        .number()
+        .default(
+            removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseStatusDefault,
+        ),
+    message: zod
+        .string()
+        .default(
+            removeAudiencesFromContestApiV1ContestsContestIdAudiencesDeleteResponseMessageDefault,
+        ),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
+ * Get audiences for a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: List of audiences for the contest.
+ * @summary Get contest audiences
+ */
+export const GetContestAudiencesApiV1ContestsContestIdAudiencesGetParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseSuccessDefault = true;
+export const getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseStatusDefault = 200;
+export const getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseMessageDefault = `Success`;
+
+export const GetContestAudiencesApiV1ContestsContestIdAudiencesGetResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseSuccessDefault),
+    status: zod
+        .number()
+        .default(getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseStatusDefault),
+    message: zod
+        .string()
+        .default(getContestAudiencesApiV1ContestsContestIdAudiencesGetResponseMessageDefault),
+    data: zod
+        .union([
+            zod.array(
+                zod
+                    .object({
+                        id: zod.uuid().describe("Audience ID"),
+                        name: zod.string().describe("Audience name"),
+                        audience_type: zod
+                            .enum(["class", "department", "batch", "campus"])
+                            .describe("Audience type"),
+                    })
+                    .describe("Schema for audience information within a contest."),
             ),
             zod.null(),
         ])

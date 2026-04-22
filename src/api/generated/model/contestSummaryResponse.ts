@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ContestAudienceResponse } from "./contestAudienceResponse";
 import type { ContestStatus } from "./contestStatus";
 import type { TeamApprovalMode } from "./teamApprovalMode";
 
@@ -32,4 +33,6 @@ export interface ContestSummaryResponse {
     is_public: boolean;
     /** How teams are approved in this contest */
     team_approval_mode: TeamApprovalMode;
+    /** List of audiences linked to this contest */
+    audiences?: ContestAudienceResponse[];
 }

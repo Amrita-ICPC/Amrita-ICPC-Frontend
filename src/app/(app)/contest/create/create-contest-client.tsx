@@ -36,6 +36,9 @@ import type { ImageUploadResponse } from "@/api/generated/model";
 import { useCreateContest, useUploadContestImage } from "@/query/contest-query";
 import { toApiError } from "@/lib/api/error";
 import { toast } from "@/lib/hooks/use-toast";
+import { ContestSummaryCard } from "../../../../components/contest/contest-summary-card";
+import { ContestActionBar } from "@/components/contest/contest-action-bar";
+import { AudienceSelectorCard } from "@/components/contest/audience-selector-card";
 
 function pad2(value: number) {
     return String(value).padStart(2, "0");
@@ -73,6 +76,7 @@ const formSchema = z
         team_approval_mode: z
             .enum([TeamApprovalMode.AUTO_APPROVE, TeamApprovalMode.INSTRUCTOR_REVIEW])
             .optional(),
+        audience_ids: z.array(z.string()).optional(),
     })
     .refine(
         (values) => {
@@ -139,11 +143,17 @@ export function CreateContestClient() {
             rules: "",
             scoring_type: ScoringType.AUTO,
             team_approval_mode: TeamApprovalMode.AUTO_APPROVE,
+            audience_ids: [],
         },
         mode: "onTouched",
     });
 
     const imageUrl = useWatch({ control, name: "image" }) ?? null;
+    const watchedName = useWatch({ control, name: "name" }) ?? "";
+    const watchedIsPublic = useWatch({ control, name: "is_public" });
+    const watchedStartTime = useWatch({ control, name: "start_time" });
+    const watchedEndTime = useWatch({ control, name: "end_time" });
+    const watchedAudienceIds = useWatch({ control, name: "audience_ids" }) ?? [];
 
     const [uploadedImage, setUploadedImage] = useState<ImageUploadResponse | null>(null);
     const uploadImageMutation = useUploadContestImage();
@@ -182,6 +192,7 @@ export function CreateContestClient() {
             rules: values.rules?.trim() ? values.rules.trim() : null,
             scoring_type: values.scoring_type,
             team_approval_mode: values.team_approval_mode,
+            audience_ids: values.audience_ids?.length ? values.audience_ids : undefined,
         };
 
         try {
@@ -223,6 +234,15 @@ export function CreateContestClient() {
             </Dialog>
 
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="lg:col-span-3">
+                    <ContestActionBar
+                        isSubmitting={isSubmitting}
+                        isCreating={createContestMutation.isPending}
+                        isUploadingImage={uploadImageMutation.isPending}
+                        onCancel={() => router.push("/contest")}
+                    />
+                </div>
+
                 <Card className="lg:col-span-2">
                     <CardHeader className="space-y-1">
                         <CardTitle>Contest Details</CardTitle>
@@ -460,7 +480,15 @@ export function CreateContestClient() {
                     </CardContent>
                 </Card>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 lg:sticky lg:top-8 lg:self-start">
+                    <ContestSummaryCard
+                        name={watchedName}
+                        isPublic={watchedIsPublic !== false}
+                        startTime={watchedStartTime}
+                        endTime={watchedEndTime}
+                        audienceCount={watchedAudienceIds.length}
+                    />
+
                     <Card>
                         <CardHeader className="space-y-1">
                             <CardTitle>Visibility</CardTitle>
@@ -578,38 +606,7 @@ export function CreateContestClient() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle>Create</CardTitle>
-                            <CardDescription>Review and submit when ready.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                disabled={
-                                    isSubmitting ||
-                                    createContestMutation.isPending ||
-                                    uploadImageMutation.isPending
-                                }
-                            >
-                                {createContestMutation.isPending ? "Creating…" : "Create contest"}
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                onClick={() => router.push("/contest")}
-                            >
-                                Cancel
-                            </Button>
-                            {createContestMutation.isError ? (
-                                <p className="text-sm text-destructive">
-                                    Creation failed. Try again.
-                                </p>
-                            ) : null}
-                        </CardContent>
-                    </Card>
+                    <AudienceSelectorCard control={control} name="audience_ids" />
                 </div>
             </form>
         </>

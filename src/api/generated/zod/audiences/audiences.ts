@@ -62,8 +62,8 @@ Args:
 Returns:
     Standard APIResponse containing audiences and pagination metadata.
 
-Raises:
-    PermissionDeniedError: If the caller is not an admin.
+Notes:
+    This endpoint is accessible only to administrators.
  * @summary List audiences
  */
 export const listAudiencesApiV1AudiencesGetQueryPageDefault = 1;
@@ -154,6 +154,96 @@ export const ListAudiencesApiV1AudiencesGetResponse = zod.object({
                             .describe("Total number of users"),
                     })
                     .describe("Response payload representing an audience."),
+            ),
+            zod.null(),
+        ])
+        .optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
+ * List audiences available to the current user.
+
+For administrators, this endpoint returns all audiences in the system.
+For non-admin users, it returns only audiences they belong to.
+
+The response objects are intentionally minimal and contain only `id`, `name`,
+and `type`.
+
+Args:
+    request: FastAPI request context.
+    page: Page number (1-indexed).
+    page_size: Page size.
+    q: Optional substring filter applied to audience names.
+    actor_id: Current caller's database user ID.
+    current_user: Authenticated user payload from Keycloak.
+    service: Injected audience service.
+
+Returns:
+    Standard APIResponse containing the audiences and pagination metadata.
+ * @summary List audiences for the current user (brief)
+ */
+export const listUserAudiencesApiV1AudiencesMyGetQueryPageDefault = 1;
+
+export const listUserAudiencesApiV1AudiencesMyGetQueryPageSizeDefault = 10;
+export const listUserAudiencesApiV1AudiencesMyGetQueryPageSizeMax = 100;
+
+export const ListUserAudiencesApiV1AudiencesMyGetQueryParams = zod.object({
+    page: zod
+        .number()
+        .min(1)
+        .default(listUserAudiencesApiV1AudiencesMyGetQueryPageDefault)
+        .describe("Page number (starts from 1)"),
+    page_size: zod
+        .number()
+        .min(1)
+        .max(listUserAudiencesApiV1AudiencesMyGetQueryPageSizeMax)
+        .default(listUserAudiencesApiV1AudiencesMyGetQueryPageSizeDefault)
+        .describe("Number of items per page"),
+    q: zod
+        .union([zod.string(), zod.null()])
+        .optional()
+        .describe("Optional search by audience name"),
+});
+
+export const listUserAudiencesApiV1AudiencesMyGetResponseSuccessDefault = true;
+export const listUserAudiencesApiV1AudiencesMyGetResponseStatusDefault = 200;
+export const listUserAudiencesApiV1AudiencesMyGetResponseMessageDefault = `Success`;
+
+export const ListUserAudiencesApiV1AudiencesMyGetResponse = zod.object({
+    success: zod.boolean().default(listUserAudiencesApiV1AudiencesMyGetResponseSuccessDefault),
+    status: zod.number().default(listUserAudiencesApiV1AudiencesMyGetResponseStatusDefault),
+    message: zod.string().default(listUserAudiencesApiV1AudiencesMyGetResponseMessageDefault),
+    data: zod
+        .union([
+            zod.array(
+                zod
+                    .object({
+                        id: zod.uuid().describe("Audience identifier"),
+                        name: zod.string().describe("Audience name"),
+                        type: zod
+                            .enum(["class", "department", "batch", "campus"])
+                            .describe("Audience type"),
+                    })
+                    .describe(
+                        "Response payload representing a minimal audience object.\n\nAttributes:\n    id: Audience identifier.\n    name: Audience name.\n    type: Audience type.",
+                    ),
             ),
             zod.null(),
         ])

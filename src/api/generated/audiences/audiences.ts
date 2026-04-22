@@ -11,6 +11,7 @@ import type {
     APIResponseAudienceResponse,
     APIResponseAudienceUsersResponse,
     APIResponseInt,
+    APIResponseListAudienceBriefResponse,
     APIResponseListAudienceResponse,
     AudienceCreate,
     AudienceUpdate,
@@ -18,6 +19,7 @@ import type {
     AudienceUsersBulkRequest,
     ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams,
     ListAudiencesApiV1AudiencesGetParams,
+    ListUserAudiencesApiV1AudiencesMyGetParams,
 } from "../model";
 
 import { axiosWithAuth } from "../../../lib/api-client";
@@ -62,13 +64,44 @@ Args:
 Returns:
     Standard APIResponse containing audiences and pagination metadata.
 
-Raises:
-    PermissionDeniedError: If the caller is not an admin.
+Notes:
+    This endpoint is accessible only to administrators.
  * @summary List audiences
  */
     const listAudiencesApiV1AudiencesGet = (params?: ListAudiencesApiV1AudiencesGetParams) => {
         return axiosWithAuth<APIResponseListAudienceResponse>({
             url: `/api/v1/audiences/`,
+            method: "GET",
+            params,
+        });
+    };
+    /**
+ * List audiences available to the current user.
+
+For administrators, this endpoint returns all audiences in the system.
+For non-admin users, it returns only audiences they belong to.
+
+The response objects are intentionally minimal and contain only `id`, `name`,
+and `type`.
+
+Args:
+    request: FastAPI request context.
+    page: Page number (1-indexed).
+    page_size: Page size.
+    q: Optional substring filter applied to audience names.
+    actor_id: Current caller's database user ID.
+    current_user: Authenticated user payload from Keycloak.
+    service: Injected audience service.
+
+Returns:
+    Standard APIResponse containing the audiences and pagination metadata.
+ * @summary List audiences for the current user (brief)
+ */
+    const listUserAudiencesApiV1AudiencesMyGet = (
+        params?: ListUserAudiencesApiV1AudiencesMyGetParams,
+    ) => {
+        return axiosWithAuth<APIResponseListAudienceBriefResponse>({
+            url: `/api/v1/audiences/my`,
             method: "GET",
             params,
         });
@@ -272,6 +305,7 @@ Raises:
     return {
         createAudienceApiV1AudiencesPost,
         listAudiencesApiV1AudiencesGet,
+        listUserAudiencesApiV1AudiencesMyGet,
         getAudienceApiV1AudiencesAudienceIdGet,
         updateAudienceApiV1AudiencesAudienceIdPatch,
         deleteAudienceApiV1AudiencesAudienceIdDelete,
@@ -286,6 +320,9 @@ export type CreateAudienceApiV1AudiencesPostResult = NonNullable<
 >;
 export type ListAudiencesApiV1AudiencesGetResult = NonNullable<
     Awaited<ReturnType<ReturnType<typeof getAudiences>["listAudiencesApiV1AudiencesGet"]>>
+>;
+export type ListUserAudiencesApiV1AudiencesMyGetResult = NonNullable<
+    Awaited<ReturnType<ReturnType<typeof getAudiences>["listUserAudiencesApiV1AudiencesMyGet"]>>
 >;
 export type GetAudienceApiV1AudiencesAudienceIdGetResult = NonNullable<
     Awaited<ReturnType<ReturnType<typeof getAudiences>["getAudienceApiV1AudiencesAudienceIdGet"]>>
