@@ -8,9 +8,9 @@ import { AudienceFilters } from "@/components/audience/audience-filters";
 import { useAudiences } from "@/query/audience-query";
 import type { AudienceType } from "@/api/generated/model";
 import { clampPage, clampPageSize } from "@/lib/utils/pagination";
-import { AudienceGrid } from "./audience-grid";
-import { AudiencePageHeader } from "./audience-page-header";
-import { AudiencePagination } from "./audience-pagination";
+import { AudienceGrid } from "../../../components/audience/audience-grid";
+import { AudiencePageHeader } from "../../../components/audience/audience-page-header";
+import { AudiencePagination } from "../../../components/audience/audience-pagination";
 
 const AUDIENCE_TYPES = ["class", "department", "batch", "campus"] as const;
 

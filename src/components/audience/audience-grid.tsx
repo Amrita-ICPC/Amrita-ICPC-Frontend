@@ -39,7 +39,7 @@ export function AudienceGrid({
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(280px,360px))]">
             {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => <AudienceSkeleton key={i} />)
             ) : visibleAudiences.length > 0 ? (

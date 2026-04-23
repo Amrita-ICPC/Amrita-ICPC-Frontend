@@ -3,6 +3,7 @@
 import { ArrowRight, Calendar, Clock3, Lock, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -198,7 +199,7 @@ export function ContestCard({ contest }: ContestCardProps) {
                 </DialogContent>
             </Dialog>
 
-            <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 border-transparent bg-gradient-to-b from-card to-card/50">
+            <Card className="w-full max-w-[500px] group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 border-transparent bg-gradient-to-b from-card to-card/50">
                 <div className="relative aspect-video w-full overflow-hidden bg-muted">
                     {showImage ? (
                         <>
@@ -332,11 +333,14 @@ export function ContestCard({ contest }: ContestCardProps) {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
+                                asChild
                                 variant="default"
                                 className="w-full group/btn shadow-md hover:shadow-lg transition-all"
                             >
-                                View Details
-                                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                                <Link href={`/contest/${contest.id}`}>
+                                    View Details
+                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                                </Link>
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>

@@ -59,7 +59,7 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(320px,500px))]">
                     {isLoading ? (
                         Array.from({ length: 8 }).map((_, i) => <ContestSkeleton key={i} />)
                     ) : data?.data && data.data.length > 0 ? (

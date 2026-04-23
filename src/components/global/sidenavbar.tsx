@@ -29,7 +29,7 @@ export default async function Sidenavbar() {
     }
 
     return (
-        <aside className="flex h-screen w-72 flex-col border-r border-white/10 bg-[#0b0d12] px-6 py-8 text-white">
+        <aside className="flex h-full w-full flex-col bg-[#0b0d12] px-6 py-8 text-white">
             <div className="mb-10 flex items-center gap-3">
                 <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#5eead4] to-[#38bdf8] p-[2px]">
                     <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-[#0b0d12] text-sm font-semibold">
@@ -42,7 +42,7 @@ export default async function Sidenavbar() {
                 </div>
             </div>
 
-            <nav className="flex-1 space-y-2 text-sm">
+            <nav className="flex-1 space-y-2 text-sm overflow-y-auto no-scrollbar">
                 <Link
                     href="/dashboard"
                     className="flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3 text-white/80 transition hover:border-white/40 hover:text-white"
@@ -97,7 +97,7 @@ export default async function Sidenavbar() {
                         {getInitials(user?.name, user?.email)}
                     </div>
                     <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold">
+                        <div className="truncate text-sm font-semibold text-white">
                             {user?.name || "ICPC User"}
                         </div>
                         <div className="truncate text-xs text-white/60">
@@ -108,7 +108,7 @@ export default async function Sidenavbar() {
                 <form action={handleSignOut} className="mt-3">
                     <button
                         type="submit"
-                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:border-white/40 hover:text-white"
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:border-white/40 hover:text-white cursor-pointer"
                     >
                         <LogOut className="h-4 w-4" />
                         Logout

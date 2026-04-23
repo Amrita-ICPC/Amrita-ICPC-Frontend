@@ -71,7 +71,7 @@ export function AudienceCard({ audience }: { audience: AudienceResponse }) {
     }
 
     return (
-        <Card className="group relative flex h-full flex-col gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/20 focus-within:ring-2 focus-within:ring-ring/50">
+        <Card className="w-full max-w-[360px] group relative flex h-full flex-col gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/20 focus-within:ring-2 focus-within:ring-ring/50">
             <div className={`absolute inset-x-0 top-0 h-1 ${styles.accent}`} />
 
             <AudienceDeleteDialog

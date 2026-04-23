@@ -12,7 +12,7 @@ export function AudiencePageHeader({ onCreate }: AudiencePageHeaderProps) {
     return (
         <div className="flex items-start justify-between gap-4">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Audiences</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Manage Users</h1>
                 <p className="text-muted-foreground">
                     Create and manage audience groups for visibility and access.
                 </p>

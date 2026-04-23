@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import Sidenavbar from "@/components/global/sidenavbar";
+import { AppShell } from "@/components/global/app-shell";
 import { UserType } from "@/lib/auth/utils";
 import AuthGuard from "@/components/global/auth-guard";
 import AccessDenied from "@/components/global/access-denied";
@@ -46,27 +47,30 @@ export default async function AppLayout({
     }
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#0b0d12] text-white">
-            <Sidenavbar />
-            <main className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
-                {/* Main page content (e.g., Dashboard) */}
-                <div className="mb-8">{children}</div>
+        <AppShell sidebar={<Sidenavbar />}>
+            <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+                <div className="flex flex-col min-h-full">
+                    {/* Main page content */}
+                    {children}
 
-                {/* Role-specific parallel route slot */}
-                <div className="flex-1">
-                    {hasRole(UserType.ADMIN) ? (
-                        <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
-                    ) : hasRole(UserType.MANAGER) ? (
-                        <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
-                    ) : hasRole(UserType.INSTRUCTOR) ? (
-                        <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
-                    ) : hasRole(UserType.STUDENT) ? (
-                        <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
-                    ) : (
-                        <AccessDenied />
-                    )}
+                    {/* Role-specific parallel route slot */}
+                    <div className="flex-1">
+                        {hasRole(UserType.ADMIN) ? (
+                            <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
+                        ) : hasRole(UserType.MANAGER) ? (
+                            <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
+                        ) : hasRole(UserType.INSTRUCTOR) ? (
+                            <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>
+                                {instructor}
+                            </AuthGuard>
+                        ) : hasRole(UserType.STUDENT) ? (
+                            <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
+                        ) : (
+                            <AccessDenied />
+                        )}
+                    </div>
                 </div>
             </main>
-        </div>
+        </AppShell>
     );
 }
