@@ -11,6 +11,7 @@ import {
     type ImageUploadResponse,
     type InstructorManageRequest,
     type InstructorResponse,
+    type ContestUpdate,
 } from "@/api/generated/model";
 import { getContests } from "@/api/generated/contests/contests";
 import { getImages } from "@/api/generated/images/images";
@@ -24,7 +25,7 @@ const contestKeys = {
     lists: () => [...contestKeys.all, "list"] as const,
     list: (params: GetContestsParams) =>
         [
-            "contests",
+            ...contestKeys.lists(),
             params.page,
             params.page_size,
             params.search,
@@ -220,6 +221,44 @@ export function useCreateContest() {
         onSuccess: () => {
             // Invalidate contests list to refetch updated data after creating a contest
             queryClient.invalidateQueries({ queryKey: contestKeys.all });
+        },
+    });
+}
+
+// update contest mutation
+async function updateContest(input: { contestId: string; contestData: ContestUpdate }) {
+    const response = await contestsApi.updateContestApiV1ContestsContestIdPatch(
+        input.contestId,
+        input.contestData,
+    );
+
+    if (response?.success === false) {
+        throw new ApiError(response.message ?? "Failed to update contest", {
+            status: response.status,
+        });
+    }
+
+    return response;
+}
+
+export function useUpdateContest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: updateContest,
+        onSuccess: (response, variables) => {
+            // The list invalidation works, so we keep it.
+            queryClient.invalidateQueries({ queryKey: contestKeys.lists() });
+
+            const updatedContest = response?.data;
+            if (updatedContest) {
+                queryClient.setQueryData(contestKeys.detail(variables.contestId), updatedContest);
+            } else {
+                // If the mutation response doesn't have data, fall back to invalidation.
+                queryClient.invalidateQueries({
+                    queryKey: contestKeys.detail(variables.contestId),
+                });
+            }
         },
     });
 }

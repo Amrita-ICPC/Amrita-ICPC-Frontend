@@ -25,31 +25,15 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
-export type Contest = {
-    name: string;
-    description: string;
-    image: string;
-    status: string;
-    is_public: boolean;
-    start_time: string;
-    end_time: string;
-    registration_start: string;
-    registration_end: string;
-    scoring_type: string;
-    team_approval_mode: string;
-    min_team_size: number;
-    max_team_size: number;
-    max_teams: number | null;
-};
+import { ContestDetailResponse } from "@/api/generated/model";
 
 interface ContestOverviewHeroProps {
-    contest: Contest;
+    contest: ContestDetailResponse;
     onEdit?: () => void;
     onPublish?: () => void;
 }
 
-export function ContestOverviewHero({ contest, onEdit, onPublish }: ContestOverviewHeroProps) {
+export function ContestOverviewHero({ contest, onPublish }: ContestOverviewHeroProps) {
     const formatDate = (date: string) => {
         try {
             return format(new Date(date), "MMM dd, yyyy hh:mm a");
@@ -116,6 +100,13 @@ export function ContestOverviewHero({ contest, onEdit, onPublish }: ContestOverv
                                         PUBLIC
                                     </Badge>
                                 )}
+
+                                <Badge
+                                    variant="outline"
+                                    className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 shadow-xs"
+                                >
+                                    {contest.mode?.toUpperCase()}
+                                </Badge>
                             </div>
                         </div>
                         <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-3xl line-clamp-2 leading-relaxed">
@@ -125,15 +116,16 @@ export function ContestOverviewHero({ contest, onEdit, onPublish }: ContestOverv
                     </div>
 
                     <div className="flex items-center gap-2 md:gap-3 shrink-0">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onEdit}
-                            className="h-9 md:h-11 px-3 md:px-5 gap-1.5 md:gap-2 text-xs md:text-sm font-semibold border-border shadow-xs hover:bg-muted/50"
-                        >
-                            <Edit className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                            Edit
-                        </Button>
+                        <Link href={`/contest/${contest.id}/edit`}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-9 md:h-11 px-3 md:px-5 gap-1.5 md:gap-2 text-xs md:text-sm font-semibold border-border shadow-xs hover:bg-muted/50"
+                            >
+                                <Edit className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                Edit
+                            </Button>
+                        </Link>
                         <Button
                             size="sm"
                             onClick={onPublish}
@@ -255,7 +247,7 @@ export function ContestOverviewHero({ contest, onEdit, onPublish }: ContestOverv
                                         Approval
                                     </p>
                                     <p className="text-xs md:text-sm font-bold text-foreground truncate">
-                                        {contest.team_approval_mode.replace("_", " ")}
+                                        {contest.team_approval_mode!.replace("_", " ")}
                                     </p>
                                 </div>
                             </div>

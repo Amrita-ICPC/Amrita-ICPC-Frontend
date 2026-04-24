@@ -17,6 +17,17 @@ export function getContestStatusBadgeClass(status: string): string {
     }
 }
 
+export function getContestModeBadgeClass(mode: string): string {
+    switch (mode) {
+        case "team":
+            return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
+        case "individual":
+            return "bg-green-500/10 text-green-500 hover:bg-green-500/20";
+        default:
+            return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
+    }
+}
+
 export function formatContestLabel(value: string): string {
     return value
         .toLowerCase()

@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ContestMode } from "./contestMode";
 import type { ContestStatus } from "./contestStatus";
 import type { InstructorResponse } from "./instructorResponse";
 import type { ScoringType } from "./scoringType";
@@ -46,10 +47,32 @@ export interface ContestDetailResponse {
     scoring_type?: ScoringType;
     /** How teams are approved in this contest */
     team_approval_mode?: TeamApprovalMode;
+    /** Contest mode (individual or team) */
+    mode?: ContestMode;
     /** Contest ID */
     id: string;
     /** Contest status */
     status: ContestStatus;
+    /**
+     * Number of teams in the contest
+     * @minimum 0
+     */
+    team_count?: number;
+    /**
+     * Number of questions in the contest
+     * @minimum 0
+     */
+    question_count?: number;
+    /**
+     * Number of submissions for contest questions
+     * @minimum 0
+     */
+    submission_count?: number;
+    /**
+     * Number of participants (distinct users) in the contest
+     * @minimum 0
+     */
+    participant_count?: number;
     /** Creator user ID */
     created_by: string;
     /** Creator details */

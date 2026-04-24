@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ContestMode } from "./contestMode";
 import type { ScoringType } from "./scoringType";
 import type { TeamApprovalMode } from "./teamApprovalMode";
 
@@ -38,6 +39,8 @@ export interface ContestUpdate {
     rules?: string | null;
     /** Scoring type */
     scoring_type?: ScoringType | null;
+    /** Contest mode */
+    mode?: ContestMode | null;
     /** How teams are approved in this contest */
     team_approval_mode?: TeamApprovalMode | null;
     /** Whether to show leaderboard */

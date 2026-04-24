@@ -25,6 +25,7 @@ import type { ContestSummaryResponse } from "@/api/generated/model";
 import {
     formatContestDateTime,
     formatContestLabel,
+    getContestModeBadgeClass,
     getContestStatusBadgeClass,
     isAllowedContestImage,
 } from "./contest-util";
@@ -239,6 +240,12 @@ export function ContestCard({ contest }: ContestCardProps) {
                                             <Lock className="h-3.5 w-3.5" />
                                         )}
                                         {contest.is_public ? "Public" : "Restricted"}
+                                    </Badge>
+                                    <Badge
+                                        variant="outline"
+                                        className={`border-transparent font-semibold tracking-wide ${getContestModeBadgeClass(String(contest.mode))}`}
+                                    >
+                                        {formatContestLabel(String(contest.mode))}
                                     </Badge>
                                 </div>
                             </div>

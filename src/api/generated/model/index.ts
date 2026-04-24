@@ -62,6 +62,7 @@ export * from "./contestAudienceManageRequest";
 export * from "./contestAudienceResponse";
 export * from "./contestCreate";
 export * from "./contestDetailResponse";
+export * from "./contestMode";
 export * from "./contestQuestionResponse";
 export * from "./contestStatus";
 export * from "./contestSummaryResponse";

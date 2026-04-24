@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { use } from "react";
 import { useContestDetail } from "@/query/contest-query";
 import { ContestOverviewHero } from "@/components/contest/details/ContestOverviewHero";
@@ -74,27 +75,11 @@ export default function ContestDetailsPage({ params }: ContestPageProps) {
         );
     }
 
-    const contestData = {
-        name: contest.name,
-        description: contest.description || "",
-        image: contest.image || "",
-        status: contest.status,
-        is_public: contest.is_public ?? false,
-        start_time: contest.start_time,
-        end_time: contest.end_time,
-        registration_start: contest.registration_start || contest.created_at,
-        registration_end: contest.registration_end || contest.start_time,
-        scoring_type: contest.scoring_type || "AUTO",
-        team_approval_mode: contest.team_approval_mode || "AUTO_APPROVE",
-        min_team_size: contest.min_team_size ?? 1,
-        max_team_size: contest.max_team_size ?? 3,
-        max_teams: contest.max_teams ?? null,
-    };
-
     return (
         <main className="flex flex-col gap-6 md:gap-10 p-4 sm:p-6 md:p-8 lg:p-10 xl:px-16 2xl:px-24 w-full animate-in fade-in duration-700 pb-20">
+            <div className="flex justify-end"></div>
             <ContestOverviewHero
-                contest={contestData}
+                contest={contest}
                 onPublish={() => console.log("Publish contest", contestId)}
             />
 
