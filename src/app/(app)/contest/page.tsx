@@ -2,29 +2,46 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import type { GetContestsParams } from "@/types/contest";
-import { Roles } from "@/lib/auth/utils";
+import { hasPermission } from "@/lib/auth/utils";
 import { auth } from "@/lib/auth/auth";
-import { getSingleValue, parseBoolean, parsePage } from "@/lib/search-params";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ContestClient } from "@/components/contest/contest-client";
-import AuthGuard from "@/components/global/auth-guard";
 
 type SearchParams = Record<string, string | string[] | undefined>;
+
+function getSingleValue(value: string | string[] | undefined) {
+    return Array.isArray(value) ? value[0] : value;
+}
+
+function parsePage(value: string | string[] | undefined, fallback: number) {
+    const parsed = Number.parseInt(getSingleValue(value) ?? "", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseBoolean(value: string | string[] | undefined) {
+    const normalized = getSingleValue(value);
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+    return undefined;
+}
 
 export default async function ContestPage(props: { searchParams?: Promise<SearchParams> }) {
     const resolvedParams = await props.searchParams;
     const params: GetContestsParams = {
         page: parsePage(resolvedParams?.page, 1),
-        page_size: parsePage(resolvedParams?.page_size, 10),
+        page_size: parsePageSize(resolvedParams?.page_size, 10),
         contest_status: getSingleValue(resolvedParams?.contest_status) ?? undefined,
         search: getSingleValue(resolvedParams?.search) ?? undefined,
         is_public: parseBoolean(resolvedParams?.is_public),
     };
-    await auth();
+    const session = await auth();
+
+    const isContestRead = hasPermission(session?.user, ["contests:read"]);
+    const isContestCreate = hasPermission(session?.user, ["contests:create"]);
 
     return (
-        <div className="flex h-full flex-col space-y-6 p-8">
+        <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Contests</h1>
@@ -32,7 +49,7 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
                         Manage and explore upcoming programming contests.
                     </p>
                 </div>
-                <AuthGuard requiredRoles={[Roles.CONTEST_CREATE]} fallbackComponent={null}>
+                {isContestCreate && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button asChild>
@@ -46,23 +63,25 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
                             <p>Set up a new programming contest</p>
                         </TooltipContent>
                     </Tooltip>
-                </AuthGuard>
+                )}
             </div>
-            <AuthGuard
-                requiredRoles={[Roles.CONTEST_READ]}
-                fallbackComponent={
-                    <div className="flex w-full min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center p-8">
-                        <h3 className="mb-2 text-xl font-semibold">Access Denied</h3>
-                        <p className="text-sm text-muted-foreground max-w-md">
-                            You do not have the required permissions to view the contests list.
-                            Please contact your system administrator if you believe this is an
-                            error.
-                        </p>
-                    </div>
-                }
-            >
+
+            {isContestRead ? (
                 <ContestClient initialParams={params} />
-            </AuthGuard>
+            ) : (
+                <div className="flex w-full min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center p-8">      
+                    <h3 className="mb-2 text-xl font-semibold">Access Denied</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                        You do not have the required permissions to view the contests list. Please
+                        contact your system administrator if you believe this is an error.
+                    </p>
+                </div>
+            )}
         </div>
     );
+}
+
+function parsePageSize(value: string | string[] | undefined, fallback: number) {
+    const parsed = Number.parseInt(getSingleValue(value) ?? "", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }

@@ -50,7 +50,8 @@ export function belongsToRequiredGroup(
     requiredGroups: string[],
 ): boolean {
     if (!userGroups || requiredGroups.length === 0) return false;
-    return requiredGroups.some((group) => userGroups.includes(group));
+    const normalizedUserGroups = userGroups.map((g) => g.toLowerCase());
+    return requiredGroups.some((group) => normalizedUserGroups.includes(group.toLowerCase()));
 }
 
 // Wrapper helper for session.user style objects.
