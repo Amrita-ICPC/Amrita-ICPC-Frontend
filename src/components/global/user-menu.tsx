@@ -28,27 +28,25 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ name, email }: UserMenuProps) {
-    const { theme, setTheme } = useTheme();
+    const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => setMounted(true), []);
 
-    const isDark = mounted ? theme === "dark" : false;
+    const isDark = mounted ? resolvedTheme === "dark" : false;
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-sidebar-accent">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-[11px] font-semibold text-sidebar-foreground">
+                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-white/10 hover:bg-white/8">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-[11px] font-semibold text-sidebar-foreground">
                         {initials(name, email)}
                     </div>
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium text-sidebar-foreground">
                             {name || "ICPC User"}
                         </p>
-                        <p className="truncate text-[10px] text-sidebar-foreground/40">
-                            {email}
-                        </p>
+                        <p className="truncate text-[10px] text-sidebar-foreground/60">{email}</p>
                     </div>
                 </button>
             </DropdownMenuTrigger>

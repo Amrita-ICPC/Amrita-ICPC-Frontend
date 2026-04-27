@@ -10,15 +10,19 @@ export default async function Sidenavbar() {
     const isAdmin = allRoles.some((r) => r.toLowerCase() === UserType.ADMIN.toLowerCase());
 
     return (
-        <aside className="flex h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+        <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
             {/* Logo */}
-            <div className="flex items-center gap-3 px-5 py-5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
+            <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/15 text-xs font-bold text-white">
                     IC
                 </div>
                 <div className="min-w-0">
-                    <p className="text-sm font-semibold text-sidebar-foreground leading-tight">ICPC Platform</p>
-                    <p className="text-[10px] text-sidebar-foreground/40 leading-tight">Amrita University</p>
+                    <p className="text-sm font-semibold leading-tight text-sidebar-foreground">
+                        ICPC Platform
+                    </p>
+                    <p className="text-[10px] leading-tight text-sidebar-foreground/60">
+                        Amrita University
+                    </p>
                 </div>
             </div>
 
@@ -26,7 +30,7 @@ export default async function Sidenavbar() {
             <NavLinks isAdmin={isAdmin} />
 
             {/* User */}
-            <div className="px-3 pb-4 pt-2 border-t border-sidebar-border">
+            <div className="border-t border-sidebar-border px-3 pb-4 pt-2">
                 <UserMenu name={user?.name} email={user?.email} />
             </div>
         </aside>

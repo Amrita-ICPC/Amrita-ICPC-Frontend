@@ -7,18 +7,26 @@ import Link from "next/link";
 import type { ContestSummaryResponse } from "@/api/generated/model";
 
 const STATUS: Record<string, { dot: string; label: string; text: string }> = {
-    RUNNING:   { dot: "bg-emerald-400",     label: "Running",   text: "text-emerald-400" },
-    SCHEDULED: { dot: "bg-sky-400",         label: "Scheduled", text: "text-sky-400"     },
-    FINISHED:  { dot: "bg-slate-500",       label: "Finished",  text: "text-slate-400"   },
-    DRAFT:     { dot: "bg-amber-400",       label: "Draft",     text: "text-amber-400"   },
+    RUNNING: {
+        dot: "bg-emerald-500",
+        label: "Running",
+        text: "text-emerald-700 dark:text-emerald-300",
+    },
+    SCHEDULED: { dot: "bg-sky-600", label: "Scheduled", text: "text-sky-700 dark:text-sky-300" },
+    FINISHED: {
+        dot: "bg-slate-500",
+        label: "Finished",
+        text: "text-slate-600 dark:text-slate-300",
+    },
+    DRAFT: { dot: "bg-amber-500", label: "Draft", text: "text-amber-700 dark:text-amber-300" },
 };
 
 const BANNERS = [
-    { from: "#1e3a5f", to: "#0c1a2e", accent: "#3b82f6" },
-    { from: "#1a1f4e", to: "#0c0f2e", accent: "#6366f1" },
-    { from: "#12274a", to: "#0a1628", accent: "#0ea5e9" },
-    { from: "#1e2d4a", to: "#0d1829", accent: "#818cf8" },
-    { from: "#162040", to: "#0b1428", accent: "#38bdf8" },
+    { from: "#294892", to: "#162d68", accent: "#93b1ff" },
+    { from: "#28458a", to: "#15285f", accent: "#a7bcff" },
+    { from: "#223e80", to: "#142659", accent: "#89adff" },
+    { from: "#315098", to: "#193066", accent: "#b5c7ff" },
+    { from: "#26458a", to: "#13275b", accent: "#9ab6ff" },
 ];
 
 function hashIndex(id: string, len: number) {
@@ -31,7 +39,12 @@ function FallbackBanner({ id, name }: { id: string; name: string }) {
     const display = name.length > 24 ? name.slice(0, 24) + "…" : name;
 
     return (
-        <svg viewBox="0 0 400 140" xmlns="http://www.w3.org/2000/svg" className="h-full w-full" aria-hidden>
+        <svg
+            viewBox="0 0 400 140"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-full w-full"
+            aria-hidden
+        >
             <defs>
                 <linearGradient id={bgId} x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor={b.from} />
@@ -39,21 +52,48 @@ function FallbackBanner({ id, name }: { id: string; name: string }) {
                 </linearGradient>
             </defs>
             <rect width="400" height="140" fill={`url(#${bgId})`} />
-            {/* Grid lines */}
-            {[40, 80, 120, 160, 200, 240, 280, 320, 360].map(x => (
-                <line key={x} x1={x} y1="0" x2={x} y2="140" stroke={b.accent} strokeOpacity="0.06" strokeWidth="1" />
-            ))}
-            {[35, 70, 105].map(y => (
-                <line key={y} x1="0" y1={y} x2="400" y2={y} stroke={b.accent} strokeOpacity="0.06" strokeWidth="1" />
-            ))}
-            {/* Glow orb */}
-            <ellipse cx="200" cy="60" rx="120" ry="55" fill={b.accent} fillOpacity="0.08" />
+            {/* Soft abstract overlays */}
+            <circle cx="332" cy="26" r="44" fill={b.accent} fillOpacity="0.2" />
+            <circle cx="78" cy="126" r="56" fill={b.accent} fillOpacity="0.15" />
+            <path
+                d="M0 106 C70 84, 150 82, 250 102 C310 114, 362 116, 400 110 L400 140 L0 140 Z"
+                fill={b.accent}
+                fillOpacity="0.2"
+            />
             {/* Label */}
-            <text x="200" y="55" textAnchor="middle" fontSize="9" fontFamily="system-ui" letterSpacing="4"
-                fill={b.accent} fillOpacity="0.7">CONTEST</text>
-            <text x="200" y="78" textAnchor="middle" fontSize="15" fontWeight="700" fontFamily="system-ui"
-                fill="white" fillOpacity="0.9">{display}</text>
-            <rect x="150" y="90" width="100" height="1.5" rx="0.75" fill={b.accent} fillOpacity="0.4" />
+            <text
+                x="200"
+                y="55"
+                textAnchor="middle"
+                fontSize="9"
+                fontFamily="system-ui"
+                letterSpacing="4"
+                fill={b.accent}
+                fillOpacity="0.7"
+            >
+                CONTEST
+            </text>
+            <text
+                x="200"
+                y="78"
+                textAnchor="middle"
+                fontSize="15"
+                fontWeight="700"
+                fontFamily="system-ui"
+                fill="white"
+                fillOpacity="0.95"
+            >
+                {display}
+            </text>
+            <rect
+                x="150"
+                y="90"
+                width="100"
+                height="1.5"
+                rx="0.75"
+                fill={b.accent}
+                fillOpacity="0.4"
+            />
         </svg>
     );
 }
@@ -67,19 +107,23 @@ export function ContestCard({ contest }: ContestCardProps) {
     const status = STATUS[contest.status] ?? STATUS.DRAFT;
 
     const startDate = new Date(contest.start_time).toLocaleDateString(undefined, {
-        month: "short", day: "numeric", year: "numeric",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
     });
     const endDate = new Date(contest.end_time).toLocaleDateString(undefined, {
-        month: "short", day: "numeric", year: "numeric",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
     });
 
     return (
         <Link
             href={`/contest/${contest.id}`}
-            className="group flex h-[280px] flex-col rounded-xl bg-[#0c1a2e] overflow-hidden shadow-lg shadow-black/30 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#060f1e]/60 hover:bg-[#0f2040]"
+            className="group flex h-70 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(20,45,103,0.45)] transition-all duration-200 hover:-translate-y-1 hover:border-[#bdccee] hover:shadow-[0_18px_30px_-18px_rgba(16,35,82,0.58)] dark:border-white/12 dark:bg-slate-900 dark:hover:border-white/20"
         >
             {/* Banner — fixed 130px */}
-            <div className="relative h-[130px] w-full shrink-0 overflow-hidden">
+            <div className="relative h-32.5 w-full shrink-0 overflow-hidden">
                 {contest.image && !imgErr ? (
                     <>
                         <img
@@ -88,36 +132,40 @@ export function ContestCard({ contest }: ContestCardProps) {
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={() => setImgErr(true)}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0c1a2e]/90 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-[#13285e]/88 via-[#13285e]/30 to-transparent" />
                     </>
                 ) : (
                     <FallbackBanner id={contest.id} name={contest.name} />
                 )}
 
                 {/* Status */}
-                <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-sm border border-white/5">
+                <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/45 bg-white/95 px-2.5 py-1 shadow-sm backdrop-blur-sm dark:border-white/20 dark:bg-slate-900/80">
                     <span className={`h-1.5 w-1.5 rounded-full ${status.dot} shadow-sm`} />
-                    <span className={`text-[11px] font-semibold tracking-wide ${status.text}`}>{status.label}</span>
+                    <span className={`text-[11px] font-semibold tracking-wide ${status.text}`}>
+                        {status.label}
+                    </span>
                 </div>
             </div>
 
             {/* Content */}
             <div className="flex flex-1 flex-col justify-between px-4 py-3">
                 <div>
-                    <h3 className="line-clamp-1 font-bold text-slate-100 group-hover:text-sky-300 transition-colors duration-200">
+                    <h3 className="line-clamp-1 font-bold text-slate-900 transition-colors duration-200 group-hover:text-[#162d68] dark:text-slate-100 dark:group-hover:text-blue-300">
                         {contest.name}
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300/90">
                         {contest.description || "No description provided."}
                     </p>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-600" />
-                        <span>{startDate} – {endDate}</span>
+                        <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                        <span>
+                            {startDate} – {endDate}
+                        </span>
                     </div>
-                    <div className="flex items-center gap-1 text-slate-500 group-hover:text-sky-400 transition-colors">
+                    <div className="flex items-center gap-1 text-slate-500 transition-colors group-hover:text-[#23428d] dark:text-slate-400 dark:group-hover:text-blue-300">
                         <span className="text-[11px] font-medium">View</span>
                         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </div>

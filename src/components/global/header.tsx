@@ -26,8 +26,10 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 function isUUID(s: string) {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
-        || /^[0-9a-f]{24}$/i.test(s);
+    return (
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ||
+        /^[0-9a-f]{24}$/i.test(s)
+    );
 }
 
 function segmentLabel(seg: string, prev?: string): string {
@@ -53,12 +55,12 @@ export function Header() {
     });
 
     return (
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/95 backdrop-blur-sm px-6">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-card/95 px-6 backdrop-blur-sm">
             <div className="flex items-center gap-1">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    className="h-7 w-7 text-muted-foreground hover:bg-accent hover:text-foreground"
                     onClick={() => router.back()}
                     title="Go back"
                 >
@@ -67,7 +69,7 @@ export function Header() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    className="h-7 w-7 text-muted-foreground hover:bg-accent hover:text-foreground"
                     onClick={() => router.forward()}
                     title="Go forward"
                 >
@@ -89,7 +91,10 @@ export function Header() {
                                     </BreadcrumbPage>
                                 ) : (
                                     <BreadcrumbLink asChild>
-                                        <Link href={crumb.href} className="text-muted-foreground hover:text-foreground">
+                                        <Link
+                                            href={crumb.href}
+                                            className="text-muted-foreground transition-colors hover:text-foreground"
+                                        >
                                             {crumb.label}
                                         </Link>
                                     </BreadcrumbLink>

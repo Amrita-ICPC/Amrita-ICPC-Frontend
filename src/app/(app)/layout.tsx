@@ -52,8 +52,8 @@ export default async function AppLayout({
             <Sidenavbar />
             <div className="flex flex-1 flex-col overflow-hidden">
                 <Header />
-                <main className="flex-1 overflow-y-auto">
-                    <div className="mx-auto max-w-7xl px-6 py-6">
+                <main className="flex-1 overflow-y-auto bg-background">
+                    <div className="mx-auto max-w-7xl px-6 py-5">
                         <div className="mb-6">{children}</div>
                         <div>
                             {hasRole(UserType.ADMIN) ? (
@@ -61,7 +61,9 @@ export default async function AppLayout({
                             ) : hasRole(UserType.MANAGER) ? (
                                 <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
                             ) : hasRole(UserType.INSTRUCTOR) ? (
-                                <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
+                                <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>
+                                    {instructor}
+                                </AuthGuard>
                             ) : hasRole(UserType.STUDENT) ? (
                                 <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
                             ) : (
