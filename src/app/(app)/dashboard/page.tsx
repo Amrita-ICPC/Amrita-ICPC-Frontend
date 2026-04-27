@@ -4,6 +4,7 @@ export default async function DashboardPage() {
     const session = await auth();
     const roles = session?.user?.roles ?? [];
     const groups = session?.user?.groups ?? [];
+    const permissions = session?.user?.permissions ?? [];
 
     return (
         <div className="space-y-6">
@@ -15,10 +16,10 @@ export default async function DashboardPage() {
                     Use this block to verify what came from Keycloak in your current session.
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-3">
                     <div>
                         <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/70">
-                            Roles (Permissions)
+                            Roles
                         </h3>
                         <pre className="overflow-x-auto rounded-md bg-black/30 p-3 text-xs text-white/90">
                             {JSON.stringify(roles, null, 2)}
@@ -31,6 +32,15 @@ export default async function DashboardPage() {
                         </h3>
                         <pre className="overflow-x-auto rounded-md bg-black/30 p-3 text-xs text-white/90">
                             {JSON.stringify(groups, null, 2)}
+                        </pre>
+                    </div>
+
+                    <div>
+                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/70">
+                            Permissions
+                        </h3>
+                        <pre className="overflow-x-auto rounded-md bg-black/30 p-3 text-xs text-white/90">
+                            {JSON.stringify(permissions, null, 2)}
                         </pre>
                     </div>
                 </div>

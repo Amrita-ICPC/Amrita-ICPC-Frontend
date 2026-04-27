@@ -6,6 +6,8 @@ import AuthGuard from "@/components/global/auth-guard";
 import AccessDenied from "@/components/global/access-denied";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
     children,
     student,
@@ -25,13 +27,12 @@ export default async function AppLayout({
         redirect("/auth/login");
     }
 
-    const userRoleCandidates = [
-        ...(session.user.groups || []),
-        ...((session.user.roles || []).filter((r) => !r.includes(":")) ?? []),
-    ];
+    const userRoles = session.user.roles || [];
+    const userGroups = session.user.groups || [];
+    const allRoles = [...userRoles, ...userGroups];
 
     const hasRole = (role: UserType) =>
-        userRoleCandidates.some((r) => r.toLowerCase() === role.toLowerCase());
+        allRoles.some((r) => r.toLowerCase() === role.toLowerCase());
 
     const hasAnyRole =
         hasRole(UserType.ADMIN) ||
@@ -41,7 +42,7 @@ export default async function AppLayout({
 
     if (!hasAnyRole) {
         logger.warn(
-            `User ${session.user.email} (ID: ${session.user.id}) has no recognized roles. Groups found: ${(session.user.groups || []).join(", ")}`,
+            `User ${session.user.email} (ID: ${session.user.id}) has no recognized roles. Roles found: ${userRoles.join(", ")}`,
         );
     }
 

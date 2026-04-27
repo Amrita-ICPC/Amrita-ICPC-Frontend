@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { auth, signOut } from "@/lib/auth/auth";
 import {
-    Banknote,
+    Database,
     LayoutDashboard,
+    Languages,
     LogOut,
     Settings,
     Trophy,
@@ -73,14 +74,28 @@ export default async function Sidenavbar() {
                         <UsersRound className="h-4 w-4" />
                         Manage Users
                     </Link>
+                    <Link
+                        href="/languages"
+                        className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
+                    >
+                        <Languages className="h-4 w-4" />
+                        Manage Languages
+                    </Link>
                 </AuthGuard>
 
                 <Link
-                    href="/bank"
+                    href="/banks"
                     className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
                 >
-                    <Banknote className="h-4 w-4" />
-                    Bank
+                    <Database className="h-4 w-4" />
+                    Question Banks
+                </Link>
+                <Link
+                    href="/questions"
+                    className="flex items-center gap-3 rounded-2xl border border-white/5 px-4 py-3 text-white/70 transition hover:border-white/30 hover:text-white"
+                >
+                    <Database className="h-4 w-4" />
+                    Question Editor
                 </Link>
                 <Link
                     href="/settings"

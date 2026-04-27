@@ -1,28 +1,13 @@
 "use client";
 
-import { Calendar, Users, ArrowRight, Trash2 } from "lucide-react";
+import { Calendar, Users, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import AuthGuard from "@/components/global/auth-guard";
-import { Roles } from "@/lib/auth/utils";
-import { toApiError } from "@/lib/api/error";
-import { useSoftDeleteContest } from "@/query/contest-query";
-import type { ContestSummaryResponse } from "@/api/generated/model";
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
+import { Contest } from "@/types/contest";
 
 // ─── Fallback Banner ─────────────────────────────────────────────────────────
 
@@ -146,29 +131,11 @@ function getStatusColor(status: string): string {
 // ─── ContestCard ─────────────────────────────────────────────────────────────
 
 interface ContestCardProps {
-    contest: ContestSummaryResponse;
+    contest: Contest;
 }
 
 export function ContestCard({ contest }: ContestCardProps) {
     const [imageError, setImageError] = useState(false);
-    const softDeleteMutation = useSoftDeleteContest();
-
-    const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
-    const [errorDialogMessage, setErrorDialogMessage] = useState<string>(
-        "Failed to delete contest",
-    );
-    const [errorDialogStatus, setErrorDialogStatus] = useState<number | undefined>(undefined);
-
-    function onSoftDelete() {
-        softDeleteMutation.mutate(contest.id, {
-            onError: (error) => {
-                const apiError = toApiError(error);
-                setErrorDialogMessage(apiError.detail ?? apiError.message);
-                setErrorDialogStatus(apiError.status);
-                setIsErrorDialogOpen(true);
-            },
-        });
-    }
 
     const startDate = new Date(contest.start_time).toLocaleDateString(undefined, {
         month: "short",
@@ -185,133 +152,80 @@ export function ContestCard({ contest }: ContestCardProps) {
     const showImage = !!contest.image && !imageError;
 
     return (
-        <>
-            <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
-                <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle>Soft delete failed</DialogTitle>
-                        <DialogDescription>
-                            {errorDialogStatus ? `Status: ${errorDialogStatus}` : ""}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <Alert variant="destructive">
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>
-                            <p>{errorDialogMessage}</p>
-                        </AlertDescription>
-                    </Alert>
-                    <div className="flex justify-end">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsErrorDialogOpen(false)}
-                        >
-                            Close
-                        </Button>
+        <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 border-transparent bg-gradient-to-b from-card to-card/50">
+            <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                {showImage ? (
+                    <>
+                        {/* Plain <img> — no hostname config, onError silently falls back */}
+                        <img
+                            src={contest.image}
+                            alt={contest.name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={() => setImageError(true)}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+                    </>
+                ) : (
+                    <ContestFallbackBanner id={contest.id} name={contest.name} />
+                )}
+
+                <div className="absolute right-3 top-3">
+                    <Badge
+                        variant="outline"
+                        className={`border-transparent backdrop-blur-md font-semibold tracking-wide ${getStatusColor(contest.status)}`}
+                    >
+                        {contest.status.replace("_", " ")}
+                    </Badge>
+                </div>
+            </div>
+
+            <CardHeader className="p-5 pb-3">
+                <h3 className="line-clamp-1 text-xl font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors">
+                    {contest.name}
+                </h3>
+                <p className="line-clamp-2 mt-1.5 text-sm text-muted-foreground/80 leading-relaxed">
+                    {contest.description ||
+                        "No specific details have been provided for this contest yet."}
+                </p>
+            </CardHeader>
+
+            <CardContent className="flex-1 px-5 py-2">
+                <div className="flex flex-col gap-3 text-sm font-medium text-muted-foreground/90">
+                    <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Calendar className="h-4 w-4" />
+                        </div>
+                        <span>
+                            {startDate} <span className="opacity-50 mx-1">—</span> {endDate}
+                        </span>
                     </div>
-                </DialogContent>
-            </Dialog>
-
-            <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 border-transparent bg-gradient-to-b from-card to-card/50">
-                <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                    {showImage ? (
-                        <>
-                            <Image
-                                src={contest.image ?? ""}
-                                alt={contest.name}
-                                fill
-                                sizes="(min-width: 768px) 50vw, 100vw"
-                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                onError={() => setImageError(true)}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
-                        </>
-                    ) : (
-                        <ContestFallbackBanner id={contest.id} name={contest.name} />
-                    )}
-
-                    <div className="absolute right-3 top-3">
-                        <Badge
-                            variant="outline"
-                            className={`border-transparent backdrop-blur-md font-semibold tracking-wide ${getStatusColor(String(contest.status))}`}
-                        >
-                            {String(contest.status).replace("_", " ")}
-                        </Badge>
+                    <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Users className="h-4 w-4" />
+                        </div>
+                        <span className="capitalize">
+                            {contest.team_approval_mode.replace("_", " ").toLowerCase()} Teams
+                        </span>
                     </div>
                 </div>
+            </CardContent>
 
-                <CardHeader className="p-5 pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                        <h3 className="line-clamp-1 text-xl font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors">
-                            {contest.name}
-                        </h3>
-
-                        <AuthGuard requiredRoles={[Roles.CONTEST_DELETE]} fallbackComponent={null}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        size="icon-xs"
-                                        disabled={softDeleteMutation.isPending}
-                                        onClick={onSoftDelete}
-                                        aria-label="Soft delete contest"
-                                        title="Soft delete"
-                                    >
-                                        <Trash2 />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Soft delete</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </AuthGuard>
-                    </div>
-                    <p className="line-clamp-2 mt-1.5 text-sm text-muted-foreground/80 leading-relaxed">
-                        {contest.description ||
-                            "No specific details have been provided for this contest yet."}
-                    </p>
-                </CardHeader>
-
-                <CardContent className="flex-1 px-5 py-2">
-                    <div className="flex flex-col gap-3 text-sm font-medium text-muted-foreground/90">
-                        <div className="flex items-center gap-2.5">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <Calendar className="h-4 w-4" />
-                            </div>
-                            <span>
-                                {startDate} <span className="opacity-50 mx-1">—</span> {endDate}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <Users className="h-4 w-4" />
-                            </div>
-                            <span className="capitalize">
-                                {String(contest.team_approval_mode).replace("_", " ").toLowerCase()}{" "}
-                                Teams
-                            </span>
-                        </div>
-                    </div>
-                </CardContent>
-
-                <CardFooter className="p-5 pt-4 border-t border-border/40">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="default"
-                                className="w-full group/btn shadow-md hover:shadow-lg transition-all"
-                            >
-                                View Details
-                                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Explore contest info and rules</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </CardFooter>
-            </Card>
-        </>
+            <CardFooter className="p-5 pt-4 border-t border-border/40">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="default"
+                            className="w-full group/btn shadow-md hover:shadow-lg transition-all"
+                        >
+                            View Details
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Explore contest info and rules</p>
+                    </TooltipContent>
+                </Tooltip>
+            </CardFooter>
+        </Card>
     );
 }

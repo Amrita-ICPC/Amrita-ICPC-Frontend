@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 function buildBackendUrl(userId: string) {
-    const url = new URL("/api/v1/sessions/stream", env.NEXT_PUBLIC_API_URL);
+    const baseUrl = env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, "");
+    const url = new URL(`${baseUrl}/api/v1/sessions/stream`);
     url.searchParams.set("userId", userId);
     return url;
 }

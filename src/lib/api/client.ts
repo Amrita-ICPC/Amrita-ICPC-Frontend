@@ -10,11 +10,21 @@ import axios, {
 import { getSession, signOut } from "next-auth/react";
 import { env } from "@/lib/env";
 
+const getBaseUrl = (url: string) => {
+    return url.replace(/\/api\/v1\/?$/, "");
+};
+
 export const api = axios.create({
-    baseURL: env.NEXT_PUBLIC_API_URL,
+    baseURL: getBaseUrl(env.NEXT_PUBLIC_API_URL),
 });
 
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+    // Normalize URL: remove trailing slash from path to prevent FastAPI redirection/404 issues
+    // but only if it's not the root path.
+    if (config.url && config.url.length > 1 && config.url.endsWith("/")) {
+        config.url = config.url.slice(0, -1);
+    }
+
     const headers =
         config.headers instanceof AxiosHeaders ? config.headers : AxiosHeaders.from(config.headers);
 
