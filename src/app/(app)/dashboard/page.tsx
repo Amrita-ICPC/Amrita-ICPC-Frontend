@@ -4,7 +4,8 @@ export default async function DashboardPage() {
     const session = await auth();
     const roles = session?.user?.roles ?? [];
     const groups = session?.user?.groups ?? [];
-    const permissions = session?.user?.permissions ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const permissions = (session?.user as any)?.permissions ?? [];
 
     return (
         <div className="space-y-6">

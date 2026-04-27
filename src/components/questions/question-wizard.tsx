@@ -109,9 +109,8 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     const languages = (languagesData as any)?.data || [];
 
     const form = useForm<QuestionFormValues>({
-        resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as unknown as Parameters<
-            typeof useForm<QuestionFormValues>
-        >[0]["resolver"],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as any,
         defaultValues: {
             question_text: "",
             difficulty: "MEDIUM" as const,
