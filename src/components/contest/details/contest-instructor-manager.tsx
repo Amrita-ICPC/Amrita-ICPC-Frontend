@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { Users, Plus, X, Search, Loader2 } from "lucide-react";
-import {
-    useContestInstructors,
-    useAssignInstructors,
-    useRemoveInstructors,
-} from "@/query/contest-query";
+import { useAssignInstructors, useRemoveInstructors } from "@/mutation/contest-mutation";
+import { useContestInstructors } from "@/query/contest-query";
 import { useQuery } from "@tanstack/react-query";
 import { getUsers } from "@/api/generated/users/users";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

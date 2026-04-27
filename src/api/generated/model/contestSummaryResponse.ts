@@ -35,7 +35,7 @@ export interface ContestSummaryResponse {
     /** How teams are approved in this contest */
     team_approval_mode: TeamApprovalMode;
     /** Contest mode (individual or team) */
-    mode: ContestMode;
+    contest_mode: ContestMode;
     /** List of audiences linked to this contest */
     audiences?: ContestAudienceResponse[];
 }

@@ -15,6 +15,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ContestStatus } from "@/api/generated/model/contestStatus";
 
 interface ContestClientProps {
     initialParams: GetContestsParams;
@@ -31,7 +32,9 @@ export function ContestClient({ initialParams }: ContestClientProps) {
         page: parseInt(searchParams.get("page") || String(initialParams.page || 1)),
         page_size: initialParams.page_size || 10,
         search: searchParams.get("search") || initialParams.search,
-        contest_status: searchParams.get("contest_status") || initialParams.contest_status,
+        contest_status:
+            ContestStatus[searchParams.get("contest_status") as keyof typeof ContestStatus] ||
+            initialParams.contest_status,
     };
 
     const { data, isLoading, isError } = useContests(params);

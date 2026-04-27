@@ -1,14 +1,9 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { userKeys } from "./user-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { getAudiences } from "@/api/generated/audiences/audiences";
 import type {
-    AudienceCreate,
     AudienceResponse,
     AudienceType,
-    AudienceUpdate,
-    AudienceUserBulkDataEmail,
-    AudienceUsersBulkRequest,
     AudienceUsersResponse,
     ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams,
     ListAudiencesApiV1AudiencesGetParams,
@@ -57,6 +52,13 @@ const audienceKeys = {
     ) => [...audienceKeys.detail(audienceId), "users", "list", params] as const,
 };
 
+/**
+ * Fetches a paginated list of audiences based on the provided filters.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return A promise resolving to an ApiResponse containing the audience list.
+ * @throws {ApiError} If the API request fails or returns success: false.
+ */
 async function fetchAudiences(
     params: AudienceListParams = {},
 ): Promise<ApiResponse<AudienceResponse[]>> {
@@ -80,6 +82,12 @@ async function fetchAudiences(
     };
 }
 
+/**
+ * TanStack Query hook for fetching a paginated list of audiences.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return The query result for the audience list.
+ */
 export function useAudiences(params: AudienceListParams = {}) {
     return useQuery({
         queryKey: audienceKeys.list(params),
@@ -89,6 +97,13 @@ export function useAudiences(params: AudienceListParams = {}) {
     });
 }
 
+/**
+ * Fetches the details of a specific audience.
+ *
+ * @param audienceId The unique identifier of the audience.
+ * @return A promise resolving to the audience response data.
+ * @throws {ApiError} If the audience is not found or the request fails.
+ */
 async function fetchAudience(audienceId: string): Promise<AudienceResponse> {
     const response = await audiencesApi.getAudienceApiV1AudiencesAudienceIdGet(audienceId);
 
@@ -107,6 +122,12 @@ async function fetchAudience(audienceId: string): Promise<AudienceResponse> {
     return response.data as AudienceResponse;
 }
 
+/**
+ * TanStack Query hook for fetching audience details.
+ *
+ * @param audienceId The unique identifier of the audience.
+ * @return The query result for the audience details.
+ */
 export function useAudience(audienceId: string | null | undefined) {
     return useQuery({
         queryKey: audienceId ? audienceKeys.detail(audienceId) : audienceKeys.details(),
@@ -116,6 +137,14 @@ export function useAudience(audienceId: string | null | undefined) {
     });
 }
 
+/**
+ * Fetches the list of users associated with a specific audience.
+ *
+ * @param audienceId The unique identifier of the audience.
+ * @param params Pagination and filtering parameters for users.
+ * @return A promise resolving to an ApiResponse containing the audience users.
+ * @throws {ApiError} If the request fails or returns success: false.
+ */
 async function fetchAudienceUsers(
     audienceId: string,
     params: ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams = {},
@@ -147,6 +176,13 @@ async function fetchAudienceUsers(
     };
 }
 
+/**
+ * TanStack Query hook for fetching audience users.
+ *
+ * @param audienceId The unique identifier of the audience.
+ * @param params Pagination and filtering parameters.
+ * @return The query result for the audience users list.
+ */
 export function useAudienceUsers(
     audienceId: string | null | undefined,
     params: ListAudienceUsersApiV1AudiencesAudienceIdUsersGetParams = {},
@@ -157,180 +193,6 @@ export function useAudienceUsers(
         enabled: !!audienceId,
         placeholderData: keepPreviousData,
         retry: false,
-    });
-}
-
-async function createAudience(payload: AudienceCreate) {
-    const response = await audiencesApi.createAudienceApiV1AudiencesPost(payload);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to create audience", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useCreateAudience() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: createAudience,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: audienceKeys.all });
-        },
-    });
-}
-
-async function updateAudience(input: { audienceId: string; payload: AudienceUpdate }) {
-    const response = await audiencesApi.updateAudienceApiV1AudiencesAudienceIdPatch(
-        input.audienceId,
-        input.payload,
-    );
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to update audience", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useUpdateAudience() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: updateAudience,
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: audienceKeys.all });
-            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-        },
-    });
-}
-
-async function deleteAudience(audienceId: string) {
-    const response = await audiencesApi.deleteAudienceApiV1AudiencesAudienceIdDelete(audienceId);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to delete audience", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useDeleteAudience() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: deleteAudience,
-        onSuccess: (_data, audienceId) => {
-            queryClient.invalidateQueries({ queryKey: audienceKeys.all });
-            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(audienceId) });
-        },
-    });
-}
-
-async function addUsersToAudience(input: {
-    audienceId: string;
-    payload: AudienceUsersBulkRequest;
-}) {
-    const response = await audiencesApi.addUsersToAudienceApiV1AudiencesAudienceIdUsersPost(
-        input.audienceId,
-        input.payload,
-    );
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to add users to audience", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useAddAudienceUsers() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: addUsersToAudience,
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({
-                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
-            });
-            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-        },
-    });
-}
-
-async function removeUsersFromAudience(input: {
-    audienceId: string;
-    payload: AudienceUsersBulkRequest;
-}) {
-    const response = await audiencesApi.removeUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete(
-        input.audienceId,
-        input.payload,
-    );
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to remove users from audience", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useRemoveAudienceUsers() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: removeUsersFromAudience,
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({
-                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
-            });
-            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-        },
-    });
-}
-
-async function addUsersToAudienceByEmail(input: {
-    audienceId: string;
-    payload: AudienceUserBulkDataEmail;
-}) {
-    const response =
-        await audiencesApi.addUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost(
-            input.audienceId,
-            input.payload,
-        );
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to add users by email", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useAddAudienceUsersByEmail() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: addUsersToAudienceByEmail,
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({
-                queryKey: [...audienceKeys.detail(variables.audienceId), "users"],
-            });
-            queryClient.invalidateQueries({ queryKey: audienceKeys.detail(variables.audienceId) });
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-        },
     });
 }
 

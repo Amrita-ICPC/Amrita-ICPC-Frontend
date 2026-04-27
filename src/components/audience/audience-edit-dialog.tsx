@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
+import { UpdateAudienceApiV1AudiencesAudienceIdPatchBody } from "@/api/generated/zod/audiences/audiences";
 import type { AudienceResponse } from "@/api/generated/model";
 import { AudienceType } from "@/api/generated/model";
 import { Button } from "@/components/ui/button";
@@ -27,18 +28,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/lib/hooks/use-toast";
 import { toApiError } from "@/lib/api/error";
-import { useUpdateAudience } from "@/query/audience-query";
+import { useUpdateAudience } from "@/mutation/audience-mutation";
 
-const formSchema = z.object({
-    name: z.string().min(1, "Audience name is required").max(255),
-    audience_type: z.enum([
-        AudienceType.class,
-        AudienceType.department,
-        AudienceType.batch,
-        AudienceType.campus,
-    ]),
-    description: z.string().optional(),
-});
+const formSchema = UpdateAudienceApiV1AudiencesAudienceIdPatchBody;
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -97,7 +89,7 @@ export function AudienceEditDialog({
             await updateMutation.mutateAsync({
                 audienceId,
                 payload: {
-                    name: values.name.trim(),
+                    name: values.name?.trim() ?? "",
                     audience_type: values.audience_type,
                     description: values.description?.trim() ? values.description.trim() : null,
                 },
@@ -151,7 +143,7 @@ export function AudienceEditDialog({
                                     name="audience_type"
                                     render={({ field }) => (
                                         <Select
-                                            value={field.value}
+                                            value={field.value ?? ""}
                                             onValueChange={(value) => field.onChange(value)}
                                         >
                                             <SelectTrigger className="w-full">

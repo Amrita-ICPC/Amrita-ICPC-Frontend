@@ -48,7 +48,7 @@ export interface ContestDetailResponse {
     /** How teams are approved in this contest */
     team_approval_mode?: TeamApprovalMode;
     /** Contest mode (individual or team) */
-    mode?: ContestMode;
+    contest_mode?: ContestMode;
     /** Contest ID */
     id: string;
     /** Contest status */

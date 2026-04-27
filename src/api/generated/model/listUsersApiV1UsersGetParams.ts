@@ -27,4 +27,8 @@ export type ListUsersApiV1UsersGetParams = {
      * Search by name, email, or phone number
      */
     q?: string | null;
+    /**
+     * Filter by audience IDs
+     */
+    audience_ids?: string[] | null;
 };

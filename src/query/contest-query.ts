@@ -1,26 +1,19 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { ApiResponse } from "@/types/api";
 import type { GetContestsParams } from "@/types/contest";
 import {
-    type ContestAudienceManageRequest,
     type ContestAudienceResponse,
-    ContestCreate,
     type ContestDetailResponse,
     type ContestSummaryResponse,
-    type ImageUploadResponse,
-    type InstructorManageRequest,
     type InstructorResponse,
-    type ContestUpdate,
 } from "@/api/generated/model";
 import { getContests } from "@/api/generated/contests/contests";
-import { getImages } from "@/api/generated/images/images";
 import { ApiError } from "@/lib/api/error";
 
 const contestsApi = getContests();
-const imagesApi = getImages();
 
-const contestKeys = {
+export const contestKeys = {
     all: ["contests"] as const,
     lists: () => [...contestKeys.all, "list"] as const,
     list: (params: GetContestsParams) =>
@@ -36,6 +29,13 @@ const contestKeys = {
     detail: (id: string) => [...contestKeys.details(), id] as const,
 };
 
+/**
+ * Fetches the details of a specific contest.
+ *
+ * @param id The unique identifier of the contest.
+ * @return A promise resolving to the contest detail response.
+ * @throws {ApiError} If the contest is not found or the request fails.
+ */
 async function fetchContestDetail(id: string): Promise<ContestDetailResponse> {
     const response = await contestsApi.getContestApiV1ContestsContestIdGet(id);
 
@@ -54,6 +54,12 @@ async function fetchContestDetail(id: string): Promise<ContestDetailResponse> {
     return response.data;
 }
 
+/**
+ * TanStack Query hook for fetching contest details.
+ *
+ * @param id The unique identifier of the contest.
+ * @return The query result for the contest details.
+ */
 export function useContestDetail(id: string) {
     return useQuery({
         queryKey: contestKeys.detail(id),
@@ -62,6 +68,12 @@ export function useContestDetail(id: string) {
     });
 }
 
+/**
+ * TanStack Query hook for fetching audiences assigned to a contest.
+ *
+ * @param contestId The unique identifier of the contest.
+ * @return The query result for the contest audiences list.
+ */
 export function useContestAudiences(contestId: string) {
     return useQuery({
         queryKey: [...contestKeys.detail(contestId), "audiences"],
@@ -79,38 +91,12 @@ export function useContestAudiences(contestId: string) {
     });
 }
 
-export function useAssignAudiences(contestId: string) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: ContestAudienceManageRequest) =>
-            contestsApi.assignAudiencesToContestApiV1ContestsContestIdAudiencesPost(
-                contestId,
-                payload,
-            ),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [...contestKeys.detail(contestId), "audiences"],
-            });
-        },
-    });
-}
-
-export function useRemoveAudiences(contestId: string) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: ContestAudienceManageRequest) =>
-            contestsApi.removeAudiencesFromContestApiV1ContestsContestIdAudiencesDelete(
-                contestId,
-                payload,
-            ),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [...contestKeys.detail(contestId), "audiences"],
-            });
-        },
-    });
-}
-
+/**
+ * TanStack Query hook for fetching instructors assigned to a contest.
+ *
+ * @param contestId The unique identifier of the contest.
+ * @return The query result for the contest instructors list.
+ */
 export function useContestInstructors(contestId: string) {
     return useQuery({
         queryKey: [...contestKeys.detail(contestId), "instructors"],
@@ -130,38 +116,13 @@ export function useContestInstructors(contestId: string) {
     });
 }
 
-export function useAssignInstructors(contestId: string) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: InstructorManageRequest) =>
-            contestsApi.assignInstructorsToContestApiV1ContestsContestIdInstructorsPost(
-                contestId,
-                payload,
-            ),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [...contestKeys.detail(contestId), "instructors"],
-            });
-        },
-    });
-}
-
-export function useRemoveInstructors(contestId: string) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: InstructorManageRequest) =>
-            contestsApi.removeInstructorsFromContestApiV1ContestsContestIdInstructorsDelete(
-                contestId,
-                payload,
-            ),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [...contestKeys.detail(contestId), "instructors"],
-            });
-        },
-    });
-}
-
+/**
+ * Fetches a paginated list of contests based on the provided filters.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return A promise resolving to an ApiResponse containing the contest summary list.
+ * @throws {ApiError} If the request fails or returns success: false.
+ */
 async function fetchContests(
     params: GetContestsParams,
 ): Promise<ApiResponse<ContestSummaryResponse[]>> {
@@ -169,7 +130,7 @@ async function fetchContests(
         page: params.page,
         page_size: params.page_size,
         search: params.search,
-        contest_status: params.contest_status as never,
+        contest_status: params.contest_status,
         is_public: params.is_public,
     });
 
@@ -191,124 +152,17 @@ async function fetchContests(
     };
 }
 
+/**
+ * TanStack Query hook for fetching a paginated list of contests.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return The query result for the contest list.
+ */
 export function useContests(params: GetContestsParams = {}) {
     return useQuery({
         queryKey: contestKeys.list(params),
         queryFn: () => fetchContests(params),
         placeholderData: keepPreviousData,
         retry: false,
-    });
-}
-
-//create contest mutation
-async function createContest(contestData: ContestCreate) {
-    const response = await contestsApi.createContestApiV1ContestsPost(contestData);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to create contest", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useCreateContest() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: createContest,
-        onSuccess: () => {
-            // Invalidate contests list to refetch updated data after creating a contest
-            queryClient.invalidateQueries({ queryKey: contestKeys.all });
-        },
-    });
-}
-
-// update contest mutation
-async function updateContest(input: { contestId: string; contestData: ContestUpdate }) {
-    const response = await contestsApi.updateContestApiV1ContestsContestIdPatch(
-        input.contestId,
-        input.contestData,
-    );
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to update contest", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useUpdateContest() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: updateContest,
-        onSuccess: (response, variables) => {
-            // The list invalidation works, so we keep it.
-            queryClient.invalidateQueries({ queryKey: contestKeys.lists() });
-
-            const updatedContest = response?.data;
-            if (updatedContest) {
-                queryClient.setQueryData(contestKeys.detail(variables.contestId), updatedContest);
-            } else {
-                // If the mutation response doesn't have data, fall back to invalidation.
-                queryClient.invalidateQueries({
-                    queryKey: contestKeys.detail(variables.contestId),
-                });
-            }
-        },
-    });
-}
-
-//upload image
-async function uploadContestImage(file: File): Promise<ImageUploadResponse> {
-    const response = await imagesApi.uploadImageApiV1UploadPost({ file });
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Image upload failed", {
-            status: response.status,
-        });
-    }
-
-    if (!response?.data) {
-        throw new ApiError("Image upload succeeded but no data was returned", {
-            status: response?.status,
-        });
-    }
-
-    return response.data;
-}
-
-export function useUploadContestImage() {
-    return useMutation({
-        mutationFn: uploadContestImage,
-    });
-}
-
-// soft delete contest
-async function softDeleteContest(contestId: string) {
-    const response =
-        await contestsApi.softDeleteContestApiV1ContestsContestIdSoftDeleteDelete(contestId);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to delete contest", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useSoftDeleteContest() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: softDeleteContest,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: contestKeys.all });
-        },
     });
 }

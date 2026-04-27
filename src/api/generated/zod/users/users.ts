@@ -72,6 +72,7 @@ Args:
     page_size: Number of items per page.
     role: Optional filter for user role.
     q: Optional search query for name, email, or phone number.
+    audience_ids: Optional filter for audience IDs.
 
 Returns:
     Paginated list of users.
@@ -109,6 +110,10 @@ export const ListUsersApiV1UsersGetQueryParams = zod.object({
         .union([zod.string(), zod.null()])
         .optional()
         .describe("Search by name, email, or phone number"),
+    audience_ids: zod
+        .union([zod.array(zod.uuid()), zod.null()])
+        .optional()
+        .describe("Filter by audience IDs"),
 });
 
 export const listUsersApiV1UsersGetResponseSuccessDefault = true;

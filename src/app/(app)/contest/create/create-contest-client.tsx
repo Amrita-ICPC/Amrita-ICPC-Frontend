@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ContestForm } from "@/components/contest/contest-form";
-import { useCreateContest } from "@/query/contest-query";
+import { useCreateContest } from "@/mutation/contest-mutation";
 import { ContestFormValues } from "@/components/contest/form/contest-form";
 import { ContestCreate, ContestMode } from "@/api/generated/model";
 import { toast } from "@/lib/hooks/use-toast";
@@ -31,7 +31,7 @@ export function CreateContestClient() {
             registration_end: values.registration_end?.trim()
                 ? toUtcIsoString(values.registration_end)
                 : null,
-            mode: values.mode,
+            contest_mode: values.contest_mode as ContestMode,
             max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
             min_team_size: values.min_team_size,
             max_team_size: values.max_team_size,

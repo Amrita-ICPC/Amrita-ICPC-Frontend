@@ -19,12 +19,11 @@ import { extractEmailsFromFile } from "@/lib/utils/file-parser";
 import { clampPage, clampPageSize } from "@/lib/utils/pagination";
 import { toast } from "@/lib/hooks/use-toast";
 import {
-    useAudience,
-    useAudienceUsers,
     useRemoveAudienceUsers,
     useAddAudienceUsersByEmail,
     useDeleteAudience,
-} from "@/query/audience-query";
+} from "@/mutation/audience-mutation";
+import { useAudience, useAudienceUsers } from "@/query/audience-query";
 
 const USER_ROLES = ["student", "instructor", "manager", "admin"] as const;
 

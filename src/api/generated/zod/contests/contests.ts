@@ -37,7 +37,7 @@ export const createContestApiV1ContestsPostBodyMinTeamSizeDefault = 1;
 export const createContestApiV1ContestsPostBodyMaxTeamSizeDefault = 1;
 export const createContestApiV1ContestsPostBodyScoringTypeDefault = `AUTO`;
 export const createContestApiV1ContestsPostBodyTeamApprovalModeDefault = `AUTO_APPROVE`;
-export const createContestApiV1ContestsPostBodyModeDefault = `individual`;
+export const createContestApiV1ContestsPostBodyContestModeDefault = `individual`;
 
 export const CreateContestApiV1ContestsPostBody = zod
     .object({
@@ -89,9 +89,9 @@ export const CreateContestApiV1ContestsPostBody = zod
             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
             .default(createContestApiV1ContestsPostBodyTeamApprovalModeDefault)
             .describe("How teams are approved in this contest"),
-        mode: zod
+        contest_mode: zod
             .enum(["individual", "team"])
-            .default(createContestApiV1ContestsPostBodyModeDefault)
+            .default(createContestApiV1ContestsPostBodyContestModeDefault)
             .describe("Contest mode (individual or team)"),
         audience_ids: zod
             .array(zod.uuid())
@@ -198,7 +198,7 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
                         team_approval_mode: zod
                             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
                             .describe("How teams are approved in this contest"),
-                        mode: zod
+                        contest_mode: zod
                             .enum(["individual", "team"])
                             .describe("Contest mode (individual or team)"),
                         audiences: zod
@@ -333,7 +333,7 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
                         team_approval_mode: zod
                             .enum(["AUTO_APPROVE", "INSTRUCTOR_REVIEW"])
                             .describe("How teams are approved in this contest"),
-                        mode: zod
+                        contest_mode: zod
                             .enum(["individual", "team"])
                             .describe("Contest mode (individual or team)"),
                         audiences: zod
@@ -410,7 +410,7 @@ export const getContestApiV1ContestsContestIdGetResponseDataOneMinTeamSizeDefaul
 export const getContestApiV1ContestsContestIdGetResponseDataOneMaxTeamSizeDefault = 1;
 export const getContestApiV1ContestsContestIdGetResponseDataOneScoringTypeDefault = `AUTO`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
-export const getContestApiV1ContestsContestIdGetResponseDataOneModeDefault = `individual`;
+export const getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault = `individual`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountDefault = 0;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountMin = 0;
 
@@ -497,9 +497,11 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
                             getContestApiV1ContestsContestIdGetResponseDataOneTeamApprovalModeDefault,
                         )
                         .describe("How teams are approved in this contest"),
-                    mode: zod
+                    contest_mode: zod
                         .enum(["individual", "team"])
-                        .default(getContestApiV1ContestsContestIdGetResponseDataOneModeDefault)
+                        .default(
+                            getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault,
+                        )
                         .describe("Contest mode (individual or team)"),
                     id: zod.uuid().describe("Contest ID"),
                     status: zod
@@ -692,7 +694,7 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod
             ])
             .optional()
             .describe("Scoring type"),
-        mode: zod
+        contest_mode: zod
             .union([
                 zod
                     .enum(["individual", "team"])
@@ -733,7 +735,7 @@ export const updateContestApiV1ContestsContestIdPatchResponseDataOneMinTeamSizeD
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneMaxTeamSizeDefault = 1;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneScoringTypeDefault = `AUTO`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
-export const updateContestApiV1ContestsContestIdPatchResponseDataOneModeDefault = `individual`;
+export const updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault = `individual`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountDefault = 0;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountMin = 0;
 
@@ -822,9 +824,11 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
                             updateContestApiV1ContestsContestIdPatchResponseDataOneTeamApprovalModeDefault,
                         )
                         .describe("How teams are approved in this contest"),
-                    mode: zod
+                    contest_mode: zod
                         .enum(["individual", "team"])
-                        .default(updateContestApiV1ContestsContestIdPatchResponseDataOneModeDefault)
+                        .default(
+                            updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault,
+                        )
                         .describe("Contest mode (individual or team)"),
                     id: zod.uuid().describe("Contest ID"),
                     status: zod
@@ -1550,7 +1554,7 @@ export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMinTe
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxTeamSizeDefault = 1;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneScoringTypeDefault = `AUTO`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
-export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneModeDefault = `individual`;
+export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault = `individual`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountDefault = 0;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountMin = 0;
 
@@ -1645,10 +1649,10 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
                             restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamApprovalModeDefault,
                         )
                         .describe("How teams are approved in this contest"),
-                    mode: zod
+                    contest_mode: zod
                         .enum(["individual", "team"])
                         .default(
-                            restoreContestApiV1ContestsContestIdRestorePostResponseDataOneModeDefault,
+                            restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault,
                         )
                         .describe("Contest mode (individual or team)"),
                     id: zod.uuid().describe("Contest ID"),

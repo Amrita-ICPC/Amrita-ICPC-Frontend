@@ -19,7 +19,7 @@ export interface Contest {
 export type GetContestsParams = {
     page?: number;
     page_size?: number;
-    contest_status?: ContestStatus | string;
+    contest_status?: ContestStatus;
     search?: string;
     is_public?: boolean;
 };
@@ -30,3 +30,11 @@ export type PaginatedContestList = {
     page: number;
     size: number;
 };
+
+export interface PartialUserResponseForTeamSelection {
+    id: string;
+    user_id: string;
+    name: string;
+    email: string;
+    picture?: string;
+}

@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/table";
 
 import { useDebounce } from "@/hooks/use-debounce";
-import { useAddAudienceUsers } from "@/query/audience-query";
+import { useAddAudienceUsers } from "@/mutation/audience-mutation";
 import { useUsers } from "@/query/user-query";
 import { toast } from "@/lib/hooks/use-toast";
 import { toApiError } from "@/lib/api/error";

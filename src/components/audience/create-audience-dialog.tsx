@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { CreateAudienceApiV1AudiencesPostBody } from "@/api/generated/zod/audiences/audiences";
 
 import { AudienceType, type AudienceCreate } from "@/api/generated/model";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toApiError } from "@/lib/api/error";
-import { useCreateAudience } from "@/query/audience-query";
+import { useCreateAudience } from "@/mutation/audience-mutation";
 
 /**
  * CreateAudienceDialog provides an admin-facing form to create a new Audience.
@@ -67,20 +68,7 @@ function CreateAudienceDialogContent(props: { onClose: () => void }) {
         [],
     );
 
-    const formSchema = useMemo(
-        () =>
-            z.object({
-                name: z.string().trim().min(1, "Name is required").max(255),
-                audience_type: z.enum([
-                    AudienceType.class,
-                    AudienceType.department,
-                    AudienceType.batch,
-                    AudienceType.campus,
-                ]),
-                description: z.string().optional(),
-            }),
-        [],
-    );
+    const formSchema = useMemo(() => CreateAudienceApiV1AudiencesPostBody, []);
 
     type FormValues = z.infer<typeof formSchema>;
 

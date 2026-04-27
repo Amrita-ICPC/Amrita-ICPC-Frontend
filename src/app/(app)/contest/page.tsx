@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import type { GetContestsParams } from "@/types/contest";
+import type { ContestStatus, GetContestsParams } from "@/types/contest";
 import { Roles } from "@/lib/auth/utils";
 import { auth } from "@/lib/auth/auth";
 import { getSingleValue, parseBoolean, parsePage } from "@/lib/search-params";
@@ -17,7 +17,8 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
     const params: GetContestsParams = {
         page: parsePage(resolvedParams?.page, 1),
         page_size: parsePage(resolvedParams?.page_size, 10),
-        contest_status: getSingleValue(resolvedParams?.contest_status) ?? undefined,
+        contest_status:
+            (getSingleValue(resolvedParams?.contest_status) as ContestStatus) ?? undefined,
         search: getSingleValue(resolvedParams?.search) ?? undefined,
         is_public: parseBoolean(resolvedParams?.is_public),
     };

@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { ContestForm } from "@/components/contest/contest-form";
-import { useContestAudiences, useContestDetail, useUpdateContest } from "@/query/contest-query";
+import { useUpdateContest } from "@/mutation/contest-mutation";
+import { useContestAudiences, useContestDetail } from "@/query/contest-query";
 import { ContestFormValues } from "@/components/contest/form/contest-form";
-import { ContestUpdate, ContestMode } from "@/api/generated/model";
+import { ContestUpdate } from "@/api/generated/model";
 import { toast } from "@/lib/hooks/use-toast";
 import { toApiError } from "@/lib/api/error";
 
@@ -33,14 +34,13 @@ export function EditContestClient({ contestId }: EditContestClientProps) {
             end_time: toUtcIsoString(values.end_time)!,
             registration_start: toUtcIsoString(values.registration_start!),
             registration_end: toUtcIsoString(values.registration_end!),
-            mode: values.mode,
+            contest_mode: values.contest_mode,
             max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
             min_team_size: values.min_team_size,
             max_team_size: values.max_team_size,
             rules: values.rules?.trim() ? values.rules.trim() : null,
             scoring_type: values.scoring_type,
             team_approval_mode: values.team_approval_mode,
-            audience_ids: values.audience_ids?.length ? values.audience_ids : [],
         };
 
         try {

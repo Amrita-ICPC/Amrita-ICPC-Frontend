@@ -20,7 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import AuthGuard from "@/components/global/auth-guard";
 import { Roles } from "@/lib/auth/utils";
 import { toApiError } from "@/lib/api/error";
-import { useSoftDeleteContest } from "@/query/contest-query";
+import { useSoftDeleteContest } from "@/mutation/contest-mutation";
 import type { ContestSummaryResponse } from "@/api/generated/model";
 import {
     formatContestDateTime,
@@ -243,9 +243,9 @@ export function ContestCard({ contest }: ContestCardProps) {
                                     </Badge>
                                     <Badge
                                         variant="outline"
-                                        className={`border-transparent font-semibold tracking-wide ${getContestModeBadgeClass(String(contest.mode))}`}
+                                        className={`border-transparent font-semibold tracking-wide ${getContestModeBadgeClass(String(contest.contest_mode))}`}
                                     >
-                                        {formatContestLabel(String(contest.mode))}
+                                        {formatContestLabel(String(contest.contest_mode))}
                                     </Badge>
                                 </div>
                             </div>

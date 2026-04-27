@@ -5,10 +5,9 @@ import {
     TeamApprovalMode,
     ContestMode,
 } from "@/api/generated/model";
-import { useUploadContestImage } from "@/query/contest-query";
+import { useUploadContestImage } from "@/mutation/contest-mutation";
 import { useMemo, useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toDateTimeLocalValue } from "@/lib/utils/date-time-parser";
 import { AudienceSelectorCard } from "./audience-selector-card";
@@ -115,7 +114,7 @@ export function ContestForm({ onSubmit, contest, audience_ids, isPending }: Cont
             registration_end: contest
                 ? toDateTimeLocalValue(new Date(contest.registration_end!))
                 : "",
-            mode: contest ? contest.mode : ContestMode.team,
+            contest_mode: contest ? contest.contest_mode : ContestMode.team,
             max_teams: contest ? (contest.max_teams ?? undefined) : undefined,
             min_team_size: contest ? contest.min_team_size : 1,
             max_team_size: contest ? contest.max_team_size : 3,
@@ -125,6 +124,7 @@ export function ContestForm({ onSubmit, contest, audience_ids, isPending }: Cont
                 ? contest.team_approval_mode
                 : TeamApprovalMode.AUTO_APPROVE,
             audience_ids: audience_ids ? audience_ids : [],
+            show_leaderboard: contest ? contest.show_leaderboard : true,
         },
         mode: "onTouched",
     });
@@ -135,7 +135,7 @@ export function ContestForm({ onSubmit, contest, audience_ids, isPending }: Cont
     const watchedStartTime = useWatch({ control, name: "start_time" });
     const watchedEndTime = useWatch({ control, name: "end_time" });
     const watchedAudienceIds = useWatch({ control, name: "audience_ids" }) ?? [];
-    const watchedMode = useWatch({ control, name: "mode" });
+    const watchedMode = useWatch({ control, name: "contest_mode" });
 
     useEffect(() => {
         if (watchedMode === ContestMode.individual) {
@@ -303,7 +303,7 @@ export function ContestForm({ onSubmit, contest, audience_ids, isPending }: Cont
                                     <Label>Mode</Label>
                                     <Controller
                                         control={control}
-                                        name="mode"
+                                        name="contest_mode"
                                         render={({ field }) => (
                                             <Select
                                                 value={field.value}
@@ -489,6 +489,30 @@ export function ContestForm({ onSubmit, contest, audience_ids, isPending }: Cont
                                             <SelectContent>
                                                 <SelectItem value="true">Public</SelectItem>
                                                 <SelectItem value="false">Private</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Show Leaderboard</Label>
+                                <Controller
+                                    control={control}
+                                    name="show_leaderboard"
+                                    render={({ field }) => (
+                                        <Select
+                                            value={String(field.value ?? true)}
+                                            onValueChange={(value) =>
+                                                field.onChange(value === "true")
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">Show</SelectItem>
+                                                <SelectItem value="false">Hide</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     )}

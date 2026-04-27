@@ -1,7 +1,17 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Users2 } from "lucide-react";
+"use client";
 
-export function ContestTeamsPage() {
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TeamActionBar } from "@/components/contest/teams/team-action-bar";
+import { TeamsTable } from "@/components/contest/teams/teams-table";
+import { useDebounce } from "@/hooks/use-debounce";
+
+export function ContestTeamsPage({ contestId }: { contestId: string }) {
+    const [search, setSearch] = useState("");
+    const [approvalStatus, setApprovalStatus] = useState<"approved" | "pending" | "all">("all");
+    const [teamStatus, setTeamStatus] = useState<"all" | "DRAFT" | "CONFIRMED">("all");
+    const debouncedSearch = useDebounce(search, 300);
+
     return (
         <div className="space-y-8">
             <Card>
@@ -12,14 +22,21 @@ export function ContestTeamsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex flex-col items-center justify-center text-center p-12 border border-dashed rounded-xl bg-muted/20">
-                        <Users2 className="h-12 w-12 text-muted-foreground/40 mb-4" />
-                        <h3 className="text-lg font-semibold text-foreground/80">No Teams Found</h3>
-                        <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">
-                            There are no teams registered for this contest yet. Participants can
-                            create or join teams once registration opens.
-                        </p>
-                    </div>
+                    <TeamActionBar
+                        search={search}
+                        onSearchChange={setSearch}
+                        approvalStatus={approvalStatus}
+                        onApprovalStatusChange={setApprovalStatus}
+                        teamStatus={teamStatus}
+                        onTeamStatusChange={setTeamStatus}
+                        contestId={contestId}
+                    />
+                    <TeamsTable
+                        contestId={contestId}
+                        search={debouncedSearch}
+                        approvalStatus={approvalStatus}
+                        teamStatus={teamStatus}
+                    />
                 </CardContent>
             </Card>
         </div>

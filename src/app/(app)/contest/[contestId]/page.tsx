@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { use } from "react";
 import { useContestDetail } from "@/query/contest-query";
 import { ContestOverviewHero } from "@/components/contest/details/ContestOverviewHero";

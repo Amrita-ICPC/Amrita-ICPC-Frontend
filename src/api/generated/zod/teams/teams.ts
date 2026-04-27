@@ -277,6 +277,59 @@ export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponse = zod.obje
 });
 
 /**
+ * Delete a team and its member associations from a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    team_id (UUID): The unique identifier of the team to delete.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Delete a team from a contest
+ */
+export const DeleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteParams = zod.object({
+    contest_id: zod.uuid(),
+    team_id: zod.uuid(),
+});
+
+export const deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseSuccessDefault = true;
+export const deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseStatusDefault = 200;
+export const deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseMessageDefault = `Success`;
+
+export const DeleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseSuccessDefault),
+    status: zod
+        .number()
+        .default(deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseStatusDefault),
+    message: zod
+        .string()
+        .default(deleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResponseMessageDefault),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({}),
+    }),
+});
+
+/**
  * Get detailed information about a specific team.
 
 Args:

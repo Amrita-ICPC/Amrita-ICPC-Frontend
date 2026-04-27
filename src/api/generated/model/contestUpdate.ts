@@ -40,7 +40,7 @@ export interface ContestUpdate {
     /** Scoring type */
     scoring_type?: ScoringType | null;
     /** Contest mode */
-    mode?: ContestMode | null;
+    contest_mode?: ContestMode | null;
     /** How teams are approved in this contest */
     team_approval_mode?: TeamApprovalMode | null;
     /** Whether to show leaderboard */

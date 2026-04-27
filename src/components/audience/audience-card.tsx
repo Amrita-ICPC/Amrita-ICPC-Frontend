@@ -10,7 +10,7 @@ import { AudienceEditDialog } from "@/components/audience/audience-edit-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { useDeleteAudience } from "@/query/audience-query";
+import { useDeleteAudience } from "@/mutation/audience-mutation";
 import { toast } from "@/lib/hooks/use-toast";
 import { toApiError } from "@/lib/api/error";
 

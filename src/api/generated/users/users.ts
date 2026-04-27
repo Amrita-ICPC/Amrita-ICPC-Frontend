@@ -59,6 +59,7 @@ Args:
     page_size: Number of items per page.
     role: Optional filter for user role.
     q: Optional search query for name, email, or phone number.
+    audience_ids: Optional filter for audience IDs.
 
 Returns:
     Paginated list of users.

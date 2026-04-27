@@ -101,6 +101,29 @@ Returns:
         });
     };
     /**
+ * Delete a team and its member associations from a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    team_id (UUID): The unique identifier of the team to delete.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Delete a team from a contest
+ */
+    const deleteTeamApiV1ContestsContestIdTeamsTeamIdDelete = (
+        contestId: string,
+        teamId: string,
+    ) => {
+        return axiosWithAuth<APIResponse>({
+            url: `/api/v1/contests/${contestId}/teams/${teamId}`,
+            method: "DELETE",
+        });
+    };
+    /**
  * Get detailed information about a specific team.
 
 Args:
@@ -229,6 +252,7 @@ Returns:
         createTeamApiV1ContestsContestIdTeamsPost,
         getContestTeamsApiV1ContestsContestIdTeamsGet,
         updateTeamApiV1ContestsContestIdTeamsTeamIdPatch,
+        deleteTeamApiV1ContestsContestIdTeamsTeamIdDelete,
         getTeamApiV1ContestsContestIdTeamsTeamIdGet,
         approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch,
         getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet,
@@ -247,6 +271,11 @@ export type GetContestTeamsApiV1ContestsContestIdTeamsGetResult = NonNullable<
 export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchResult = NonNullable<
     Awaited<
         ReturnType<ReturnType<typeof getTeams>["updateTeamApiV1ContestsContestIdTeamsTeamIdPatch"]>
+    >
+>;
+export type DeleteTeamApiV1ContestsContestIdTeamsTeamIdDeleteResult = NonNullable<
+    Awaited<
+        ReturnType<ReturnType<typeof getTeams>["deleteTeamApiV1ContestsContestIdTeamsTeamIdDelete"]>
     >
 >;
 export type GetTeamApiV1ContestsContestIdTeamsTeamIdGetResult = NonNullable<

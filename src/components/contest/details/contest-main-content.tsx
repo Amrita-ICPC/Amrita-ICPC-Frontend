@@ -78,7 +78,7 @@ export function ContestMainContent({ contest }: ContestMainContentProps) {
             <div className="py-8 md:py-10">
                 {activeTab === "overview" && <OverviewTab contest={contest} />}
                 {activeTab === "questions" && <ContestQuestionsPage />}
-                {activeTab === "teams" && <ContestTeamsPage />}
+                {activeTab === "teams" && <ContestTeamsPage contestId={contest.id} />}
                 {activeTab === "monitor" && <ContestMonitorPage />}
             </div>
         </Tabs>

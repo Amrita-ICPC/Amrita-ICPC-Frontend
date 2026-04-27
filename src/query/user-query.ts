@@ -20,6 +20,13 @@ export const userKeys = {
     list: (params: ListUsersApiV1UsersGetParams) => [...userKeys.lists(), params] as const,
 };
 
+/**
+ * Fetches a paginated list of users based on the provided filters.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return A promise resolving to an ApiResponse containing the user list.
+ * @throws {ApiError} If the request fails or returns success: false.
+ */
 async function fetchUsers(
     params: ListUsersApiV1UsersGetParams,
 ): Promise<ApiResponse<UserResponse[]>> {
@@ -48,6 +55,12 @@ async function fetchUsers(
     };
 }
 
+/**
+ * TanStack Query hook for fetching a paginated list of users.
+ *
+ * @param params Filtering and pagination parameters.
+ * @return The query result for the user list.
+ */
 export function useUsers(params: ListUsersApiV1UsersGetParams = {}) {
     return useQuery({
         queryKey: userKeys.list(params),
@@ -57,6 +70,13 @@ export function useUsers(params: ListUsersApiV1UsersGetParams = {}) {
     });
 }
 
+/**
+ * Fetches the list of audiences associated with the current user.
+ *
+ * @param params Pagination and search parameters.
+ * @return A promise resolving to an ApiResponse containing the user's audiences.
+ * @throws {ApiError} If the request fails or returns success: false.
+ */
 async function fetchUserAudiences(
     params?: ListUserAudiencesApiV1AudiencesMyGetParams,
 ): Promise<ApiResponse<AudienceBriefResponse[]>> {
@@ -83,6 +103,12 @@ async function fetchUserAudiences(
     };
 }
 
+/**
+ * TanStack Query hook for fetching the current user's audiences.
+ *
+ * @param params Pagination and search parameters.
+ * @return The query result for the user's audiences list.
+ */
 export function useUserAudiences(params?: ListUserAudiencesApiV1AudiencesMyGetParams) {
     return useQuery({
         queryKey: ["userAudiences", params?.page, params?.page_size, params?.q] as const,

@@ -105,7 +105,7 @@ export function ContestOverviewHero({ contest, onPublish }: ContestOverviewHeroP
                                     variant="outline"
                                     className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 shadow-xs"
                                 >
-                                    {contest.mode?.toUpperCase()}
+                                    {contest.contest_mode?.toUpperCase()}
                                 </Badge>
                             </div>
                         </div>
