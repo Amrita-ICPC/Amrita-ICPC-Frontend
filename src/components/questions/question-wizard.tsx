@@ -368,7 +368,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                                     if (current.includes(lang.id)) {
                                                                         field.onChange(
                                                                             current.filter(
-                                                                                (id) =>
+                                                                                (id: number) =>
                                                                                     id !== lang.id,
                                                                             ),
                                                                         );
@@ -526,7 +526,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                             className="w-full"
                                         >
                                             <TabsList className="bg-white/5 border border-white/10 p-1 mb-8 overflow-x-auto max-w-full justify-start">
-                                                {selectedLangIds.map((langId) => {
+                                                {selectedLangIds.map((langId: number) => {
                                                     const lang = languages.find(
                                                         (l: { id: number; slug?: string }) =>
                                                             l.id === langId,
@@ -550,7 +550,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                 })}
                                             </TabsList>
 
-                                            {selectedLangIds.map((langId) => {
+                                            {selectedLangIds.map((langId: number) => {
                                                 const existingIdx = activeTemplates.findIndex(
                                                     (t: { language_id: number }) =>
                                                         t.language_id === langId,
