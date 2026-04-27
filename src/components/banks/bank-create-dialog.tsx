@@ -27,7 +27,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateBankApiV1BanksPost, getGetAllBanksApiV1BanksGetQueryKey } from "@/api/generated/banks/banks";
+import {
+    useCreateBankApiV1BanksPost,
+    getGetAllBanksApiV1BanksGetQueryKey,
+} from "@/api/generated/banks/banks";
 import { CreateBankApiV1BanksPostBody } from "@/api/generated/zod/banks/banks";
 import { toApiError } from "@/lib/api/error";
 import * as zod from "zod";
@@ -49,7 +52,7 @@ export function BankCreateDialog() {
                     queryKey: getGetAllBanksApiV1BanksGetQueryKey(),
                 });
             },
-            onError: (error: any) => {
+            onError: (error: unknown) => {
                 const apiError = toApiError(error);
                 toast.error(apiError.message);
             },
@@ -133,7 +136,11 @@ export function BankCreateDialog() {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending} className="min-w-[120px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                            <Button
+                                type="submit"
+                                disabled={isPending}
+                                className="min-w-[120px] shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                            >
                                 {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

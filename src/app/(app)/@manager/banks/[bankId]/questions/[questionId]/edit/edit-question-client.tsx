@@ -20,7 +20,7 @@ export function EditQuestionClient() {
     const { data: question, isLoading: isQuestionLoading } = useQuestion(questionId);
     const updateQuestionMutation = useUpdateQuestion();
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: unknown) => {
         try {
             await updateQuestionMutation.mutateAsync({
                 questionId,
@@ -32,9 +32,9 @@ export function EditQuestionClient() {
             });
 
             router.push(`/banks/${bankId}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast("Failed to update question", {
-                description: error.message || "An unexpected error occurred.",
+                description: (error as Error).message || "An unexpected error occurred.",
             });
         }
     };
@@ -74,9 +74,11 @@ export function EditQuestionClient() {
             </div>
 
             <div className="bg-card rounded-lg border p-6">
-                <QuestionForm 
-                    initialValues={question as any}
-                    onSubmit={handleSubmit} 
+                <QuestionForm
+                    initialValues={
+                        question as unknown as Parameters<typeof QuestionForm>[0]["initialValues"]
+                    }
+                    onSubmit={handleSubmit}
                     isLoading={updateQuestionMutation.isPending}
                 />
             </div>

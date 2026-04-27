@@ -156,6 +156,7 @@ export function ContestCard({ contest }: ContestCardProps) {
             <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 {showImage ? (
                     <>
+                        {}
                         {/* Plain <img> — no hostname config, onError silently falls back */}
                         <img
                             src={contest.image}
