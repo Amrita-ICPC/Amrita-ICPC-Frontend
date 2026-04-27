@@ -46,6 +46,7 @@ import {
     useCreateQuestionApiV1QuestionsPost,
     useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet,
 } from "@/api/generated/questions/questions";
+import { useAddQuestionsToBankApiV1BanksBankIdQuestionsPost } from "@/api/generated/bank-questions/bank-questions";
 import { CreateQuestionApiV1QuestionsPostBody } from "@/api/generated/zod/questions/questions";
 import { TagSelector } from "@/components/shared/tags/tag-selector";
 import * as zod from "zod";
@@ -58,14 +59,39 @@ const steps = [
     { id: "templates", title: "Code Templates", icon: Code },
 ];
 
-export function QuestionWizard() {
+interface QuestionWizardProps {
+    bankId?: string;
+    onSuccess?: (questionId: string) => void;
+}
+
+export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     const [currentStep, setCurrentStep] = useState(0);
+
+    const { mutateAsync: addQuestionsToBank } = useAddQuestionsToBankApiV1BanksBankIdQuestionsPost();
+
     const { mutate: createQuestion, isPending } = useCreateQuestionApiV1QuestionsPost({
         mutation: {
-            onSuccess: () => {
-                toast.success("Question created successfully!");
+            onSuccess: async (response) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const questionId = (response as any)?.data?.id;
+
+                if (bankId && questionId) {
+                    try {
+                        await addQuestionsToBank({
+                            bankId,
+                            data: { question_ids: [questionId] },
+                        });
+                        toast.success("Question created and added to bank!");
+                    } catch (error) {
+                        toast.error("Question created but failed to link to bank");
+                    }
+                } else {
+                    toast.success("Question created successfully!");
+                }
+
                 form.reset();
                 setCurrentStep(0);
+                if (onSuccess && questionId) onSuccess(questionId);
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
