@@ -529,11 +529,11 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                             <TabsList className="bg-white/5 border border-white/10 p-1 mb-8 overflow-x-auto max-w-full justify-start">
                                                 {selectedLangIds.map((langId) => {
                                                     const lang = languages.find(
-                                                        (l: { id: string; slug?: string }) =>
+                                                        (l: { id: number; slug?: string }) =>
                                                             l.id === langId,
                                                     );
                                                     const hasTemplate = activeTemplates.some(
-                                                        (t: { language_id: string }) =>
+                                                        (t: { language_id: number }) =>
                                                             t.language_id === langId,
                                                     );
                                                     return (
@@ -553,7 +553,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
 
                                             {selectedLangIds.map((langId) => {
                                                 const existingIdx = activeTemplates.findIndex(
-                                                    (t: { language_id: string }) =>
+                                                    (t: { language_id: number }) =>
                                                         t.language_id === langId,
                                                 );
                                                 const hasTemplate = existingIdx !== -1;
