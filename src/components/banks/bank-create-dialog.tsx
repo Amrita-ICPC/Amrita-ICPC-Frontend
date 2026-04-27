@@ -2,9 +2,10 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,25 +27,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateBankApiV1BanksPost } from "@/api/generated/banks/banks";
+import { useCreateBankApiV1BanksPost, getGetAllBanksApiV1BanksGetQueryKey } from "@/api/generated/banks/banks";
 import { CreateBankApiV1BanksPostBody } from "@/api/generated/zod/banks/banks";
+import { toApiError } from "@/lib/api/error";
 import * as zod from "zod";
 
 type BankFormValues = zod.infer<typeof CreateBankApiV1BanksPostBody>;
 
 export function BankCreateDialog() {
     const [open, setOpen] = useState(false);
+    const queryClient = useQueryClient();
+
     const { mutate: createBank, isPending } = useCreateBankApiV1BanksPost({
         mutation: {
             onSuccess: () => {
                 toast.success("Bank created successfully");
                 setOpen(false);
                 form.reset();
+                // Invalidate the banks list to refresh the UI
+                queryClient.invalidateQueries({
+                    queryKey: getGetAllBanksApiV1BanksGetQueryKey(),
+                });
             },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
-                const message = error?.response?.data?.message || "Failed to create bank";
-                toast.error(message);
+                const apiError = toApiError(error);
+                toast.error(apiError.message);
             },
         },
     });
@@ -64,7 +71,7 @@ export function BankCreateDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2 shadow-[0_0_15px_rgba(var(--primary),0.3)]">
                     <Plus className="h-4 w-4" />
                     New Bank
                 </Button>
@@ -126,8 +133,15 @@ export function BankCreateDialog() {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending} className="min-w-[100px]">
-                                {isPending ? "Creating..." : "Create Bank"}
+                            <Button type="submit" disabled={isPending} className="min-w-[120px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    "Create Bank"
+                                )}
                             </Button>
                         </DialogFooter>
                     </form>
