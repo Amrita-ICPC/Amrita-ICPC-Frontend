@@ -67,7 +67,8 @@ interface QuestionWizardProps {
 export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     const [currentStep, setCurrentStep] = useState(0);
 
-    const { mutateAsync: addQuestionsToBank } = useAddQuestionsToBankApiV1BanksBankIdQuestionsPost();
+    const { mutateAsync: addQuestionsToBank } =
+        useAddQuestionsToBankApiV1BanksBankIdQuestionsPost();
 
     const { mutate: createQuestion, isPending } = useCreateQuestionApiV1QuestionsPost({
         mutation: {
@@ -82,7 +83,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                             data: { question_ids: [questionId] },
                         });
                         toast.success("Question created and added to bank!");
-                    } catch (error) {
+                    } catch {
                         toast.error("Question created but failed to link to bank");
                     }
                 } else {
@@ -93,9 +94,11 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                 setCurrentStep(0);
                 if (onSuccess && questionId) onSuccess(questionId);
             },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onError: (error: any) => {
-                toast.error(error?.response?.data?.message || "Failed to create question");
+            onError: (error: unknown) => {
+                toast.error(
+                    (error as { response?: { data?: { message?: string } } })?.response?.data
+                        ?.message || "Failed to create question",
+                );
             },
         },
     });
@@ -106,8 +109,9 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     const languages = (languagesData as any)?.data || [];
 
     const form = useForm<QuestionFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as any,
+        resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as unknown as Parameters<
+            typeof useForm<QuestionFormValues>
+        >[0]["resolver"],
         defaultValues: {
             question_text: "",
             difficulty: "MEDIUM" as const,
@@ -148,8 +152,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                   ? ["testcases"]
                   : [];
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const isValid = await form.trigger(fieldsToValidate as any);
+        const isValid = await form.trigger(fieldsToValidate as (keyof QuestionFormValues)[]);
         if (isValid) setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     };
 
@@ -525,13 +528,13 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                         >
                                             <TabsList className="bg-white/5 border border-white/10 p-1 mb-8 overflow-x-auto max-w-full justify-start">
                                                 {selectedLangIds.map((langId) => {
-                                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                     const lang = languages.find(
-                                                        (l: any) => l.id === langId,
+                                                        (l: { id: string; slug?: string }) =>
+                                                            l.id === langId,
                                                     );
-                                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                     const hasTemplate = activeTemplates.some(
-                                                        (t: any) => t.language_id === langId,
+                                                        (t: { language_id: string }) =>
+                                                            t.language_id === langId,
                                                     );
                                                     return (
                                                         <TabsTrigger
@@ -549,9 +552,9 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                             </TabsList>
 
                                             {selectedLangIds.map((langId) => {
-                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                 const existingIdx = activeTemplates.findIndex(
-                                                    (t: any) => t.language_id === langId,
+                                                    (t: { language_id: string }) =>
+                                                        t.language_id === langId,
                                                 );
                                                 const hasTemplate = existingIdx !== -1;
 

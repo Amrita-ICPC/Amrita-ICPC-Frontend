@@ -13,14 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BankQuestionsTable } from "@/components/banks/bank-questions-table";
 import { BankShareDialog } from "@/components/banks/bank-share-dialog";
 import { BankUpdateDialog } from "@/components/banks/bank-update-dialog";
-import { 
-    useGetBankApiV1BanksBankIdGet, 
+import {
+    useGetBankApiV1BanksBankIdGet,
     useDeleteBankApiV1BanksBankIdDelete,
-    getGetAllBanksApiV1BanksGetQueryKey 
+    getGetAllBanksApiV1BanksGetQueryKey,
 } from "@/api/generated/banks/banks";
-import { 
-    useGetBankQuestionsApiV1BanksBankIdQuestionsGet, 
-    useRemoveQuestionsFromBankApiV1BanksBankIdQuestionsDelete 
+import {
+    useGetBankQuestionsApiV1BanksBankIdQuestionsGet,
+    useRemoveQuestionsFromBankApiV1BanksBankIdQuestionsDelete,
 } from "@/api/generated/bank-questions/bank-questions";
 import { toApiError } from "@/lib/api/error";
 
@@ -30,23 +30,29 @@ export function BankDetailsClient() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    const { data: bankData, isLoading: isBankLoading, isError: isBankError } = useGetBankApiV1BanksBankIdGet(bankId);
-    const { data: questionsData, isLoading: isQuestionsLoading } = useGetBankQuestionsApiV1BanksBankIdQuestionsGet(bankId, {});
-    
-    const { mutate: removeQuestions, isPending: isRemoving } = useRemoveQuestionsFromBankApiV1BanksBankIdQuestionsDelete({
-        mutation: {
-            onSuccess: () => {
-                toast.success("Question removed from bank");
-                queryClient.invalidateQueries({
-                    queryKey: [`/api/v1/banks/${bankId}/questions`],
-                });
+    const {
+        data: bankData,
+        isLoading: isBankLoading,
+        isError: isBankError,
+    } = useGetBankApiV1BanksBankIdGet(bankId);
+    const { data: questionsData, isLoading: isQuestionsLoading } =
+        useGetBankQuestionsApiV1BanksBankIdQuestionsGet(bankId, {});
+
+    const { mutate: removeQuestions, isPending: isRemoving } =
+        useRemoveQuestionsFromBankApiV1BanksBankIdQuestionsDelete({
+            mutation: {
+                onSuccess: () => {
+                    toast.success("Question removed from bank");
+                    queryClient.invalidateQueries({
+                        queryKey: [`/api/v1/banks/${bankId}/questions`],
+                    });
+                },
+                onError: (error: unknown) => {
+                    const apiError = toApiError(error);
+                    toast.error(apiError.message);
+                },
             },
-            onError: (error: any) => {
-                const apiError = toApiError(error);
-                toast.error(apiError.message);
-            }
-        }
-    });
+        });
 
     const { mutate: deleteBank, isPending: isDeleting } = useDeleteBankApiV1BanksBankIdDelete({
         mutation: {
@@ -57,11 +63,11 @@ export function BankDetailsClient() {
                 });
                 router.push("/banks");
             },
-            onError: (error: any) => {
+            onError: (error: unknown) => {
                 const apiError = toApiError(error);
                 toast.error(apiError.message);
-            }
-        }
+            },
+        },
     });
 
     const [activeTab, setActiveTab] = useState("questions");
@@ -87,7 +93,10 @@ export function BankDetailsClient() {
         return (
             <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4 rounded-lg border border-dashed text-center border-white/10 bg-white/5">
                 <h2 className="text-xl font-semibold text-white">Bank not found</h2>
-                <p className="text-white/40 text-sm">The bank you're looking for doesn't exist or you don't have access.</p>
+                <p className="text-white/40 text-sm">
+                    The bank you&apos;re looking for doesn&apos;t exist or you don&apos;t have
+                    access.
+                </p>
                 <Button variant="outline" asChild className="border-white/10">
                     <Link href="/banks">
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -104,15 +113,19 @@ export function BankDetailsClient() {
 
     const handleRemoveQuestion = (questionId: string) => {
         if (confirm("Are you sure you want to remove this question from the bank?")) {
-            removeQuestions({ 
-                bankId, 
-                data: { question_ids: [questionId] } 
+            removeQuestions({
+                bankId,
+                data: { question_ids: [questionId] },
             });
         }
     };
 
     const handleDeleteBank = () => {
-        if (confirm("CRITICAL: Are you sure you want to delete this bank? This action cannot be undone and will remove all question associations.")) {
+        if (
+            confirm(
+                "CRITICAL: Are you sure you want to delete this bank? This action cannot be undone and will remove all question associations.",
+            )
+        ) {
             deleteBank({ bankId });
         }
     };
@@ -121,15 +134,22 @@ export function BankDetailsClient() {
         <div className="flex h-full flex-col space-y-8 pb-12">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-4">
-                    <Button variant="ghost" size="icon" asChild className="mt-1 text-white/40 hover:text-white hover:bg-white/5">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        asChild
+                        className="mt-1 text-white/40 hover:text-white hover:bg-white/5"
+                    >
                         <Link href="/banks">
                             <ArrowLeft className="h-5 w-5" />
                         </Link>
                     </Button>
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold tracking-tight text-white">{bank.name}</h1>
-                            {/* @ts-ignore - is_public might be in standard response */}
+                            <h1 className="text-3xl font-bold tracking-tight text-white">
+                                {bank.name}
+                            </h1>
+                            {/* @ts-expect-error - is_public might be in standard response */}
                             {bank.is_public && (
                                 <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/20">
                                     Public
@@ -143,15 +163,29 @@ export function BankDetailsClient() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="outline" size="sm" onClick={() => setIsShareOpen(true)} className="border-white/10 bg-white/5 hover:bg-white/10">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsShareOpen(true)}
+                        className="border-white/10 bg-white/5 hover:bg-white/10"
+                    >
                         <Share2 className="mr-2 h-4 w-4" />
                         Manage Access
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setIsUpdateOpen(true)} className="border-white/10 bg-white/5 hover:bg-white/10">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsUpdateOpen(true)}
+                        className="border-white/10 bg-white/5 hover:bg-white/10"
+                    >
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                     </Button>
-                    <Button size="sm" asChild className="shadow-[0_0_15px_rgba(var(--primary),0.2)]">
+                    <Button
+                        size="sm"
+                        asChild
+                        className="shadow-[0_0_15px_rgba(var(--primary),0.2)]"
+                    >
                         <Link href={`/banks/${bankId}/questions/create`}>
                             <Plus className="mr-2 h-4 w-4" />
                             Create Question
@@ -160,59 +194,71 @@ export function BankDetailsClient() {
                 </div>
             </div>
 
-            <BankShareDialog 
+            <BankShareDialog
                 bankId={bankId}
                 bankName={bank.name}
                 open={isShareOpen}
                 onOpenChange={setIsShareOpen}
             />
 
-            <BankUpdateDialog 
-                bank={bank as any}
+            <BankUpdateDialog
+                bank={bank as unknown as Parameters<typeof BankUpdateDialog>[0]["bank"]}
                 open={isUpdateOpen}
                 onOpenChange={setIsUpdateOpen}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-transparent border-b border-white/10 rounded-none h-auto p-0 space-x-8">
-                    <TabsTrigger 
-                        value="questions" 
+                    <TabsTrigger
+                        value="questions"
                         className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary px-0 py-4 text-sm font-semibold text-white/40 hover:text-white/60 transition-all"
                     >
                         Questions ({questions.length})
                     </TabsTrigger>
-                    <TabsTrigger 
-                        value="settings" 
+                    <TabsTrigger
+                        value="settings"
                         className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary px-0 py-4 text-sm font-semibold text-white/40 hover:text-white/60 transition-all"
                     >
                         General Settings
                     </TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="questions" className="pt-8 focus-visible:outline-none focus-visible:ring-0">
+
+                <TabsContent
+                    value="questions"
+                    className="pt-8 focus-visible:outline-none focus-visible:ring-0"
+                >
                     {isQuestionsLoading ? (
                         <div className="flex min-h-[300px] items-center justify-center">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <BankQuestionsTable 
+                        <BankQuestionsTable
                             bankId={bankId}
-                            questions={questions} 
+                            questions={questions}
                             onRemove={handleRemoveQuestion}
                             isRemoving={isRemoving}
                         />
                     )}
                 </TabsContent>
-                
-                <TabsContent value="settings" className="pt-8 focus-visible:outline-none focus-visible:ring-0">
+
+                <TabsContent
+                    value="settings"
+                    className="pt-8 focus-visible:outline-none focus-visible:ring-0"
+                >
                     <div className="max-w-2xl space-y-8">
                         <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-bold text-white">Bank Details</h3>
-                                    <p className="text-sm text-white/50">Edit name and description.</p>
+                                    <p className="text-sm text-white/50">
+                                        Edit name and description.
+                                    </p>
                                 </div>
-                                <Button onClick={() => setIsUpdateOpen(true)} variant="outline" className="border-white/10">
+                                <Button
+                                    onClick={() => setIsUpdateOpen(true)}
+                                    variant="outline"
+                                    className="border-white/10"
+                                >
                                     Edit Details
                                 </Button>
                             </div>
@@ -222,16 +268,21 @@ export function BankDetailsClient() {
                             <div>
                                 <h3 className="text-lg font-bold text-red-400">Danger Zone</h3>
                                 <p className="text-sm text-white/50 mt-1">
-                                    Once you delete a bank, there is no going back. All question associations will be removed.
+                                    Once you delete a bank, there is no going back. All question
+                                    associations will be removed.
                                 </p>
                             </div>
-                            <Button 
-                                variant="destructive" 
+                            <Button
+                                variant="destructive"
                                 className="bg-red-500 hover:bg-red-600 gap-2"
                                 onClick={handleDeleteBank}
                                 disabled={isDeleting}
                             >
-                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                {isDeleting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
                                 Delete this bank
                             </Button>
                         </div>
