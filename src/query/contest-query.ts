@@ -1,18 +1,7 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { ApiResponse } from "@/types/api";
-import type { GetContestsParams } from "@/types/contest";
-import {
-    ContestCreate,
-    type ContestSummaryResponse,
-    type ImageUploadResponse,
-} from "@/api/generated/model";
-import { getContests } from "@/api/generated/contests/contests";
-import { getImages } from "@/api/generated/images/images";
-import { ApiError } from "@/lib/api/error";
-
-const contestsApi = getContests();
-const imagesApi = getImages();
+import type { Contest, GetContestsParams } from "@/types/contest";
 
 const contestKeys = {
     all: ["contests"] as const,
@@ -28,33 +17,35 @@ const contestKeys = {
         ] as const,
 };
 
-async function fetchContests(
-    params: GetContestsParams,
-): Promise<ApiResponse<ContestSummaryResponse[]>> {
-    const response = await contestsApi.getAllContestsApiV1ContestsGet({
-        page: params.page,
-        page_size: params.page_size,
-        search: params.search,
-        contest_status: params.contest_status as never,
-        is_public: params.is_public,
+async function fetchContests(params: GetContestsParams): Promise<ApiResponse<Contest[]>> {
+    const searchParams = new URLSearchParams();
+
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params.search) searchParams.set("search", params.search);
+    if (params.contest_status) searchParams.set("contest_status", String(params.contest_status));
+    if (typeof params.is_public === "boolean")
+        searchParams.set("is_public", String(params.is_public));
+
+    const url = `/api/contests${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
+    const res = await fetch(url, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store", // Bypass browser HTTP caching
     });
 
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to load contests", {
-            status: response.status,
-        });
+    const json = (await res.json()) as unknown;
+
+    if (!res.ok) {
+        const message =
+            typeof json === "object" && json !== null && "message" in json
+                ? String((json as { message: unknown }).message)
+                : "Failed to load contests";
+        throw new Error(message);
     }
 
-    const items = (response.data ?? []) as ContestSummaryResponse[];
-
-    return {
-        success: response.success ?? true,
-        status: response.status ?? 200,
-        message: response.message ?? "",
-        data: items,
-        pagination: response.pagination ?? undefined,
-        meta: response.meta ?? undefined,
-    };
+    return json as ApiResponse<Contest[]>;
 }
 
 export function useContests(params: GetContestsParams = {}) {
@@ -63,80 +54,5 @@ export function useContests(params: GetContestsParams = {}) {
         queryFn: () => fetchContests(params),
         placeholderData: keepPreviousData,
         retry: false,
-    });
-}
-
-//create contest mutation
-async function createContest(contestData: ContestCreate) {
-    const response = await contestsApi.createContestApiV1ContestsPost(contestData);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to create contest", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useCreateContest() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: createContest,
-        onSuccess: () => {
-            // Invalidate contests list to refetch updated data after creating a contest
-            queryClient.invalidateQueries({ queryKey: contestKeys.all });
-        },
-    });
-}
-
-//upload image
-async function uploadContestImage(file: File): Promise<ImageUploadResponse> {
-    const response = await imagesApi.uploadImageApiV1UploadPost({ file });
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Image upload failed", {
-            status: response.status,
-        });
-    }
-
-    if (!response?.data) {
-        throw new ApiError("Image upload succeeded but no data was returned", {
-            status: response?.status,
-        });
-    }
-
-    return response.data;
-}
-
-export function useUploadContestImage() {
-    return useMutation({
-        mutationFn: uploadContestImage,
-    });
-}
-
-// soft delete contest
-async function softDeleteContest(contestId: string) {
-    const response =
-        await contestsApi.softDeleteContestApiV1ContestsContestIdSoftDeleteDelete(contestId);
-
-    if (response?.success === false) {
-        throw new ApiError(response.message ?? "Failed to delete contest", {
-            status: response.status,
-        });
-    }
-
-    return response;
-}
-
-export function useSoftDeleteContest() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: softDeleteContest,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: contestKeys.all });
-        },
     });
 }

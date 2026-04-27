@@ -6,7 +6,7 @@ export default defineConfig({
             mode: "tags-split",
             target: "src/api/generated/icpc.ts",
             schemas: "src/api/generated/model",
-            client: "axios",
+            client: "react-query",
             httpClient: "axios",
             mock: false,
             override: {
