@@ -4,11 +4,25 @@ import { UserType, hasAccess } from "@/lib/auth/utils";
 
 export default auth((req) => {
     const { nextUrl } = req;
-    const isLoggedIn = !!req.auth;
-    const userRoles = req.auth?.user?.roles;
-    const userGroups = req.auth?.user?.groups;
+    const pathname = nextUrl.pathname;
+    const session = req.auth;
 
-    // Paths that require specific roles
+    // Public paths — always allow
+    if (pathname === "/" || pathname.startsWith("/auth")) {
+        return NextResponse.next();
+    }
+
+    // Not authenticated — redirect to login
+    if (!session?.user) {
+        const loginUrl = new URL("/auth/login", nextUrl);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+    }
+
+    const userRoles = session.user.roles;
+    const userGroups = session.user.groups;
+
+    // RBAC for specific path prefixes
     const roleMappedPaths: { path: string; roles: UserType[] }[] = [
         { path: "/admin", roles: [UserType.ADMIN] },
         { path: "/manager", roles: [UserType.MANAGER, UserType.ADMIN] },
@@ -16,24 +30,10 @@ export default auth((req) => {
         { path: "/student", roles: [UserType.STUDENT, UserType.ADMIN] },
     ];
 
-    const currentPath = nextUrl.pathname;
-
-    // Public paths
-    const isPublicPath = currentPath === "/" || currentPath.startsWith("/auth");
-
-    if (isPublicPath) {
-        return NextResponse.next();
-    }
-
-    if (!isLoggedIn) {
-        return NextResponse.redirect(new URL("/auth/login", nextUrl));
-    }
-
-    // Check RBAC
     for (const { path, roles } of roleMappedPaths) {
-        if (currentPath === path || currentPath.startsWith(path + "/")) {
+        if (pathname === path || pathname.startsWith(path + "/")) {
             if (!hasAccess(userRoles, userGroups, roles)) {
-                return NextResponse.redirect(new URL("/not-found", nextUrl)); // Or a specialized Access Denied page
+                return NextResponse.redirect(new URL("/not-found", nextUrl));
             }
         }
     }

@@ -4,9 +4,7 @@ import { Edit, MoreVertical, Share2, Trash2, BookOpen, Clock } from "lucide-reac
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,13 +27,10 @@ export function BankCard({ bank }: BankCardProps) {
 
     const { mutate: deleteBank, isPending: isDeleting } = useDeleteBankApiV1BanksBankIdDelete({
         mutation: {
-            onSuccess: () => {
-                toast.success("Bank deleted successfully");
-            },
+            onSuccess: () => toast.success("Bank deleted successfully"),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
-                const message = error?.response?.data?.message || "Failed to delete bank";
-                toast.error(message);
+                toast.error(error?.response?.data?.message || "Failed to delete bank");
             },
         },
     });
@@ -47,98 +42,66 @@ export function BankCard({ bank }: BankCardProps) {
     };
 
     const formattedDate = new Date(bank.updated_at).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
+        month: "short", day: "numeric", year: "numeric",
     });
 
     return (
-        <Card className="group relative flex h-full flex-col overflow-hidden border-white/10 bg-[#0f1117] transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5">
-            <CardHeader className="p-6 pb-4">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                        <BookOpen className="h-6 w-6" />
-                    </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-white/40 hover:text-white"
-                            >
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="end"
-                            className="w-48 border-white/10 bg-[#161922] text-white"
+        <div className="group relative flex h-[200px] flex-col rounded-xl bg-[#0c1a2e] p-5 shadow-lg shadow-black/30 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#060f1e]/60 hover:bg-[#0f2040]">
+            {/* Hover accent line */}
+            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
+                    <BookOpen className="h-5 w-5" />
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-600 hover:text-slate-300 hover:bg-white/5"
                         >
-                            <DropdownMenuItem
-                                onClick={() => setUpdateOpen(true)}
-                                className="gap-2 cursor-pointer focus:bg-white/5"
-                            >
-                                <Edit className="h-4 w-4" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setShareOpen(true)}
-                                className="gap-2 cursor-pointer focus:bg-white/5"
-                            >
-                                <Share2 className="h-4 w-4" /> Manage Access
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-white/5" />
-                            <DropdownMenuItem
-                                onClick={handleDelete}
-                                className="gap-2 cursor-pointer text-red-400 focus:bg-red-500/10 focus:text-red-400"
-                                disabled={isDeleting}
-                            >
-                                <Trash2 className="h-4 w-4" /> Delete Bank
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                <div className="mt-4 space-y-1">
-                    <h3 className="line-clamp-1 text-lg font-bold text-white group-hover:text-primary transition-colors">
-                        {bank.name}
-                    </h3>
-                    <p className="line-clamp-2 text-sm text-white/50 leading-relaxed">
-                        {bank.description || "No description provided for this bank."}
-                    </p>
-                </div>
-            </CardHeader>
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onClick={() => setUpdateOpen(true)} className="gap-2 cursor-pointer">
+                            <Edit className="h-4 w-4" /> Edit Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShareOpen(true)} className="gap-2 cursor-pointer">
+                            <Share2 className="h-4 w-4" /> Manage Access
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={handleDelete}
+                            className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                            disabled={isDeleting}
+                        >
+                            <Trash2 className="h-4 w-4" /> Delete Bank
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
 
-            <CardContent className="flex-1 px-6 py-2">
-                <div className="flex flex-wrap gap-2 mt-2">
-                    {/* These would ideally come from the API, placeholder for now */}
-                    <Badge variant="secondary" className="bg-white/5 text-white/70 border-white/10">
-                        12 Questions
-                    </Badge>
-                    <Badge variant="secondary" className="bg-white/5 text-white/70 border-white/10">
-                        Shared
-                    </Badge>
-                </div>
-            </CardContent>
+            {/* Name + description */}
+            <div className="mt-3 flex-1 min-h-0">
+                <p className="line-clamp-1 font-bold text-slate-100 group-hover:text-sky-300 transition-colors">
+                    {bank.name}
+                </p>
+                <p className="mt-1.5 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+                    {bank.description || "No description provided for this bank."}
+                </p>
+            </div>
 
-            <CardFooter className="px-6 py-4 border-t border-white/5 flex items-center justify-between text-xs text-white/40">
-                <div className="flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" />
-                    Updated {formattedDate}
-                </div>
-                <Button
-                    variant="link"
-                    className="h-auto p-0 text-primary hover:text-primary/80 font-semibold"
-                    onClick={() => {}}
-                >
-                    View Questions
-                </Button>
-            </CardFooter>
+            {/* Footer */}
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                <Clock className="h-3 w-3" />
+                Updated {formattedDate}
+            </div>
 
             <BankUpdateDialog bank={bank} open={updateOpen} onOpenChange={setUpdateOpen} />
-            <BankShareDialog
-                bankId={bank.id}
-                bankName={bank.name}
-                open={shareOpen}
-                onOpenChange={setShareOpen}
-            />
-        </Card>
+            <BankShareDialog bankId={bank.id} bankName={bank.name} open={shareOpen} onOpenChange={setShareOpen} />
+        </div>
     );
 }

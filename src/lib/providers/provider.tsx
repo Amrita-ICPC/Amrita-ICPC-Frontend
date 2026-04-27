@@ -30,8 +30,8 @@ export default function Provider({ children }: ProviderProps) {
 
     return (
         <SessionProvider>
-            <SessionIntegrityProvider>
-                <ClockSyncProvider>
+            {/* <SessionIntegrityProvider> */}
+                {/* <ClockSyncProvider> */}
                     <QueryClientProvider client={queryClient}>
                         <ThemeProvider
                             attribute="class"
@@ -53,8 +53,8 @@ export default function Provider({ children }: ProviderProps) {
                             </TooltipProvider>
                         </ThemeProvider>
                     </QueryClientProvider>
-                </ClockSyncProvider>
-            </SessionIntegrityProvider>
+                {/* </ClockSyncProvider> */}
+            {/* </SessionIntegrityProvider> */}
         </SessionProvider>
     );
 }

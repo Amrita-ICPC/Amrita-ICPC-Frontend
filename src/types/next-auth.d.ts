@@ -1,27 +1,14 @@
-import "next-auth";
-import "next-auth/jwt";
+import type { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
     interface Session {
         user: {
             id: string;
-            name?: string | null;
-            email?: string | null;
-            image?: string | null;
             roles: string[];
             groups: string[];
-        };
+        } & DefaultSession["user"];
         access_token: string;
         error?: string | null;
-    }
-
-    interface User {
-        id: string;
-        name?: string | null;
-        email?: string | null;
-        image?: string | null;
-        roles: string[];
-        groups: string[];
     }
 }
 
@@ -30,7 +17,11 @@ declare module "next-auth/jwt" {
         roles?: string[];
         access_token?: string;
         refresh_token?: string;
+        id_token?: string;
         expires_at?: number;
+        session_expires_at?: number;
         groups?: string[];
+        id?: string;
+        error?: string;
     }
 }

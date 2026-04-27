@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import Sidenavbar from "@/components/global/sidenavbar";
+import { Header } from "@/components/global/header";
 import { UserType } from "@/lib/auth/utils";
 import AuthGuard from "@/components/global/auth-guard";
 import AccessDenied from "@/components/global/access-denied";
@@ -47,27 +48,29 @@ export default async function AppLayout({
     }
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#0b0d12] text-white">
+        <div className="flex h-screen overflow-hidden bg-background text-foreground">
             <Sidenavbar />
-            <main className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
-                {/* Main page content (e.g., Dashboard) */}
-                <div className="mb-8">{children}</div>
-
-                {/* Role-specific parallel route slot */}
-                <div className="flex-1">
-                    {hasRole(UserType.ADMIN) ? (
-                        <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
-                    ) : hasRole(UserType.MANAGER) ? (
-                        <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
-                    ) : hasRole(UserType.INSTRUCTOR) ? (
-                        <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
-                    ) : hasRole(UserType.STUDENT) ? (
-                        <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
-                    ) : (
-                        <AccessDenied />
-                    )}
-                </div>
-            </main>
+            <div className="flex flex-1 flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-y-auto">
+                    <div className="mx-auto max-w-7xl px-6 py-6">
+                        <div className="mb-6">{children}</div>
+                        <div>
+                            {hasRole(UserType.ADMIN) ? (
+                                <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
+                            ) : hasRole(UserType.MANAGER) ? (
+                                <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
+                            ) : hasRole(UserType.INSTRUCTOR) ? (
+                                <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>{instructor}</AuthGuard>
+                            ) : hasRole(UserType.STUDENT) ? (
+                                <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
+                            ) : (
+                                <AccessDenied />
+                            )}
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

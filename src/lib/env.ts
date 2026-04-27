@@ -14,10 +14,10 @@ export const env = createEnv({
     server: {
         NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
         NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
-        NEXTAUTH_URL: z.string().url().optional(),
+        NEXTAUTH_URL: z.url().optional(),
         AUTH_KEYCLOAK_ID: z.string().min(1, "AUTH_KEYCLOAK_ID is required"),
         AUTH_KEYCLOAK_SECRET: z.string().min(1, "AUTH_KEYCLOAK_SECRET is required"),
-        AUTH_KEYCLOAK_ISSUER: z.string().url("AUTH_KEYCLOAK_ISSUER must be a valid URL"),
+        AUTH_KEYCLOAK_ISSUER: z.url("AUTH_KEYCLOAK_ISSUER must be a valid URL"),
         FEATURE_FLAGS: z.string().optional(),
     },
 
@@ -27,7 +27,7 @@ export const env = createEnv({
      */
     clientPrefix: "NEXT_PUBLIC_",
     client: {
-        NEXT_PUBLIC_API_URL: z.string().url("NEXT_PUBLIC_API_URL must be a valid URL"),
+        NEXT_PUBLIC_API_URL: z.url("NEXT_PUBLIC_API_URL must be a valid URL"),
         NEXT_PUBLIC_FEATURE_FLAGS: z.string().optional(),
     },
 

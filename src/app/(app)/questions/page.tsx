@@ -1,3 +1,5 @@
-export default function QuestionsLayout() {
-    return null;
+import { CodeEditor } from "@/components/questions/code-editor";
+
+export default function QuestionsPage() {
+    return <CodeEditor />;
 }

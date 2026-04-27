@@ -1,12 +1,7 @@
 import Link from "next/link";
-import { Space_Grotesk } from "next/font/google";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-
-const spaceGrotesk = Space_Grotesk({
-    subsets: ["latin"],
-    variable: "--font-space-grotesk",
-});
+import { Code2, Trophy, Users, FileCode2 } from "lucide-react";
 
 export default async function LandingPage() {
     const session = await auth();
@@ -15,38 +10,84 @@ export default async function LandingPage() {
     }
 
     return (
-        <main
-            className={`${spaceGrotesk.variable} relative min-h-screen overflow-hidden bg-[#0b0d12] text-white`}
-        >
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute left-1/2 top-[-20rem] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#38bdf8]/30 blur-[140px]" />
-                <div className="absolute bottom-[-16rem] left-10 h-[420px] w-[420px] rounded-full bg-[#f97316]/25 blur-[140px]" />
-                <div className="absolute right-12 top-24 h-[320px] w-[320px] rounded-full bg-[#5eead4]/25 blur-[120px]" />
-                <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
-                <div className="absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5" />
+        <main className="relative flex min-h-screen flex-col overflow-hidden bg-sidebar text-sidebar-foreground">
+            {/* Background */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute left-1/2 top-[-10rem] h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-sidebar-primary/15 blur-[130px]" />
+                <div className="absolute bottom-[-10rem] right-[-5rem] h-[400px] w-[400px] rounded-full bg-sidebar-primary/10 blur-[120px]" />
             </div>
 
-            <div className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
-                <div className="mb-6 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs uppercase tracking-[0.4em] text-white/70">
-                    Amrita ICPC
+            {/* Header */}
+            <header className="relative flex items-center justify-between border-b border-sidebar-border px-8 py-4">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-primary/20 text-sidebar-primary">
+                        <Code2 className="h-4 w-4" />
+                    </div>
+                    <div>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+                            Amrita
+                        </span>
+                        <span className="ml-2 text-sm font-bold text-sidebar-foreground">
+                            ICPC Platform
+                        </span>
+                    </div>
                 </div>
-                <h1 className="text-5xl font-semibold tracking-[0.2em] sm:text-6xl">ICPC</h1>
-                <p className="mt-4 max-w-xl text-sm text-white/60 sm:text-base">
-                    Competition infrastructure, simplified for teams and juries.
+                <Link
+                    href="/auth/login"
+                    className="rounded-lg bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground transition-opacity hover:opacity-90"
+                >
+                    Sign in
+                </Link>
+            </header>
+
+            {/* Hero */}
+            <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sidebar-border bg-sidebar-accent/40 px-4 py-1.5 text-xs font-medium text-sidebar-foreground/60">
+                    <span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+                    Competitive Programming Infrastructure
+                </div>
+
+                <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-sidebar-foreground sm:text-6xl">
+                    Amrita{" "}
+                    <span className="text-sidebar-primary">ICPC</span>
+                </h1>
+
+                <p className="mt-5 max-w-lg text-base text-sidebar-foreground/60">
+                    Manage contests, questions, teams, and submissions in one place.
+                    Built for instructors, students, and contest managers.
                 </p>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                     <Link
                         href="/auth/login"
-                        className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0b0d12] transition hover:-translate-y-0.5 hover:bg-white/90"
+                        className="rounded-lg bg-sidebar-primary px-6 py-3 text-sm font-semibold text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/20 transition-opacity hover:opacity-90"
                     >
-                        Sign in
+                        Enter Platform
                     </Link>
                     <Link
                         href="/auth/login"
-                        className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-white hover:text-white"
+                        className="rounded-lg border border-sidebar-border px-6 py-3 text-sm font-semibold text-sidebar-foreground/70 transition-colors hover:border-sidebar-foreground/40 hover:text-sidebar-foreground"
                     >
-                        Enter platform
+                        Learn More
                     </Link>
+                </div>
+
+                {/* Feature pills */}
+                <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
+                    {[
+                        { icon: Trophy, label: "Live Contests" },
+                        { icon: FileCode2, label: "Question Banks" },
+                        { icon: Users, label: "Team Management" },
+                        { icon: Code2, label: "Multi-language Execution" },
+                    ].map(({ icon: Icon, label }) => (
+                        <div
+                            key={label}
+                            className="flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-4 py-2 text-xs font-medium text-sidebar-foreground/60"
+                        >
+                            <Icon className="h-3.5 w-3.5 text-sidebar-primary" />
+                            {label}
+                        </div>
+                    ))}
                 </div>
             </div>
         </main>

@@ -1,12 +1,14 @@
 import NextAuth from "next-auth";
+import type { NextAuthConfig } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import Keycloak from "next-auth/providers/keycloak";
 import { decodeJwt } from "jose";
-import { KeycloakToken, DecodedJWT } from "./types";
+import type { KeycloakToken, DecodedJWT } from "./types";
 import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
 import { logger } from "../logger";
 import { env } from "@/lib/env";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const config: NextAuthConfig = {
     providers: [
         Keycloak({
             clientId: env.AUTH_KEYCLOAK_ID,
@@ -15,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             authorization: {
                 params: {
                     prompt: "login",
-                    max_age: "0",
+                    max_age: 0,
                 },
             },
         }),
@@ -26,7 +28,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session: {
         strategy: "jwt",
     },
-    trustHost: true,
     secret: env.NEXTAUTH_SECRET,
     callbacks: {
         async redirect({ url, baseUrl }) {
@@ -39,7 +40,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (account && user) {
                 const decoded = decodeJwt(account.access_token!);
                 const { groups, permissions } = processDecodedToken(decoded as DecodedJWT);
-                // Calculate session expiry based on Keycloak's refresh token expiry
                 const refreshExpiresIn =
                     typeof account.refresh_expires_in === "number"
                         ? account.refresh_expires_in
@@ -52,13 +52,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     id_token: account.id_token,
                     expires_at: account.expires_at,
                     session_expires_at: sessionExpiresAt,
-                    groups: groups,
-                    // Expose permissions as `roles` (and do not keep a separate permissions field)
+                    groups,
                     roles: permissions,
                     id: account.providerAccountId,
                 };
             }
 
+            // Session lifetime exceeded
             if (
                 token.session_expires_at &&
                 typeof token.session_expires_at === "number" &&
@@ -68,25 +68,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 return null;
             }
 
-            // Token still valid
+            // Access token still valid
             if (token.expires_at && Date.now() < token.expires_at * 1000 - 15 * 1000) {
                 return token;
-            } // Try to refresh
-            if (token.refresh_token) {
-                const refreshedToken = await refreshKeycloakAccessToken(token as KeycloakToken);
-                // If refresh returns null (session expired), invalidate the session
-                if (!refreshedToken) {
-                    return null;
-                }
-                return refreshedToken;
             }
 
-            // No refresh token or refresh failed — invalidate session
+            // Try to refresh
+            if (token.refresh_token) {
+                const refreshed = await refreshKeycloakAccessToken(token as KeycloakToken);
+                if (!refreshed) return null;
+                return refreshed as JWT;
+            }
+
             return null;
         },
         async session({ session, token }) {
             if (token) {
-                session.user.id = token.id as string; // Ensure id is correctly assigned
+                session.user.id = token.id as string;
                 session.user.roles = token.roles as string[];
                 session.user.groups = token.groups as string[];
                 session.access_token = token.access_token as string;
@@ -99,11 +97,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     events: {
         async signOut(message) {
-            if ("token" in message && message.token?.id_token) {
+            const token = "token" in message ? message.token : null;
+            if (token?.id_token) {
                 try {
-                    const issuerUrl = env.AUTH_KEYCLOAK_ISSUER;
-                    const logoutUrl = new URL(`${issuerUrl}/protocol/openid-connect/logout`);
-                    logoutUrl.searchParams.set("id_token_hint", message.token.id_token as string);
+                    const logoutUrl = new URL(
+                        `${env.AUTH_KEYCLOAK_ISSUER}/protocol/openid-connect/logout`,
+                    );
+                    logoutUrl.searchParams.set("id_token_hint", token.id_token as string);
                     logoutUrl.searchParams.set("client_id", env.AUTH_KEYCLOAK_ID);
 
                     const response = await fetch(logoutUrl, { method: "GET" });
@@ -121,4 +121,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
         },
     },
-});
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(config);

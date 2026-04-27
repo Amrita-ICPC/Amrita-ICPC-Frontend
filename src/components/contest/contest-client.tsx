@@ -1,40 +1,142 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Calendar, ArrowRight, Users, Trophy } from "lucide-react";
+import Link from "next/link";
 
-import { useContests } from "@/query/contest-query";
-import type { GetContestsParams } from "@/types/contest";
+import { useGetAllContestsApiV1ContestsGet } from "@/api/generated/contests/contests";
+import type { ContestStatus, GetAllContestsApiV1ContestsGetParams, ContestSummaryResponse } from "@/api/generated/model";
 import { ContestFilters } from "./contest-filters";
 import { ContestCard } from "./contest-card";
 import { ContestSkeleton } from "./contest-skeleton";
+import { AppPagination } from "@/components/shared/app-pagination";
+import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+
+const STATUS_CLASSES: Record<string, string> = {
+    RUNNING: "bg-emerald-500/10 text-emerald-500 border-transparent",
+    SCHEDULED: "bg-blue-500/10 text-blue-500 border-transparent",
+    FINISHED: "bg-zinc-500/10 text-zinc-500 border-transparent",
+    DRAFT: "bg-orange-500/10 text-orange-500 border-transparent",
+};
+
+function ContestTableRow({ contest }: { contest: ContestSummaryResponse }) {
+    const start = new Date(contest.start_time).toLocaleDateString(undefined, {
+        month: "short", day: "numeric", year: "numeric",
+    });
+    const end = new Date(contest.end_time).toLocaleDateString(undefined, {
+        month: "short", day: "numeric", year: "numeric",
+    });
+
+    return (
+        <TableRow className="group cursor-pointer hover:bg-muted/40 transition-colors">
+            <TableCell>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Trophy className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-foreground leading-tight group-hover:text-primary transition-colors">
+                            {contest.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {contest.description || "No description"}
+                        </p>
+                    </div>
+                </div>
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline" className={STATUS_CLASSES[contest.status] ?? STATUS_CLASSES.DRAFT}>
+                    {contest.status.replace("_", " ")}
+                </Badge>
+            </TableCell>
+            <TableCell className="text-sm text-muted-foreground capitalize">
+                {contest.contest_mode.toLowerCase()}
+            </TableCell>
+            <TableCell>
+                <div className="text-sm text-muted-foreground">
+                    <p>{start}</p>
+                    <p className="text-xs opacity-70">→ {end}</p>
+                </div>
+            </TableCell>
+            <TableCell>
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    <span className="capitalize">{contest.team_approval_mode.replace("_", " ").toLowerCase()}</span>
+                </div>
+            </TableCell>
+            <TableCell className="text-right">
+                <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/contest/${contest.id}`}>
+                        View <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    </Link>
+                </Button>
+            </TableCell>
+        </TableRow>
+    );
+}
+
+function TableSkeleton() {
+    return (
+        <div className="rounded-lg border">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Contest</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Mode</TableHead>
+                        <TableHead>Dates</TableHead>
+                        <TableHead>Approval</TableHead>
+                        <TableHead />
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell><Skeleton className="h-9 w-48" /></TableCell>
+                            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                            <TableCell><Skeleton className="h-8 w-28" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
+    );
+}
 
 interface ContestClientProps {
-    initialParams: GetContestsParams;
+    initialParams: GetAllContestsApiV1ContestsGetParams;
 }
 
 export function ContestClient({ initialParams }: ContestClientProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [view, setView] = useState<ViewMode>("grid");
 
-    // Combine initial params with live query state changes
-    const params: GetContestsParams = {
+    const params: GetAllContestsApiV1ContestsGetParams = {
         ...initialParams,
         page: parseInt(searchParams.get("page") || String(initialParams.page || 1)),
-        page_size: initialParams.page_size || 10,
-        search: searchParams.get("search") || initialParams.search,
-        contest_status: searchParams.get("contest_status") || initialParams.contest_status,
+        page_size: initialParams.page_size || 12,
+        search: searchParams.get("search") || initialParams.search || undefined,
+        contest_status: ((searchParams.get("contest_status") || initialParams.contest_status) as ContestStatus) ?? undefined,
     };
 
-    const { data, isLoading, isError } = useContests(params);
+    const { data, isLoading, isError } = useGetAllContestsApiV1ContestsGet(params);
 
     const setPage = (newPage: number) => {
         const newParams = new URLSearchParams(searchParams.toString());
@@ -42,94 +144,72 @@ export function ContestClient({ initialParams }: ContestClientProps) {
         router.push(`${pathname}?${newParams.toString()}`);
     };
 
-    // derived pagination values
     const pagination = data?.pagination;
     const totalPages = pagination?.total_pages || 1;
     const currentPage = pagination?.page || 1;
 
     return (
-        <div className="flex flex-col gap-6">
-            <ContestFilters />
+        <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <ContestFilters />
+                <ViewToggle view={view} onChange={setView} />
+            </div>
 
             {isError ? (
-                <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-border/50 bg-destructive/5 text-destructive p-8 text-center">
-                    <p className="mb-2 font-medium">Failed to load contests</p>
-                    <p className="text-sm opacity-80">
-                        Please try refreshing the page or check your connection.
-                    </p>
+                <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 text-destructive p-8 text-center">
+                    <p className="mb-1 font-medium">Failed to load contests</p>
+                    <p className="text-sm opacity-80">Check your connection or try refreshing.</p>
+                </div>
+            ) : view === "grid" ? (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {isLoading
+                        ? Array.from({ length: 6 }).map((_, i) => <ContestSkeleton key={i} />)
+                        : data?.data && data.data.length > 0
+                            ? data.data.map((contest) => <ContestCard key={contest.id} contest={contest} />)
+                            : (
+                                <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
+                                    No contests found. Try adjusting your filters.
+                                </div>
+                            )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    {isLoading ? (
-                        Array.from({ length: 8 }).map((_, i) => <ContestSkeleton key={i} />)
-                    ) : data?.data && data.data.length > 0 ? (
-                        data.data.map((contest) => (
-                            <ContestCard key={contest.id} contest={contest} />
-                        ))
+                isLoading ? <TableSkeleton /> : (
+                    data?.data && data.data.length > 0 ? (
+                        <div className="rounded-lg border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Contest</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Mode</TableHead>
+                                        <TableHead>Dates</TableHead>
+                                        <TableHead>Approval</TableHead>
+                                        <TableHead />
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {data.data.map((contest) => (
+                                        <ContestTableRow key={contest.id} contest={contest} />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     ) : (
-                        <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
+                        <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
                             No contests found. Try adjusting your filters.
                         </div>
-                    )}
-                </div>
+                    )
+                )
             )}
 
-            {/* Pagination Controls */}
             {pagination && (
-                <Pagination className="mt-8 justify-center sm:justify-end">
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (pagination.has_previous) setPage(currentPage - 1);
-                                }}
-                                className={
-                                    !pagination.has_previous ? "pointer-events-none opacity-50" : ""
-                                }
-                            />
-                        </PaginationItem>
-
-                        {/* Simple page enumerator up to 5 pages around current */}
-                        {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
-                            // rough centering algorithm for paginator
-                            let pageNum = currentPage;
-                            if (totalPages <= 5) pageNum = idx + 1;
-                            else if (currentPage <= 3) pageNum = idx + 1;
-                            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + idx;
-                            else pageNum = currentPage - 2 + idx;
-
-                            return (
-                                <PaginationItem key={pageNum}>
-                                    <PaginationLink
-                                        href="#"
-                                        isActive={pageNum === currentPage}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setPage(pageNum);
-                                        }}
-                                    >
-                                        {pageNum}
-                                    </PaginationLink>
-                                </PaginationItem>
-                            );
-                        })}
-
-                        <PaginationItem>
-                            <PaginationNext
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (pagination.has_next) setPage(currentPage + 1);
-                                }}
-                                className={
-                                    !pagination.has_next ? "pointer-events-none opacity-50" : ""
-                                }
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                <AppPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    hasPrevious={pagination.has_previous}
+                    hasNext={pagination.has_next}
+                    onPageChange={setPage}
+                />
             )}
         </div>
     );

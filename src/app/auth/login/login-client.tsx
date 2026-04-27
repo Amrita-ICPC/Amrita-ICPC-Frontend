@@ -2,13 +2,8 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { Space_Grotesk } from "next/font/google";
 import { Suspense, useEffect, useState } from "react";
-
-const spaceGrotesk = Space_Grotesk({
-    subsets: ["latin"],
-    variable: "--font-space-grotesk",
-});
+import { Code2 } from "lucide-react";
 
 function LoginContent() {
     const searchParams = useSearchParams();
@@ -31,32 +26,51 @@ function LoginContent() {
     }, [callbackUrl]);
 
     return (
-        <main
-            className={`${spaceGrotesk.variable} relative min-h-screen overflow-hidden bg-[#0b0d12] text-white`}
-        >
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute left-1/2 top-[-18rem] h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-[#38bdf8]/25 blur-[140px]" />
-                <div className="absolute bottom-[-16rem] left-6 h-[420px] w-[420px] rounded-full bg-[#f97316]/20 blur-[140px]" />
-                <div className="absolute right-12 top-24 h-[320px] w-[320px] rounded-full bg-[#5eead4]/20 blur-[120px]" />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-sidebar px-6">
+            {/* Background glow */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sidebar-primary/20 blur-[120px]" />
+                <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/2 translate-y-1/2 rounded-full bg-sidebar-primary/10 blur-[100px]" />
             </div>
 
-            <div className="relative flex min-h-screen items-center justify-center px-6 text-center">
-                <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur">
-                    <div className="mb-6 text-xs uppercase tracking-[0.4em] text-white/60">
-                        Amrita ICPC
+            <div className="relative w-full max-w-sm">
+                {/* Card */}
+                <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-8 shadow-2xl backdrop-blur">
+                    {/* Logo */}
+                    <div className="mb-8 flex flex-col items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sidebar-primary/20 text-sidebar-primary">
+                            <Code2 className="h-6 w-6" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sidebar-foreground/40">
+                                Amrita University
+                            </p>
+                            <h1 className="text-xl font-bold text-sidebar-foreground">
+                                ICPC Platform
+                            </h1>
+                        </div>
                     </div>
-                    <h1 className="text-3xl font-semibold">Sign in</h1>
-                    <p className="mt-3 text-sm text-white/60">
-                        Redirecting you to the Keycloak login page.
-                    </p>
+
+                    <div className="mb-6 text-center">
+                        <p className="text-sm text-sidebar-foreground/60">
+                            {isRedirecting
+                                ? "Redirecting to Keycloak..."
+                                : "Click below to continue"}
+                        </p>
+                    </div>
+
                     <button
                         onClick={() => signIn("keycloak", { callbackUrl })}
                         disabled={isRedirecting}
-                        className="mt-8 w-full rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0b0d12] transition hover:-translate-y-0.5 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-lg bg-sidebar-primary px-4 py-2.5 text-sm font-semibold text-sidebar-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {isRedirecting ? "Redirecting..." : "Continue to Keycloak"}
+                        {isRedirecting ? "Redirecting…" : "Continue to Keycloak"}
                     </button>
                 </div>
+
+                <p className="mt-4 text-center text-xs text-sidebar-foreground/30">
+                    Secure login via Keycloak SSO
+                </p>
             </div>
         </main>
     );
@@ -64,7 +78,7 @@ function LoginContent() {
 
 export default function LoginClient() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-[#0b0d12] text-white" />}>
+        <Suspense fallback={<div className="min-h-screen bg-sidebar" />}>
             <LoginContent />
         </Suspense>
     );
