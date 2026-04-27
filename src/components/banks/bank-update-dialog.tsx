@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,9 +25,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateBankApiV1BanksBankIdPatch } from "@/api/generated/banks/banks";
+import { useUpdateBankApiV1BanksBankIdPatch, getGetBankApiV1BanksBankIdGetQueryKey, getGetAllBanksApiV1BanksGetQueryKey } from "@/api/generated/banks/banks";
 import { UpdateBankApiV1BanksBankIdPatchBody } from "@/api/generated/zod/banks/banks";
 import { BankResponse } from "@/api/generated/model/bankResponse";
+import { toApiError } from "@/lib/api/error";
 import * as zod from "zod";
 
 type BankUpdateFormValues = zod.infer<typeof UpdateBankApiV1BanksBankIdPatchBody>;
@@ -38,16 +40,24 @@ interface BankUpdateDialogProps {
 }
 
 export function BankUpdateDialog({ bank, open, onOpenChange }: BankUpdateDialogProps) {
+    const queryClient = useQueryClient();
+
     const { mutate: updateBank, isPending } = useUpdateBankApiV1BanksBankIdPatch({
         mutation: {
             onSuccess: () => {
                 toast.success("Bank updated successfully");
                 onOpenChange(false);
+                // Invalidate both the detail and the list
+                queryClient.invalidateQueries({
+                    queryKey: getGetBankApiV1BanksBankIdGetQueryKey(bank.id),
+                });
+                queryClient.invalidateQueries({
+                    queryKey: getGetAllBanksApiV1BanksGetQueryKey(),
+                });
             },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
-                const message = error?.response?.data?.message || "Failed to update bank";
-                toast.error(message);
+                const apiError = toApiError(error);
+                toast.error(apiError.message);
             },
         },
     });

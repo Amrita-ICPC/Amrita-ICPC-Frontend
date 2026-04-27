@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, LayoutGrid, List as ListIcon, Loader2 } from "lucide-react";
+import { Search, LayoutGrid, List as ListIcon, Loader2, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { toApiError } from "@/lib/api/error";
 
 export function BankList() {
     const router = useRouter();
@@ -26,7 +28,7 @@ export function BankList() {
     const currentPage = parseInt(searchParams.get("page") || "1");
     const searchQuery = searchParams.get("search") || "";
 
-    const { data, isLoading, isError } = useGetAllBanksApiV1BanksGet({
+    const { data, isLoading, isError, error } = useGetAllBanksApiV1BanksGet({
         page: currentPage,
         page_size: 12,
         // search: searchQuery, // Add search if API supports it later
@@ -51,6 +53,8 @@ export function BankList() {
 
     const pagination = data?.pagination;
     const totalPages = pagination?.total_pages || 1;
+
+    const apiError = error ? toApiError(error) : null;
 
     return (
         <div className="space-y-6">
@@ -89,18 +93,28 @@ export function BankList() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : isError ? (
-                <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-                    <p className="text-lg font-semibold text-red-400">Failed to load banks</p>
-                    <p className="text-sm text-white/60">
-                        There was an error fetching the question banks. Please try again.
+                <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 p-8 text-center max-w-2xl mx-auto">
+                    <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+                    <p className="text-xl font-bold text-white mb-2">
+                        {apiError?.status === 403 ? "Access Denied" : "Failed to load banks"}
                     </p>
-                    <Button
-                        variant="outline"
-                        className="mt-4 border-white/10"
-                        onClick={() => window.location.reload()}
-                    >
-                        Retry
-                    </Button>
+                    <p className="text-sm text-white/60 mb-6">
+                        {apiError?.message || "There was an error fetching the question banks. Please try again."}
+                    </p>
+                    <div className="flex gap-4">
+                        <Button
+                            variant="outline"
+                            className="border-white/10"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry Request
+                        </Button>
+                        {apiError?.status === 403 && (
+                            <Button asChild>
+                                <Link href="/dashboard">Back to Dashboard</Link>
+                            </Button>
+                        )}
+                    </div>
                 </div>
             ) : data?.data && data.data.length > 0 ? (
                 <>
