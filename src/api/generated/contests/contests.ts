@@ -1621,6 +1621,303 @@ export const usePublishContestApiV1ContestsContestIdPublishPost = <
     );
 };
 /**
+ * Pause a published contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to pause.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Pause a contest
+ */
+export const pauseContestApiV1ContestsContestIdPausePost = (
+    contestId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponse>({
+        url: `/api/v1/contests/${contestId}/pause`,
+        method: "POST",
+        signal,
+    });
+};
+
+export const getPauseContestApiV1ContestsContestIdPausePostMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>,
+        TError,
+        { contestId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    const mutationKey = ["pauseContestApiV1ContestsContestIdPausePost"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>,
+        { contestId: string }
+    > = (props) => {
+        const { contestId } = props ?? {};
+
+        return pauseContestApiV1ContestsContestIdPausePost(contestId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type PauseContestApiV1ContestsContestIdPausePostMutationResult = NonNullable<
+    Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>
+>;
+
+export type PauseContestApiV1ContestsContestIdPausePostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Pause a contest
+ */
+export const usePauseContestApiV1ContestsContestIdPausePost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>,
+            TError,
+            { contestId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof pauseContestApiV1ContestsContestIdPausePost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    return useMutation(
+        getPauseContestApiV1ContestsContestIdPausePostMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Resume a paused contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to resume.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Resume a paused contest
+ */
+export const resumeContestApiV1ContestsContestIdResumePost = (
+    contestId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponse>({
+        url: `/api/v1/contests/${contestId}/resume`,
+        method: "POST",
+        signal,
+    });
+};
+
+export const getResumeContestApiV1ContestsContestIdResumePostMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>,
+        TError,
+        { contestId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    const mutationKey = ["resumeContestApiV1ContestsContestIdResumePost"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>,
+        { contestId: string }
+    > = (props) => {
+        const { contestId } = props ?? {};
+
+        return resumeContestApiV1ContestsContestIdResumePost(contestId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ResumeContestApiV1ContestsContestIdResumePostMutationResult = NonNullable<
+    Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>
+>;
+
+export type ResumeContestApiV1ContestsContestIdResumePostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Resume a paused contest
+ */
+export const useResumeContestApiV1ContestsContestIdResumePost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>,
+            TError,
+            { contestId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof resumeContestApiV1ContestsContestIdResumePost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    return useMutation(
+        getResumeContestApiV1ContestsContestIdResumePostMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Cancel a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to cancel.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Cancel a contest
+ */
+export const cancelContestApiV1ContestsContestIdCancelPost = (
+    contestId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponse>({
+        url: `/api/v1/contests/${contestId}/cancel`,
+        method: "POST",
+        signal,
+    });
+};
+
+export const getCancelContestApiV1ContestsContestIdCancelPostMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>,
+        TError,
+        { contestId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    const mutationKey = ["cancelContestApiV1ContestsContestIdCancelPost"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>,
+        { contestId: string }
+    > = (props) => {
+        const { contestId } = props ?? {};
+
+        return cancelContestApiV1ContestsContestIdCancelPost(contestId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type CancelContestApiV1ContestsContestIdCancelPostMutationResult = NonNullable<
+    Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>
+>;
+
+export type CancelContestApiV1ContestsContestIdCancelPostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Cancel a contest
+ */
+export const useCancelContestApiV1ContestsContestIdCancelPost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>,
+            TError,
+            { contestId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof cancelContestApiV1ContestsContestIdCancelPost>>,
+    TError,
+    { contestId: string },
+    TContext
+> => {
+    return useMutation(
+        getCancelContestApiV1ContestsContestIdCancelPostMutationOptions(options),
+        queryClient,
+    );
+};
+/**
  * Soft delete a contest without physically removing it.
 
 Args:
