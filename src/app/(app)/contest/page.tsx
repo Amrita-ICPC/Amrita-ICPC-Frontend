@@ -27,7 +27,7 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
 
     const params: GetAllContestsApiV1ContestsGetParams = {
         page: parsePage(resolvedParams?.page, 1),
-        page_size: parsePage(resolvedParams?.page_size, 10),
+        page_size: parsePage(resolvedParams?.page_size, 12),
         contest_status: (str(resolvedParams?.contest_status) as ContestStatus) ?? undefined,
         run_status: (str(resolvedParams?.run_status) as ContestRunStatus) ?? undefined,
         search: str(resolvedParams?.search) ?? undefined,

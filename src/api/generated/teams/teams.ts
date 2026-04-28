@@ -5,44 +5,38 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+    DataTag,
+    DefinedInitialDataOptions,
+    DefinedUseQueryResult,
+    MutationFunction,
+    QueryClient,
+    QueryFunction,
+    QueryKey,
+    UndefinedInitialDataOptions,
+    UseMutationOptions,
+    UseMutationResult,
+    UseQueryOptions,
+    UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
-  APIResponse,
-  APIResponseContestTeamResponse,
-  APIResponseListContestTeamResponse,
-  APIResponseListTeamMemberResponse,
-  ExceptionResponse,
-  GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
-  GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
-  HTTPValidationError,
-  TeamCreate,
-  TeamMemberAdd,
-  TeamMemberRemove,
-  TeamUpdate
-} from '../model';
+    APIResponse,
+    APIResponseContestTeamResponse,
+    APIResponseListTeamMemberResponse,
+    APIResponseTeamListResponse,
+    ExceptionResponse,
+    GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    HTTPValidationError,
+    TeamCreate,
+    TeamMemberAdd,
+    TeamMemberRemove,
+    TeamUpdate,
+} from "../model";
 
-import { axiosWithAuth } from '../../../lib/api-client';
-
-
-
+import { axiosWithAuth } from "../../../lib/api-client";
 
 /**
  * Create a new team in a specific contest.
@@ -61,65 +55,88 @@ Returns:
 export const createTeamApiV1ContestsContestIdTeamsPost = (
     contestId: string,
     teamCreate: TeamCreate,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponse>({
+        url: `/api/v1/contests/${contestId}/teams`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: teamCreate,
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponse>(
-      {url: `/api/v1/contests/${contestId}/teams`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: teamCreate, signal
-    },
-      );
-    }
-
-
-
-export const getCreateTeamApiV1ContestsContestIdTeamsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>, TError,{contestId: string;data: TeamCreate}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>, TError,{contestId: string;data: TeamCreate}, TContext> => {
-
-const mutationKey = ['createTeamApiV1ContestsContestIdTeamsPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>, {contestId: string;data: TeamCreate}> = (props) => {
-          const {contestId,data} = props ?? {};
-
-          return  createTeamApiV1ContestsContestIdTeamsPost(contestId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateTeamApiV1ContestsContestIdTeamsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>>
-    export type CreateTeamApiV1ContestsContestIdTeamsPostMutationBody = TeamCreate
-    export type CreateTeamApiV1ContestsContestIdTeamsPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Create a team in a contest
- */
-export const useCreateTeamApiV1ContestsContestIdTeamsPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>, TError,{contestId: string;data: TeamCreate}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
+export const getCreateTeamApiV1ContestsContestIdTeamsPostMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>,
         TError,
-        {contestId: string;data: TeamCreate},
+        { contestId: string; data: TeamCreate },
         TContext
-      > => {
-      return useMutation(getCreateTeamApiV1ContestsContestIdTeamsPostMutationOptions(options), queryClient);
-    }
-    /**
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>,
+    TError,
+    { contestId: string; data: TeamCreate },
+    TContext
+> => {
+    const mutationKey = ["createTeamApiV1ContestsContestIdTeamsPost"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>,
+        { contestId: string; data: TeamCreate }
+    > = (props) => {
+        const { contestId, data } = props ?? {};
+
+        return createTeamApiV1ContestsContestIdTeamsPost(contestId, data);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type CreateTeamApiV1ContestsContestIdTeamsPostMutationResult = NonNullable<
+    Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>
+>;
+export type CreateTeamApiV1ContestsContestIdTeamsPostMutationBody = TeamCreate;
+export type CreateTeamApiV1ContestsContestIdTeamsPostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Create a team in a contest
+ */
+export const useCreateTeamApiV1ContestsContestIdTeamsPost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>,
+            TError,
+            { contestId: string; data: TeamCreate },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof createTeamApiV1ContestsContestIdTeamsPost>>,
+    TError,
+    { contestId: string; data: TeamCreate },
+    TContext
+> => {
+    return useMutation(
+        getCreateTeamApiV1ContestsContestIdTeamsPostMutationOptions(options),
+        queryClient,
+    );
+};
+/**
  * Get all teams in a specific contest.
 
 Args:
@@ -139,99 +156,163 @@ Returns:
 export const getContestTeamsApiV1ContestsContestIdTeamsGet = (
     contestId: string,
     params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseTeamListResponse>({
+        url: `/api/v1/contests/${contestId}/teams`,
+        method: "GET",
+        params,
+        signal,
+    });
+};
 
+export const getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey = (
+    contestId: string,
+    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+) => {
+    return [`/api/v1/contests/${contestId}/teams`, ...(params ? [params] : [])] as const;
+};
 
-      return axiosWithAuth<APIResponseListContestTeamResponse>(
-      {url: `/api/v1/contests/${contestId}/teams`, method: 'GET',
-        params, signal
+export const getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryOptions = <
+    TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                TError,
+                TData
+            >
+        >;
     },
-      );
-    }
-
-
-
-
-export const getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey = (contestId: string,
-    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,) => {
-    return [
-    `/api/v1/contests/${contestId}/teams`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
-    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData>>, }
 ) => {
+    const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ??
+        getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId, params);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId,params);
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
+    > = ({ signal }) => getContestTeamsApiV1ContestsContestIdTeamsGet(contestId, params, signal);
 
+    return { queryKey, queryFn, enabled: !!contestId, ...queryOptions } as UseQueryOptions<
+        Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type GetContestTeamsApiV1ContestsContestIdTeamsGetQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
+>;
+export type GetContestTeamsApiV1ContestsContestIdTeamsGetQueryError =
+    | ExceptionResponse
+    | HTTPValidationError;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>> = ({ signal }) => getContestTeamsApiV1ContestsContestIdTeamsGet(contestId,params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(contestId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetContestTeamsApiV1ContestsContestIdTeamsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>>
-export type GetContestTeamsApiV1ContestsContestIdTeamsGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params: undefined |  GetContestTeamsApiV1ContestsContestIdTeamsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<
+    TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    params: undefined | GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                    TError,
+                    Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<
+    TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                    TError,
+                    Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<
+    TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get all teams in a contest
  */
 
-export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetContestTeamsApiV1ContestsContestIdTeamsGet<
+    TData = Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    params?: GetContestTeamsApiV1ContestsContestIdTeamsGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getContestTeamsApiV1ContestsContestIdTeamsGet>>,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+    const queryOptions = getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryOptions(
+        contestId,
+        params,
+        options,
+    );
 
-  const queryOptions = getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryOptions(contestId,params,options)
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+        queryKey: DataTag<QueryKey, TData, TError>;
+    };
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
-
-
-
 
 /**
  * Update an existing team in a contest.
@@ -252,65 +333,88 @@ export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatch = (
     contestId: string,
     teamId: string,
     teamUpdate: TeamUpdate,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}`,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        data: teamUpdate,
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponseContestTeamResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: teamUpdate, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>, TError,{contestId: string;teamId: string;data: TeamUpdate}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>, TError,{contestId: string;teamId: string;data: TeamUpdate}, TContext> => {
-
-const mutationKey = ['updateTeamApiV1ContestsContestIdTeamsTeamIdPatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>, {contestId: string;teamId: string;data: TeamUpdate}> = (props) => {
-          const {contestId,teamId,data} = props ?? {};
-
-          return  updateTeamApiV1ContestsContestIdTeamsTeamIdPatch(contestId,teamId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>>
-    export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationBody = TeamUpdate
-    export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update a team in a contest
- */
-export const useUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>, TError,{contestId: string;teamId: string;data: TeamUpdate}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
+export const getUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>,
         TError,
-        {contestId: string;teamId: string;data: TeamUpdate},
+        { contestId: string; teamId: string; data: TeamUpdate },
         TContext
-      > => {
-      return useMutation(getUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationOptions(options), queryClient);
-    }
-    /**
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamUpdate },
+    TContext
+> => {
+    const mutationKey = ["updateTeamApiV1ContestsContestIdTeamsTeamIdPatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>,
+        { contestId: string; teamId: string; data: TeamUpdate }
+    > = (props) => {
+        const { contestId, teamId, data } = props ?? {};
+
+        return updateTeamApiV1ContestsContestIdTeamsTeamIdPatch(contestId, teamId, data);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationResult = NonNullable<
+    Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>
+>;
+export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationBody = TeamUpdate;
+export type UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Update a team in a contest
+ */
+export const useUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>,
+            TError,
+            { contestId: string; teamId: string; data: TeamUpdate },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof updateTeamApiV1ContestsContestIdTeamsTeamIdPatch>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamUpdate },
+    TContext
+> => {
+    return useMutation(
+        getUpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
  * Get detailed information about a specific team.
 
 Args:
@@ -327,98 +431,167 @@ Returns:
 export const getTeamApiV1ContestsContestIdTeamsTeamIdGet = (
     contestId: string,
     teamId: string,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}`,
+        method: "GET",
+        signal,
+    });
+};
 
+export const getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryKey = (
+    contestId: string,
+    teamId: string,
+) => {
+    return [`/api/v1/contests/${contestId}/teams/${teamId}`] as const;
+};
 
-      return axiosWithAuth<APIResponseContestTeamResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}`, method: 'GET', signal
+export const getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryOptions = <
+    TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    teamId: string,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                TError,
+                TData
+            >
+        >;
     },
-      );
-    }
-
-
-
-
-export const getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryKey = (contestId: string,
-    teamId: string,) => {
-    return [
-    `/api/v1/contests/${contestId}/teams/${teamId}`
-    ] as const;
-    }
-
-
-export const getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
-    teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData>>, }
 ) => {
+    const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ??
+        getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryKey(contestId, teamId);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryKey(contestId,teamId);
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
+    > = ({ signal }) => getTeamApiV1ContestsContestIdTeamsTeamIdGet(contestId, teamId, signal);
 
+    return {
+        queryKey,
+        queryFn,
+        enabled: !!(contestId && teamId),
+        ...queryOptions,
+    } as UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type GetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
+>;
+export type GetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryError =
+    | ExceptionResponse
+    | HTTPValidationError;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>> = ({ signal }) => getTeamApiV1ContestsContestIdTeamsTeamIdGet(contestId,teamId, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(contestId && teamId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>>
-export type GetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    teamId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<
+    TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    teamId: string,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                    TError,
+                    Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<
+    TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    teamId: string,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                    TError,
+                    Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<
+    TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    teamId: string,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get team by ID
  */
 
-export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetTeamApiV1ContestsContestIdTeamsTeamIdGet<
+    TData = Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
+    teamId: string,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getTeamApiV1ContestsContestIdTeamsTeamIdGet>>,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+    const queryOptions = getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryOptions(
+        contestId,
+        teamId,
+        options,
+    );
 
-  const queryOptions = getGetTeamApiV1ContestsContestIdTeamsTeamIdGetQueryOptions(contestId,teamId,options)
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+        queryKey: DataTag<QueryKey, TData, TError>;
+    };
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
-
-
-
 
 /**
  * Approve a contest team.
@@ -437,63 +610,377 @@ Returns:
 export const approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch = (
     contestId: string,
     teamId: string,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/approve`,
+        method: "PATCH",
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponseContestTeamResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}/approve`, method: 'PATCH', signal
-    },
-      );
-    }
-
-
-
-export const getApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>, TError,{contestId: string;teamId: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>, TError,{contestId: string;teamId: string}, TContext> => {
-
-const mutationKey = ['approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>, {contestId: string;teamId: string}> = (props) => {
-          const {contestId,teamId} = props ?? {};
-
-          return  approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch(contestId,teamId,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationResult = NonNullable<Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>>
-
-    export type ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Approve a team in a contest
- */
-export const useApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>, TError,{contestId: string;teamId: string}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
+export const getApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>,
         TError,
-        {contestId: string;teamId: string},
+        { contestId: string; teamId: string },
         TContext
-      > => {
-      return useMutation(getApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationOptions(options), queryClient);
-    }
-    /**
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    const mutationKey = ["approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>,
+        { contestId: string; teamId: string }
+    > = (props) => {
+        const { contestId, teamId } = props ?? {};
+
+        return approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch(contestId, teamId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationResult = NonNullable<
+    Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>
+>;
+
+export type ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Approve a team in a contest
+ */
+export const useApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>,
+            TError,
+            { contestId: string; teamId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    return useMutation(
+        getApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Reject a contest team.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    team_id (UUID): The unique identifier of the team.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Reject a team in a contest
+ */
+export const rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch = (
+    contestId: string,
+    teamId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/reject`,
+        method: "PATCH",
+        signal,
+    });
+};
+
+export const getRejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>,
+        TError,
+        { contestId: string; teamId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    const mutationKey = ["rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>,
+        { contestId: string; teamId: string }
+    > = (props) => {
+        const { contestId, teamId } = props ?? {};
+
+        return rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch(contestId, teamId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type RejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchMutationResult = NonNullable<
+    Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>
+>;
+
+export type RejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Reject a team in a contest
+ */
+export const useRejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>,
+            TError,
+            { contestId: string; teamId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    return useMutation(
+        getRejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Confirm a contest team.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    team_id (UUID): The unique identifier of the team.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Confirm a team in a contest
+ */
+export const confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch = (
+    contestId: string,
+    teamId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/confirm`,
+        method: "PATCH",
+        signal,
+    });
+};
+
+export const getConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>,
+        TError,
+        { contestId: string; teamId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    const mutationKey = ["confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>,
+        { contestId: string; teamId: string }
+    > = (props) => {
+        const { contestId, teamId } = props ?? {};
+
+        return confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch(contestId, teamId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchMutationResult = NonNullable<
+    Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>
+>;
+
+export type ConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Confirm a team in a contest
+ */
+export const useConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>,
+            TError,
+            { contestId: string; teamId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    return useMutation(
+        getConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
+ * Disqualify a contest team.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    team_id (UUID): The unique identifier of the team.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Disqualify a team in a contest
+ */
+export const disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch = (
+    contestId: string,
+    teamId: string,
+    signal?: AbortSignal,
+) => {
+    return axiosWithAuth<APIResponseContestTeamResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/disqualify`,
+        method: "PATCH",
+        signal,
+    });
+};
+
+export const getDisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
+        Awaited<ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>>,
+        TError,
+        { contestId: string; teamId: string },
+        TContext
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    const mutationKey = ["disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>>,
+        { contestId: string; teamId: string }
+    > = (props) => {
+        const { contestId, teamId } = props ?? {};
+
+        return disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch(contestId, teamId);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchMutationResult =
+    NonNullable<
+        Awaited<ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>>
+    >;
+
+export type DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Disqualify a team in a contest
+ */
+export const useDisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>
+            >,
+            TError,
+            { contestId: string; teamId: string },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatch>>,
+    TError,
+    { contestId: string; teamId: string },
+    TContext
+> => {
+    return useMutation(
+        getDisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchMutationOptions(options),
+        queryClient,
+    );
+};
+/**
  * Get a paginated list of members in a specific team.
 
 Args:
@@ -514,105 +1001,206 @@ export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet = (
     contestId: string,
     teamId: string,
     params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseListTeamMemberResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/members`,
+        method: "GET",
+        params,
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponseListTeamMemberResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}/members`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryKey = (contestId: string,
+export const getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryKey = (
+    contestId: string,
     teamId: string,
-    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,) => {
+    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+) => {
     return [
-    `/api/v1/contests/${contestId}/teams/${teamId}/members`, ...(params ? [params] : [])
+        `/api/v1/contests/${contestId}/teams/${teamId}/members`,
+        ...(params ? [params] : []),
     ] as const;
-    }
+};
 
-
-export const getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryOptions = <TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
+export const getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryOptions = <
+    TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
     teamId: string,
-    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData>>, }
+    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<
+                    ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                >,
+                TError,
+                TData
+            >
+        >;
+    },
 ) => {
+    const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ??
+        getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryKey(
+            contestId,
+            teamId,
+            params,
+        );
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryKey(contestId,teamId,params);
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>
+    > = ({ signal }) =>
+        getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet(
+            contestId,
+            teamId,
+            params,
+            signal,
+        );
 
+    return {
+        queryKey,
+        queryFn,
+        enabled: !!(contestId && teamId),
+        ...queryOptions,
+    } as UseQueryOptions<
+        Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>
+>;
+export type GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryError =
+    | ExceptionResponse
+    | HTTPValidationError;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>> = ({ signal }) => getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet(contestId,teamId,params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(contestId && teamId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>>
-export type GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
+export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<
+    TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
     teamId: string,
-    params: undefined |  GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
+    params: undefined | GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<
+                    ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                >,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<
+                        ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                    >,
+                    TError,
+                    Awaited<
+                        ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                    >
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<
+    TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
     teamId: string,
-    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
-          TError,
-          Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
+    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<
+                    ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                >,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<
+                        ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                    >,
+                    TError,
+                    Awaited<
+                        ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                    >
+                >,
+                "initialData"
+            >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<
+    TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
     teamId: string,
-    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<
+                    ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                >,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get team members
  */
 
-export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
+export function useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet<
+    TData = Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>,
+    TError = ExceptionResponse | HTTPValidationError,
+>(
+    contestId: string,
     teamId: string,
-    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+    params?: GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<
+                    ReturnType<typeof getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet>
+                >,
+                TError,
+                TData
+            >
+        >;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+    const queryOptions = getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryOptions(
+        contestId,
+        teamId,
+        params,
+        options,
+    );
 
-  const queryOptions = getGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryOptions(contestId,teamId,params,options)
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+        queryKey: DataTag<QueryKey, TData, TError>;
+    };
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
-
-
-
 
 /**
  * Add members to an existing team.
@@ -633,65 +1221,88 @@ export const addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost = (
     contestId: string,
     teamId: string,
     teamMemberAdd: TeamMemberAdd,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseListTeamMemberResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/members`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: teamMemberAdd,
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponseListTeamMemberResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}/members`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: teamMemberAdd, signal
-    },
-      );
-    }
-
-
-
-export const getAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>, TError,{contestId: string;teamId: string;data: TeamMemberAdd}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>, TError,{contestId: string;teamId: string;data: TeamMemberAdd}, TContext> => {
-
-const mutationKey = ['addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>, {contestId: string;teamId: string;data: TeamMemberAdd}> = (props) => {
-          const {contestId,teamId,data} = props ?? {};
-
-          return  addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost(contestId,teamId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationResult = NonNullable<Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>>
-    export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationBody = TeamMemberAdd
-    export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Add members to a team
- */
-export const useAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>, TError,{contestId: string;teamId: string;data: TeamMemberAdd}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
+export const getAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>,
         TError,
-        {contestId: string;teamId: string;data: TeamMemberAdd},
+        { contestId: string; teamId: string; data: TeamMemberAdd },
         TContext
-      > => {
-      return useMutation(getAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationOptions(options), queryClient);
-    }
-    /**
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamMemberAdd },
+    TContext
+> => {
+    const mutationKey = ["addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>,
+        { contestId: string; teamId: string; data: TeamMemberAdd }
+    > = (props) => {
+        const { contestId, teamId, data } = props ?? {};
+
+        return addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost(contestId, teamId, data);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationResult = NonNullable<
+    Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>
+>;
+export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationBody = TeamMemberAdd;
+export type AddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Add members to a team
+ */
+export const useAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>,
+            TError,
+            { contestId: string; teamId: string; data: TeamMemberAdd },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof addTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPost>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamMemberAdd },
+    TContext
+> => {
+    return useMutation(
+        getAddTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersPostMutationOptions(options),
+        queryClient,
+    );
+};
+/**
  * Remove members from an existing team.
 
 Args:
@@ -710,61 +1321,92 @@ export const removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete = (
     contestId: string,
     teamId: string,
     teamMemberRemove: TeamMemberRemove,
- signal?: AbortSignal
+    signal?: AbortSignal,
 ) => {
+    return axiosWithAuth<APIResponseListTeamMemberResponse>({
+        url: `/api/v1/contests/${contestId}/teams/${teamId}/members`,
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        data: teamMemberRemove,
+        signal,
+    });
+};
 
-
-      return axiosWithAuth<APIResponseListTeamMemberResponse>(
-      {url: `/api/v1/contests/${contestId}/teams/${teamId}/members`, method: 'DELETE',
-      headers: {'Content-Type': 'application/json', },
-      data: teamMemberRemove, signal
-    },
-      );
-    }
-
-
-
-export const getRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>, TError,{contestId: string;teamId: string;data: TeamMemberRemove}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>, TError,{contestId: string;teamId: string;data: TeamMemberRemove}, TContext> => {
-
-const mutationKey = ['removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>, {contestId: string;teamId: string;data: TeamMemberRemove}> = (props) => {
-          const {contestId,teamId,data} = props ?? {};
-
-          return  removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete(contestId,teamId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>>
-    export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationBody = TeamMemberRemove
-    export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Remove members from a team
- */
-export const useRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>, TError,{contestId: string;teamId: string;data: TeamMemberRemove}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
+export const getRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationOptions = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>,
         TError,
-        {contestId: string;teamId: string;data: TeamMemberRemove},
+        { contestId: string; teamId: string; data: TeamMemberRemove },
         TContext
-      > => {
-      return useMutation(getRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationOptions(options), queryClient);
-    }
+    >;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamMemberRemove },
+    TContext
+> => {
+    const mutationKey = ["removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete"];
+    const { mutation: mutationOptions } = options
+        ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>,
+        { contestId: string; teamId: string; data: TeamMemberRemove }
+    > = (props) => {
+        const { contestId, teamId, data } = props ?? {};
+
+        return removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete(
+            contestId,
+            teamId,
+            data,
+        );
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationResult =
+    NonNullable<
+        Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>
+    >;
+export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationBody =
+    TeamMemberRemove;
+export type RemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationError =
+    | ExceptionResponse
+    | HTTPValidationError;
+
+/**
+ * @summary Remove members from a team
+ */
+export const useRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete = <
+    TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown,
+>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<
+                ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>
+            >,
+            TError,
+            { contestId: string; teamId: string; data: TeamMemberRemove },
+            TContext
+        >;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof removeTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDelete>>,
+    TError,
+    { contestId: string; teamId: string; data: TeamMemberRemove },
+    TContext
+> => {
+    return useMutation(
+        getRemoveTeamMemberApiV1ContestsContestIdTeamsTeamIdMembersDeleteMutationOptions(options),
+        queryClient,
+    );
+};
