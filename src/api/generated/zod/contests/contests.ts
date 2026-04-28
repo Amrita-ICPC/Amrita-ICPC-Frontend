@@ -1494,6 +1494,172 @@ export const PublishContestApiV1ContestsContestIdPublishPostResponse = zod.objec
 });
 
 /**
+ * Pause a published contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to pause.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Pause a contest
+ */
+export const PauseContestApiV1ContestsContestIdPausePostParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const pauseContestApiV1ContestsContestIdPausePostResponseSuccessDefault = true;
+export const pauseContestApiV1ContestsContestIdPausePostResponseStatusDefault = 200;
+export const pauseContestApiV1ContestsContestIdPausePostResponseMessageDefault = `Success`;
+
+export const PauseContestApiV1ContestsContestIdPausePostResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(pauseContestApiV1ContestsContestIdPausePostResponseSuccessDefault),
+    status: zod.number().default(pauseContestApiV1ContestsContestIdPausePostResponseStatusDefault),
+    message: zod
+        .string()
+        .default(pauseContestApiV1ContestsContestIdPausePostResponseMessageDefault),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({ offset: true }),
+    }),
+});
+
+/**
+ * Resume a paused contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to resume.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Resume a paused contest
+ */
+export const ResumeContestApiV1ContestsContestIdResumePostParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const resumeContestApiV1ContestsContestIdResumePostResponseSuccessDefault = true;
+export const resumeContestApiV1ContestsContestIdResumePostResponseStatusDefault = 200;
+export const resumeContestApiV1ContestsContestIdResumePostResponseMessageDefault = `Success`;
+
+export const ResumeContestApiV1ContestsContestIdResumePostResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(resumeContestApiV1ContestsContestIdResumePostResponseSuccessDefault),
+    status: zod
+        .number()
+        .default(resumeContestApiV1ContestsContestIdResumePostResponseStatusDefault),
+    message: zod
+        .string()
+        .default(resumeContestApiV1ContestsContestIdResumePostResponseMessageDefault),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({ offset: true }),
+    }),
+});
+
+/**
+ * Cancel a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest to cancel.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    ContestNotFoundError: If the contest does not exist.
+ * @summary Cancel a contest
+ */
+export const CancelContestApiV1ContestsContestIdCancelPostParams = zod.object({
+    contest_id: zod.uuid(),
+});
+
+export const cancelContestApiV1ContestsContestIdCancelPostResponseSuccessDefault = true;
+export const cancelContestApiV1ContestsContestIdCancelPostResponseStatusDefault = 200;
+export const cancelContestApiV1ContestsContestIdCancelPostResponseMessageDefault = `Success`;
+
+export const CancelContestApiV1ContestsContestIdCancelPostResponse = zod.object({
+    success: zod
+        .boolean()
+        .default(cancelContestApiV1ContestsContestIdCancelPostResponseSuccessDefault),
+    status: zod
+        .number()
+        .default(cancelContestApiV1ContestsContestIdCancelPostResponseStatusDefault),
+    message: zod
+        .string()
+        .default(cancelContestApiV1ContestsContestIdCancelPostResponseMessageDefault),
+    data: zod.union([zod.unknown(), zod.null()]).optional(),
+    pagination: zod
+        .union([
+            zod.object({
+                total: zod.number(),
+                page: zod.number(),
+                page_size: zod.number(),
+                total_pages: zod.number(),
+                has_next: zod.boolean(),
+                has_previous: zod.boolean(),
+            }),
+            zod.null(),
+        ])
+        .optional(),
+    meta: zod.object({
+        request_id: zod.string(),
+        timestamp: zod.iso.datetime({ offset: true }),
+    }),
+});
+
+/**
  * Soft delete a contest without physically removing it.
 
 Args:

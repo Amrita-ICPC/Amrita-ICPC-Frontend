@@ -21,15 +21,36 @@ import {
     MoreVertical,
     Trash2,
     UserPlus,
+    Pause,
+    Ban,
 } from "lucide-react";
 import Link from "next/link";
 
 import { useRouter } from "next/navigation";
 
 import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
-import { useDeleteContest, contestKeys } from "@/query/contest-query";
+import {
+    useDeleteContest,
+    contestKeys,
+    usePublishContest,
+    usePauseContest,
+    useResumeContest,
+    useCancelContest,
+    contestDetailKey,
+} from "@/query/contest-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/hooks/use-toast";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { ContestDetailResponse } from "@/api/generated/model";
 import {
     DropdownMenu,
@@ -46,20 +67,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ElementType }> =
     {
-        RUNNING: {
-            label: "Running",
+        PUBLISHED: {
+            label: "Published",
             className: "bg-emerald-500/10 text-emerald-500 border-transparent",
             icon: Zap,
         },
-        SCHEDULED: {
-            label: "Scheduled",
+        PAUSED: {
+            label: "Paused",
             className: "bg-blue-500/10 text-blue-500 border-transparent",
-            icon: Clock,
+            icon: Pause,
         },
-        FINISHED: {
-            label: "Finished",
+        CANCELLED: {
+            label: "Cancelled",
             className: "bg-zinc-500/10 text-zinc-400 border-transparent",
-            icon: CheckCircle2,
+            icon: Ban,
         },
         DRAFT: {
             label: "Draft",
@@ -168,24 +189,73 @@ interface ContestDetailClientProps {
 }
 
 export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
-    const { data, isLoading, isError } = useGetContestApiV1ContestsContestIdGet(contestId);
+    const { data, isLoading, isError, refetch } = useGetContestApiV1ContestsContestIdGet(contestId);
     const contest: ContestDetailResponse | undefined = data?.data ?? undefined;
 
     const deleteMutation = useDeleteContest();
+    const publishMutation = usePublishContest();
+    const pauseMutation = usePauseContest();
+    const resumeMutation = useResumeContest();
+    const cancelMutation = useCancelContest();
     const queryClient = useQueryClient();
     const router = useRouter();
 
-    async function handleDeleteContest() {
+    async function handleContestAction(
+        action: () => Promise<any>,
+        successMsg: string,
+        errorMsg: string,
+    ) {
         try {
-            await deleteMutation.mutateAsync({ contestId });
-            toast.success("Contest deleted");
-            queryClient.invalidateQueries({ queryKey: contestKeys() });
-            router.push("/contest");
-            router.refresh();
+            await action();
+            toast.success(successMsg);
+
+            // Await invalidations to ensure server state is refreshed
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: contestKeys() }),
+                queryClient.invalidateQueries({ queryKey: contestDetailKey(contestId) }),
+            ]);
+
+            // Force a manual refetch of the current contest data
+            await refetch();
         } catch (error) {
-            toast.error("Failed to delete contest");
+            toast.error(errorMsg);
         }
     }
+
+    const handleDeleteContest = () =>
+        handleContestAction(
+            () => deleteMutation.mutateAsync({ contestId }),
+            "Contest deleted",
+            "Failed to delete contest",
+        ).then(() => router.push("/contest"));
+
+    const handlePublish = () =>
+        handleContestAction(
+            () => publishMutation.mutateAsync({ contestId }),
+            "Contest published",
+            "Failed to publish contest",
+        );
+
+    const handlePause = () =>
+        handleContestAction(
+            () => pauseMutation.mutateAsync({ contestId }),
+            "Contest paused",
+            "Failed to pause contest",
+        );
+
+    const handleResume = () =>
+        handleContestAction(
+            () => resumeMutation.mutateAsync({ contestId }),
+            "Contest resumed",
+            "Failed to resume contest",
+        );
+
+    const handleCancel = () =>
+        handleContestAction(
+            () => cancelMutation.mutateAsync({ contestId }),
+            "Contest cancelled",
+            "Failed to cancel contest",
+        );
 
     if (isLoading) return <ContestDetailSkeleton />;
 
@@ -284,17 +354,132 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 <UserPlus className="mr-1.5 h-3.5 w-3.5" />
                                 Invite
                             </Button>
+
                             {contest.status === "DRAFT" && (
-                                <Button size="sm" className="shadow-sm">
-                                    <Play className="mr-1.5 h-3.5 w-3.5" />
+                                <Button
+                                    size="sm"
+                                    className="shadow-sm"
+                                    onClick={handlePublish}
+                                    disabled={publishMutation.isPending}
+                                >
+                                    {publishMutation.isPending ? (
+                                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                        <Play className="mr-1.5 h-3.5 w-3.5" />
+                                    )}
                                     Publish
                                 </Button>
                             )}
+
+                            {contest.status === "PUBLISHED" && (
+                                <>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="shadow-sm"
+                                        onClick={handlePause}
+                                        disabled={pauseMutation.isPending}
+                                    >
+                                        {pauseMutation.isPending ? (
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <Pause className="mr-1.5 h-3.5 w-3.5" />
+                                        )}
+                                        Pause
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="shadow-sm"
+                                                disabled={cancelMutation.isPending}
+                                            >
+                                                {cancelMutation.isPending ? (
+                                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                                ) : (
+                                                    <Ban className="mr-1.5 h-3.5 w-3.5" />
+                                                )}
+                                                Cancel
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Are you absolutely sure?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will cancel the contest. This action cannot
+                                                    be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Go Back</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={handleCancel}
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    Yes, Cancel Contest
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </>
+                            )}
+
                             {contest.status === "PAUSED" && (
-                                <Button size="sm" className="shadow-sm">
-                                    <Play className="mr-1.5 h-3.5 w-3.5" />
-                                    Resume
-                                </Button>
+                                <>
+                                    <Button
+                                        size="sm"
+                                        className="shadow-sm"
+                                        onClick={handleResume}
+                                        disabled={resumeMutation.isPending}
+                                    >
+                                        {resumeMutation.isPending ? (
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <Play className="mr-1.5 h-3.5 w-3.5" />
+                                        )}
+                                        Resume
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="shadow-sm"
+                                                disabled={cancelMutation.isPending}
+                                            >
+                                                {cancelMutation.isPending ? (
+                                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                                ) : (
+                                                    <Ban className="mr-1.5 h-3.5 w-3.5" />
+                                                )}
+                                                Cancel
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Are you absolutely sure?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will cancel the contest. This action cannot
+                                                    be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Go Back</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={handleCancel}
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    Yes, Cancel Contest
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </>
                             )}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
