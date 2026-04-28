@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 "use client";
 
@@ -8,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,10 +32,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import type { ContestCreate } from "@/api/generated/model";
+import type { ContestCreate, ContestUpdate, ContestDetailResponse } from "@/api/generated/model";
 import { ScoringType, TeamApprovalMode } from "@/api/generated/model";
 import type { ImageUploadResponse } from "@/api/generated/model";
-import { useCreateContest, useUploadContestImage } from "@/query/contest-query";
+import {
+    useCreateContest,
+    useUpdateContest,
+    useUploadContestImage,
+    contestKeys,
+} from "@/query/contest-query";
 import { toApiError } from "@/lib/api/error";
 import { toast } from "@/lib/hooks/use-toast";
 
@@ -55,6 +60,13 @@ function toDateTimeLocalValue(date: Date) {
 function toUtcIsoString(dateTimeLocal: string) {
     // HTML datetime-local is interpreted as local time. Convert to UTC ISO for backend.
     return new Date(dateTimeLocal).toISOString();
+}
+
+function toLocalValue(iso: string | null | undefined): string {
+    if (!iso) return "";
+    const date = new Date(iso);
+    if (isNaN(date.getTime())) return "";
+    return toDateTimeLocalValue(date);
 }
 
 const formSchema = z
@@ -89,8 +101,14 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function CreateContestClient() {
+export interface ContestFormProps {
+    initialData?: ContestDetailResponse;
+    contestId?: string;
+}
+
+export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
     const [errorDialogTitle, setErrorDialogTitle] = useState("Request failed");
@@ -127,20 +145,24 @@ export function CreateContestClient() {
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            description: "",
-            image: null,
-            is_public: true,
-            start_time: toDateTimeLocalValue(now.start),
-            end_time: toDateTimeLocalValue(now.end),
-            registration_start: "",
-            registration_end: "",
-            max_teams: undefined,
-            min_team_size: 1,
-            max_team_size: 3,
-            rules: "",
-            scoring_type: ScoringType.AUTO,
-            team_approval_mode: TeamApprovalMode.AUTO_APPROVE,
+            name: initialData?.name ?? "",
+            description: initialData?.description ?? "",
+            image: initialData?.image ?? null,
+            is_public: initialData?.is_public ?? true,
+            start_time: initialData?.start_time
+                ? toLocalValue(initialData.start_time)
+                : toDateTimeLocalValue(now.start),
+            end_time: initialData?.end_time
+                ? toLocalValue(initialData.end_time)
+                : toDateTimeLocalValue(now.end),
+            registration_start: toLocalValue(initialData?.registration_start),
+            registration_end: toLocalValue(initialData?.registration_end),
+            max_teams: initialData?.max_teams ?? undefined,
+            min_team_size: initialData?.min_team_size ?? 1,
+            max_team_size: initialData?.max_team_size ?? 3,
+            rules: initialData?.rules ?? "",
+            scoring_type: initialData?.scoring_type ?? ScoringType.AUTO,
+            team_approval_mode: initialData?.team_approval_mode ?? TeamApprovalMode.AUTO_APPROVE,
         },
         mode: "onTouched",
     });
@@ -152,6 +174,8 @@ export function CreateContestClient() {
     const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
     const createContestMutation = useCreateContest();
+    const updateContestMutation = useUpdateContest();
+    const isPending = createContestMutation.isPending || updateContestMutation.isPending;
 
     async function onPickImage(file: File) {
         try {
@@ -165,7 +189,7 @@ export function CreateContestClient() {
     }
 
     const onSubmit = handleSubmit(async (values) => {
-        const payload: ContestCreate = {
+        const payload: ContestCreate | ContestUpdate = {
             name: values.name,
             description: values.description?.trim() ? values.description.trim() : null,
             image: values.image ?? null,
@@ -187,12 +211,26 @@ export function CreateContestClient() {
         };
 
         try {
-            await createContestMutation.mutateAsync(payload);
-            toast.success("Contest created");
+            if (initialData && contestId) {
+                await updateContestMutation.mutateAsync({
+                    contestId,
+                    data: payload as ContestUpdate,
+                });
+                toast.success("Contest updated");
+            } else {
+                await createContestMutation.mutateAsync({ data: payload as ContestCreate });
+                toast.success("Contest created");
+            }
+            queryClient.invalidateQueries({
+                queryKey: contestKeys(),
+            });
             router.push("/contest");
             router.refresh();
         } catch (error) {
-            openErrorDialog(error, "Failed to create contest");
+            openErrorDialog(
+                error,
+                initialData ? "Failed to update contest" : "Failed to create contest",
+            );
         }
     });
 
@@ -227,7 +265,9 @@ export function CreateContestClient() {
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader className="space-y-1">
-                        <CardTitle>Contest Details</CardTitle>
+                        <CardTitle>
+                            {initialData ? "Edit Contest Details" : "Contest Details"}
+                        </CardTitle>
                         <CardDescription>
                             Provide the core information participants will see.
                         </CardDescription>
@@ -582,7 +622,7 @@ export function CreateContestClient() {
 
                     <Card>
                         <CardHeader className="space-y-1">
-                            <CardTitle>Create</CardTitle>
+                            <CardTitle>{initialData ? "Save" : "Create"}</CardTitle>
                             <CardDescription>Review and submit when ready.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3">
@@ -590,12 +630,16 @@ export function CreateContestClient() {
                                 type="submit"
                                 className="w-full"
                                 disabled={
-                                    isSubmitting ||
-                                    createContestMutation.isPending ||
-                                    uploadImageMutation.isPending
+                                    isSubmitting || isPending || uploadImageMutation.isPending
                                 }
                             >
-                                {createContestMutation.isPending ? "Creating…" : "Create contest"}
+                                {isPending
+                                    ? initialData
+                                        ? "Saving…"
+                                        : "Creating…"
+                                    : initialData
+                                      ? "Save changes"
+                                      : "Create contest"}
                             </Button>
                             <Button
                                 type="button"
@@ -605,9 +649,11 @@ export function CreateContestClient() {
                             >
                                 Cancel
                             </Button>
-                            {createContestMutation.isError ? (
+                            {createContestMutation.isError || updateContestMutation.isError ? (
                                 <p className="text-sm text-destructive">
-                                    Creation failed. Try again.
+                                    {initialData
+                                        ? "Update failed. Try again."
+                                        : "Creation failed. Try again."}
                                 </p>
                             ) : null}
                         </CardContent>

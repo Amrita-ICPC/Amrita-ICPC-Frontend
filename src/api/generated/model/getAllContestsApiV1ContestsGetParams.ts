@@ -5,30 +5,35 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ContestStatus } from './contestStatus';
+import type { ContestRunStatus } from "./contestRunStatus";
+import type { ContestStatus } from "./contestStatus";
 
 export type GetAllContestsApiV1ContestsGetParams = {
-/**
- * Search by contest name
- */
-search?: string | null;
-/**
- * Filter by contest status
- */
-contest_status?: ContestStatus | null;
-/**
- * Filter by visibility (public/private)
- */
-is_public?: boolean | null;
-/**
- * Page number (starts from 1)
- * @minimum 1
- */
-page?: number;
-/**
- * Number of contests per page
- * @minimum 1
- * @maximum 100
- */
-page_size?: number;
+    /**
+     * Search by contest name
+     */
+    search?: string | null;
+    /**
+     * Filter by contest lifecycle status (DRAFT/PUBLISHED/etc)
+     */
+    contest_status?: ContestStatus | null;
+    /**
+     * Filter by contest run-state (UPCOMING/LIVE/ENDED)
+     */
+    run_status?: ContestRunStatus | null;
+    /**
+     * Filter by visibility (public/private)
+     */
+    is_public?: boolean | null;
+    /**
+     * Page number (starts from 1)
+     * @minimum 1
+     */
+    page?: number;
+    /**
+     * Number of contests per page
+     * @minimum 1
+     * @maximum 100
+     */
+    page_size?: number;
 };

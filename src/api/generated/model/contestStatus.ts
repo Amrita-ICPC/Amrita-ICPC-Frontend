@@ -14,20 +14,15 @@ controlling participant access and available operations.
 
 Attributes:
     DRAFT: Contest is being configured and not visible to participants.
-    SCHEDULED: Contest is published and scheduled for future start.
-    RUNNING: Contest is currently active and accepting submissions.
+    PUBLISHED: Contest is published and visible to participants.
     PAUSED: Contest is temporarily halted, submissions disabled.
-    FINISHED: Contest has concluded, final results available.
     CANCELLED: Contest has been cancelled and will not proceed.
  */
-export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
-
+export type ContestStatus = (typeof ContestStatus)[keyof typeof ContestStatus];
 
 export const ContestStatus = {
-  DRAFT: 'DRAFT',
-  SCHEDULED: 'SCHEDULED',
-  RUNNING: 'RUNNING',
-  PAUSED: 'PAUSED',
-  FINISHED: 'FINISHED',
-  CANCELLED: 'CANCELLED',
+    DRAFT: "DRAFT",
+    PUBLISHED: "PUBLISHED",
+    PAUSED: "PAUSED",
+    CANCELLED: "CANCELLED",
 } as const;

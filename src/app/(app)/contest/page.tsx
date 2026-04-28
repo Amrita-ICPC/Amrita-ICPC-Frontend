@@ -1,7 +1,11 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import type { GetAllContestsApiV1ContestsGetParams, ContestStatus } from "@/api/generated/model";
+import type {
+    GetAllContestsApiV1ContestsGetParams,
+    ContestStatus,
+    ContestRunStatus,
+} from "@/api/generated/model";
 import { hasPermission } from "@/lib/auth/utils";
 import { auth } from "@/lib/auth/auth";
 import { Button } from "@/components/ui/button";
@@ -19,15 +23,13 @@ function parsePage(v: string | string[] | undefined, fallback: number) {
 }
 
 export default async function ContestPage(props: { searchParams?: Promise<SearchParams> }) {
-    const [resolvedParams, session] = await Promise.all([
-        props.searchParams,
-        auth(),
-    ]);
+    const [resolvedParams, session] = await Promise.all([props.searchParams, auth()]);
 
     const params: GetAllContestsApiV1ContestsGetParams = {
         page: parsePage(resolvedParams?.page, 1),
         page_size: parsePage(resolvedParams?.page_size, 10),
         contest_status: (str(resolvedParams?.contest_status) as ContestStatus) ?? undefined,
+        run_status: (str(resolvedParams?.run_status) as ContestRunStatus) ?? undefined,
         search: str(resolvedParams?.search) ?? undefined,
     };
 
@@ -39,7 +41,9 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Contests</h1>
-                    <p className="text-sm text-muted-foreground">Manage and explore programming contests.</p>
+                    <p className="text-sm text-muted-foreground">
+                        Manage and explore programming contests.
+                    </p>
                 </div>
                 {canCreate && (
                     <Button asChild>
