@@ -19,6 +19,7 @@ import {
     getListAudiencesApiV1AudiencesGetQueryKey,
     getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey,
 } from "@/api/generated/audiences/audiences";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { AudienceResponse } from "@/api/generated/model";
 import { AudienceType } from "@/api/generated/model/audienceType";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AppPagination } from "@/components/shared/app-pagination";
 
 // ─── Zod schemas ─────────────────────────────────────────────────────────────
 
@@ -94,10 +96,13 @@ function AudienceDialog({ open, onOpenChange, audience }: AudienceDialogProps) {
                 toast.success("Audience created");
                 onOpenChange(false);
                 form.reset();
-                queryClient.invalidateQueries({ queryKey: getListAudiencesApiV1AudiencesGetQueryKey() });
+                queryClient.invalidateQueries({
+                    queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                });
             },
             onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data
+                    ?.message;
                 toast.error(msg || "Failed to create audience");
             },
         },
@@ -108,10 +113,13 @@ function AudienceDialog({ open, onOpenChange, audience }: AudienceDialogProps) {
             onSuccess: () => {
                 toast.success("Audience updated");
                 onOpenChange(false);
-                queryClient.invalidateQueries({ queryKey: getListAudiencesApiV1AudiencesGetQueryKey() });
+                queryClient.invalidateQueries({
+                    queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                });
             },
             onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data
+                    ?.message;
                 toast.error(msg || "Failed to update audience");
             },
         },
@@ -161,10 +169,18 @@ function AudienceDialog({ open, onOpenChange, audience }: AudienceDialogProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={AudienceType.class}>Class</SelectItem>
-                                            <SelectItem value={AudienceType.department}>Department</SelectItem>
-                                            <SelectItem value={AudienceType.batch}>Batch</SelectItem>
-                                            <SelectItem value={AudienceType.campus}>Campus</SelectItem>
+                                            <SelectItem value={AudienceType.class}>
+                                                Class
+                                            </SelectItem>
+                                            <SelectItem value={AudienceType.department}>
+                                                Department
+                                            </SelectItem>
+                                            <SelectItem value={AudienceType.batch}>
+                                                Batch
+                                            </SelectItem>
+                                            <SelectItem value={AudienceType.campus}>
+                                                Campus
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -191,7 +207,12 @@ function AudienceDialog({ open, onOpenChange, audience }: AudienceDialogProps) {
                             )}
                         />
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => onOpenChange(false)}
+                                disabled={isPending}
+                            >
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={isPending}>
@@ -207,48 +228,74 @@ function AudienceDialog({ open, onOpenChange, audience }: AudienceDialogProps) {
 
 // ─── Users Panel ─────────────────────────────────────────────────────────────
 
-function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse; onClose: () => void }) {
+function AudienceUsersPanel({
+    audience,
+    onClose,
+}: {
+    audience: AudienceResponse;
+    onClose: () => void;
+}) {
     const [emailInput, setEmailInput] = useState("");
+    const [page, setPage] = useState(1);
     const queryClient = useQueryClient();
 
-    const { data, isLoading } = useListAudienceUsersApiV1AudiencesAudienceIdUsersGet(audience.id);
+    const { data, isLoading } = useListAudienceUsersApiV1AudiencesAudienceIdUsersGet(audience.id, {
+        page,
+        page_size: 20,
+    });
     const users = data?.data?.users ?? [];
+    const pagination = data?.pagination;
 
-    const { mutate: addByEmail, isPending: adding } = useAddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost({
-        mutation: {
-            onSuccess: () => {
-                toast.success("User added");
-                setEmailInput("");
-                queryClient.invalidateQueries({
-                    queryKey: getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey(audience.id),
-                });
-                queryClient.invalidateQueries({ queryKey: getListAudiencesApiV1AudiencesGetQueryKey() });
+    const { mutate: addByEmail, isPending: adding } =
+        useAddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost({
+            mutation: {
+                onSuccess: () => {
+                    toast.success("User added");
+                    setEmailInput("");
+                    queryClient.invalidateQueries({
+                        queryKey: getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey(
+                            audience.id,
+                        ),
+                    });
+                    queryClient.invalidateQueries({
+                        queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                    });
+                },
+                onError: (err: unknown) => {
+                    const msg = (err as { response?: { data?: { message?: string } } })?.response
+                        ?.data?.message;
+                    toast.error(msg || "Failed to add user");
+                },
             },
-            onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-                toast.error(msg || "Failed to add user");
-            },
-        },
-    });
+        });
 
-    const { mutate: removeUsers, isPending: removing } = useRemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete({
-        mutation: {
-            onSuccess: () => {
-                toast.success("User removed");
-                queryClient.invalidateQueries({
-                    queryKey: getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey(audience.id),
-                });
-                queryClient.invalidateQueries({ queryKey: getListAudiencesApiV1AudiencesGetQueryKey() });
+    const { mutate: removeUsers, isPending: removing } =
+        useRemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete({
+            mutation: {
+                onSuccess: () => {
+                    toast.success("User removed");
+                    queryClient.invalidateQueries({
+                        queryKey: getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey(
+                            audience.id,
+                        ),
+                    });
+                    queryClient.invalidateQueries({
+                        queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                    });
+                },
+                onError: (err: unknown) => {
+                    const msg = (err as { response?: { data?: { message?: string } } })?.response
+                        ?.data?.message;
+                    toast.error(msg || "Failed to remove user");
+                },
             },
-            onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-                toast.error(msg || "Failed to remove user");
-            },
-        },
-    });
+        });
 
     function handleAdd() {
-        const emails = emailInput.split(/[\s,]+/).map((e) => e.trim()).filter(Boolean);
+        const emails = emailInput
+            .split(/[\s,]+/)
+            .map((e) => e.trim())
+            .filter(Boolean);
         if (!emails.length) return;
         addByEmail({
             audienceId: audience.id,
@@ -261,9 +308,13 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
             <div className="flex items-center justify-between">
                 <div>
                     <p className="font-semibold">{audience.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{audience.audience_type} · {audience.total_users ?? 0} users</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                        {audience.audience_type} · {audience.total_users ?? 0} users
+                    </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                    Close
+                </Button>
             </div>
 
             <div className="flex gap-2">
@@ -273,7 +324,11 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
                     onChange={(e) => setEmailInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAdd())}
                 />
-                <Button onClick={handleAdd} disabled={adding || !emailInput.trim()} className="shrink-0">
+                <Button
+                    onClick={handleAdd}
+                    disabled={adding || !emailInput.trim()}
+                    className="shrink-0"
+                >
                     <Mail className="mr-1.5 h-4 w-4" />
                     Add
                 </Button>
@@ -281,17 +336,28 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
 
             <ScrollArea className="h-[280px]">
                 {isLoading ? (
-                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Loading…</div>
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                        Loading…
+                    </div>
                 ) : users.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No users yet.</div>
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                        No users yet.
+                    </div>
                 ) : (
                     <div className="space-y-1">
                         {users.map((u) => (
-                            <div key={u.id} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50">
+                            <div
+                                key={u.id}
+                                className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50"
+                            >
                                 <div className="min-w-0">
-                                    <p className="text-sm font-medium truncate">{u.name || u.email || u.id}</p>
+                                    <p className="text-sm font-medium truncate">
+                                        {u.name || u.email || u.id}
+                                    </p>
                                     {u.name && u.email && (
-                                        <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                            {u.email}
+                                        </p>
                                     )}
                                 </div>
                                 <Button
@@ -299,7 +365,12 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
                                     size="icon"
                                     className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
                                     disabled={removing}
-                                    onClick={() => removeUsers({ audienceId: audience.id, data: { user_ids: [u.user_id] } })}
+                                    onClick={() =>
+                                        removeUsers({
+                                            audienceId: audience.id,
+                                            data: { user_ids: [u.user_id] },
+                                        })
+                                    }
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -308,6 +379,18 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
                     </div>
                 )}
             </ScrollArea>
+
+            {pagination && (
+                <div className="pt-2">
+                    <AppPagination
+                        currentPage={pagination.page}
+                        totalPages={pagination.total_pages}
+                        hasNext={pagination.has_next}
+                        hasPrevious={pagination.has_previous}
+                        onPageChange={setPage}
+                    />
+                </div>
+            )}
         </div>
     );
 }
@@ -315,23 +398,36 @@ function AudienceUsersPanel({ audience, onClose }: { audience: AudienceResponse;
 // ─── Main Client ──────────────────────────────────────────────────────────────
 
 export function AudiencesClient() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const queryClient = useQueryClient();
+
     const [createOpen, setCreateOpen] = useState(false);
     const [editAudience, setEditAudience] = useState<AudienceResponse | null>(null);
     const [selectedAudience, setSelectedAudience] = useState<AudienceResponse | null>(null);
 
-    const { data, isLoading, isError } = useListAudiencesApiV1AudiencesGet();
+    const page = parseInt(searchParams.get("page") || "1");
+
+    const { data, isLoading, isError } = useListAudiencesApiV1AudiencesGet({
+        page,
+        page_size: 10,
+    });
     const audiences = data?.data ?? [];
+    const pagination = data?.pagination;
 
     const { mutate: deleteAudience } = useDeleteAudienceApiV1AudiencesAudienceIdDelete({
         mutation: {
             onSuccess: () => {
                 toast.success("Audience deleted");
                 setSelectedAudience(null);
-                queryClient.invalidateQueries({ queryKey: getListAudiencesApiV1AudiencesGetQueryKey() });
+                queryClient.invalidateQueries({
+                    queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                });
             },
             onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data
+                    ?.message;
                 toast.error(msg || "Failed to delete audience");
             },
         },
@@ -381,9 +477,15 @@ export function AudiencesClient() {
                                 {audiences.map((audience) => (
                                     <TableRow
                                         key={audience.id}
-                                        className={selectedAudience?.id === audience.id ? "bg-muted/50" : ""}
+                                        className={
+                                            selectedAudience?.id === audience.id
+                                                ? "bg-muted/50"
+                                                : ""
+                                        }
                                     >
-                                        <TableCell className="font-medium">{audience.name}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {audience.name}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge variant="secondary" className="capitalize">
                                                 {audience.audience_type}
@@ -401,12 +503,18 @@ export function AudiencesClient() {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    onClick={() => setSelectedAudience(
-                                                        selectedAudience?.id === audience.id ? null : audience
-                                                    )}
+                                                    onClick={() =>
+                                                        setSelectedAudience(
+                                                            selectedAudience?.id === audience.id
+                                                                ? null
+                                                                : audience,
+                                                        )
+                                                    }
                                                     title="Manage users"
                                                 >
-                                                    <ChevronRight className={`h-4 w-4 transition-transform ${selectedAudience?.id === audience.id ? "rotate-90" : ""}`} />
+                                                    <ChevronRight
+                                                        className={`h-4 w-4 transition-transform ${selectedAudience?.id === audience.id ? "rotate-90" : ""}`}
+                                                    />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -431,6 +539,20 @@ export function AudiencesClient() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {pagination && (
+                        <AppPagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.total_pages}
+                            hasNext={pagination.has_next}
+                            hasPrevious={pagination.has_previous}
+                            onPageChange={(p) => {
+                                const params = new URLSearchParams(searchParams.toString());
+                                params.set("page", String(p));
+                                router.push(`${pathname}?${params.toString()}`);
+                            }}
+                        />
+                    )}
 
                     {selectedAudience && (
                         <AudienceUsersPanel

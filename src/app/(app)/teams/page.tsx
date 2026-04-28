@@ -1,5 +1,3 @@
-import { TeamsClient } from "@/components/teams/teams-client";
-
 export default function TeamsPage() {
     return (
         <div className="space-y-6">
@@ -7,7 +5,7 @@ export default function TeamsPage() {
                 <h1 className="text-2xl font-bold tracking-tight">Teams</h1>
                 <p className="text-sm text-muted-foreground">Browse and manage contest teams.</p>
             </div>
-            <TeamsClient />
+            {/* <TeamsClient /> */}
         </div>
     );
 }

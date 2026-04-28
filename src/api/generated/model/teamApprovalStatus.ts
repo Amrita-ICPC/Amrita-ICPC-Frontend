@@ -12,11 +12,12 @@
 Attributes:
     WAITING: Team is awaiting instructor review.
     APPROVED: Team enrollment is approved.
+    REJECTED: Team enrollment is rejected.
  */
-export type TeamApprovalStatus = typeof TeamApprovalStatus[keyof typeof TeamApprovalStatus];
-
+export type TeamApprovalStatus = (typeof TeamApprovalStatus)[keyof typeof TeamApprovalStatus];
 
 export const TeamApprovalStatus = {
-  WAITING: 'WAITING',
-  APPROVED: 'APPROVED',
+    WAITING: "WAITING",
+    APPROVED: "APPROVED",
+    REJECTED: "REJECTED",
 } as const;
