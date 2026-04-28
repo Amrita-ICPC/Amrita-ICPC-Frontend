@@ -21,6 +21,7 @@ export function ContestFilters() {
 
     const initialSearch = searchParams.get("search") || "";
     const initialStatus = searchParams.get("contest_status") || "all";
+    const initialRunStatus = searchParams.get("run_status") || "all";
 
     const [searchTerm, setSearchTerm] = useState(initialSearch);
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -61,6 +62,19 @@ export function ContestFilters() {
         router.replace(`${pathname}?${params.toString()}`);
     };
 
+    const handleRunStatusChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (value && value !== "all") {
+            params.set("run_status", value);
+        } else {
+            params.delete("run_status");
+        }
+
+        params.set("page", "1");
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
@@ -73,18 +87,32 @@ export function ContestFilters() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <Select value={initialStatus} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                    <SelectItem value="RUNNING">Running</SelectItem>
-                    <SelectItem value="FINISHED">Finished</SelectItem>
-                </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3">
+                <Select value={initialRunStatus} onValueChange={handleRunStatusChange}>
+                    <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Run Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="UPCOMING">Upcoming</SelectItem>
+                        <SelectItem value="LIVE">Live</SelectItem>
+                        <SelectItem value="ENDED">Ended</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={initialStatus} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Contest Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="DRAFT">Draft</SelectItem>
+                        <SelectItem value="PUBLISHED">Published</SelectItem>
+                        <SelectItem value="PAUSED">Paused</SelectItem>
+                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
     );
 }

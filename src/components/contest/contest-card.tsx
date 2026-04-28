@@ -1,24 +1,30 @@
 "use client";
 
-import { Calendar, ArrowRight } from "lucide-react";
+import { Calendar, ArrowRight, Edit2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
 import type { ContestSummaryResponse } from "@/api/generated/model";
 
-const STATUS: Record<string, { dot: string; label: string; text: string }> = {
-    RUNNING: {
+const CONTEST_STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
+    PUBLISHED: {
         dot: "bg-emerald-500",
-        label: "Running",
+        label: "Published",
         text: "text-emerald-700 dark:text-emerald-300",
     },
-    SCHEDULED: { dot: "bg-sky-600", label: "Scheduled", text: "text-sky-700 dark:text-sky-300" },
-    FINISHED: {
-        dot: "bg-slate-500",
-        label: "Finished",
-        text: "text-slate-600 dark:text-slate-300",
-    },
     DRAFT: { dot: "bg-amber-500", label: "Draft", text: "text-amber-700 dark:text-amber-300" },
+    PAUSED: { dot: "bg-sky-600", label: "Paused", text: "text-sky-700 dark:text-sky-300" },
+    CANCELLED: { dot: "bg-red-500", label: "Cancelled", text: "text-red-700 dark:text-red-300" },
+};
+
+const RUN_STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+    LIVE: {
+        bg: "bg-emerald-500/10",
+        text: "text-emerald-600 dark:text-emerald-400",
+        label: "Live",
+    },
+    UPCOMING: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", label: "Upcoming" },
+    ENDED: { bg: "bg-slate-500/10", text: "text-slate-600 dark:text-slate-400", label: "Ended" },
 };
 
 const BANNERS = [
@@ -104,7 +110,8 @@ interface ContestCardProps {
 
 export function ContestCard({ contest }: ContestCardProps) {
     const [imgErr, setImgErr] = useState(false);
-    const status = STATUS[contest.status] ?? STATUS.DRAFT;
+    const cStatus = CONTEST_STATUS_STYLES[contest.status] ?? CONTEST_STATUS_STYLES.DRAFT;
+    const rStatus = RUN_STATUS_STYLES[contest.run_status] ?? RUN_STATUS_STYLES.UPCOMING;
 
     const startDate = new Date(contest.start_time).toLocaleDateString(undefined, {
         month: "short",
@@ -118,12 +125,15 @@ export function ContestCard({ contest }: ContestCardProps) {
     });
 
     return (
-        <Link
-            href={`/contest/${contest.id}`}
-            className="group flex h-70 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(20,45,103,0.45)] transition-all duration-200 hover:-translate-y-1 hover:border-[#bdccee] hover:shadow-[0_18px_30px_-18px_rgba(16,35,82,0.58)] dark:border-white/12 dark:bg-slate-900 dark:hover:border-white/20"
-        >
+        <div className="group relative flex h-70 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(20,45,103,0.45)] transition-all duration-200 hover:-translate-y-1 hover:border-[#bdccee] hover:shadow-[0_18px_30px_-18px_rgba(16,35,82,0.58)] dark:border-white/12 dark:bg-slate-900 dark:hover:border-white/20">
+            <Link
+                href={`/contest/${contest.id}`}
+                className="absolute inset-0 z-0"
+                aria-label={`View contest ${contest.name}`}
+            />
+
             {/* Banner — fixed 130px */}
-            <div className="relative h-32.5 w-full shrink-0 overflow-hidden">
+            <div className="relative h-32.5 w-full shrink-0 overflow-hidden z-0 pointer-events-none">
                 {contest.image && !imgErr ? (
                     <>
                         <img
@@ -138,12 +148,37 @@ export function ContestCard({ contest }: ContestCardProps) {
                     <FallbackBanner id={contest.id} name={contest.name} />
                 )}
 
-                {/* Status */}
-                <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/45 bg-white/95 px-2.5 py-1 shadow-sm backdrop-blur-sm dark:border-white/20 dark:bg-slate-900/80">
-                    <span className={`h-1.5 w-1.5 rounded-full ${status.dot} shadow-sm`} />
-                    <span className={`text-[11px] font-semibold tracking-wide ${status.text}`}>
-                        {status.label}
-                    </span>
+                {/* Top overlays */}
+                <div className="absolute inset-x-3 top-3 flex items-start justify-between pointer-events-none">
+                    {/* Run Status Badge */}
+                    <div className="flex flex-col gap-1.5 items-start">
+                        <div
+                            className={`flex items-center rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${rStatus.bg} ${rStatus.text} border border-current/10 shadow-sm pointer-events-auto`}
+                        >
+                            {rStatus.label}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 items-end">
+                        {/* Status */}
+                        <div className="flex items-center gap-1.5 rounded-full border border-white/45 bg-white/95 px-2.5 py-1 shadow-sm backdrop-blur-sm dark:border-white/20 dark:bg-slate-900/80 pointer-events-auto">
+                            <span className={`h-1.5 w-1.5 rounded-full ${cStatus.dot} shadow-sm`} />
+                            <span
+                                className={`text-[11px] font-semibold tracking-wide ${cStatus.text}`}
+                            >
+                                {cStatus.label}
+                            </span>
+                        </div>
+
+                        {/* Edit Button */}
+                        <Link
+                            href={`/contest/${contest.id}/edit`}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-600 shadow-sm backdrop-blur-md transition-all hover:scale-105 hover:bg-white hover:text-[#162d68] dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300 pointer-events-auto"
+                            title="Edit Contest"
+                        >
+                            <Edit2 className="h-3.5 w-3.5" />
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -171,6 +206,6 @@ export function ContestCard({ contest }: ContestCardProps) {
                     </div>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }
