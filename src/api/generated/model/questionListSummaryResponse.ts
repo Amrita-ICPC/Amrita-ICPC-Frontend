@@ -5,29 +5,30 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { QuestionDifficulty } from './questionDifficulty';
+import type { QuestionDifficulty } from "./questionDifficulty";
+import type { TagResponse } from "./tagResponse";
 
 export interface QuestionListSummaryResponse {
-  id: string;
-  /** The problem statement and description */
-  question_text: string;
-  /** Difficulty level of the question */
-  difficulty: QuestionDifficulty;
-  allowed_languages?: string[];
-  /**
+    id: string;
+    /** The problem statement and description */
+    question_text: string;
+    /** Difficulty level of the question */
+    difficulty: QuestionDifficulty;
+    allowed_languages?: string[];
+    /**
      * Time limit in milliseconds
      * @exclusiveMinimum 0
      */
-  time_limit_ms: number;
-  /**
+    time_limit_ms: number;
+    /**
      * Memory limit in megabytes
      * @exclusiveMinimum 0
      */
-  memory_limit_mb: number;
-  tag_ids?: string[];
-  /** Number of testcases */
-  testcase_count?: number;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+    memory_limit_mb: number;
+    tags?: TagResponse[];
+    /** Number of testcases */
+    testcase_count?: number;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
 }
