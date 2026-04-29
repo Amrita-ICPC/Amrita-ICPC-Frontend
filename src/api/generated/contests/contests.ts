@@ -24,11 +24,11 @@ import type {
 import type {
     APIResponse,
     APIResponseContestDetailResponse,
+    APIResponseContestQuestionsListResponse,
     APIResponseListContestAudienceResponse,
     APIResponseListContestQuestionResponse,
     APIResponseListContestSummaryResponse,
     APIResponseListInstructorResponse,
-    APIResponseListQuestionListSummaryResponse,
     APIResponseNoneType,
     APIResponseQuestionResponse,
     AddContestQuestionsRequest,
@@ -893,7 +893,7 @@ export const getContestQuestionsApiV1ContestsContestIdQuestionsGet = (
     params?: GetContestQuestionsApiV1ContestsContestIdQuestionsGetParams,
     signal?: AbortSignal,
 ) => {
-    return axiosWithAuth<APIResponseListQuestionListSummaryResponse>({
+    return axiosWithAuth<APIResponseContestQuestionsListResponse>({
         url: `/api/v1/contests/${contestId}/questions`,
         method: "GET",
         params,

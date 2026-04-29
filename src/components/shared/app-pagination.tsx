@@ -24,8 +24,6 @@ export function AppPagination({
     hasNext,
     onPageChange,
 }: AppPaginationProps) {
-    if (totalPages <= 1) return null;
-
     const pages: number[] = [];
     if (totalPages <= 5) {
         for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -43,7 +41,10 @@ export function AppPagination({
                 <PaginationItem>
                     <PaginationPrevious
                         href="#"
-                        onClick={(e) => { e.preventDefault(); if (hasPrevious) onPageChange(currentPage - 1); }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (hasPrevious) onPageChange(currentPage - 1);
+                        }}
                         className={!hasPrevious ? "pointer-events-none opacity-50" : ""}
                     />
                 </PaginationItem>
@@ -52,7 +53,10 @@ export function AppPagination({
                         <PaginationLink
                             href="#"
                             isActive={p === currentPage}
-                            onClick={(e) => { e.preventDefault(); onPageChange(p); }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onPageChange(p);
+                            }}
                         >
                             {p}
                         </PaginationLink>
@@ -61,7 +65,10 @@ export function AppPagination({
                 <PaginationItem>
                     <PaginationNext
                         href="#"
-                        onClick={(e) => { e.preventDefault(); if (hasNext) onPageChange(currentPage + 1); }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (hasNext) onPageChange(currentPage + 1);
+                        }}
                         className={!hasNext ? "pointer-events-none opacity-50" : ""}
                     />
                 </PaginationItem>

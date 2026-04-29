@@ -1100,11 +1100,15 @@ export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetQueryParams = 
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseSuccessDefault = true;
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseStatusDefault = 200;
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseMessageDefault = `Success`;
-export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemTimeLimitMsExclusiveMin = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemTimeLimitMsExclusiveMin = 0;
 
-export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemMemoryLimitMbExclusiveMin = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemMemoryLimitMbExclusiveMin = 0;
 
-export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemTestcaseCountDefault = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemTestcaseCountDefault = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneEasyCountDefault = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneMediumCountDefault = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneHardCountDefault = 0;
+export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneTotalCountDefault = 0;
 
 export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetResponse = zod.object({
     success: zod
@@ -1118,38 +1122,77 @@ export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetResponse = zod
         .default(getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseMessageDefault),
     data: zod
         .union([
-            zod.array(
-                zod.object({
-                    id: zod.uuid(),
-                    question_text: zod.string().describe("The problem statement and description"),
-                    difficulty: zod
-                        .enum(["EASY", "MEDIUM", "HARD"])
-                        .describe("Difficulty level of the question"),
-                    allowed_languages: zod.array(zod.string()).optional(),
-                    time_limit_ms: zod
-                        .number()
-                        .gt(
-                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemTimeLimitMsExclusiveMin,
-                        )
-                        .describe("Time limit in milliseconds"),
-                    memory_limit_mb: zod
-                        .number()
-                        .gt(
-                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemMemoryLimitMbExclusiveMin,
-                        )
-                        .describe("Memory limit in megabytes"),
-                    tag_ids: zod.array(zod.uuid()).optional(),
-                    testcase_count: zod
+            zod
+                .object({
+                    questions: zod.array(
+                        zod.object({
+                            id: zod.uuid(),
+                            question_text: zod
+                                .string()
+                                .describe("The problem statement and description"),
+                            difficulty: zod
+                                .enum(["EASY", "MEDIUM", "HARD"])
+                                .describe("Difficulty level of the question"),
+                            allowed_languages: zod.array(zod.string()).optional(),
+                            time_limit_ms: zod
+                                .number()
+                                .gt(
+                                    getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemTimeLimitMsExclusiveMin,
+                                )
+                                .describe("Time limit in milliseconds"),
+                            memory_limit_mb: zod
+                                .number()
+                                .gt(
+                                    getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemMemoryLimitMbExclusiveMin,
+                                )
+                                .describe("Memory limit in megabytes"),
+                            tags: zod
+                                .array(
+                                    zod.object({
+                                        id: zod.uuid(),
+                                        name: zod.string(),
+                                    }),
+                                )
+                                .optional(),
+                            testcase_count: zod
+                                .number()
+                                .default(
+                                    getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemTestcaseCountDefault,
+                                )
+                                .describe("Number of testcases"),
+                            created_by: zod.uuid(),
+                            created_at: zod.iso.datetime({ offset: true }),
+                            updated_at: zod.iso.datetime({ offset: true }),
+                        }),
+                    ),
+                    easy_count: zod
                         .number()
                         .default(
-                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneItemTestcaseCountDefault,
+                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneEasyCountDefault,
                         )
-                        .describe("Number of testcases"),
-                    created_by: zod.uuid(),
-                    created_at: zod.iso.datetime({ offset: true }),
-                    updated_at: zod.iso.datetime({ offset: true }),
-                }),
-            ),
+                        .describe("Number of easy questions in the contest"),
+                    medium_count: zod
+                        .number()
+                        .default(
+                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneMediumCountDefault,
+                        )
+                        .describe("Number of medium questions in the contest"),
+                    hard_count: zod
+                        .number()
+                        .default(
+                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneHardCountDefault,
+                        )
+                        .describe("Number of hard questions in the contest"),
+                    total_count: zod
+                        .number()
+                        .default(
+                            getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneTotalCountDefault,
+                        )
+                        .describe("Total number of questions in the contest"),
+                })
+                .describe(
+                    "Response model for a paginated list of contest questions with summary statistics.\n\nIncludes counts for each difficulty level to help with UI dashboard rendering.",
+                ),
             zod.null(),
         ])
         .optional(),
@@ -1411,7 +1454,14 @@ export const GetContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetRespo
                     )
                     .optional(),
                 allowed_languages: zod.array(zod.string()).optional(),
-                tag_ids: zod.array(zod.uuid()).optional(),
+                tags: zod
+                    .array(
+                        zod.object({
+                            id: zod.uuid(),
+                            name: zod.string(),
+                        }),
+                    )
+                    .optional(),
             }),
             zod.null(),
         ])
@@ -2561,7 +2611,14 @@ export const UpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestio
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -2725,7 +2782,14 @@ export const RemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQu
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -2870,7 +2934,14 @@ export const UpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQues
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -2996,7 +3067,14 @@ export const UpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuest
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3152,7 +3230,14 @@ export const RemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQu
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3281,7 +3366,14 @@ export const UpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQues
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3406,7 +3498,14 @@ export const UpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuest
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3529,7 +3628,14 @@ export const AddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestions
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3652,7 +3758,14 @@ export const RemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQues
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
@@ -3775,7 +3888,14 @@ export const UpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuesti
                         )
                         .optional(),
                     allowed_languages: zod.array(zod.string()).optional(),
-                    tag_ids: zod.array(zod.uuid()).optional(),
+                    tags: zod
+                        .array(
+                            zod.object({
+                                id: zod.uuid(),
+                                name: zod.string(),
+                            }),
+                        )
+                        .optional(),
                 }),
                 zod.null(),
             ])
