@@ -313,6 +313,8 @@ export const UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchParam
   "question_id": zod.uuid()
 })
 
+export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTitleOneMax = 255;
+
 export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin = 0;
 
 export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin = 0;
@@ -320,6 +322,7 @@ export const updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyM
 
 
 export const UpdateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBody = zod.object({
+  "title": zod.union([zod.string().max(updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTitleOneMax),zod.null()]).optional().describe('Updated title'),
   "question_text": zod.union([zod.string(),zod.null()]).optional().describe('Updated problem statement and description'),
   "difficulty": zod.union([zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),zod.null()]).optional().describe('Updated difficulty level'),
   "time_limit_ms": zod.union([zod.number().gt(updateQuestionMetadataApiV1BanksBankIdQuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin),zod.null()]).optional().describe('Updated time limit in milliseconds'),

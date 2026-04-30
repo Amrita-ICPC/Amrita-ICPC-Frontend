@@ -9,3 +9,9 @@ export { usePauseContestApiV1ContestsContestIdPausePost as usePauseContest } fro
 export { useResumeContestApiV1ContestsContestIdResumePost as useResumeContest } from "@/api/generated/contests/contests";
 export { useCancelContestApiV1ContestsContestIdCancelPost as useCancelContest } from "@/api/generated/contests/contests";
 export { getGetContestApiV1ContestsContestIdGetQueryKey as contestDetailKey } from "@/api/generated/contests/contests";
+export { useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet as usePlatformLanguages } from "@/api/generated/questions/questions";
+export {
+    useGetTagsApiV1QuestionsTagsGet as useTags,
+    useCreateTagApiV1QuestionsTagsPost as useCreateTag,
+    getGetTagsApiV1QuestionsTagsGetQueryKey as tagKeys,
+} from "@/api/generated/questions/questions";

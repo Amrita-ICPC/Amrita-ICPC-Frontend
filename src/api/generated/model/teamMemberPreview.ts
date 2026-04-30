@@ -10,8 +10,8 @@
  * Schema for a minimal team member preview.
  */
 export interface TeamMemberPreview {
-    id: string;
-    name: string;
-    avatar?: string | null;
-    initials: string;
+  id: string;
+  name: string;
+  avatar?: string | null;
+  initials: string;
 }

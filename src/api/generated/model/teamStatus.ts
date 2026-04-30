@@ -14,10 +14,11 @@ Attributes:
     CONFIRMED: Team is finalized and ready for contest participation.
     DISQUALIFIED: Team has been disqualified from the contest.
  */
-export type TeamStatus = (typeof TeamStatus)[keyof typeof TeamStatus];
+export type TeamStatus = typeof TeamStatus[keyof typeof TeamStatus];
+
 
 export const TeamStatus = {
-    DRAFT: "DRAFT",
-    CONFIRMED: "CONFIRMED",
-    DISQUALIFIED: "DISQUALIFIED",
+  DRAFT: 'DRAFT',
+  CONFIRMED: 'CONFIRMED',
+  DISQUALIFIED: 'DISQUALIFIED',
 } as const;

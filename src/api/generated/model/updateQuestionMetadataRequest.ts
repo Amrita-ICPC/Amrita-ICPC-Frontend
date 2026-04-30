@@ -14,6 +14,8 @@ Allows updating question text, difficulty level, execution limits, allowed langu
 All fields are optional for partial updates.
  */
 export interface UpdateQuestionMetadataRequest {
+  /** Updated title */
+  title?: string | null;
   /** Updated problem statement and description */
   question_text?: string | null;
   /** Updated difficulty level */

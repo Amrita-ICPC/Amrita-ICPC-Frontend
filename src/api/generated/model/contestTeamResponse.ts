@@ -5,9 +5,9 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { TeamApprovalStatus } from "./teamApprovalStatus";
-import type { TeamMemberPreview } from "./teamMemberPreview";
-import type { TeamStatus } from "./teamStatus";
+import type { TeamApprovalStatus } from './teamApprovalStatus';
+import type { TeamMemberPreview } from './teamMemberPreview';
+import type { TeamStatus } from './teamStatus';
 
 /**
  * Schema for contest team response without member details.
@@ -27,16 +27,16 @@ Attributes:
     extra_members_count: Number of members beyond the preview.
  */
 export interface ContestTeamResponse {
-    id: string;
-    name: string;
-    description: string | null;
-    logo: string | null;
-    status: TeamStatus;
-    approval_status: TeamApprovalStatus;
-    leader_id: string | null;
-    created_by: string | null;
-    created_at: string;
-    updated_at: string;
-    members_preview?: TeamMemberPreview[];
-    extra_members_count?: number;
+  id: string;
+  name: string;
+  description: string | null;
+  logo: string | null;
+  status: TeamStatus;
+  approval_status: TeamApprovalStatus;
+  leader_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  members_preview?: TeamMemberPreview[];
+  extra_members_count?: number;
 }

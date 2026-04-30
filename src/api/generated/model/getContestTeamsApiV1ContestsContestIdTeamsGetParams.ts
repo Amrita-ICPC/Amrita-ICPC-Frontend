@@ -5,31 +5,31 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { TeamApprovalStatus } from "./teamApprovalStatus";
-import type { TeamStatus } from "./teamStatus";
+import type { TeamApprovalStatus } from './teamApprovalStatus';
+import type { TeamStatus } from './teamStatus';
 
 export type GetContestTeamsApiV1ContestsContestIdTeamsGetParams = {
-    /**
-     * Search by team name
-     */
-    search?: string | null;
-    /**
-     * Filter by team status
-     */
-    team_status?: TeamStatus | null;
-    /**
-     * Filter by approval status
-     */
-    approval_status?: TeamApprovalStatus | null;
-    /**
-     * Page number (starts from 1)
-     * @minimum 1
-     */
-    page?: number;
-    /**
-     * Number of teams per page
-     * @minimum 1
-     * @maximum 100
-     */
-    page_size?: number;
+/**
+ * Search by team name
+ */
+search?: string | null;
+/**
+ * Filter by team status
+ */
+team_status?: TeamStatus | null;
+/**
+ * Filter by approval status
+ */
+approval_status?: TeamApprovalStatus | null;
+/**
+ * Page number (starts from 1)
+ * @minimum 1
+ */
+page?: number;
+/**
+ * Number of teams per page
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
 };

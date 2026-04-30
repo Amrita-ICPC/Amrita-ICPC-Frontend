@@ -208,14 +208,7 @@ export function ContestQuestionsTable({
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <span className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors duration-200">
-                                        {question.question_text.split("\n")[0].substring(0, 60)}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground/50 truncate group-hover:text-muted-foreground/70 transition-colors">
-                                        {question.question_text
-                                            .split("\n")
-                                            .slice(1)
-                                            .join(" ")
-                                            .substring(0, 100) || "No description provided"}
+                                        {question.title}
                                     </span>
                                 </div>
                                 <div className="flex justify-center">

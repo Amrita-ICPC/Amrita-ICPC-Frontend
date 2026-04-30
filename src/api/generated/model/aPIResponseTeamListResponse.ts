@@ -5,15 +5,15 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { MetaResponse } from "./metaResponse";
-import type { PaginationResponse } from "./paginationResponse";
-import type { TeamListResponse } from "./teamListResponse";
+import type { MetaResponse } from './metaResponse';
+import type { PaginationResponse } from './paginationResponse';
+import type { TeamListResponse } from './teamListResponse';
 
 export interface APIResponseTeamListResponse {
-    success?: boolean;
-    status?: number;
-    message?: string;
-    data?: TeamListResponse | null;
-    pagination?: PaginationResponse | null;
-    meta: MetaResponse;
+  success?: boolean;
+  status?: number;
+  message?: string;
+  data?: TeamListResponse | null;
+  pagination?: PaginationResponse | null;
+  meta: MetaResponse;
 }

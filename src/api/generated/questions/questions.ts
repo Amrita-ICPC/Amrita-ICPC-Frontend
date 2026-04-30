@@ -25,11 +25,23 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponse,
+  APIResponseCodeRunResponse,
+  APIResponseListJudge0LanguageResponse,
+  APIResponseListTagResponse,
+  APIResponsePlatformLanguageListResponse,
+  APIResponsePlatformLanguageResponse,
+  APIResponseQuestionResponse,
+  APIResponseTagResponse,
+  DraftCodeRunRequest,
   ExceptionResponse,
+  GetTagsApiV1QuestionsTagsGetParams,
   HTTPValidationError,
   PlatformLanguageCreateRequest,
   QuestionCreate,
-  QuestionUpdate
+  QuestionUpdate,
+  TagCreate,
+  TagUpdate
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -61,7 +73,7 @@ export const createQuestionApiV1QuestionsPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponseQuestionResponse>(
       {url: `/api/v1/questions/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: questionCreate, signal
@@ -136,7 +148,7 @@ export const getJudge0LanguagesApiV1QuestionsLanguagesJudge0Get = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponseListJudge0LanguageResponse>(
       {url: `/api/v1/questions/languages/judge0`, method: 'GET', signal
     },
       );
@@ -237,7 +249,7 @@ export const getPlatformLanguagesApiV1QuestionsLanguagesPlatformGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponsePlatformLanguageListResponse>(
       {url: `/api/v1/questions/languages/platform`, method: 'GET', signal
     },
       );
@@ -343,7 +355,7 @@ export const createPlatformLanguageApiV1QuestionsLanguagesPlatformPost = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponsePlatformLanguageResponse>(
       {url: `/api/v1/questions/languages/platform`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: platformLanguageCreateRequest, signal
@@ -398,6 +410,291 @@ export const useCreatePlatformLanguageApiV1QuestionsLanguagesPlatformPost = <TEr
       return useMutation(getCreatePlatformLanguageApiV1QuestionsLanguagesPlatformPostMutationOptions(options), queryClient);
     }
     /**
+ * List all tags with optional search.
+ * @summary Get Tags
+ */
+export const getTagsApiV1QuestionsTagsGet = (
+    params?: GetTagsApiV1QuestionsTagsGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseListTagResponse>(
+      {url: `/api/v1/questions/tags`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetTagsApiV1QuestionsTagsGetQueryKey = (params?: GetTagsApiV1QuestionsTagsGetParams,) => {
+    return [
+    `/api/v1/questions/tags`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTagsApiV1QuestionsTagsGetQueryOptions = <TData = Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetTagsApiV1QuestionsTagsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTagsApiV1QuestionsTagsGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>> = ({ signal }) => getTagsApiV1QuestionsTagsGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTagsApiV1QuestionsTagsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>>
+export type GetTagsApiV1QuestionsTagsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetTagsApiV1QuestionsTagsGet<TData = Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  GetTagsApiV1QuestionsTagsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagsApiV1QuestionsTagsGet<TData = Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTagsApiV1QuestionsTagsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagsApiV1QuestionsTagsGet<TData = Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTagsApiV1QuestionsTagsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Tags
+ */
+
+export function useGetTagsApiV1QuestionsTagsGet<TData = Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTagsApiV1QuestionsTagsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagsApiV1QuestionsTagsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTagsApiV1QuestionsTagsGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Create a new tag.
+ * @summary Create Tag
+ */
+export const createTagApiV1QuestionsTagsPost = (
+    tagCreate: TagCreate,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseTagResponse>(
+      {url: `/api/v1/questions/tags`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: tagCreate, signal
+    },
+      );
+    }
+
+
+
+export const getCreateTagApiV1QuestionsTagsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>, TError,{data: TagCreate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>, TError,{data: TagCreate}, TContext> => {
+
+const mutationKey = ['createTagApiV1QuestionsTagsPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>, {data: TagCreate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTagApiV1QuestionsTagsPost(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTagApiV1QuestionsTagsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>>
+    export type CreateTagApiV1QuestionsTagsPostMutationBody = TagCreate
+    export type CreateTagApiV1QuestionsTagsPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Create Tag
+ */
+export const useCreateTagApiV1QuestionsTagsPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>, TError,{data: TagCreate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createTagApiV1QuestionsTagsPost>>,
+        TError,
+        {data: TagCreate},
+        TContext
+      > => {
+      return useMutation(getCreateTagApiV1QuestionsTagsPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Update an existing tag.
+ * @summary Update Tag
+ */
+export const updateTagApiV1QuestionsTagsTagIdPatch = (
+    tagId: string,
+    tagUpdate: TagUpdate,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseTagResponse>(
+      {url: `/api/v1/questions/tags/${tagId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: tagUpdate, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateTagApiV1QuestionsTagsTagIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>, TError,{tagId: string;data: TagUpdate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>, TError,{tagId: string;data: TagUpdate}, TContext> => {
+
+const mutationKey = ['updateTagApiV1QuestionsTagsTagIdPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>, {tagId: string;data: TagUpdate}> = (props) => {
+          const {tagId,data} = props ?? {};
+
+          return  updateTagApiV1QuestionsTagsTagIdPatch(tagId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTagApiV1QuestionsTagsTagIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>>
+    export type UpdateTagApiV1QuestionsTagsTagIdPatchMutationBody = TagUpdate
+    export type UpdateTagApiV1QuestionsTagsTagIdPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Update Tag
+ */
+export const useUpdateTagApiV1QuestionsTagsTagIdPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>, TError,{tagId: string;data: TagUpdate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTagApiV1QuestionsTagsTagIdPatch>>,
+        TError,
+        {tagId: string;data: TagUpdate},
+        TContext
+      > => {
+      return useMutation(getUpdateTagApiV1QuestionsTagsTagIdPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Delete a tag.
+ * @summary Delete Tag
+ */
+export const deleteTagApiV1QuestionsTagsTagIdDelete = (
+    tagId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponse>(
+      {url: `/api/v1/questions/tags/${tagId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteTagApiV1QuestionsTagsTagIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>, TError,{tagId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>, TError,{tagId: string}, TContext> => {
+
+const mutationKey = ['deleteTagApiV1QuestionsTagsTagIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>, {tagId: string}> = (props) => {
+          const {tagId} = props ?? {};
+
+          return  deleteTagApiV1QuestionsTagsTagIdDelete(tagId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTagApiV1QuestionsTagsTagIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>>
+
+    export type DeleteTagApiV1QuestionsTagsTagIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Delete Tag
+ */
+export const useDeleteTagApiV1QuestionsTagsTagIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>, TError,{tagId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTagApiV1QuestionsTagsTagIdDelete>>,
+        TError,
+        {tagId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTagApiV1QuestionsTagsTagIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
  * Retrieve a question by ID.
 
 Args:
@@ -422,7 +719,7 @@ export const getQuestionApiV1QuestionsQuestionIdGet = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponseQuestionResponse>(
       {url: `/api/v1/questions/${questionId}`, method: 'GET', signal
     },
       );
@@ -533,7 +830,7 @@ export const updateQuestionApiV1QuestionsQuestionIdPatch = (
 ) => {
 
 
-      return axiosWithAuth<unknown>(
+      return axiosWithAuth<APIResponseQuestionResponse>(
       {url: `/api/v1/questions/${questionId}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: questionUpdate, signal
@@ -610,7 +907,7 @@ export const deleteQuestionApiV1QuestionsQuestionIdDelete = (
 ) => {
 
 
-      return axiosWithAuth<void>(
+      return axiosWithAuth<APIResponse>(
       {url: `/api/v1/questions/${questionId}`, method: 'DELETE', signal
     },
       );
@@ -661,4 +958,80 @@ export const useDeleteQuestionApiV1QuestionsQuestionIdDelete = <TError = Excepti
         TContext
       > => {
       return useMutation(getDeleteQuestionApiV1QuestionsQuestionIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
+ * Run code for a draft question with ad-hoc test cases.
+
+This endpoint allows testing code snippets before a question is created.
+No data is persisted to the database.
+
+Args:
+    request: FastAPI request object.
+    data: Draft code run request with code and test cases.
+    user_id: Authenticated user ID.
+    service: Injected CodeExecutionService.
+
+Returns:
+    API response containing the execution results.
+ * @summary Test Draft Code
+ */
+export const testDraftCodeApiV1QuestionsTestDraftPost = (
+    draftCodeRunRequest: DraftCodeRunRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseCodeRunResponse>(
+      {url: `/api/v1/questions/test-draft`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: draftCodeRunRequest, signal
+    },
+      );
+    }
+
+
+
+export const getTestDraftCodeApiV1QuestionsTestDraftPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>, TError,{data: DraftCodeRunRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>, TError,{data: DraftCodeRunRequest}, TContext> => {
+
+const mutationKey = ['testDraftCodeApiV1QuestionsTestDraftPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>, {data: DraftCodeRunRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  testDraftCodeApiV1QuestionsTestDraftPost(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TestDraftCodeApiV1QuestionsTestDraftPostMutationResult = NonNullable<Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>>
+    export type TestDraftCodeApiV1QuestionsTestDraftPostMutationBody = DraftCodeRunRequest
+    export type TestDraftCodeApiV1QuestionsTestDraftPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Test Draft Code
+ */
+export const useTestDraftCodeApiV1QuestionsTestDraftPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>, TError,{data: DraftCodeRunRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof testDraftCodeApiV1QuestionsTestDraftPost>>,
+        TError,
+        {data: DraftCodeRunRequest},
+        TContext
+      > => {
+      return useMutation(getTestDraftCodeApiV1QuestionsTestDraftPostMutationOptions(options), queryClient);
     }

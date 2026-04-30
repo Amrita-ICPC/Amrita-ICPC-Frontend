@@ -17,10 +17,11 @@ Attributes:
     LIVE: Current time is between start_time and end_time (inclusive).
     ENDED: Current time is after end_time.
  */
-export type ContestRunStatus = (typeof ContestRunStatus)[keyof typeof ContestRunStatus];
+export type ContestRunStatus = typeof ContestRunStatus[keyof typeof ContestRunStatus];
+
 
 export const ContestRunStatus = {
-    UPCOMING: "UPCOMING",
-    LIVE: "LIVE",
-    ENDED: "ENDED",
+  UPCOMING: 'UPCOMING',
+  LIVE: 'LIVE',
+  ENDED: 'ENDED',
 } as const;

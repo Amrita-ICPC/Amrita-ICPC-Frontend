@@ -1,16 +1,17 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
 import { fixupConfigRules } from "@eslint/compat";
+import nextVitals from "eslint-config-next/core-web-vitals";
 
-const eslintConfig = defineConfig([
+const eslintConfig = [
+  {
+    ignores: [
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+      "src/api/generated/**",
+    ],
+  },
   ...fixupConfigRules(nextVitals),
-  globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-    "src/api/generated/**",
-  ]),
-]);
+];
 
 export default eslintConfig;

@@ -15,7 +15,7 @@ export interface ContestQuestionResponse {
   /** Position of the question in the contest */
   order: number;
   /** Time allocated for this question in seconds */
-  duration: number;
+  duration: number | null;
   /** Points awarded for solving this question */
   score: number;
   /** When question was added to contest */

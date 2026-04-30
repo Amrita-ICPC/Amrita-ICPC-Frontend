@@ -14,6 +14,7 @@ interface ProviderProps {
 import { SessionIntegrityProvider } from "./session-integrity-provider";
 import { ClockSyncProvider } from "./clock-sync-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { EditorProvider } from "@/components/shared/TipTap";
 
 export default function Provider({ children }: ProviderProps) {
     const [queryClient] = useState(
@@ -30,8 +31,8 @@ export default function Provider({ children }: ProviderProps) {
 
     return (
         <SessionProvider>
-            {/* <SessionIntegrityProvider> */}
-                {/* <ClockSyncProvider> */}
+            <SessionIntegrityProvider>
+                <ClockSyncProvider>
                     <QueryClientProvider client={queryClient}>
                         <ThemeProvider
                             attribute="class"
@@ -40,7 +41,7 @@ export default function Provider({ children }: ProviderProps) {
                             disableTransitionOnChange
                         >
                             <TooltipProvider>
-                                {children}
+                                <EditorProvider>{children}</EditorProvider>
                                 <Toaster
                                     position="top-right"
                                     richColors
@@ -53,8 +54,8 @@ export default function Provider({ children }: ProviderProps) {
                             </TooltipProvider>
                         </ThemeProvider>
                     </QueryClientProvider>
-                {/* </ClockSyncProvider> */}
-            {/* </SessionIntegrityProvider> */}
+                </ClockSyncProvider>
+            </SessionIntegrityProvider>
         </SessionProvider>
     );
 }

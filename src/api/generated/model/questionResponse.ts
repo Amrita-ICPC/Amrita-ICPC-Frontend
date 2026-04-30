@@ -5,32 +5,37 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { QuestionDifficulty } from "./questionDifficulty";
-import type { QuestionTemplateResponse } from "./questionTemplateResponse";
-import type { QuestionTestCaseResponse } from "./questionTestCaseResponse";
-import type { TagResponse } from "./tagResponse";
+import type { QuestionDifficulty } from './questionDifficulty';
+import type { QuestionTemplateResponse } from './questionTemplateResponse';
+import type { QuestionTestCaseResponse } from './questionTestCaseResponse';
+import type { TagResponse } from './tagResponse';
 
 export interface QuestionResponse {
-    /** The problem statement and description */
-    question_text: string;
-    /** Difficulty level of the question */
-    difficulty: QuestionDifficulty;
-    /**
+  /**
+     * The title of the question
+     * @maxLength 255
+     */
+  title: string;
+  /** The problem statement and description */
+  question_text: string;
+  /** Difficulty level of the question */
+  difficulty: QuestionDifficulty;
+  /**
      * Time limit in milliseconds
      * @exclusiveMinimum 0
      */
-    time_limit_ms: number;
-    /**
+  time_limit_ms: number;
+  /**
      * Memory limit in megabytes
      * @exclusiveMinimum 0
      */
-    memory_limit_mb: number;
-    id: string;
-    created_by: string;
-    created_at: string;
-    updated_at: string;
-    testcases?: QuestionTestCaseResponse[];
-    templates?: QuestionTemplateResponse[];
-    allowed_languages?: string[];
-    tags?: TagResponse[];
+  memory_limit_mb: number;
+  id: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  testcases?: QuestionTestCaseResponse[];
+  templates?: QuestionTemplateResponse[];
+  allowed_languages?: string[];
+  tags?: TagResponse[];
 }

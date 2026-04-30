@@ -28,7 +28,6 @@ export function BankCard({ bank }: BankCardProps) {
     const { mutate: deleteBank, isPending: isDeleting } = useDeleteBankApiV1BanksBankIdDelete({
         mutation: {
             onSuccess: () => toast.success("Bank deleted successfully"),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
                 toast.error(error?.response?.data?.message || "Failed to delete bank");
             },

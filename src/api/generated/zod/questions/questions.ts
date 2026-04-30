@@ -26,6 +26,8 @@ Raises:
     QuestionPermissionError: If user lacks create permission.
  * @summary Create Question
  */
+export const createQuestionApiV1QuestionsPostBodyTitleMax = 255;
+
 export const createQuestionApiV1QuestionsPostBodyTimeLimitMsExclusiveMin = 0;
 
 export const createQuestionApiV1QuestionsPostBodyMemoryLimitMbExclusiveMin = 0;
@@ -40,6 +42,7 @@ export const createQuestionApiV1QuestionsPostBodyTemplatesItemLanguageIdExclusiv
 
 
 export const CreateQuestionApiV1QuestionsPostBody = zod.object({
+  "title": zod.string().max(createQuestionApiV1QuestionsPostBodyTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
   "time_limit_ms": zod.number().gt(createQuestionApiV1QuestionsPostBodyTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
@@ -76,7 +79,31 @@ Raises:
     Judge0ServiceError: If Judge0 request fails.
  * @summary Get Judge0 Languages
  */
-export const GetJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponse = zod.unknown()
+export const getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseSuccessDefault = true;
+export const getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseStatusDefault = 200;
+export const getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseMessageDefault = `Success`;
+
+export const GetJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponse = zod.object({
+  "success": zod.boolean().default(getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseSuccessDefault),
+  "status": zod.number().default(getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseStatusDefault),
+  "message": zod.string().default(getJudge0LanguagesApiV1QuestionsLanguagesJudge0GetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
 /**
  * List platform language mappings.
@@ -90,7 +117,36 @@ Returns:
     API response containing platform language mappings.
  * @summary Get Platform Languages
  */
-export const GetPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponse = zod.unknown()
+export const getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseSuccessDefault = true;
+export const getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseStatusDefault = 200;
+export const getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseMessageDefault = `Success`;
+
+export const GetPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponse = zod.object({
+  "success": zod.boolean().default(getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseSuccessDefault),
+  "status": zod.number().default(getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseStatusDefault),
+  "message": zod.string().default(getPlatformLanguagesApiV1QuestionsLanguagesPlatformGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "languages": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "file_extension": zod.union([zod.string(),zod.null()]),
+  "monaco_language": zod.union([zod.string(),zod.null()])
+}))
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
 /**
  * Create a platform language mapping from Judge0.
@@ -121,6 +177,131 @@ export const CreatePlatformLanguageApiV1QuestionsLanguagesPlatformPostBody = zod
 })
 
 /**
+ * List all tags with optional search.
+ * @summary Get Tags
+ */
+export const GetTagsApiV1QuestionsTagsGetQueryParams = zod.object({
+  "search": zod.union([zod.string(),zod.null()]).optional().describe('Search tags by name')
+})
+
+export const getTagsApiV1QuestionsTagsGetResponseSuccessDefault = true;
+export const getTagsApiV1QuestionsTagsGetResponseStatusDefault = 200;
+export const getTagsApiV1QuestionsTagsGetResponseMessageDefault = `Success`;
+export const getTagsApiV1QuestionsTagsGetResponseDataOneItemNameMax = 100;
+
+
+
+export const GetTagsApiV1QuestionsTagsGetResponse = zod.object({
+  "success": zod.boolean().default(getTagsApiV1QuestionsTagsGetResponseSuccessDefault),
+  "status": zod.number().default(getTagsApiV1QuestionsTagsGetResponseStatusDefault),
+  "message": zod.string().default(getTagsApiV1QuestionsTagsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "name": zod.string().max(getTagsApiV1QuestionsTagsGetResponseDataOneItemNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+})),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Create a new tag.
+ * @summary Create Tag
+ */
+export const createTagApiV1QuestionsTagsPostBodyNameMax = 100;
+
+
+
+export const CreateTagApiV1QuestionsTagsPostBody = zod.object({
+  "name": zod.string().max(createTagApiV1QuestionsTagsPostBodyNameMax).describe('The name of the tag')
+})
+
+/**
+ * Update an existing tag.
+ * @summary Update Tag
+ */
+export const UpdateTagApiV1QuestionsTagsTagIdPatchParams = zod.object({
+  "tag_id": zod.uuid()
+})
+
+export const updateTagApiV1QuestionsTagsTagIdPatchBodyNameMax = 100;
+
+
+
+export const UpdateTagApiV1QuestionsTagsTagIdPatchBody = zod.object({
+  "name": zod.string().max(updateTagApiV1QuestionsTagsTagIdPatchBodyNameMax).describe('The name of the tag')
+})
+
+export const updateTagApiV1QuestionsTagsTagIdPatchResponseSuccessDefault = true;
+export const updateTagApiV1QuestionsTagsTagIdPatchResponseStatusDefault = 200;
+export const updateTagApiV1QuestionsTagsTagIdPatchResponseMessageDefault = `Success`;
+export const updateTagApiV1QuestionsTagsTagIdPatchResponseDataOneNameMax = 100;
+
+
+
+export const UpdateTagApiV1QuestionsTagsTagIdPatchResponse = zod.object({
+  "success": zod.boolean().default(updateTagApiV1QuestionsTagsTagIdPatchResponseSuccessDefault),
+  "status": zod.number().default(updateTagApiV1QuestionsTagsTagIdPatchResponseStatusDefault),
+  "message": zod.string().default(updateTagApiV1QuestionsTagsTagIdPatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "name": zod.string().max(updateTagApiV1QuestionsTagsTagIdPatchResponseDataOneNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Delete a tag.
+ * @summary Delete Tag
+ */
+export const DeleteTagApiV1QuestionsTagsTagIdDeleteParams = zod.object({
+  "tag_id": zod.uuid()
+})
+
+export const deleteTagApiV1QuestionsTagsTagIdDeleteResponseSuccessDefault = true;
+export const deleteTagApiV1QuestionsTagsTagIdDeleteResponseStatusDefault = 200;
+export const deleteTagApiV1QuestionsTagsTagIdDeleteResponseMessageDefault = `Success`;
+
+export const DeleteTagApiV1QuestionsTagsTagIdDeleteResponse = zod.object({
+  "success": zod.boolean().default(deleteTagApiV1QuestionsTagsTagIdDeleteResponseSuccessDefault),
+  "status": zod.number().default(deleteTagApiV1QuestionsTagsTagIdDeleteResponseStatusDefault),
+  "message": zod.string().default(deleteTagApiV1QuestionsTagsTagIdDeleteResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Retrieve a question by ID.
 
 Args:
@@ -143,7 +324,67 @@ export const GetQuestionApiV1QuestionsQuestionIdGetParams = zod.object({
   "question_id": zod.uuid()
 })
 
-export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.unknown()
+export const getQuestionApiV1QuestionsQuestionIdGetResponseSuccessDefault = true;
+export const getQuestionApiV1QuestionsQuestionIdGetResponseStatusDefault = 200;
+export const getQuestionApiV1QuestionsQuestionIdGetResponseMessageDefault = `Success`;
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTitleMax = 255;
+
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin = 0;
+
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin = 0;
+
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
+
+
+
+export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getQuestionApiV1QuestionsQuestionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getQuestionApiV1QuestionsQuestionIdGetResponseStatusDefault),
+  "message": zod.string().default(getQuestionApiV1QuestionsQuestionIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "title": zod.string().max(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTitleMax).describe('The title of the question'),
+  "question_text": zod.string().describe('The problem statement and description'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "time_limit_ms": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
+  "memory_limit_mb": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
+  "id": zod.uuid(),
+  "created_by": zod.uuid(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "updated_at": zod.iso.datetime({"offset":true}),
+  "testcases": zod.array(zod.object({
+  "id": zod.union([zod.uuid(),zod.null()]).optional(),
+  "input": zod.string(),
+  "output": zod.string(),
+  "is_hidden": zod.boolean(),
+  "weight": zod.number(),
+  "order": zod.union([zod.number(),zod.null()])
+})).optional(),
+  "templates": zod.array(zod.object({
+  "id": zod.union([zod.uuid(),zod.null()]).optional(),
+  "language_id": zod.number(),
+  "starter_code": zod.string(),
+  "driver_code": zod.union([zod.string(),zod.null()]),
+  "solution_code": zod.union([zod.string(),zod.null()])
+})).optional(),
+  "allowed_languages": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.object({
+  "name": zod.string().max(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTagsItemNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+})).optional()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
 /**
  * Update a question.
@@ -170,6 +411,8 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchParams = zod.object({
   "question_id": zod.uuid()
 })
 
+export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTitleOneMax = 255;
+
 export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemIsHiddenDefault = true;
 export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemWeightDefault = 1;
 
@@ -184,6 +427,7 @@ export const updateQuestionApiV1QuestionsQuestionIdPatchBodyMemoryLimitMbOneExcl
 
 
 export const UpdateQuestionApiV1QuestionsQuestionIdPatchBody = zod.object({
+  "title": zod.union([zod.string().max(updateQuestionApiV1QuestionsQuestionIdPatchBodyTitleOneMax),zod.null()]).optional(),
   "question_text": zod.union([zod.string(),zod.null()]).optional(),
   "difficulty": zod.union([zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),zod.null()]).optional(),
   "allowed_languages": zod.union([zod.array(zod.number()),zod.null()]).optional(),
@@ -205,7 +449,67 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchBody = zod.object({
   "memory_limit_mb": zod.union([zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional()
 })
 
-export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.unknown()
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseSuccessDefault = true;
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseStatusDefault = 200;
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseMessageDefault = `Success`;
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTitleMax = 255;
+
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin = 0;
+
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin = 0;
+
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTagsItemNameMax = 100;
+
+
+
+export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.object({
+  "success": zod.boolean().default(updateQuestionApiV1QuestionsQuestionIdPatchResponseSuccessDefault),
+  "status": zod.number().default(updateQuestionApiV1QuestionsQuestionIdPatchResponseStatusDefault),
+  "message": zod.string().default(updateQuestionApiV1QuestionsQuestionIdPatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "title": zod.string().max(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTitleMax).describe('The title of the question'),
+  "question_text": zod.string().describe('The problem statement and description'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "time_limit_ms": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
+  "memory_limit_mb": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
+  "id": zod.uuid(),
+  "created_by": zod.uuid(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "updated_at": zod.iso.datetime({"offset":true}),
+  "testcases": zod.array(zod.object({
+  "id": zod.union([zod.uuid(),zod.null()]).optional(),
+  "input": zod.string(),
+  "output": zod.string(),
+  "is_hidden": zod.boolean(),
+  "weight": zod.number(),
+  "order": zod.union([zod.number(),zod.null()])
+})).optional(),
+  "templates": zod.array(zod.object({
+  "id": zod.union([zod.uuid(),zod.null()]).optional(),
+  "language_id": zod.number(),
+  "starter_code": zod.string(),
+  "driver_code": zod.union([zod.string(),zod.null()]),
+  "solution_code": zod.union([zod.string(),zod.null()])
+})).optional(),
+  "allowed_languages": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.object({
+  "name": zod.string().max(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTagsItemNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+})).optional()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
 /**
  * Delete a question by ID.
@@ -226,5 +530,97 @@ Raises:
  */
 export const DeleteQuestionApiV1QuestionsQuestionIdDeleteParams = zod.object({
   "question_id": zod.uuid()
+})
+
+export const deleteQuestionApiV1QuestionsQuestionIdDeleteResponseSuccessDefault = true;
+export const deleteQuestionApiV1QuestionsQuestionIdDeleteResponseStatusDefault = 200;
+export const deleteQuestionApiV1QuestionsQuestionIdDeleteResponseMessageDefault = `Success`;
+
+export const DeleteQuestionApiV1QuestionsQuestionIdDeleteResponse = zod.object({
+  "success": zod.boolean().default(deleteQuestionApiV1QuestionsQuestionIdDeleteResponseSuccessDefault),
+  "status": zod.number().default(deleteQuestionApiV1QuestionsQuestionIdDeleteResponseStatusDefault),
+  "message": zod.string().default(deleteQuestionApiV1QuestionsQuestionIdDeleteResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Run code for a draft question with ad-hoc test cases.
+
+This endpoint allows testing code snippets before a question is created.
+No data is persisted to the database.
+
+Args:
+    request: FastAPI request object.
+    data: Draft code run request with code and test cases.
+    user_id: Authenticated user ID.
+    service: Injected CodeExecutionService.
+
+Returns:
+    API response containing the execution results.
+ * @summary Test Draft Code
+ */
+export const testDraftCodeApiV1QuestionsTestDraftPostBodyLanguageIdExclusiveMin = 0;
+
+export const testDraftCodeApiV1QuestionsTestDraftPostBodyStarterCodeDefault = ``;
+export const testDraftCodeApiV1QuestionsTestDraftPostBodyDriverCodeDefault = ``;
+
+
+export const TestDraftCodeApiV1QuestionsTestDraftPostBody = zod.object({
+  "language_id": zod.number().gt(testDraftCodeApiV1QuestionsTestDraftPostBodyLanguageIdExclusiveMin).describe('Judge0 language ID (e.g., 71 for Python)'),
+  "starter_code": zod.string().default(testDraftCodeApiV1QuestionsTestDraftPostBodyStarterCodeDefault).describe('Initial boilerplate code'),
+  "solution_code": zod.string().describe('User-provided solution code'),
+  "driver_code": zod.string().default(testDraftCodeApiV1QuestionsTestDraftPostBodyDriverCodeDefault).describe('Boilerplate to execute the solution'),
+  "test_cases": zod.array(zod.object({
+  "input": zod.string().describe('Standard input for the test case'),
+  "expected_output": zod.string().describe('Expected standard output for comparison')
+}).describe('Ephemeral test case for draft testing.')).min(1).describe('List of test cases to run against')
+}).describe('Request to test a draft question with custom test cases.')
+
+export const testDraftCodeApiV1QuestionsTestDraftPostResponseSuccessDefault = true;
+export const testDraftCodeApiV1QuestionsTestDraftPostResponseStatusDefault = 200;
+export const testDraftCodeApiV1QuestionsTestDraftPostResponseMessageDefault = `Success`;
+
+export const TestDraftCodeApiV1QuestionsTestDraftPostResponse = zod.object({
+  "success": zod.boolean().default(testDraftCodeApiV1QuestionsTestDraftPostResponseSuccessDefault),
+  "status": zod.number().default(testDraftCodeApiV1QuestionsTestDraftPostResponseStatusDefault),
+  "message": zod.string().default(testDraftCodeApiV1QuestionsTestDraftPostResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "testcases": zod.array(zod.object({
+  "testcase_id": zod.string().describe('Test case UUID'),
+  "status": zod.enum(['ACCEPTED', 'WRONG_ANSWER', 'TIME_LIMIT_EXCEEDED', 'RUNTIME_ERROR', 'MEMORY_LIMIT_EXCEEDED', 'CPU_TIME_LIMIT_EXCEEDED', 'SYSTEM_ERROR', 'INTERNAL_ERROR']).describe('Execution status from Judge0 (ACCEPTED, WRONG_ANSWER, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, SYSTEM_ERROR, etc.)'),
+  "passed": zod.boolean().describe('Whether this test case passed (output matches expected)'),
+  "stdout": zod.union([zod.string(),zod.null()]).optional().describe('Actual output from user\'s code'),
+  "stderr": zod.union([zod.string(),zod.null()]).optional().describe('Runtime error output (e.g., ZeroDivisionError, IndexError)'),
+  "expected_output": zod.union([zod.string(),zod.null()]).optional().describe('Expected output from test case'),
+  "time": zod.union([zod.number(),zod.null()]).optional().describe('Execution time in seconds'),
+  "memory": zod.union([zod.number(),zod.null()]).optional().describe('Memory used in kilobytes')
+}).describe('Result of running code against a single test case.\n\nOnly returned when code compiles successfully.\nIf compilation fails, use CompilationErrorResponse instead.')).describe('Results for each test case executed'),
+  "total": zod.number().describe('Total number of tests executed'),
+  "passed": zod.number().describe('Number of tests passed')
+}).describe('Response with test case run results (no database record).'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
 })
 

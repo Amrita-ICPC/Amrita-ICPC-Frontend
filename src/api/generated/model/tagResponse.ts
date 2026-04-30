@@ -7,6 +7,10 @@
  */
 
 export interface TagResponse {
-    id: string;
-    name: string;
+  /**
+     * The name of the tag
+     * @maxLength 100
+     */
+  name: string;
+  id: string;
 }

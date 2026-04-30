@@ -52,7 +52,7 @@ export function BankShareDialog({ bankId, bankName, open, onOpenChange }: BankSh
                 setNewUserEmail("");
                 refetch();
             },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             onError: (error: any) => {
                 toast.error(error?.response?.data?.message || "Failed to share bank");
             },
@@ -66,7 +66,6 @@ export function BankShareDialog({ bankId, bankName, open, onOpenChange }: BankSh
                     toast.success("Access revoked");
                     refetch();
                 },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onError: (error: any) => {
                     toast.error(error?.response?.data?.message || "Failed to revoke access");
                 },

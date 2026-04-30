@@ -5,7 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { QuestionListSummaryResponse } from "./questionListSummaryResponse";
+import type { QuestionListSummaryResponse } from './questionListSummaryResponse';
 
 /**
  * Response model for a paginated list of contest questions with summary statistics.
@@ -13,13 +13,13 @@ import type { QuestionListSummaryResponse } from "./questionListSummaryResponse"
 Includes counts for each difficulty level to help with UI dashboard rendering.
  */
 export interface ContestQuestionsListResponse {
-    questions: QuestionListSummaryResponse[];
-    /** Number of easy questions in the contest */
-    easy_count?: number;
-    /** Number of medium questions in the contest */
-    medium_count?: number;
-    /** Number of hard questions in the contest */
-    hard_count?: number;
-    /** Total number of questions in the contest */
-    total_count?: number;
+  questions: QuestionListSummaryResponse[];
+  /** Number of easy questions in the contest */
+  easy_count?: number;
+  /** Number of medium questions in the contest */
+  medium_count?: number;
+  /** Number of hard questions in the contest */
+  hard_count?: number;
+  /** Total number of questions in the contest */
+  total_count?: number;
 }

@@ -29,7 +29,6 @@ export function BankRowItem({ bank }: BankRowItemProps) {
     const { mutate: deleteBank, isPending: isDeleting } = useDeleteBankApiV1BanksBankIdDelete({
         mutation: {
             onSuccess: () => toast.success("Bank deleted successfully"),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onError: (error: any) => {
                 toast.error(error?.response?.data?.message || "Failed to delete bank");
             },
@@ -43,7 +42,9 @@ export function BankRowItem({ bank }: BankRowItemProps) {
     };
 
     const formattedDate = new Date(bank.updated_at).toLocaleDateString(undefined, {
-        month: "short", day: "numeric", year: "numeric",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
     });
 
     return (
@@ -68,15 +69,25 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                 <TableCell className="text-right">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            >
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => setUpdateOpen(true)} className="gap-2 cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => setUpdateOpen(true)}
+                                className="gap-2 cursor-pointer"
+                            >
                                 <Edit className="h-4 w-4" /> Edit Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setShareOpen(true)} className="gap-2 cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => setShareOpen(true)}
+                                className="gap-2 cursor-pointer"
+                            >
                                 <Share2 className="h-4 w-4" /> Manage Access
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -93,7 +104,12 @@ export function BankRowItem({ bank }: BankRowItemProps) {
             </TableRow>
 
             <BankUpdateDialog bank={bank} open={updateOpen} onOpenChange={setUpdateOpen} />
-            <BankShareDialog bankId={bank.id} bankName={bank.name} open={shareOpen} onOpenChange={setShareOpen} />
+            <BankShareDialog
+                bankId={bank.id}
+                bankName={bank.name}
+                open={shareOpen}
+                onOpenChange={setShareOpen}
+            />
         </>
     );
 }
