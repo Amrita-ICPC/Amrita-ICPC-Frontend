@@ -73,7 +73,6 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     const { mutate: createQuestion, isPending } = useCreateQuestionApiV1QuestionsPost({
         mutation: {
             onSuccess: async (response) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const questionId = (response as any)?.data?.id;
 
                 if (bankId && questionId) {
@@ -105,11 +104,9 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
 
     const { data: languagesData } = useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet();
     // Assuming platform languages have id and slug/name
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const languages = (languagesData as any)?.data || [];
 
     const form = useForm<QuestionFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as any,
         defaultValues: {
             question_text: "",
@@ -353,7 +350,6 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                         Languages
                                                     </FormLabel>
                                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                                         {languages.map((lang: any) => (
                                                             <div
                                                                 key={lang.id}

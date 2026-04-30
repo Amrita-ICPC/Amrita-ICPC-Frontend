@@ -34,5 +34,5 @@ export interface StudentContestProblemResponse {
   /** Points awarded for solving this problem */
   score: number;
   /** Time limit in seconds */
-  duration: number;
+  duration?: number | null;
 }

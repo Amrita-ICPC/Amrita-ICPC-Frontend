@@ -12,19 +12,10 @@
 export interface AddContestQuestionRequest {
   /** Question ID to add to contest */
   question_id: string;
-  /**
-     * Position of the question in the contest (1-indexed)
-     * @exclusiveMinimum 0
-     */
-  order: number;
-  /**
-     * Time allocated for this question in seconds
-     * @exclusiveMinimum 0
-     */
-  duration: number;
-  /**
-     * Points awarded for solving this question
-     * @exclusiveMinimum 0
-     */
-  score: number;
+  /** Position of the question in the contest (optional, 1-indexed) */
+  order?: number | null;
+  /** Time allocated for this question in seconds (optional) */
+  duration?: number | null;
+  /** Points awarded for solving this question (optional, defaults to 100) */
+  score?: number | null;
 }

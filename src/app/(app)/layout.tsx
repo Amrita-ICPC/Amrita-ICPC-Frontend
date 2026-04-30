@@ -17,10 +17,10 @@ export default async function AppLayout({
     admin,
 }: {
     children: React.ReactNode;
-    student: React.ReactNode;
-    instructor: React.ReactNode;
-    manager: React.ReactNode;
-    admin: React.ReactNode;
+    student?: React.ReactNode;
+    instructor?: React.ReactNode;
+    manager?: React.ReactNode;
+    admin?: React.ReactNode;
 }) {
     const session = await auth();
 

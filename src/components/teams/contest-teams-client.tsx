@@ -330,7 +330,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         },
     );
 
-    const teams = data?.data?.teams ?? [];
+    const teams = useMemo(() => data?.data?.teams ?? [], [data?.data?.teams]);
     const pagination = data?.pagination;
     const teamStats = data?.data;
 

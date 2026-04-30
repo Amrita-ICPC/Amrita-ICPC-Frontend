@@ -20,7 +20,7 @@ const SEGMENT_LABELS: Record<string, string> = {
     create: "Create",
     teams: "Teams",
     banks: "Question Banks",
-    questions: "Code Editor",
+    questions: "Questions",
     settings: "Settings",
     audiences: "Manage Users",
 };

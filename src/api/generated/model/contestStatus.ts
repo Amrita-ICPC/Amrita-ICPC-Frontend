@@ -18,11 +18,12 @@ Attributes:
     PAUSED: Contest is temporarily halted, submissions disabled.
     CANCELLED: Contest has been cancelled and will not proceed.
  */
-export type ContestStatus = (typeof ContestStatus)[keyof typeof ContestStatus];
+export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
+
 
 export const ContestStatus = {
-    DRAFT: "DRAFT",
-    PUBLISHED: "PUBLISHED",
-    PAUSED: "PAUSED",
-    CANCELLED: "CANCELLED",
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  PAUSED: 'PAUSED',
+  CANCELLED: 'CANCELLED',
 } as const;

@@ -10,6 +10,7 @@ import type { QuestionTemplateCreate } from './questionTemplateCreate';
 import type { QuestionTestCaseCreate } from './questionTestCaseCreate';
 
 export interface QuestionUpdate {
+  title?: string | null;
   question_text?: string | null;
   difficulty?: QuestionDifficulty | null;
   allowed_languages?: number[] | null;

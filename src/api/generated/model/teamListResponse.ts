@@ -5,16 +5,16 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ContestTeamResponse } from "./contestTeamResponse";
+import type { ContestTeamResponse } from './contestTeamResponse';
 
 /**
  * Schema for paginated team list with status counts.
  */
 export interface TeamListResponse {
-    total: number;
-    teams: ContestTeamResponse[];
-    approved_count?: number;
-    waiting_count?: number;
-    rejected_count?: number;
-    disqualified_count?: number;
+  total: number;
+  teams: ContestTeamResponse[];
+  approved_count?: number;
+  waiting_count?: number;
+  rejected_count?: number;
+  disqualified_count?: number;
 }

@@ -4,3 +4,4 @@ build
 node_modules
 coverage
 public
+src/api/generated

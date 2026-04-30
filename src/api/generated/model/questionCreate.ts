@@ -10,6 +10,11 @@ import type { QuestionTemplateCreate } from './questionTemplateCreate';
 import type { QuestionTestCaseCreate } from './questionTestCaseCreate';
 
 export interface QuestionCreate {
+  /**
+     * The title of the question
+     * @maxLength 255
+     */
+  title: string;
   /** The problem statement and description */
   question_text: string;
   /** Difficulty level of the question */
