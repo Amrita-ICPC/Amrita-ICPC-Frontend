@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { memo } from "react";
 import { FileCode2, Zap, BarChart3, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -72,7 +73,12 @@ interface ContestQuestionsStatsProps {
     hard: number;
 }
 
-export function ContestQuestionsStats({ total, easy, medium, hard }: ContestQuestionsStatsProps) {
+export const ContestQuestionsStats = memo(function ContestQuestionsStats({
+    total,
+    easy,
+    medium,
+    hard,
+}: ContestQuestionsStatsProps) {
     return (
         <motion.div
             variants={{
@@ -92,4 +98,4 @@ export function ContestQuestionsStats({ total, easy, medium, hard }: ContestQues
             <StatCard icon={AlertCircle} label="Hard Problems" value={hard} color="red" />
         </motion.div>
     );
-}
+});

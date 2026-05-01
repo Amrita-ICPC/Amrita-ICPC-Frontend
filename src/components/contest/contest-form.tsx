@@ -40,8 +40,8 @@ import {
     useUpdateContest,
     useUploadContestImage,
     contestKeys,
+    contestDetailKey,
 } from "@/query/contest-query";
-import { toApiError } from "@/lib/api/error";
 import { toast } from "@/lib/hooks/use-toast";
 
 function pad2(value: number) {
@@ -110,19 +110,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
-    const [errorDialogTitle, setErrorDialogTitle] = useState("Request failed");
-    const [errorDialogMessage, setErrorDialogMessage] = useState<string>("Something went wrong.");
-    const [errorDialogStatus, setErrorDialogStatus] = useState<number | undefined>(undefined);
-
-    function openErrorDialog(error: unknown, title?: string) {
-        const apiError = toApiError(error);
-        setErrorDialogTitle(title ?? "Request failed");
-        setErrorDialogMessage(apiError.detail ?? apiError.message);
-        setErrorDialogStatus(apiError.status);
-        setIsErrorDialogOpen(true);
-    }
-
     const now = useMemo(() => {
         const start = new Date();
         start.setSeconds(0);
@@ -170,22 +157,35 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const imageUrl = useWatch({ control, name: "image" }) ?? null;
 
     const [uploadedImage, setUploadedImage] = useState<ImageUploadResponse | null>(null);
-    const uploadImageMutation = useUploadContestImage();
+    const uploadImageMutation = useUploadContestImage({
+        mutation: {
+            meta: { successMessage: "Image uploaded successfully" },
+        },
+    });
     const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
-    const createContestMutation = useCreateContest();
-    const updateContestMutation = useUpdateContest();
+    const createContestMutation = useCreateContest({
+        mutation: {
+            meta: {
+                successMessage: "Contest created successfully",
+                invalidateKeys: [contestKeys()],
+            },
+        },
+    });
+    const updateContestMutation = useUpdateContest({
+        mutation: {
+            meta: {
+                successMessage: "Contest updated successfully",
+                invalidateKeys: [contestKeys(), contestDetailKey(contestId!)],
+            },
+        },
+    });
     const isPending = createContestMutation.isPending || updateContestMutation.isPending;
 
     async function onPickImage(file: File) {
-        try {
-            const result = await uploadImageMutation.mutateAsync(file);
-            setUploadedImage(result);
-            setValue("image", result.url, { shouldDirty: true, shouldTouch: true });
-            toast.success("Image uploaded");
-        } catch (error) {
-            openErrorDialog(error, "Image upload failed");
-        }
+        const result = await uploadImageMutation.mutateAsync(file);
+        setUploadedImage(result);
+        setValue("image", result.url, { shouldDirty: true, shouldTouch: true });
     }
 
     const onSubmit = handleSubmit(async (values) => {
@@ -210,58 +210,21 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             team_approval_mode: values.team_approval_mode,
         };
 
-        try {
-            if (initialData && contestId) {
-                await updateContestMutation.mutateAsync({
-                    contestId,
-                    data: payload as ContestUpdate,
-                });
-                toast.success("Contest updated");
-            } else {
-                await createContestMutation.mutateAsync({ data: payload as ContestCreate });
-                toast.success("Contest created");
-            }
-            queryClient.invalidateQueries({
-                queryKey: contestKeys(),
+        if (initialData && contestId) {
+            await updateContestMutation.mutateAsync({
+                contestId,
+                data: payload as ContestUpdate,
             });
-            router.push("/contest");
-            router.refresh();
-        } catch (error) {
-            openErrorDialog(
-                error,
-                initialData ? "Failed to update contest" : "Failed to create contest",
-            );
+        } else {
+            await createContestMutation.mutateAsync({ data: payload as ContestCreate });
         }
+
+        router.push("/contest");
+        router.refresh();
     });
 
     return (
         <>
-            <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
-                <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle>{errorDialogTitle}</DialogTitle>
-                        <DialogDescription>
-                            {errorDialogStatus ? `Status: ${errorDialogStatus}` : ""}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <Alert variant="destructive">
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>
-                            <p>{errorDialogMessage}</p>
-                        </AlertDescription>
-                    </Alert>
-                    <div className="flex justify-end">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsErrorDialogOpen(false)}
-                        >
-                            Close
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader className="space-y-1">
@@ -649,13 +612,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                             >
                                 Cancel
                             </Button>
-                            {createContestMutation.isError || updateContestMutation.isError ? (
-                                <p className="text-sm text-destructive">
-                                    {initialData
-                                        ? "Update failed. Try again."
-                                        : "Creation failed. Try again."}
-                                </p>
-                            ) : null}
                         </CardContent>
                     </Card>
                 </div>

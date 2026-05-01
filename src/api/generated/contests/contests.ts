@@ -32,12 +32,10 @@ import type {
   APIResponseListContestQuestionResponse,
   APIResponseListContestSummaryResponse,
   APIResponseListInstructorResponse,
+  APIResponseMessageResponse,
   APIResponseNoneType,
   APIResponseQuestionResponse,
   AddContestQuestionsRequest,
-  AddQuestionAllowedLanguagesRequest,
-  AddQuestionTemplatesRequest,
-  AddQuestionTestCasesRequest,
   ContestAudienceManageRequest,
   ContestCreate,
   ContestUpdate,
@@ -48,14 +46,9 @@ import type {
   GetDeletedContestsApiV1ContestsDeletedGetParams,
   HTTPValidationError,
   InstructorManageRequest,
+  QuestionUpdate,
   RemoveContestQuestionRequest,
-  RemoveQuestionAllowedLanguagesRequest,
-  RemoveQuestionTemplatesRequest,
-  RemoveQuestionTestCasesRequest,
-  UpdateQuestionAllowedLanguagesRequest,
-  UpdateQuestionMetadataRequest,
-  UpdateQuestionTemplateRequest,
-  UpdateQuestionTestCaseRequest
+  ReorderContestQuestionsRequest
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -639,28 +632,22 @@ export const useDeleteContestApiV1ContestsContestIdDelete = <TError = ExceptionR
       return useMutation(getDeleteContestApiV1ContestsContestIdDeleteMutationOptions(options), queryClient);
     }
     /**
- * Get paginated overview questions for a contest.
+ * Get paginated contest questions.
 
 Args:
     request (Request): Framework context.
-    contest_id (UUID): The contest identifier.
-    search (str | None): Optional question text search term.
-    difficulty (QuestionDifficulty | None): Optional difficulty filter.
-    language_id (int | None): Optional allowed-language filter.
-    tag_id (UUID | None): Optional tag filter.
-    page (int): Page number starting from 1.
+    contest_id (UUID): The unique identifier of the contest.
+    search (str): Optional search term for question title.
+    difficulty (str): Optional difficulty filter.
+    language_id (int): Optional language filter.
+    tag_id (UUID): Optional tag filter.
+    page (int): Page number (starts from 1).
     page_size (int): Number of questions per page.
-    service (ContestService): Injected domain service.
+    service (ContestQuestionService): Injected domain service.
     user_id (UUID): Authenticated user ID.
 
 Returns:
-    APIResponse: Paginated question overview list.
-
-Raises:
-    UnauthorizedError: If the caller is not authenticated.
-    PermissionDeniedError: If the caller lacks read permission.
-    RequestValidationError: If any query parameter is invalid.
-    ContestNotFoundError: If the contest does not exist.
+    APIResponse: Standardized response with list of questions and pagination state.
  * @summary Get contest questions
  */
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGet = (
@@ -931,23 +918,17 @@ export const useRemoveQuestionFromContestApiV1ContestsContestIdQuestionsDelete =
       return useMutation(getRemoveQuestionFromContestApiV1ContestsContestIdQuestionsDeleteMutationOptions(options), queryClient);
     }
     /**
- * Get detailed question data for a contest question.
+ * Get a contest question by ID.
 
 Args:
     request (Request): Framework context.
-    contest_id (UUID): The contest identifier.
-    question_id (UUID): The contest question identifier.
+    contest_id (UUID): The unique identifier of the contest.
+    question_id (UUID): The unique identifier of the question.
     user_id (UUID): Authenticated user ID.
-    service (ContestService): Injected domain service.
+    service (ContestQuestionService): Injected domain service.
 
 Returns:
-    APIResponse: Hydrated contest question payload.
-
-Raises:
-    UnauthorizedError: If the caller is not authenticated.
-    PermissionDeniedError: If the caller lacks update/manage permission.
-    ContestNotFoundError: If the contest does not exist.
-    QuestionNotInContestError: If the question is not linked to the contest.
+    APIResponse: The question details.
  * @summary Get contest question by ID
  */
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGet = (
@@ -1047,6 +1028,86 @@ export function useGetContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGe
 
 
 /**
+ * Perform a comprehensive update of a contest question.
+
+Updates metadata, tags, templates, and test cases in a single operation.
+Only contest creators and assigned instructors can perform this operation.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    question_id (UUID): The unique identifier of the question.
+    payload (QuestionUpdate): The update data.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[QuestionResponse]: The updated question.
+ * @summary Comprehensive update of a contest question
+ */
+export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch = (
+    contestId: string,
+    questionId: string,
+    questionUpdate: QuestionUpdate,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseQuestionResponse>(
+      {url: `/api/v1/contests/${contestId}/questions/${questionId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: questionUpdate, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext> => {
+
+const mutationKey = ['updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>, {contestId: string;questionId: string;data: QuestionUpdate}> = (props) => {
+          const {contestId,questionId,data} = props ?? {};
+
+          return  updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch(contestId,questionId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>>
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchMutationBody = QuestionUpdate
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Comprehensive update of a contest question
+ */
+export const useUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch>>,
+        TError,
+        {contestId: string;questionId: string;data: QuestionUpdate},
+        TContext
+      > => {
+      return useMutation(getUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchMutationOptions(options), queryClient);
+    }
+    /**
  * Publish a contest.
 
 Args:
@@ -1796,6 +1857,83 @@ export function useGetContestInstructorsApiV1ContestsContestIdInstructorsGet<TDa
 
 
 /**
+ * Update the ordering of questions within a contest.
+
+Args:
+    contest_id: UUID of the target contest.
+    reorder_request: List of question IDs and their new sequential orders.
+
+Returns:
+    MessageResponse: Confirmation of reorder success.
+
+Raises:
+    ContestNotFoundError: If the contest is not found.
+    PermissionDeniedError: If the user lacks management rights.
+    InvalidContestError: If the new ordering is non-sequential or contains duplicates.
+ * @summary Reorder contest questions
+ */
+export const reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch = (
+    contestId: string,
+    reorderContestQuestionsRequest: ReorderContestQuestionsRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseMessageResponse>(
+      {url: `/api/v1/contests/${contestId}/questions/reorder`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: reorderContestQuestionsRequest, signal
+    },
+      );
+    }
+
+
+
+export const getReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>, TError,{contestId: string;data: ReorderContestQuestionsRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>, TError,{contestId: string;data: ReorderContestQuestionsRequest}, TContext> => {
+
+const mutationKey = ['reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>, {contestId: string;data: ReorderContestQuestionsRequest}> = (props) => {
+          const {contestId,data} = props ?? {};
+
+          return  reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch(contestId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationResult = NonNullable<Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>>
+    export type ReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationBody = ReorderContestQuestionsRequest
+    export type ReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Reorder contest questions
+ */
+export const useReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>, TError,{contestId: string;data: ReorderContestQuestionsRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch>>,
+        TError,
+        {contestId: string;data: ReorderContestQuestionsRequest},
+        TContext
+      > => {
+      return useMutation(getReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationOptions(options), queryClient);
+    }
+    /**
  * Assign audiences to a contest.
 
 Args:
@@ -2048,13 +2186,27 @@ export function useGetContestAudiencesApiV1ContestsContestIdAudiencesGet<TData =
 
 
 /**
- * Update metadata fields of a question linked to a contest.
+ * Perform a comprehensive update of a contest question.
+
+Updates metadata, tags, templates, and test cases in a single operation.
+Only contest creators and assigned instructors can perform this operation.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    question_id (UUID): The unique identifier of the question.
+    payload (QuestionUpdate): The update data.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[QuestionResponse]: The updated question.
  * @summary Update contest question metadata
  */
-export const updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch = (
+export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch = (
     contestId: string,
     questionId: string,
-    updateQuestionMetadataRequest: UpdateQuestionMetadataRequest,
+    questionUpdate: QuestionUpdate,
  signal?: AbortSignal
 ) => {
 
@@ -2062,18 +2214,18 @@ export const updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestio
       return axiosWithAuth<APIResponseQuestionResponse>(
       {url: `/api/v1/contests/${contestId}/questions/${questionId}/metadata`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: updateQuestionMetadataRequest, signal
+      data: questionUpdate, signal
     },
       );
     }
 
 
 
-export const getUpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: UpdateQuestionMetadataRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: UpdateQuestionMetadataRequest}, TContext> => {
+export const getUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext> => {
 
-const mutationKey = ['updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch'];
+const mutationKey = ['updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -2083,10 +2235,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, {contestId: string;questionId: string;data: UpdateQuestionMetadataRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, {contestId: string;questionId: string;data: QuestionUpdate}> = (props) => {
           const {contestId,questionId,data} = props ?? {};
 
-          return  updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch(contestId,questionId,data,)
+          return  updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch(contestId,questionId,data,)
         }
 
 
@@ -2096,748 +2248,20 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>>
-    export type UpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationBody = UpdateQuestionMetadataRequest
-    export type UpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationError = ExceptionResponse | HTTPValidationError
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>>
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationBody = QuestionUpdate
+    export type UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationError = ExceptionResponse | HTTPValidationError
 
     /**
  * @summary Update contest question metadata
  */
-export const useUpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: UpdateQuestionMetadataRequest}, TContext>, }
+export const useUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>, TError,{contestId: string;questionId: string;data: QuestionUpdate}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>,
+        Awaited<ReturnType<typeof updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatch>>,
         TError,
-        {contestId: string;questionId: string;data: UpdateQuestionMetadataRequest},
+        {contestId: string;questionId: string;data: QuestionUpdate},
         TContext
       > => {
-      return useMutation(getUpdateContestQuestionMetadataApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationOptions(options), queryClient);
-    }
-    /**
- * Append testcases to a question linked to a contest.
- * @summary Add testcases to contest question
- */
-export const addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost = (
-    contestId: string,
-    questionId: string,
-    addQuestionTestCasesRequest: AddQuestionTestCasesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/testcases`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addQuestionTestCasesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getAddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext> => {
-
-const mutationKey = ['addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>, {contestId: string;questionId: string;data: AddQuestionTestCasesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPostMutationResult = NonNullable<Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>>
-    export type AddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPostMutationBody = AddQuestionTestCasesRequest
-    export type AddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Add testcases to contest question
- */
-export const useAddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPost>>,
-        TError,
-        {contestId: string;questionId: string;data: AddQuestionTestCasesRequest},
-        TContext
-      > => {
-      return useMutation(getAddTestcasesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPostMutationOptions(options), queryClient);
-    }
-    /**
- * Remove testcases from a question linked to a contest.
- * @summary Remove testcases from contest question
- */
-export const removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete = (
-    contestId: string,
-    questionId: string,
-    removeQuestionTestCasesRequest: RemoveQuestionTestCasesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/testcases`, method: 'DELETE',
-      headers: {'Content-Type': 'application/json', },
-      data: removeQuestionTestCasesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getRemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTestCasesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTestCasesRequest}, TContext> => {
-
-const mutationKey = ['removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>, {contestId: string;questionId: string;data: RemoveQuestionTestCasesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>>
-    export type RemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDeleteMutationBody = RemoveQuestionTestCasesRequest
-    export type RemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDeleteMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Remove testcases from contest question
- */
-export const useRemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTestCasesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDelete>>,
-        TError,
-        {contestId: string;questionId: string;data: RemoveQuestionTestCasesRequest},
-        TContext
-      > => {
-      return useMutation(getRemoveTestcasesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesDeleteMutationOptions(options), queryClient);
-    }
-    /**
- * Replace all testcases of a question linked to a contest.
- * @summary Update testcases of contest question
- */
-export const updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch = (
-    contestId: string,
-    questionId: string,
-    addQuestionTestCasesRequest: AddQuestionTestCasesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/testcases`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: addQuestionTestCasesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext> => {
-
-const mutationKey = ['updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>, {contestId: string;questionId: string;data: AddQuestionTestCasesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>>
-    export type UpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatchMutationBody = AddQuestionTestCasesRequest
-    export type UpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update testcases of contest question
- */
-export const useUpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTestCasesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatch>>,
-        TError,
-        {contestId: string;questionId: string;data: AddQuestionTestCasesRequest},
-        TContext
-      > => {
-      return useMutation(getUpdateTestcasesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesPatchMutationOptions(options), queryClient);
-    }
-    /**
- * Update one testcase in a question linked to a contest.
- * @summary Update one testcase of contest question
- */
-export const updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch = (
-    contestId: string,
-    questionId: string,
-    id: string,
-    updateQuestionTestCaseRequest: UpdateQuestionTestCaseRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/testcases/${id}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateQuestionTestCaseRequest, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>, TError,{contestId: string;questionId: string;id: string;data: UpdateQuestionTestCaseRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>, TError,{contestId: string;questionId: string;id: string;data: UpdateQuestionTestCaseRequest}, TContext> => {
-
-const mutationKey = ['updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>, {contestId: string;questionId: string;id: string;data: UpdateQuestionTestCaseRequest}> = (props) => {
-          const {contestId,questionId,id,data} = props ?? {};
-
-          return  updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch(contestId,questionId,id,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>>
-    export type UpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatchMutationBody = UpdateQuestionTestCaseRequest
-    export type UpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update one testcase of contest question
- */
-export const useUpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>, TError,{contestId: string;questionId: string;id: string;data: UpdateQuestionTestCaseRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatch>>,
-        TError,
-        {contestId: string;questionId: string;id: string;data: UpdateQuestionTestCaseRequest},
-        TContext
-      > => {
-      return useMutation(getUpdateTestcaseOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTestcasesIdPatchMutationOptions(options), queryClient);
-    }
-    /**
- * Append templates to a question linked to a contest.
- * @summary Add templates to contest question
- */
-export const addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost = (
-    contestId: string,
-    questionId: string,
-    addQuestionTemplatesRequest: AddQuestionTemplatesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/templates`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addQuestionTemplatesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getAddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext> => {
-
-const mutationKey = ['addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>, {contestId: string;questionId: string;data: AddQuestionTemplatesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPostMutationResult = NonNullable<Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>>
-    export type AddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPostMutationBody = AddQuestionTemplatesRequest
-    export type AddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Add templates to contest question
- */
-export const useAddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPost>>,
-        TError,
-        {contestId: string;questionId: string;data: AddQuestionTemplatesRequest},
-        TContext
-      > => {
-      return useMutation(getAddTemplatesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPostMutationOptions(options), queryClient);
-    }
-    /**
- * Remove templates from a question linked to a contest.
- * @summary Remove templates from contest question
- */
-export const removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete = (
-    contestId: string,
-    questionId: string,
-    removeQuestionTemplatesRequest: RemoveQuestionTemplatesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/templates`, method: 'DELETE',
-      headers: {'Content-Type': 'application/json', },
-      data: removeQuestionTemplatesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getRemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTemplatesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTemplatesRequest}, TContext> => {
-
-const mutationKey = ['removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>, {contestId: string;questionId: string;data: RemoveQuestionTemplatesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>>
-    export type RemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDeleteMutationBody = RemoveQuestionTemplatesRequest
-    export type RemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDeleteMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Remove templates from contest question
- */
-export const useRemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionTemplatesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDelete>>,
-        TError,
-        {contestId: string;questionId: string;data: RemoveQuestionTemplatesRequest},
-        TContext
-      > => {
-      return useMutation(getRemoveTemplatesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesDeleteMutationOptions(options), queryClient);
-    }
-    /**
- * Replace all templates of a question linked to a contest.
- * @summary Update templates of contest question
- */
-export const updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch = (
-    contestId: string,
-    questionId: string,
-    addQuestionTemplatesRequest: AddQuestionTemplatesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/templates`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: addQuestionTemplatesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext> => {
-
-const mutationKey = ['updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>, {contestId: string;questionId: string;data: AddQuestionTemplatesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>>
-    export type UpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatchMutationBody = AddQuestionTemplatesRequest
-    export type UpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update templates of contest question
- */
-export const useUpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>, TError,{contestId: string;questionId: string;data: AddQuestionTemplatesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatch>>,
-        TError,
-        {contestId: string;questionId: string;data: AddQuestionTemplatesRequest},
-        TContext
-      > => {
-      return useMutation(getUpdateTemplatesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesPatchMutationOptions(options), queryClient);
-    }
-    /**
- * Update one template in a question linked to a contest.
- * @summary Update one template of contest question
- */
-export const updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch = (
-    contestId: string,
-    questionId: string,
-    templateId: string,
-    updateQuestionTemplateRequest: UpdateQuestionTemplateRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/templates/${templateId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateQuestionTemplateRequest, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>, TError,{contestId: string;questionId: string;templateId: string;data: UpdateQuestionTemplateRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>, TError,{contestId: string;questionId: string;templateId: string;data: UpdateQuestionTemplateRequest}, TContext> => {
-
-const mutationKey = ['updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>, {contestId: string;questionId: string;templateId: string;data: UpdateQuestionTemplateRequest}> = (props) => {
-          const {contestId,questionId,templateId,data} = props ?? {};
-
-          return  updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch(contestId,questionId,templateId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>>
-    export type UpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatchMutationBody = UpdateQuestionTemplateRequest
-    export type UpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatchMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update one template of contest question
- */
-export const useUpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>, TError,{contestId: string;questionId: string;templateId: string;data: UpdateQuestionTemplateRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatch>>,
-        TError,
-        {contestId: string;questionId: string;templateId: string;data: UpdateQuestionTemplateRequest},
-        TContext
-      > => {
-      return useMutation(getUpdateTemplateOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdTemplatesTemplateIdPatchMutationOptions(options), queryClient);
-    }
-    /**
- * Add allowed languages to a question linked to a contest.
- * @summary Add allowed languages to contest question
- */
-export const addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost = (
-    contestId: string,
-    questionId: string,
-    addQuestionAllowedLanguagesRequest: AddQuestionAllowedLanguagesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/languages`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addQuestionAllowedLanguagesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getAddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionAllowedLanguagesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionAllowedLanguagesRequest}, TContext> => {
-
-const mutationKey = ['addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>, {contestId: string;questionId: string;data: AddQuestionAllowedLanguagesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPostMutationResult = NonNullable<Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>>
-    export type AddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPostMutationBody = AddQuestionAllowedLanguagesRequest
-    export type AddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Add allowed languages to contest question
- */
-export const useAddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>, TError,{contestId: string;questionId: string;data: AddQuestionAllowedLanguagesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPost>>,
-        TError,
-        {contestId: string;questionId: string;data: AddQuestionAllowedLanguagesRequest},
-        TContext
-      > => {
-      return useMutation(getAddAllowedLanguagesToContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPostMutationOptions(options), queryClient);
-    }
-    /**
- * Remove allowed languages from a question linked to a contest.
- * @summary Remove allowed languages from contest question
- */
-export const removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete = (
-    contestId: string,
-    questionId: string,
-    removeQuestionAllowedLanguagesRequest: RemoveQuestionAllowedLanguagesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/languages`, method: 'DELETE',
-      headers: {'Content-Type': 'application/json', },
-      data: removeQuestionAllowedLanguagesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getRemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionAllowedLanguagesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionAllowedLanguagesRequest}, TContext> => {
-
-const mutationKey = ['removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>, {contestId: string;questionId: string;data: RemoveQuestionAllowedLanguagesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>>
-    export type RemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDeleteMutationBody = RemoveQuestionAllowedLanguagesRequest
-    export type RemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDeleteMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Remove allowed languages from contest question
- */
-export const useRemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>, TError,{contestId: string;questionId: string;data: RemoveQuestionAllowedLanguagesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDelete>>,
-        TError,
-        {contestId: string;questionId: string;data: RemoveQuestionAllowedLanguagesRequest},
-        TContext
-      > => {
-      return useMutation(getRemoveAllowedLanguagesFromContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesDeleteMutationOptions(options), queryClient);
-    }
-    /**
- * Replace allowed languages of a question linked to a contest.
- * @summary Update allowed languages of contest question
- */
-export const updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut = (
-    contestId: string,
-    questionId: string,
-    updateQuestionAllowedLanguagesRequest: UpdateQuestionAllowedLanguagesRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseQuestionResponse>(
-      {url: `/api/v1/contests/${contestId}/questions/${questionId}/languages`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: updateQuestionAllowedLanguagesRequest, signal
-    },
-      );
-    }
-
-
-
-export const getUpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPutMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>, TError,{contestId: string;questionId: string;data: UpdateQuestionAllowedLanguagesRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>, TError,{contestId: string;questionId: string;data: UpdateQuestionAllowedLanguagesRequest}, TContext> => {
-
-const mutationKey = ['updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>, {contestId: string;questionId: string;data: UpdateQuestionAllowedLanguagesRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPutMutationResult = NonNullable<Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>>
-    export type UpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPutMutationBody = UpdateQuestionAllowedLanguagesRequest
-    export type UpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPutMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Update allowed languages of contest question
- */
-export const useUpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>, TError,{contestId: string;questionId: string;data: UpdateQuestionAllowedLanguagesRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPut>>,
-        TError,
-        {contestId: string;questionId: string;data: UpdateQuestionAllowedLanguagesRequest},
-        TContext
-      > => {
-      return useMutation(getUpdateAllowedLanguagesOfContestQuestionApiV1ContestsContestIdQuestionsQuestionIdLanguagesPutMutationOptions(options), queryClient);
+      return useMutation(getUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchMutationOptions(options), queryClient);
     }

@@ -8,25 +8,21 @@ interface EditContestClientProps {
     contestId: string;
 }
 
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+
 export function EditContestClient({ contestId }: EditContestClientProps) {
-    const { data, isLoading, isError } = useGetContestApiV1ContestsContestIdGet(contestId);
+    const { data, isLoading, isError, error, refetch } =
+        useGetContestApiV1ContestsContestIdGet(contestId);
 
-    if (isLoading) {
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-        );
-    }
-
-    if (isError || !data?.data) {
-        return (
-            <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 text-center">
-                <AlertCircle className="h-10 w-10 text-destructive" />
-                <p className="font-medium">Failed to load contest</p>
-            </div>
-        );
-    }
-
-    return <ContestForm initialData={data.data} contestId={contestId} />;
+    return (
+        <AsyncStateHandler
+            isLoading={isLoading}
+            isError={isError || (!isLoading && !data?.data)}
+            error={error}
+            onRetry={refetch}
+            errorTitle="Failed to Load Contest"
+        >
+            {data?.data && <ContestForm initialData={data.data} contestId={contestId} />}
+        </AsyncStateHandler>
+    );
 }

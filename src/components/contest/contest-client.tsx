@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Calendar, ArrowRight, Users, Trophy } from "lucide-react";
+import { ArrowRight, Users, Trophy } from "lucide-react";
 import Link from "next/link";
 
 import { useGetAllContestsApiV1ContestsGet } from "@/api/generated/contests/contests";
@@ -28,6 +28,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { AsyncStateHandler } from "../shared/async-state-handler";
 
 const STATUS_CLASSES: Record<string, string> = {
     PUBLISHED: "bg-emerald-500/10 text-emerald-500 border-transparent",
@@ -183,7 +184,7 @@ export function ContestClient({ initialParams }: ContestClientProps) {
             undefined,
     };
 
-    const { data, isLoading, isError } = useGetAllContestsApiV1ContestsGet(params);
+    const { data, isLoading, isError, error, refetch } = useGetAllContestsApiV1ContestsGet(params);
 
     const setPage = (newPage: number) => {
         const newParams = new URLSearchParams(searchParams.toString());
@@ -202,62 +203,77 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                 <ViewToggle view={view} onChange={setView} />
             </div>
 
-            {isError ? (
-                <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 text-destructive p-8 text-center">
-                    <p className="mb-1 font-medium">Failed to load contests</p>
-                    <p className="text-sm opacity-80">Check your connection or try refreshing.</p>
-                </div>
-            ) : view === "grid" ? (
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {isLoading ? (
-                        Array.from({ length: 6 }).map((_, i) => <ContestSkeleton key={i} />)
-                    ) : data?.data && data.data.length > 0 ? (
-                        data.data.map((contest) => (
-                            <ContestCard key={contest.id} contest={contest} />
-                        ))
-                    ) : (
-                        <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                            No contests found. Try adjusting your filters.
-                        </div>
-                    )}
-                </div>
-            ) : isLoading ? (
-                <TableSkeleton />
-            ) : data?.data && data.data.length > 0 ? (
-                <div className="rounded-lg border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Contest</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Mode</TableHead>
-                                <TableHead>Dates</TableHead>
-                                <TableHead>Approval</TableHead>
-                                <TableHead />
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.data.map((contest) => (
-                                <ContestTableRow key={contest.id} contest={contest} />
+            <AsyncStateHandler
+                isLoading={isLoading}
+                isError={isError}
+                error={error}
+                onRetry={refetch}
+                loadingComponent={
+                    view === "grid" ? (
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <ContestSkeleton key={i} />
                             ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            ) : (
-                <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                    No contests found. Try adjusting your filters.
-                </div>
-            )}
+                        </div>
+                    ) : (
+                        <TableSkeleton />
+                    )
+                }
+            >
+                {view === "grid" ? (
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        {data?.data && data.data.length > 0 ? (
+                            data.data.map((contest) => (
+                                <ContestCard key={contest.id} contest={contest} />
+                            ))
+                        ) : (
+                            <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
+                                No contests found. Try adjusting your filters.
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <>
+                        {data?.data && data.data.length > 0 ? (
+                            <div className="rounded-lg border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Contest</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Mode</TableHead>
+                                            <TableHead>Dates</TableHead>
+                                            <TableHead>Approval</TableHead>
+                                            <TableHead />
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {data.data.map((contest) => (
+                                            <ContestTableRow key={contest.id} contest={contest} />
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
+                                No contests found. Try adjusting your filters.
+                            </div>
+                        )}
+                    </>
+                )}
 
-            {pagination && (
-                <AppPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    hasPrevious={pagination.has_previous}
-                    hasNext={pagination.has_next}
-                    onPageChange={setPage}
-                />
-            )}
+                {pagination && (
+                    <div className="mt-4">
+                        <AppPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            hasPrevious={pagination.has_previous}
+                            hasNext={pagination.has_next}
+                            onPageChange={setPage}
+                        />
+                    </div>
+                )}
+            </AsyncStateHandler>
         </div>
     );
 }

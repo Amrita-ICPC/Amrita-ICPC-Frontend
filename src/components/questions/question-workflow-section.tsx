@@ -99,11 +99,11 @@ export function QuestionWorkflowSection({
                         driverCode={driverCodes[workflowEditorLang.id]}
                         allowedLanguages={allowedLanguages}
                         value={
-                            activeWorkflowStep === "starter"
+                            (activeWorkflowStep === "starter"
                                 ? starterCodes[workflowEditorLang.id]
                                 : activeWorkflowStep === "solution"
                                   ? solutionCodes[workflowEditorLang.id]
-                                  : driverCodes[workflowEditorLang.id]
+                                  : driverCodes[workflowEditorLang.id]) ?? ""
                         }
                         onChange={(val) => {
                             if (activeWorkflowStep === "starter")
