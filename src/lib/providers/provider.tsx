@@ -2,9 +2,10 @@
 
 import { ThemeProvider } from "next-themes";
 import { SessionProvider } from "next-auth/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, MutationCache } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
+import { handleApiError } from "@/lib/handle-api-error";
 import { useState, type ReactNode } from "react";
 
 interface ProviderProps {
@@ -17,17 +18,43 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { EditorProvider } from "@/components/shared/TipTap";
 
 export default function Provider({ children }: ProviderProps) {
-    const [queryClient] = useState(
-        () =>
-            new QueryClient({
-                defaultOptions: {
-                    queries: {
-                        staleTime: 60 * 1000, // 1 minute
-                        refetchOnWindowFocus: false,
-                    },
+    const [queryClient] = useState(() => {
+        const client = new QueryClient({
+            mutationCache: new MutationCache({
+                onSuccess: async (_data, _variables, _context, mutation) => {
+                    const meta = mutation.options.meta as any;
+
+                    if (meta?.successMessage) {
+                        toast.success(meta.successMessage);
+                    }
+
+                    if (meta?.invalidateKeys) {
+                        const keys = Array.isArray(meta.invalidateKeys)
+                            ? meta.invalidateKeys
+                            : [meta.invalidateKeys];
+
+                        await Promise.all(
+                            keys.map((key: any) => client.invalidateQueries({ queryKey: key })),
+                        );
+                    }
+                },
+
+                onError: (error) => {
+                    const apiError = handleApiError(error);
+                    toast.error(apiError.message);
                 },
             }),
-    );
+
+            defaultOptions: {
+                queries: {
+                    staleTime: 60 * 1000,
+                    refetchOnWindowFocus: false,
+                },
+            },
+        });
+
+        return client;
+    });
 
     return (
         <SessionProvider>

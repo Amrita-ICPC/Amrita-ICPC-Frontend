@@ -25,6 +25,19 @@ language_id?: number | null;
  */
 tag_id?: string | null;
 /**
+ * Filter by tag name
+ */
+tag_name?: string | null;
+/**
+ * Sort by field (e.g., 'difficulty')
+ */
+sort_by?: string | null;
+/**
+ * Sort order
+ * @pattern ^(asc|desc)$
+ */
+sort_order?: string;
+/**
  * Page number (starts from 1)
  * @minimum 1
  */

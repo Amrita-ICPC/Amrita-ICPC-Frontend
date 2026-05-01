@@ -34,8 +34,6 @@ function isUUID(s: string) {
 
 function segmentLabel(seg: string, prev?: string): string {
     if (isUUID(seg)) {
-        if (prev === "contest") return "Details";
-        if (prev === "banks") return "Bank";
         return "Details";
     }
     return SEGMENT_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
@@ -47,10 +45,23 @@ export function Header() {
 
     const segments = pathname.split("/").filter(Boolean);
 
-    const crumbs = segments.map((seg, i) => {
-        const href = "/" + segments.slice(0, i + 1).join("/");
-        const label = segmentLabel(seg, segments[i - 1]);
-        const isLast = i === segments.length - 1;
+    // Filter out redundant UUIDs in nested paths (e.g. /contest/[id]/questions/[id]/edit)
+    const filteredSegments = segments.filter((seg, i) => {
+        const prev = segments[i - 1];
+        const next = segments[i + 1];
+
+        // If this is a question UUID and there's a next segment (like edit), skip it
+        if (isUUID(seg) && prev === "questions" && next) {
+            return false;
+        }
+        return true;
+    });
+
+    const crumbs = filteredSegments.map((seg, i) => {
+        const originalIndex = segments.indexOf(seg);
+        const href = "/" + segments.slice(0, originalIndex + 1).join("/");
+        const label = segmentLabel(seg, segments[originalIndex - 1]);
+        const isLast = i === filteredSegments.length - 1;
         return { href, label, isLast };
     });
 

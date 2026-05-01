@@ -79,10 +79,19 @@ export function ProblemPreview({
         ),
     };
 
+    const convertMath = (content: string) => {
+        if (!content) return "";
+        // Convert Tiptap math spans to Markdown math
+        return content.replace(
+            /<span data-latex="(.*?)" data-type="(inline-math|display-math)"><\/span>/g,
+            (_, latex, type) => (type === "display-math" ? `\n$$\n${latex}\n$$\n` : `$${latex}$`),
+        );
+    };
+
     return (
         <div className="max-w-4xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header / Actions */}
-            <div className="flex items-center justify-between mb-8">
+            {/* Header / Actions - Removed duplicated back button as it's now in QuestionCreateHero */}
+            <div className="flex items-center justify-between mb-8 opacity-0 pointer-events-none h-0 overflow-hidden">
                 <Button
                     variant="ghost"
                     onClick={onBack}
@@ -91,14 +100,6 @@ export function ProblemPreview({
                     <ChevronLeft className="h-4 w-4" />
                     Back to Editor
                 </Button>
-                <div className="flex items-center gap-2">
-                    <Badge
-                        variant="outline"
-                        className="bg-primary/5 text-primary border-primary/20"
-                    >
-                        Preview Mode
-                    </Badge>
-                </div>
             </div>
 
             {/* Problem Title & Stats */}
@@ -153,7 +154,7 @@ export function ProblemPreview({
                         rehypePlugins={[rehypeKatex] as any}
                         components={markdownComponents as any}
                     >
-                        {description || "_No description provided yet._"}
+                        {convertMath(description) || "_No description provided yet._"}
                     </ReactMarkdown>
                 </section>
 
@@ -174,7 +175,7 @@ export function ProblemPreview({
                                 rehypePlugins={[rehypeKatex] as any}
                                 components={markdownComponents as any}
                             >
-                                {inputFormat || "_No input format specified._"}
+                                {convertMath(inputFormat) || "_No input format specified._"}
                             </ReactMarkdown>
                         </div>
                     </section>
@@ -192,7 +193,7 @@ export function ProblemPreview({
                                 rehypePlugins={[rehypeKatex] as any}
                                 components={markdownComponents as any}
                             >
-                                {outputFormat || "_No output format specified._"}
+                                {convertMath(outputFormat) || "_No output format specified._"}
                             </ReactMarkdown>
                         </div>
                     </section>
@@ -212,7 +213,7 @@ export function ProblemPreview({
                             rehypePlugins={[rehypeKatex] as any}
                             components={markdownComponents as any}
                         >
-                            {constraints || "_No specific constraints defined._"}
+                            {convertMath(constraints) || "_No specific constraints defined._"}
                         </ReactMarkdown>
                     </div>
                 </section>
@@ -232,7 +233,7 @@ export function ProblemPreview({
                                 rehypePlugins={[rehypeKatex] as any}
                                 components={markdownComponents as any}
                             >
-                                {notes}
+                                {convertMath(notes)}
                             </ReactMarkdown>
                         </div>
                     </section>

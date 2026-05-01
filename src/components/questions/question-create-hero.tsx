@@ -3,12 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Eye, Save } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface QuestionCreateHeroProps {
     title?: string;
     description?: string;
     backUrl: string;
     onPreview: () => void;
+    isPreview?: boolean;
     onSave?: () => void;
     isSaving?: boolean;
 }
@@ -18,6 +20,7 @@ export function QuestionCreateHero({
     description = "Configure the metadata and requirements for your new programming challenge.",
     backUrl,
     onPreview,
+    isPreview = false,
     onSave,
     isSaving = false,
 }: QuestionCreateHeroProps) {
@@ -41,10 +44,15 @@ export function QuestionCreateHero({
                 <Button
                     variant="outline"
                     onClick={onPreview}
-                    className="gap-2 h-10 border-primary/30 text-primary hover:bg-primary/10 hidden sm:flex"
+                    className={cn(
+                        "gap-2 h-10 hidden sm:flex transition-all duration-300 shadow-sm",
+                        isPreview
+                            ? "bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500/20"
+                            : "border-primary/30 text-primary hover:bg-primary/10",
+                    )}
                 >
-                    <Eye className="h-4 w-4" />
-                    Preview
+                    <Eye className={cn("h-4 w-4", isPreview && "animate-pulse")} />
+                    {isPreview ? "Edit Mode" : "Preview"}
                 </Button>
 
                 <Button

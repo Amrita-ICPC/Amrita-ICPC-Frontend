@@ -1,29 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
     FileCode2,
     Search,
-    MoreVertical,
-    Edit,
     Trash2,
-    GripVertical,
     Filter,
     ArrowUpDown,
-    Eye,
+    Loader2,
+    Save,
+    Tag as TagIcon,
+    SortAsc,
 } from "lucide-react";
-import { Reorder, AnimatePresence } from "framer-motion";
+import { useDebounce } from "@/hooks/use-debounce";
+import { SortableList } from "@/components/shared/sortable-list";
+import { QuestionSortableRow } from "./question-sortable-row";
+import { QuestionRow } from "./question-row";
+import {
+    useReorderContestQuestions,
+    useRemoveQuestionsFromContest,
+    contestQuestionsKey,
+} from "@/query/contest-query";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppPagination } from "@/components/shared/app-pagination";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
     Select,
     SelectContent,
@@ -32,6 +33,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import type { QuestionListSummaryResponse, PaginationResponse } from "@/api/generated/model";
 
 interface ContestQuestionsTableProps {
@@ -42,6 +44,10 @@ interface ContestQuestionsTableProps {
     onPageChange: (page: number) => void;
     onSearchChange: (search: string) => void;
     onDifficultyChange: (difficulty: string) => void;
+    onTagChange: (tag: string) => void;
+    onSortChange: (sortBy: string, sortOrder: string) => void;
+    sortBy?: string;
+    sortOrder?: string;
 }
 
 export function ContestQuestionsTable({
@@ -52,12 +58,49 @@ export function ContestQuestionsTable({
     onPageChange,
     onSearchChange,
     onDifficultyChange,
+    onTagChange,
+    onSortChange,
+    sortBy = "order",
+    sortOrder = "asc",
 }: ContestQuestionsTableProps) {
     const [search, setSearch] = useState("");
     const [difficulty, setDifficulty] = useState("ALL");
+    const [tagName, setTagName] = useState("");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [prevQuestions, setPrevQuestions] = useState(questions);
     const [orderedQuestions, setOrderedQuestions] = useState(questions);
+
+    const reorderMutation = useReorderContestQuestions({
+        mutation: {
+            onSuccess: () => {
+                setPrevQuestions(orderedQuestions);
+            },
+            meta: {
+                successMessage: "Questions reordered successfully!",
+                invalidateKeys: [contestQuestionsKey(contestId)],
+            },
+        },
+    });
+
+    const removeMutation = useRemoveQuestionsFromContest({
+        mutation: {
+            onSuccess: () => {
+                setSelectedIds([]);
+            },
+            meta: {
+                successMessage: "Questions removed successfully!",
+                invalidateKeys: [contestQuestionsKey(contestId)],
+            },
+        },
+    });
+
+    const hasOrderChanged = useMemo(() => {
+        if (orderedQuestions.length !== questions.length) return false;
+        return orderedQuestions.some((q, i) => q.id !== questions[i].id);
+    }, [orderedQuestions, questions]);
+
+    const debouncedSearch = useDebounce(search, 500);
+    const debouncedTag = useDebounce(tagName, 500);
 
     // Sync local ordered list when props change (e.g. pagination/filtering)
     if (questions !== prevQuestions) {
@@ -65,14 +108,31 @@ export function ContestQuestionsTable({
         setOrderedQuestions(questions);
     }
 
-    const handleSearch = (val: string) => {
-        setSearch(val);
-        onSearchChange(val);
+    // Call handlers when debounced values change
+    useEffect(() => {
+        onSearchChange(debouncedSearch);
+    }, [debouncedSearch, onSearchChange]);
+
+    useEffect(() => {
+        onTagChange(debouncedTag);
+    }, [debouncedTag, onTagChange]);
+
+    const handleSearch = (value: string) => {
+        setSearch(value);
     };
 
     const handleDifficulty = (val: string) => {
         setDifficulty(val);
         onDifficultyChange(val);
+    };
+
+    const handleTag = (val: string) => {
+        setTagName(val);
+    };
+
+    const handleSort = (field: string) => {
+        const newOrder = sortBy === field && sortOrder === "asc" ? "desc" : "asc";
+        onSortChange(field, newOrder);
     };
 
     const handleSwitch = () => {
@@ -89,28 +149,65 @@ export function ContestQuestionsTable({
         }
     };
 
+    const handleSaveOrder = async () => {
+        const reorders = orderedQuestions.map((q, i) => ({
+            question_id: q.id,
+            order: (pagination?.page ? (pagination.page - 1) * pagination.page_size : 0) + i + 1,
+        }));
+
+        await reorderMutation.mutateAsync({
+            contestId,
+            data: { reorders },
+        });
+    };
+
+    const handleRemoveSelected = async () => {
+        if (selectedIds.length === 0) return;
+        await removeMutation.mutateAsync({
+            contestId,
+            data: { question_ids: selectedIds },
+        });
+    };
+
     const toggleSelection = (id: string) => {
         setSelectedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
     };
 
+    const handleReorder = (activeId: string, overId: string) => {
+        setOrderedQuestions((items) => {
+            const oldIndex = items.findIndex((i) => i.id === activeId);
+            const newIndex = items.findIndex((i) => i.id === overId);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    };
+
     return (
         <div className="space-y-4">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-muted/20 p-4 rounded-xl border border-border/40 backdrop-blur-sm">
-                <div className="flex items-center gap-3 flex-1 min-w-[300px]">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                    <div className="relative min-w-[200px] flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                         <Input
-                            placeholder="Search by title..."
-                            className="pl-9 bg-background/50 border-border/40 focus:border-primary/50 transition-colors"
+                            placeholder="Search by name..."
+                            className="pl-9 bg-background/50 border-border/40 focus:border-primary/50 transition-colors h-10"
                             value={search}
                             onChange={(e) => handleSearch(e.target.value)}
                         />
                     </div>
+                    <div className="relative min-w-[180px] flex-1">
+                        <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                        <Input
+                            placeholder="Filter by tag..."
+                            className="pl-9 bg-background/50 border-border/40 focus:border-primary/50 transition-colors h-10"
+                            value={tagName}
+                            onChange={(e) => handleTag(e.target.value)}
+                        />
+                    </div>
                     <Select value={difficulty} onValueChange={handleDifficulty}>
-                        <SelectTrigger className="w-[140px] bg-background/50 border-border/40">
+                        <SelectTrigger className="w-[140px] bg-background/50 border-border/40 h-10">
                             <Filter className="h-3.5 w-3.5 mr-2 opacity-60" />
                             <SelectValue placeholder="Difficulty" />
                         </SelectTrigger>
@@ -121,6 +218,39 @@ export function ContestQuestionsTable({
                             <SelectItem value="HARD">Hard</SelectItem>
                         </SelectContent>
                     </Select>
+
+                    <div className="flex items-center gap-2 bg-background/40 p-1 rounded-lg border border-border/20">
+                        <Select
+                            value={sortBy}
+                            onValueChange={(val) => onSortChange(val, sortOrder)}
+                        >
+                            <SelectTrigger className="w-[130px] border-none bg-transparent h-8 text-xs font-medium focus:ring-0">
+                                <SortAsc className="h-3.5 w-3.5 mr-2 opacity-60" />
+                                <SelectValue placeholder="Sort By" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="order">Default Order</SelectItem>
+                                <SelectItem value="difficulty">Difficulty</SelectItem>
+                                <SelectItem value="title">Problem Name</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <div className="w-px h-4 bg-border/40" />
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-background/60"
+                            onClick={() =>
+                                onSortChange(sortBy, sortOrder === "asc" ? "desc" : "asc")
+                            }
+                        >
+                            <ArrowUpDown
+                                className={cn(
+                                    "h-3.5 w-3.5 transition-transform duration-200",
+                                    sortOrder === "desc" && "rotate-180",
+                                )}
+                            />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -135,15 +265,47 @@ export function ContestQuestionsTable({
                             Switch Position
                         </Button>
                     )}
-                    {selectedIds.length > 0 && (
+                    {hasOrderChanged && (
                         <Button
-                            variant="ghost"
+                            variant="default"
                             size="sm"
-                            className="text-muted-foreground hover:text-foreground h-9"
-                            onClick={() => setSelectedIds([])}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9 px-4 shadow-lg shadow-primary/20 animate-in fade-in zoom-in duration-200"
+                            onClick={handleSaveOrder}
+                            disabled={reorderMutation.isPending}
                         >
-                            Clear Selection ({selectedIds.length})
+                            {reorderMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="h-4 w-4" />
+                            )}
+                            Save New Ordering
                         </Button>
+                    )}
+                    {selectedIds.length > 0 && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                className="gap-2 h-9 px-4 shadow-lg shadow-destructive/20"
+                                onClick={handleRemoveSelected}
+                                disabled={removeMutation.isPending}
+                            >
+                                {removeMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
+                                Remove ({selectedIds.length})
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground hover:text-foreground h-9"
+                                onClick={() => setSelectedIds([])}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -162,126 +324,64 @@ export function ContestQuestionsTable({
                             }
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        Order <ArrowUpDown className="h-3 w-3 opacity-50" />
+                    <div
+                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
+                        onClick={() => handleSort("order")}
+                    >
+                        Order{" "}
+                        {sortBy === "order" && (
+                            <ArrowUpDown
+                                className={cn("h-3 w-3", sortOrder === "desc" && "rotate-180")}
+                            />
+                        )}
                     </div>
                     <div>Problem Details</div>
-                    <div className="text-center">Difficulty</div>
+                    <div
+                        className="flex items-center justify-center gap-2 cursor-pointer hover:text-foreground transition-colors"
+                        onClick={() => handleSort("difficulty")}
+                    >
+                        Difficulty{" "}
+                        {sortBy === "difficulty" && (
+                            <ArrowUpDown
+                                className={cn("h-3 w-3", sortOrder === "desc" && "rotate-180")}
+                            />
+                        )}
+                    </div>
                     <div>Tags</div>
                     <div className="text-right px-2">Actions</div>
                 </div>
 
-                <Reorder.Group
-                    axis="y"
-                    values={orderedQuestions}
-                    onReorder={setOrderedQuestions}
-                    className="divide-y divide-border/10"
+                <SortableList
+                    items={orderedQuestions}
+                    onReorder={handleReorder}
+                    renderOverlay={(item) => (
+                        <QuestionRow
+                            question={item}
+                            index={orderedQuestions.findIndex((q) => q.id === item.id)}
+                            contestId={contestId}
+                            pagination={pagination}
+                            isSelected={selectedIds.includes(item.id)}
+                            toggleSelection={() => toggleSelection(item.id)}
+                            isOverlay
+                        />
+                    )}
                 >
-                    <AnimatePresence initial={false}>
+                    <div
+                        className={`divide-y divide-border/10 transition-opacity duration-200 ${isLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+                    >
                         {orderedQuestions.map((question, index) => (
-                            <Reorder.Item
+                            <QuestionSortableRow
                                 key={question.id}
-                                value={question}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className={`group grid grid-cols-[48px_80px_1fr_120px_200px_140px] items-center gap-4 px-6 py-4 transition-all duration-200 ${
-                                    selectedIds.includes(question.id)
-                                        ? "bg-primary/10 border-l-2 border-l-primary"
-                                        : "bg-transparent hover:bg-white/[0.03] border-l-2 border-l-transparent"
-                                }`}
-                            >
-                                <div
-                                    className="flex justify-center"
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                >
-                                    <Checkbox
-                                        checked={selectedIds.includes(question.id)}
-                                        onCheckedChange={() => toggleSelection(question.id)}
-                                    />
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <GripVertical className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors cursor-grab active:cursor-grabbing" />
-                                    <span className="font-mono text-xs text-muted-foreground/60 font-bold">
-                                        {index + 1}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                    <span className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors duration-200">
-                                        {question.title}
-                                    </span>
-                                </div>
-                                <div className="flex justify-center">
-                                    <Badge
-                                        variant="outline"
-                                        className={`px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border-2 ${
-                                            question.difficulty === "EASY"
-                                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 group-hover:border-emerald-500/40"
-                                                : question.difficulty === "MEDIUM"
-                                                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20 group-hover:border-amber-500/40"
-                                                  : "bg-red-500/10 text-red-500 border-red-500/20 group-hover:border-red-500/40"
-                                        } transition-colors duration-200`}
-                                    >
-                                        {question.difficulty}
-                                    </Badge>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 overflow-hidden">
-                                    {question.tags?.slice(0, 2).map((tag) => (
-                                        <Badge
-                                            key={tag.id}
-                                            variant="secondary"
-                                            className="bg-muted/30 text-[9px] border-none text-muted-foreground/80"
-                                        >
-                                            {tag.name}
-                                        </Badge>
-                                    ))}
-                                    {(question.tags?.length ?? 0) > 2 && (
-                                        <span className="text-[10px] text-muted-foreground/30 font-bold">
-                                            +{question.tags!.length - 2}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex items-center justify-end gap-1">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
-                                    >
-                                        <Eye className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
-                                        asChild
-                                    >
-                                        <Link
-                                            href={`/contest/${contestId}/questions/${question.id}/edit`}
-                                        >
-                                            <Edit className="h-3.5 w-3.5" />
-                                        </Link>
-                                    </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
-                                            >
-                                                <MoreVertical className="h-3.5 w-3.5" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-40">
-                                            <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Remove
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </Reorder.Item>
+                                question={question}
+                                index={index}
+                                contestId={contestId}
+                                pagination={pagination}
+                                isSelected={selectedIds.includes(question.id)}
+                                toggleSelection={() => toggleSelection(question.id)}
+                            />
                         ))}
-                    </AnimatePresence>
-                </Reorder.Group>
+                    </div>
+                </SortableList>
 
                 {orderedQuestions.length === 0 && !isLoading && (
                     <div className="flex flex-col items-center justify-center py-20 bg-muted/5 text-muted-foreground">
