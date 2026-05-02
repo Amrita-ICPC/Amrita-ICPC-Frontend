@@ -47,7 +47,7 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
                 </div>
                 {canCreate && (
                     <Button asChild>
-                        <Link href="/contest/create">
+                        <Link href="/contest/new">
                             <Plus className="mr-2 h-4 w-4" />
                             Create Contest
                         </Link>
