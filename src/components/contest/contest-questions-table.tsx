@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
     FileCode2,
     Search,
@@ -67,7 +67,17 @@ export function ContestQuestionsTable({
     const [difficulty, setDifficulty] = useState("ALL");
     const [tagName, setTagName] = useState("");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [orderedQuestions, setOrderedQuestions] = useState(questions);
+    const [orderedQuestions, setOrderedQuestions] =
+        useState<QuestionListSummaryResponse[]>(questions);
+    const prevQuestionsRef = useRef<QuestionListSummaryResponse[]>(questions);
+
+    //react-hooks/set-state-in-effect
+    useEffect(() => {
+        if (prevQuestionsRef.current !== questions) {
+            prevQuestionsRef.current = questions;
+            setOrderedQuestions(questions);
+        }
+    }, [questions]);
 
     const reorderMutation = useReorderContestQuestions({
         mutation: {
@@ -229,6 +239,8 @@ export function ContestQuestionsTable({
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 hover:bg-background/60"
+                            aria-label={`Toggle sort direction (${sortOrder === "asc" ? "ascending" : "descending"})`}
+                            title="Toggle sort direction"
                             onClick={() =>
                                 onSortChange(sortBy, sortOrder === "asc" ? "desc" : "asc")
                             }

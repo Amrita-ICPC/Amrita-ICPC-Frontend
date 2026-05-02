@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { EditorProvider, useEditorContext } from "../shared/TipTap";
 import { ProblemMetadataCard } from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
@@ -65,12 +65,17 @@ export function QuestionEditorShell({
     const editor = useEditorContext();
     const [activeTab, setActiveTab] = useState("description");
 
+    const initializedQuestionIdRef = useRef<string | null>(null);
+
     // Initialize form with fetched data in update mode
     useEffect(() => {
-        if (mode === "update" && questionData?.data) {
-            initializeForm(questionData.data, languages);
-        }
-    }, [mode, questionData, initializeForm, languages]);
+        if (mode !== "update" || !questionData?.data) return;
+        if (!languagesData?.data?.languages) return;
+        if (initializedQuestionIdRef.current === questionData.data.id) return;
+
+        initializeForm(questionData.data, languagesData.data.languages);
+        initializedQuestionIdRef.current = questionData.data.id;
+    }, [mode, questionData?.data, languagesData?.data?.languages, initializeForm]);
 
     // Hide global layout (header/sidebar) when in preview mode
     useEffect(() => {
@@ -117,6 +122,12 @@ export function QuestionEditorShell({
         >
             <div className="space-y-8 max-w-5xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <QuestionCreateHero
+                    title={mode === "update" ? "Update Question" : "Create Question"}
+                    description={
+                        mode === "update"
+                            ? "Edit the metadata and requirements for this programming challenge."
+                            : "Configure the metadata and requirements for your new programming challenge."
+                    }
                     backUrl={`/contest/${contestId}/questions`}
                     onPreview={() => setIsPreviewMode(!isPreviewMode)}
                     isPreview={isPreviewMode}
