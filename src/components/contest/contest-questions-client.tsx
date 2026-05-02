@@ -51,11 +51,7 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
             sort_by: sortBy === "order" ? undefined : sortBy,
             sort_order: sortOrder as any,
         },
-        {
-            query: {
-                placeholderData: keepPreviousData,
-            },
-        },
+        {},
     );
 
     const contest = contestData?.data;
@@ -99,7 +95,6 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                 />
 
                 <ContestQuestionsTable
-                    key={`${page}-${search}-${difficulty}`}
                     contestId={contestId}
                     questions={questions}
                     pagination={pagination ?? undefined}

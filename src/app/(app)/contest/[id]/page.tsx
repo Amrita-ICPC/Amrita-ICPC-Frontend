@@ -40,24 +40,10 @@ export default async function ContestDetailPage({
                 </div>
 
                 <AuthGuard
-                    requiredRoles={[Roles.CONTEST_CREATE]}
+                    requiredRoles={[isNew ? Roles.CONTEST_CREATE : Roles.CONTEST_UPDATE]}
                     fallbackComponent={<AccessDenied />}
                 >
-                    {isNew ? (
-                        <AuthGuard
-                            requiredRoles={[Roles.CONTEST_CREATE]}
-                            fallbackComponent={<AccessDenied />}
-                        >
-                            <ContestForm />
-                        </AuthGuard>
-                    ) : (
-                        <AuthGuard
-                            requiredRoles={[Roles.CONTEST_UPDATE]}
-                            fallbackComponent={<AccessDenied />}
-                        >
-                            <EditContestClient contestId={id} />
-                        </AuthGuard>
-                    )}
+                    {isNew ? <ContestForm /> : <EditContestClient contestId={id} />}
                 </AuthGuard>
             </div>
         );

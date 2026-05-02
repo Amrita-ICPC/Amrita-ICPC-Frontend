@@ -93,7 +93,11 @@ export function QuestionRow({
                 {question.tags && question.tags.length > 0 ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="flex flex-wrap gap-1.5 cursor-pointer hover:opacity-80 transition-opacity">
+                            <button
+                                type="button"
+                                aria-label="View all tags"
+                                className="flex flex-wrap items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
+                            >
                                 {question.tags.slice(0, 2).map((tag) => (
                                     <Badge
                                         key={tag.id}
@@ -108,7 +112,7 @@ export function QuestionRow({
                                         +{question.tags.length - 2}
                                     </span>
                                 )}
-                            </div>
+                            </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-48 p-2">
                             <div className="flex flex-wrap gap-1.5">
@@ -133,6 +137,7 @@ export function QuestionRow({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
+                    aria-label="Preview question"
                 >
                     <Eye className="h-3.5 w-3.5" />
                 </Button>
@@ -142,7 +147,10 @@ export function QuestionRow({
                     className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
                     asChild
                 >
-                    <Link href={`/contest/${contestId}/questions/${question.id}?edit=1`}>
+                    <Link
+                        href={`/contest/${contestId}/questions/${question.id}?edit=1`}
+                        aria-label="Edit question"
+                    >
                         <Edit className="h-3.5 w-3.5" />
                     </Link>
                 </Button>
@@ -152,6 +160,7 @@ export function QuestionRow({
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
+                            aria-label="More options"
                         >
                             <MoreVertical className="h-3.5 w-3.5" />
                         </Button>

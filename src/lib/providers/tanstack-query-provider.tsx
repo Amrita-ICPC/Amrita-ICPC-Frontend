@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryClient, QueryClientProvider, MutationCache } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, MutationCache, QueryKey } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/handle-api-error";
@@ -10,24 +10,27 @@ interface TanstackQueryProviderProps {
     children: ReactNode;
 }
 
+type MutationMeta = {
+    successMessage?: string;
+    invalidateKeys?: QueryKey[];
+};
+
 export default function TanstackQueryProvider({ children }: TanstackQueryProviderProps) {
     const [queryClient] = useState(() => {
         const client = new QueryClient({
             mutationCache: new MutationCache({
                 onSuccess: async (_data, _variables, _context, mutation) => {
-                    const meta = mutation.options.meta as any;
+                    const meta = mutation.options.meta as MutationMeta | undefined;
 
                     if (meta?.successMessage) {
                         toast.success(meta.successMessage);
                     }
 
-                    if (meta?.invalidateKeys) {
-                        const keys = Array.isArray(meta.invalidateKeys)
-                            ? meta.invalidateKeys
-                            : [meta.invalidateKeys];
-
+                    if (meta?.invalidateKeys?.length) {
                         await Promise.all(
-                            keys.map((key: any) => client.invalidateQueries({ queryKey: key })),
+                            meta.invalidateKeys.map((key) =>
+                                client.invalidateQueries({ queryKey: key }),
+                            ),
                         );
                     }
                 },

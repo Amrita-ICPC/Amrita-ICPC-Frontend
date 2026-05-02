@@ -20,7 +20,6 @@ export default function ContestQuestionEditorPage({
     questionId: string;
     isEdit: boolean;
 }) {
-    console.log(isEdit);
     const router = useRouter();
     const form = useQuestionForm();
     const payload = useQuestionPayload(form);
@@ -86,6 +85,7 @@ export default function ContestQuestionEditorPage({
             data: payload,
         });
         router.push(`/contest/${contestId}/questions`);
+        router.refresh();
     };
 
     const isSavingCreateQuestion =
@@ -93,7 +93,6 @@ export default function ContestQuestionEditorPage({
     const isSavingUpdateQuestion = updateMutation.isPending;
 
     if (!isEdit) {
-        console.log("Rendering create shell");
         return (
             <QuestionEditorShell
                 mode="create"
@@ -105,16 +104,13 @@ export default function ContestQuestionEditorPage({
         );
     }
     return (
-        console.log("Rendering update shell with questionId:", questionId),
-        (
-            <QuestionEditorShell
-                mode="update"
-                contestId={contestId}
-                questionId={questionId}
-                form={form}
-                onSave={onUpdate}
-                isSaving={isSavingUpdateQuestion}
-            />
-        )
+        <QuestionEditorShell
+            mode="update"
+            contestId={contestId}
+            questionId={questionId}
+            form={form}
+            onSave={onUpdate}
+            isSaving={isSavingUpdateQuestion}
+        />
     );
 }
