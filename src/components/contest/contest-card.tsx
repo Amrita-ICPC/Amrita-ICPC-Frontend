@@ -172,7 +172,7 @@ export function ContestCard({ contest }: ContestCardProps) {
 
                         {/* Edit Button */}
                         <Link
-                            href={`/contest/${contest.id}/edit`}
+                            href={`/contest/${contest.id}?edit=1`}
                             className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-600 shadow-sm backdrop-blur-md transition-all hover:scale-105 hover:bg-white hover:text-[#162d68] dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300 pointer-events-auto"
                             title="Edit Contest"
                         >

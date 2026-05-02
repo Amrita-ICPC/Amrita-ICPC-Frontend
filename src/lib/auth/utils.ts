@@ -10,6 +10,7 @@ export const Roles = {
     CONTEST_READ: "contests:read",
     CONTEST_CREATE: "contests:create",
     CONTEST_DELETE: "contests:delete",
+    CONTEST_UPDATE: "contests:update",
 } as const;
 
 export type Role = (typeof Roles)[keyof typeof Roles];

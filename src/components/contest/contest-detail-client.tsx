@@ -323,7 +323,7 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         className="bg-background/50 backdrop-blur-sm hover:bg-background/80"
                                         asChild
                                     >
-                                        <Link href={`/contest/${contest.id}/edit`}>
+                                        <Link href={`/contest/${contest.id}?edit=1`}>
                                             <Edit className="mr-1.5 h-3.5 w-3.5" />
                                             Edit
                                         </Link>
