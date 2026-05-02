@@ -142,7 +142,7 @@ export function QuestionRow({
                     className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
                     asChild
                 >
-                    <Link href={`/contest/${contestId}/questions/${question.id}/edit`}>
+                    <Link href={`/contest/${contestId}/questions/${question.id}?edit=1`}>
                         <Edit className="h-3.5 w-3.5" />
                     </Link>
                 </Button>

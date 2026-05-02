@@ -67,14 +67,10 @@ export function ContestQuestionsTable({
     const [difficulty, setDifficulty] = useState("ALL");
     const [tagName, setTagName] = useState("");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [prevQuestions, setPrevQuestions] = useState(questions);
     const [orderedQuestions, setOrderedQuestions] = useState(questions);
 
     const reorderMutation = useReorderContestQuestions({
         mutation: {
-            onSuccess: () => {
-                setPrevQuestions(orderedQuestions);
-            },
             meta: {
                 successMessage: "Questions reordered successfully!",
                 invalidateKeys: [contestQuestionsKey(contestId)],
@@ -101,12 +97,6 @@ export function ContestQuestionsTable({
 
     const debouncedSearch = useDebounce(search, 500);
     const debouncedTag = useDebounce(tagName, 500);
-
-    // Sync local ordered list when props change (e.g. pagination/filtering)
-    if (questions !== prevQuestions) {
-        setPrevQuestions(questions);
-        setOrderedQuestions(questions);
-    }
 
     // Call handlers when debounced values change
     useEffect(() => {

@@ -99,6 +99,7 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                 />
 
                 <ContestQuestionsTable
+                    key={`${page}-${search}-${difficulty}`}
                     contestId={contestId}
                     questions={questions}
                     pagination={pagination ?? undefined}

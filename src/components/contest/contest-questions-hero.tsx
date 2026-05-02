@@ -38,7 +38,7 @@ export function ContestQuestionsHero({ contestId, contestName }: ContestQuestion
 
                 <div className="flex flex-wrap items-center gap-3">
                     <Button className="shadow-lg shadow-primary/20 gap-2 h-10 px-5" asChild>
-                        <Link href={`/contest/${contestId}/questions/create`}>
+                        <Link href={`/contest/${contestId}/questions/new`}>
                             <Plus className="h-4 w-4" />
                             Add Question
                         </Link>
