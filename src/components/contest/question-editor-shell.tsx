@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useEditorContext } from "../shared/TipTap";
+import { EditorProvider, useEditorContext } from "../shared/TipTap";
 import { ProblemMetadataCard } from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
 import { QuestionWorkflowSection } from "../questions/question-workflow-section";

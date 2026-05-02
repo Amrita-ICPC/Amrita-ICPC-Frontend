@@ -2,7 +2,6 @@
 
 import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
 import { ContestForm } from "@/components/contest/contest-form";
-import { Loader2, AlertCircle } from "lucide-react";
 
 interface EditContestClientProps {
     contestId: string;
