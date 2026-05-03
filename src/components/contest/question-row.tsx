@@ -48,7 +48,7 @@ export function QuestionRow({
                 isSelected && !isOverlay && "bg-primary/10 border-l-2 border-l-primary",
                 !isSelected &&
                     !isOverlay &&
-                    "bg-transparent hover:bg-white/[0.03] border-l-2 border-l-transparent",
+                    "bg-transparent hover:bg-muted/40 border-l-2 border-l-transparent",
             )}
         >
             <div className="flex justify-center" onPointerDown={(e) => e.stopPropagation()}>
@@ -62,9 +62,9 @@ export function QuestionRow({
                     )}
                     {...dragHandleProps}
                 >
-                    <GripVertical className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+                    <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
                 </div>
-                <span className="font-mono text-xs text-muted-foreground/60 font-bold">
+                <span className="font-mono text-xs text-muted-foreground font-bold">
                     {(pagination?.page ? (pagination.page - 1) * pagination.page_size : 0) +
                         index +
                         1}
@@ -80,10 +80,10 @@ export function QuestionRow({
                     variant="outline"
                     className={`px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border-2 ${
                         question.difficulty === "EASY"
-                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 group-hover:border-emerald-500/40"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:border-emerald-500/40"
                             : question.difficulty === "MEDIUM"
-                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20 group-hover:border-amber-500/40"
-                              : "bg-red-500/10 text-red-500 border-red-500/20 group-hover:border-red-500/40"
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 group-hover:border-amber-500/40"
+                              : "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 group-hover:border-red-500/40"
                     } transition-colors duration-200`}
                 >
                     {question.difficulty}
@@ -102,13 +102,13 @@ export function QuestionRow({
                                     <Badge
                                         key={tag.id}
                                         variant="secondary"
-                                        className="bg-muted/30 text-[9px] border-none text-muted-foreground/80"
+                                        className="bg-muted text-[9px] border-none text-muted-foreground font-semibold"
                                     >
                                         {tag.name}
                                     </Badge>
                                 ))}
                                 {question.tags.length > 2 && (
-                                    <span className="text-[10px] text-muted-foreground/30 font-bold self-center">
+                                    <span className="text-[10px] text-muted-foreground/60 font-bold self-center">
                                         +{question.tags.length - 2}
                                     </span>
                                 )}
@@ -129,14 +129,16 @@ export function QuestionRow({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
-                    <span className="text-[10px] text-muted-foreground/20 italic">No tags</span>
+                    <span className="text-[10px] text-muted-foreground/40 italic font-medium">
+                        No tags
+                    </span>
                 )}
             </div>
             <div className="flex items-center justify-end gap-1">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
+                    className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
                     aria-label="Preview question"
                 >
                     <Eye className="h-3.5 w-3.5" />
@@ -144,7 +146,7 @@ export function QuestionRow({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
+                    className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
                     asChild
                 >
                     <Link
@@ -159,7 +161,7 @@ export function QuestionRow({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground/40 hover:text-foreground hover:bg-muted/50"
+                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
                             aria-label="More options"
                         >
                             <MoreVertical className="h-3.5 w-3.5" />
