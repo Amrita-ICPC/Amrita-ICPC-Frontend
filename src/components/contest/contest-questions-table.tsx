@@ -186,13 +186,13 @@ export function ContestQuestionsTable({
     return (
         <div className="space-y-4">
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-muted/20 p-4 rounded-xl border border-border/40 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-muted/40 p-4 rounded-xl border border-border/60 backdrop-blur-md">
                 <div className="flex flex-wrap items-center gap-3 flex-1">
                     <div className="relative min-w-[200px] flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                         <Input
                             placeholder="Search by name..."
-                            className="pl-9 bg-background/50 border-border/40 focus:border-primary/50 transition-colors h-10"
+                            className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
                             value={search}
                             onChange={(e) => handleSearch(e.target.value)}
                         />
@@ -201,14 +201,14 @@ export function ContestQuestionsTable({
                         <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                         <Input
                             placeholder="Filter by tag..."
-                            className="pl-9 bg-background/50 border-border/40 focus:border-primary/50 transition-colors h-10"
+                            className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
                             value={tagName}
                             onChange={(e) => handleTag(e.target.value)}
                         />
                     </div>
                     <Select value={difficulty} onValueChange={handleDifficulty}>
-                        <SelectTrigger className="w-[140px] bg-background/50 border-border/40 h-10">
-                            <Filter className="h-3.5 w-3.5 mr-2 opacity-60" />
+                        <SelectTrigger className="w-[140px] bg-background border-border/60 h-10 shadow-sm">
+                            <Filter className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                             <SelectValue placeholder="Difficulty" />
                         </SelectTrigger>
                         <SelectContent>
@@ -224,8 +224,8 @@ export function ContestQuestionsTable({
                             value={sortBy}
                             onValueChange={(val) => onSortChange(val, sortOrder)}
                         >
-                            <SelectTrigger className="w-[130px] border-none bg-transparent h-8 text-xs font-medium focus:ring-0">
-                                <SortAsc className="h-3.5 w-3.5 mr-2 opacity-60" />
+                            <SelectTrigger className="w-[130px] border-none bg-transparent h-8 text-xs font-semibold focus:ring-0">
+                                <SortAsc className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                                 <SelectValue placeholder="Sort By" />
                             </SelectTrigger>
                             <SelectContent>
@@ -313,8 +313,8 @@ export function ContestQuestionsTable({
             </div>
 
             {/* Table */}
-            <div className="rounded-xl border border-border/60 bg-card/20 backdrop-blur-sm overflow-hidden shadow-2xl">
-                <div className="grid grid-cols-[48px_80px_1fr_120px_200px_140px] items-center gap-4 px-6 py-4 border-b border-border/40 bg-muted/30 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+            <div className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-md overflow-hidden shadow-xl">
+                <div className="grid grid-cols-[48px_80px_1fr_120px_200px_140px] items-center gap-4 px-6 py-4 border-b border-border/60 bg-muted/50 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                     <div className="flex justify-center">
                         <Checkbox
                             checked={
@@ -387,9 +387,9 @@ export function ContestQuestionsTable({
 
                 {orderedQuestions.length === 0 && !isLoading && (
                     <div className="flex flex-col items-center justify-center py-20 bg-muted/5 text-muted-foreground">
-                        <FileCode2 className="h-16 w-16 opacity-5 mb-4" />
+                        <FileCode2 className="h-16 w-16 opacity-20 mb-4" />
                         <h3 className="text-lg font-bold text-foreground">No questions found</h3>
-                        <p className="text-sm max-w-xs text-center mt-1 text-muted-foreground/60">
+                        <p className="text-sm max-w-xs text-center mt-1 text-muted-foreground">
                             Try adjusting your search or filters.
                         </p>
                     </div>
@@ -397,19 +397,18 @@ export function ContestQuestionsTable({
                 {/* Pagination Footer */}
                 {pagination && (
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border/40 px-6 py-4 bg-muted/10">
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground font-medium">
                             Showing{" "}
-                            <span className="font-medium text-foreground">
+                            <span className="font-bold text-foreground">
                                 {(pagination.page - 1) * pagination.page_size +
                                     (orderedQuestions.length ? 1 : 0)}
                             </span>{" "}
                             to{" "}
-                            <span className="font-medium text-foreground">
+                            <span className="font-bold text-foreground">
                                 {(pagination.page - 1) * pagination.page_size +
                                     orderedQuestions.length}
                             </span>{" "}
-                            of{" "}
-                            <span className="font-medium text-foreground">{pagination.total}</span>{" "}
+                            of <span className="font-bold text-foreground">{pagination.total}</span>{" "}
                             questions
                         </p>
                         <AppPagination

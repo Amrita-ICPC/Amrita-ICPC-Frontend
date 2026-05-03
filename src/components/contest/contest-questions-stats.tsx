@@ -39,7 +39,7 @@ function StatCard({ icon: Icon, label, value, color = "primary" }: StatCardProps
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
             <Card
-                className={`group relative overflow-hidden border-border/60 bg-gradient-to-br from-card to-muted/30 transition-all duration-300 hover:border-border/80 hover:shadow-2xl ${glowMap[color]}`}
+                className={`group relative overflow-hidden border-border/60 bg-card  transition-all duration-300 hover:border-border/80 hover:shadow-2xl ${glowMap[color]}`}
             >
                 <div
                     className={`absolute -right-6 -top-6 h-24 w-24 rounded-full blur-3xl opacity-20 ${colorMap[color].split(" ")[0]}`}
