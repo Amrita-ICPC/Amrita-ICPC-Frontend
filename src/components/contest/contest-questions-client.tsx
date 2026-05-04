@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
     useGetContestApiV1ContestsContestIdGet,
     useGetContestQuestionsApiV1ContestsContestIdQuestionsGet,
@@ -10,12 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ContestQuestionsHero } from "./contest-questions-hero";
 import { ContestQuestionsStats } from "./contest-questions-stats";
 import { ContestQuestionsTable } from "./contest-questions-table";
+import { AsyncStateHandler } from "../shared/async-state-handler";
 
 interface ContestQuestionsClientProps {
     contestId: string;
 }
-
-import { AsyncStateHandler } from "../shared/async-state-handler";
 
 export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProps) {
     const [search, setSearch] = useState("");
@@ -51,13 +50,42 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
             sort_by: sortBy === "order" ? undefined : sortBy,
             sort_order: sortOrder as any,
         },
-        {},
+        {
+            query: {
+                placeholderData: keepPreviousData,
+            },
+        },
     );
 
     const contest = contestData?.data;
     const questionsResponse = questionsData?.data;
     const questions = questionsResponse?.questions ?? [];
     const pagination = questionsData?.pagination;
+
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage);
+    }, []);
+
+    const handleSearchChange = useCallback((val: string) => {
+        setSearch(val);
+        setPage(1);
+    }, []);
+
+    const handleDifficultyChange = useCallback((val: string) => {
+        setDifficulty(val);
+        setPage(1);
+    }, []);
+
+    const handleTagChange = useCallback((val: string) => {
+        setTagName(val);
+        setPage(1);
+    }, []);
+
+    const handleSortChange = useCallback((field: string, order: string) => {
+        setSortBy(field);
+        setSortOrder(order);
+        setPage(1);
+    }, []);
 
     return (
         <AsyncStateHandler
@@ -99,24 +127,11 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                     questions={questions}
                     pagination={pagination ?? undefined}
                     isLoading={isQuestionsLoading || isFetching}
-                    onPageChange={setPage}
-                    onSearchChange={(val) => {
-                        setSearch(val);
-                        setPage(1);
-                    }}
-                    onDifficultyChange={(val) => {
-                        setDifficulty(val);
-                        setPage(1);
-                    }}
-                    onTagChange={(val) => {
-                        setTagName(val);
-                        setPage(1);
-                    }}
-                    onSortChange={(field, order) => {
-                        setSortBy(field);
-                        setSortOrder(order);
-                        setPage(1);
-                    }}
+                    onPageChange={handlePageChange}
+                    onSearchChange={handleSearchChange}
+                    onDifficultyChange={handleDifficultyChange}
+                    onTagChange={handleTagChange}
+                    onSortChange={handleSortChange}
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                 />

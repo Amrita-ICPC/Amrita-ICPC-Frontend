@@ -1500,6 +1500,48 @@ export const ReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchR
 })
 
 /**
+ * Clone questions from a bank into a contest.
+
+Args:
+    request: Framework context.
+    contest_id: UUID of the target contest.
+    clone_request: DTO containing bank ID and selection criteria.
+    user_id: Authenticated user ID.
+    service: Injected domain service.
+
+Returns:
+    APIResponse: Standardized response with list of created contest-question relationships.
+ * @summary Clone questions from a bank into a contest
+ */
+export const CloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyCopyAllDefault = false;
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyQuestionsOneItemScoreOneExclusiveMin = 0;
+
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyQuestionsOneItemDurationOneExclusiveMin = 0;
+
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyScoreDefault = 100;
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyScoreExclusiveMin = 0;
+
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyDurationOneExclusiveMin = 0;
+
+
+
+export const CloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBody = zod.object({
+  "bank_id": zod.uuid().describe('Source bank ID'),
+  "copy_all": zod.boolean().default(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyCopyAllDefault).describe('Whether to copy all questions from the bank'),
+  "questions": zod.union([zod.array(zod.object({
+  "question_id": zod.uuid(),
+  "score": zod.union([zod.number().gt(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyQuestionsOneItemScoreOneExclusiveMin),zod.null()]).optional(),
+  "duration": zod.union([zod.number().gt(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyQuestionsOneItemDurationOneExclusiveMin),zod.null()]).optional()
+}).describe('Configuration for a specific question being cloned.')),zod.null()]).optional().describe('Specific questions to copy with optional overrides (if copy_all is False)'),
+  "score": zod.number().gt(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyScoreExclusiveMin).default(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyScoreDefault).describe('Default score for cloned questions'),
+  "duration": zod.union([zod.number().gt(cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostBodyDurationOneExclusiveMin),zod.null()]).optional().describe('Default duration for cloned questions in seconds')
+}).describe('Schema for cloning questions from a bank to a contest.')
+
+/**
  * Assign audiences to a contest.
 
 Args:

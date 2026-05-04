@@ -47,7 +47,7 @@ export interface StudentContestAvailableResponse {
   registration_start?: string | null;
   /** Registration end time (UTC) */
   registration_end?: string | null;
-  /** Contest status (DRAFT, SCHEDULED, RUNNING, FINISHED) */
+  /** Contest status (DRAFT, PUBLISHED, PAUSED, CANCELLED) */
   status: ContestStatus;
   /** Whether contest is publicly visible */
   is_public: boolean;

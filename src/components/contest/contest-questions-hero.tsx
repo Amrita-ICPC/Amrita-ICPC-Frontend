@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus, Library } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { BankCloneDialog } from "../banks/bank-clone-dialog";
 
 interface ContestQuestionsHeroProps {
     contestId: string;
@@ -43,16 +44,15 @@ export function ContestQuestionsHero({ contestId, contestName }: ContestQuestion
                             Add Question
                         </Link>
                     </Button>
-                    <Button
-                        variant="outline"
-                        className="bg-background/50 backdrop-blur-sm gap-2 h-10 px-5 border-border/60 hover:bg-muted/50 transition-colors"
-                        asChild
-                    >
-                        <Link href={`/contest/${contestId}/questions/import`}>
+                    <BankCloneDialog targetId={contestId} targetType="contest">
+                        <Button
+                            variant="outline"
+                            className="bg-background/50 backdrop-blur-sm gap-2 h-10 px-5 border-border/60 hover:bg-muted/50 transition-colors"
+                        >
                             <Library className="h-4 w-4" />
                             Import from Bank
-                        </Link>
-                    </Button>
+                        </Button>
+                    </BankCloneDialog>
                 </div>
             </div>
         </motion.div>

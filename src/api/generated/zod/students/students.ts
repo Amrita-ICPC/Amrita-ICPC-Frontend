@@ -48,7 +48,7 @@ export const GetAvailableContestsApiV1StudentsContestsGetResponse = zod.object({
   "end_time": zod.iso.datetime({"offset":true}).describe('Contest end time (UTC)'),
   "registration_start": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration start time (UTC)'),
   "registration_end": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration end time (UTC)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'PAUSED', 'CANCELLED']).describe('Contest status (DRAFT, SCHEDULED, RUNNING, FINISHED)'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'PAUSED', 'CANCELLED']).describe('Contest status (DRAFT, PUBLISHED, PAUSED, CANCELLED)'),
   "is_public": zod.boolean().describe('Whether contest is publicly visible'),
   "problem_count": zod.number().describe('Number of problems in contest'),
   "team_approval_mode": zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).describe('How teams are approved (AUTO_APPROVE or INSTRUCTOR_REVIEW)'),

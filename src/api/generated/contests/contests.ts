@@ -37,6 +37,7 @@ import type {
   APIResponseQuestionResponse,
   AddContestQuestionsRequest,
   ContestAudienceManageRequest,
+  ContestBankCloneRequest,
   ContestCreate,
   ContestUpdate,
   ExceptionResponse,
@@ -1932,6 +1933,81 @@ export const useReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPat
         TContext
       > => {
       return useMutation(getReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Clone questions from a bank into a contest.
+
+Args:
+    request: Framework context.
+    contest_id: UUID of the target contest.
+    clone_request: DTO containing bank ID and selection criteria.
+    user_id: Authenticated user ID.
+    service: Injected domain service.
+
+Returns:
+    APIResponse: Standardized response with list of created contest-question relationships.
+ * @summary Clone questions from a bank into a contest
+ */
+export const cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost = (
+    contestId: string,
+    contestBankCloneRequest: ContestBankCloneRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseListContestQuestionResponse>(
+      {url: `/api/v1/contests/${contestId}/questions/clone-from-bank`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: contestBankCloneRequest, signal
+    },
+      );
+    }
+
+
+
+export const getCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>, TError,{contestId: string;data: ContestBankCloneRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>, TError,{contestId: string;data: ContestBankCloneRequest}, TContext> => {
+
+const mutationKey = ['cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>, {contestId: string;data: ContestBankCloneRequest}> = (props) => {
+          const {contestId,data} = props ?? {};
+
+          return  cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost(contestId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostMutationResult = NonNullable<Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>>
+    export type CloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostMutationBody = ContestBankCloneRequest
+    export type CloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Clone questions from a bank into a contest
+ */
+export const useCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>, TError,{contestId: string;data: ContestBankCloneRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost>>,
+        TError,
+        {contestId: string;data: ContestBankCloneRequest},
+        TContext
+      > => {
+      return useMutation(getCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPostMutationOptions(options), queryClient);
     }
     /**
  * Assign audiences to a contest.

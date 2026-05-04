@@ -28,13 +28,15 @@ import type {
   APIResponse,
   APIResponseBankDetailResponse,
   APIResponseBankResponse,
+  APIResponseBankSharesResponse,
   APIResponseListBankResponse,
   BankCreate,
+  BankShareItem,
   BankShareRequest,
-  BankUnshareRequest,
   BankUpdate,
   ExceptionResponse,
   GetAllBanksApiV1BanksGetParams,
+  GetBankSharesApiV1BanksBankIdSharesGetParams,
   GetDeletedBanksApiV1BanksDeletedGetParams,
   HTTPValidationError
 } from '../model';
@@ -741,7 +743,7 @@ Returns:
     APIResponse: Success confirmation on sharing execution.
  * @summary Share bank with users
  */
-export const shareBankApiV1BanksBankIdSharePost = (
+export const shareBankApiV1BanksBankIdSharesPost = (
     bankId: string,
     bankShareRequest: BankShareRequest,
  signal?: AbortSignal
@@ -749,7 +751,7 @@ export const shareBankApiV1BanksBankIdSharePost = (
 
 
       return axiosWithAuth<APIResponse>(
-      {url: `/api/v1/banks/${bankId}/share`, method: 'POST',
+      {url: `/api/v1/banks/${bankId}/shares`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: bankShareRequest, signal
     },
@@ -758,11 +760,11 @@ export const shareBankApiV1BanksBankIdSharePost = (
 
 
 
-export const getShareBankApiV1BanksBankIdSharePostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>, TError,{bankId: string;data: BankShareRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>, TError,{bankId: string;data: BankShareRequest}, TContext> => {
+export const getShareBankApiV1BanksBankIdSharesPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>, TError,{bankId: string;data: BankShareRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>, TError,{bankId: string;data: BankShareRequest}, TContext> => {
 
-const mutationKey = ['shareBankApiV1BanksBankIdSharePost'];
+const mutationKey = ['shareBankApiV1BanksBankIdSharesPost'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -772,10 +774,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>, {bankId: string;data: BankShareRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>, {bankId: string;data: BankShareRequest}> = (props) => {
           const {bankId,data} = props ?? {};
 
-          return  shareBankApiV1BanksBankIdSharePost(bankId,data,)
+          return  shareBankApiV1BanksBankIdSharesPost(bankId,data,)
         }
 
 
@@ -785,61 +787,171 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type ShareBankApiV1BanksBankIdSharePostMutationResult = NonNullable<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>>
-    export type ShareBankApiV1BanksBankIdSharePostMutationBody = BankShareRequest
-    export type ShareBankApiV1BanksBankIdSharePostMutationError = ExceptionResponse | HTTPValidationError
+    export type ShareBankApiV1BanksBankIdSharesPostMutationResult = NonNullable<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>>
+    export type ShareBankApiV1BanksBankIdSharesPostMutationBody = BankShareRequest
+    export type ShareBankApiV1BanksBankIdSharesPostMutationError = ExceptionResponse | HTTPValidationError
 
     /**
  * @summary Share bank with users
  */
-export const useShareBankApiV1BanksBankIdSharePost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>, TError,{bankId: string;data: BankShareRequest}, TContext>, }
+export const useShareBankApiV1BanksBankIdSharesPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>, TError,{bankId: string;data: BankShareRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharePost>>,
+        Awaited<ReturnType<typeof shareBankApiV1BanksBankIdSharesPost>>,
         TError,
         {bankId: string;data: BankShareRequest},
         TContext
       > => {
-      return useMutation(getShareBankApiV1BanksBankIdSharePostMutationOptions(options), queryClient);
+      return useMutation(getShareBankApiV1BanksBankIdSharesPostMutationOptions(options), queryClient);
     }
     /**
- * Remove users from bank share.
-
-Only the owner can remove users.
+ * Get bank shares including owner and shared users.
 
 Args:
     request (Request): Framework context.
     bank_id (UUID): The unique identifier of the bank.
-    unshare_data (BankUnshareRequest): The list of users to remove.
+    email (str): Optional email filter.
+    username (str): Optional username filter.
     user_id (UUID): Authenticated user ID.
     service (BankService): Injected domain service.
 
 Returns:
-    APIResponse: Explicit success confirmation.
- * @summary Remove users from bank share
+    APIResponse: Ownership and share breakdown.
+ * @summary Get bank shares
  */
-export const unshareBankApiV1BanksBankIdUnsharePost = (
+export const getBankSharesApiV1BanksBankIdSharesGet = (
     bankId: string,
-    bankUnshareRequest: BankUnshareRequest,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams,
  signal?: AbortSignal
 ) => {
 
 
-      return axiosWithAuth<APIResponse>(
-      {url: `/api/v1/banks/${bankId}/unshare`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: bankUnshareRequest, signal
+      return axiosWithAuth<APIResponseBankSharesResponse>(
+      {url: `/api/v1/banks/${bankId}/shares`, method: 'GET',
+        params, signal
     },
       );
     }
 
 
 
-export const getUnshareBankApiV1BanksBankIdUnsharePostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>, TError,{bankId: string;data: BankUnshareRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>, TError,{bankId: string;data: BankUnshareRequest}, TContext> => {
 
-const mutationKey = ['unshareBankApiV1BanksBankIdUnsharePost'];
+export const getGetBankSharesApiV1BanksBankIdSharesGetQueryKey = (bankId: string,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams,) => {
+    return [
+    `/api/v1/banks/${bankId}/shares`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetBankSharesApiV1BanksBankIdSharesGetQueryOptions = <TData = Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError = ExceptionResponse | HTTPValidationError>(bankId: string,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBankSharesApiV1BanksBankIdSharesGetQueryKey(bankId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>> = ({ signal }) => getBankSharesApiV1BanksBankIdSharesGet(bankId,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(bankId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetBankSharesApiV1BanksBankIdSharesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>>
+export type GetBankSharesApiV1BanksBankIdSharesGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetBankSharesApiV1BanksBankIdSharesGet<TData = Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ bankId: string,
+    params: undefined |  GetBankSharesApiV1BanksBankIdSharesGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBankSharesApiV1BanksBankIdSharesGet<TData = Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ bankId: string,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBankSharesApiV1BanksBankIdSharesGet<TData = Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ bankId: string,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get bank shares
+ */
+
+export function useGetBankSharesApiV1BanksBankIdSharesGet<TData = Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ bankId: string,
+    params?: GetBankSharesApiV1BanksBankIdSharesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBankSharesApiV1BanksBankIdSharesGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetBankSharesApiV1BanksBankIdSharesGetQueryOptions(bankId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Update permissions for multiple users shared on a bank.
+
+Args:
+    request (Request): Framework context.
+    bank_id (UUID): The unique identifier of the bank.
+    updates (List[BankShareItem]): The list of users and their new permission levels.
+    user_id (UUID): Authenticated user ID.
+    service (BankService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Update bank share permissions
+ */
+export const updateBankSharesApiV1BanksBankIdSharesPatch = (
+    bankId: string,
+    bankShareItem: BankShareItem[],
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponse>(
+      {url: `/api/v1/banks/${bankId}/shares`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: bankShareItem, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateBankSharesApiV1BanksBankIdSharesPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>, TError,{bankId: string;data: BankShareItem[]}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>, TError,{bankId: string;data: BankShareItem[]}, TContext> => {
+
+const mutationKey = ['updateBankSharesApiV1BanksBankIdSharesPatch'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -849,10 +961,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>, {bankId: string;data: BankUnshareRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>, {bankId: string;data: BankShareItem[]}> = (props) => {
           const {bankId,data} = props ?? {};
 
-          return  unshareBankApiV1BanksBankIdUnsharePost(bankId,data,)
+          return  updateBankSharesApiV1BanksBankIdSharesPatch(bankId,data,)
         }
 
 
@@ -862,20 +974,95 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UnshareBankApiV1BanksBankIdUnsharePostMutationResult = NonNullable<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>>
-    export type UnshareBankApiV1BanksBankIdUnsharePostMutationBody = BankUnshareRequest
-    export type UnshareBankApiV1BanksBankIdUnsharePostMutationError = ExceptionResponse | HTTPValidationError
+    export type UpdateBankSharesApiV1BanksBankIdSharesPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>>
+    export type UpdateBankSharesApiV1BanksBankIdSharesPatchMutationBody = BankShareItem[]
+    export type UpdateBankSharesApiV1BanksBankIdSharesPatchMutationError = ExceptionResponse | HTTPValidationError
 
     /**
- * @summary Remove users from bank share
+ * @summary Update bank share permissions
  */
-export const useUnshareBankApiV1BanksBankIdUnsharePost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>, TError,{bankId: string;data: BankUnshareRequest}, TContext>, }
+export const useUpdateBankSharesApiV1BanksBankIdSharesPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>, TError,{bankId: string;data: BankShareItem[]}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdUnsharePost>>,
+        Awaited<ReturnType<typeof updateBankSharesApiV1BanksBankIdSharesPatch>>,
         TError,
-        {bankId: string;data: BankUnshareRequest},
+        {bankId: string;data: BankShareItem[]},
         TContext
       > => {
-      return useMutation(getUnshareBankApiV1BanksBankIdUnsharePostMutationOptions(options), queryClient);
+      return useMutation(getUpdateBankSharesApiV1BanksBankIdSharesPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Remove a user from bank share.
+
+Only the owner or an editor can remove users.
+
+Args:
+    request (Request): Framework context.
+    bank_id (UUID): The unique identifier of the bank.
+    target_user_id (UUID): The user to remove.
+    user_id (UUID): Authenticated user ID.
+    service (BankService): Injected domain service.
+
+Returns:
+    APIResponse: Explicit success confirmation.
+ * @summary Remove a user from bank share
+ */
+export const unshareBankApiV1BanksBankIdSharesTargetUserIdDelete = (
+    bankId: string,
+    targetUserId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponse>(
+      {url: `/api/v1/banks/${bankId}/shares/${targetUserId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getUnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>, TError,{bankId: string;targetUserId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>, TError,{bankId: string;targetUserId: string}, TContext> => {
+
+const mutationKey = ['unshareBankApiV1BanksBankIdSharesTargetUserIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>, {bankId: string;targetUserId: string}> = (props) => {
+          const {bankId,targetUserId} = props ?? {};
+
+          return  unshareBankApiV1BanksBankIdSharesTargetUserIdDelete(bankId,targetUserId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>>
+
+    export type UnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Remove a user from bank share
+ */
+export const useUnshareBankApiV1BanksBankIdSharesTargetUserIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>, TError,{bankId: string;targetUserId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unshareBankApiV1BanksBankIdSharesTargetUserIdDelete>>,
+        TError,
+        {bankId: string;targetUserId: string},
+        TContext
+      > => {
+      return useMutation(getUnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteMutationOptions(options), queryClient);
     }
