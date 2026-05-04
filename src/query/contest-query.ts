@@ -23,3 +23,4 @@ export { useAddQuestionToContestApiV1ContestsContestIdQuestionsPost as useAddQue
 export { useUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch as useUpdateContestQuestion } from "@/api/generated/contests/contests";
 export { useReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch as useReorderContestQuestions } from "@/api/generated/contests/contests";
 export { useRemoveQuestionFromContestApiV1ContestsContestIdQuestionsDelete as useRemoveQuestionsFromContest } from "@/api/generated/contests/contests";
+export { useCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost as useCloneQuestionsFromBank } from "@/api/generated/contests/contests";

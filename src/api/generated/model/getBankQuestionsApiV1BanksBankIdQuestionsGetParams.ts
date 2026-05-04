@@ -5,6 +5,8 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { QuestionDifficulty } from './questionDifficulty';
+import type { SortOrder } from './sortOrder';
 
 export type GetBankQuestionsApiV1BanksBankIdQuestionsGetParams = {
 /**
@@ -16,4 +18,24 @@ skip?: number;
  * @maximum 100
  */
 limit?: number;
+/**
+ * Filter by question title
+ */
+title?: string | null;
+/**
+ * Filter by difficulty
+ */
+difficulty?: QuestionDifficulty | null;
+/**
+ * Filter by tag name
+ */
+tag?: string | null;
+/**
+ * Sort by field
+ */
+sort_by?: string | null;
+/**
+ * Sort order
+ */
+sort_order?: SortOrder;
 };

@@ -180,16 +180,11 @@ export const getBankApiV1BanksBankIdGetResponseDataOneNameMax = 255;
 
 export const getBankApiV1BanksBankIdGetResponseDataOneDescriptionOneMax = 5000;
 
-export const getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTitleMax = 255;
-
-export const getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTimeLimitMsExclusiveMin = 0;
-
-export const getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemMemoryLimitMbExclusiveMin = 0;
-
-export const getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTagsItemNameMax = 100;
-
-export const getBankApiV1BanksBankIdGetResponseDataOneQuestionsDefault = [];
-export const getBankApiV1BanksBankIdGetResponseDataOneSharesDefault = [];
+export const getBankApiV1BanksBankIdGetResponseDataOneTotalQuestionsCountDefault = 0;
+export const getBankApiV1BanksBankIdGetResponseDataOneEasyQuestionsCountDefault = 0;
+export const getBankApiV1BanksBankIdGetResponseDataOneMediumQuestionsCountDefault = 0;
+export const getBankApiV1BanksBankIdGetResponseDataOneHardQuestionsCountDefault = 0;
+export const getBankApiV1BanksBankIdGetResponseDataOneSharedUsersCountDefault = 0;
 
 export const GetBankApiV1BanksBankIdGetResponse = zod.object({
   "success": zod.boolean().default(getBankApiV1BanksBankIdGetResponseSuccessDefault),
@@ -202,42 +197,12 @@ export const GetBankApiV1BanksBankIdGetResponse = zod.object({
   "created_by": zod.uuid().describe('Creator user ID'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
-  "questions": zod.array(zod.object({
-  "title": zod.string().max(getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTitleMax).describe('The title of the question'),
-  "question_text": zod.string().describe('The problem statement and description'),
-  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
-  "time_limit_ms": zod.number().gt(getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
-  "memory_limit_mb": zod.number().gt(getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
-  "id": zod.uuid(),
-  "created_by": zod.uuid(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "testcases": zod.array(zod.object({
-  "id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "input": zod.string(),
-  "output": zod.string(),
-  "is_hidden": zod.boolean(),
-  "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
-})).optional(),
-  "templates": zod.array(zod.object({
-  "id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "language_id": zod.number(),
-  "starter_code": zod.string(),
-  "driver_code": zod.union([zod.string(),zod.null()]),
-  "solution_code": zod.union([zod.string(),zod.null()])
-})).optional(),
-  "allowed_languages": zod.array(zod.string()).optional(),
-  "tags": zod.array(zod.object({
-  "name": zod.string().max(getBankApiV1BanksBankIdGetResponseDataOneQuestionsItemTagsItemNameMax).describe('The name of the tag'),
-  "id": zod.uuid()
-})).optional()
-})).default(getBankApiV1BanksBankIdGetResponseDataOneQuestionsDefault).describe('List of questions in the bank'),
-  "shares": zod.array(zod.object({
-  "user_id": zod.uuid().describe('User ID the bank is shared with'),
-  "permission": zod.enum(['read', 'edit', 'owner']).describe('Permission level granted')
-}).describe('Base schema for representing a bank share configuration.\n\nDescribes what permission level a specific user has on a bank.')).default(getBankApiV1BanksBankIdGetResponseDataOneSharesDefault).describe('List of users the bank is shared with')
-}).describe('Schema for detailed bank responses.\n\nIncludes the standard bank response and extends it significantly by loading\nrelated entities like associated questions and share configurations.'),zod.null()]).optional(),
+  "total_questions_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneTotalQuestionsCountDefault).describe('Total number of questions in the bank'),
+  "easy_questions_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneEasyQuestionsCountDefault).describe('Number of easy questions'),
+  "medium_questions_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneMediumQuestionsCountDefault).describe('Number of medium questions'),
+  "hard_questions_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneHardQuestionsCountDefault).describe('Number of hard questions'),
+  "shared_users_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneSharedUsersCountDefault).describe('Number of users the bank is shared with')
+}).describe('Schema for detailed bank responses.\n\nIncludes the standard bank response and extends it by providing\naggregated counts of associated questions and share configurations.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -460,27 +425,27 @@ Returns:
     APIResponse: Success confirmation on sharing execution.
  * @summary Share bank with users
  */
-export const ShareBankApiV1BanksBankIdSharePostParams = zod.object({
+export const ShareBankApiV1BanksBankIdSharesPostParams = zod.object({
   "bank_id": zod.uuid()
 })
 
-export const shareBankApiV1BanksBankIdSharePostBodySharesItemPermissionDefault = `read`;
+export const shareBankApiV1BanksBankIdSharesPostBodySharesItemPermissionDefault = `read`;
 
-export const ShareBankApiV1BanksBankIdSharePostBody = zod.object({
+export const ShareBankApiV1BanksBankIdSharesPostBody = zod.object({
   "shares": zod.array(zod.object({
   "user_id": zod.uuid().describe('User ID to share with'),
-  "permission": zod.enum(['read', 'edit', 'owner']).default(shareBankApiV1BanksBankIdSharePostBodySharesItemPermissionDefault).describe('Permission level')
+  "permission": zod.enum(['read', 'edit', 'owner']).default(shareBankApiV1BanksBankIdSharesPostBodySharesItemPermissionDefault).describe('Permission level')
 }).describe('Schema representing an individual share instruction.\n\nUsed when processing a request to share a bank with specific users.')).describe('List of users to share with')
 }).describe('Schema for processing a bulk bank sharing request.\n\nContains a list of shares to add or modify for a bank.')
 
-export const shareBankApiV1BanksBankIdSharePostResponseSuccessDefault = true;
-export const shareBankApiV1BanksBankIdSharePostResponseStatusDefault = 200;
-export const shareBankApiV1BanksBankIdSharePostResponseMessageDefault = `Success`;
+export const shareBankApiV1BanksBankIdSharesPostResponseSuccessDefault = true;
+export const shareBankApiV1BanksBankIdSharesPostResponseStatusDefault = 200;
+export const shareBankApiV1BanksBankIdSharesPostResponseMessageDefault = `Success`;
 
-export const ShareBankApiV1BanksBankIdSharePostResponse = zod.object({
-  "success": zod.boolean().default(shareBankApiV1BanksBankIdSharePostResponseSuccessDefault),
-  "status": zod.number().default(shareBankApiV1BanksBankIdSharePostResponseStatusDefault),
-  "message": zod.string().default(shareBankApiV1BanksBankIdSharePostResponseMessageDefault),
+export const ShareBankApiV1BanksBankIdSharesPostResponse = zod.object({
+  "success": zod.boolean().default(shareBankApiV1BanksBankIdSharesPostResponseSuccessDefault),
+  "status": zod.number().default(shareBankApiV1BanksBankIdSharesPostResponseStatusDefault),
+  "message": zod.string().default(shareBankApiV1BanksBankIdSharesPostResponseMessageDefault),
   "data": zod.union([zod.unknown(),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -497,37 +462,144 @@ export const ShareBankApiV1BanksBankIdSharePostResponse = zod.object({
 })
 
 /**
- * Remove users from bank share.
-
-Only the owner can remove users.
+ * Get bank shares including owner and shared users.
 
 Args:
     request (Request): Framework context.
     bank_id (UUID): The unique identifier of the bank.
-    unshare_data (BankUnshareRequest): The list of users to remove.
+    email (str): Optional email filter.
+    username (str): Optional username filter.
+    user_id (UUID): Authenticated user ID.
+    service (BankService): Injected domain service.
+
+Returns:
+    APIResponse: Ownership and share breakdown.
+ * @summary Get bank shares
+ */
+export const GetBankSharesApiV1BanksBankIdSharesGetParams = zod.object({
+  "bank_id": zod.uuid()
+})
+
+export const GetBankSharesApiV1BanksBankIdSharesGetQueryParams = zod.object({
+  "email": zod.union([zod.string(),zod.null()]).optional().describe('Filter by user email'),
+  "username": zod.union([zod.string(),zod.null()]).optional().describe('Filter by username (user_id)')
+})
+
+export const getBankSharesApiV1BanksBankIdSharesGetResponseSuccessDefault = true;
+export const getBankSharesApiV1BanksBankIdSharesGetResponseStatusDefault = 200;
+export const getBankSharesApiV1BanksBankIdSharesGetResponseMessageDefault = `Success`;
+
+export const GetBankSharesApiV1BanksBankIdSharesGetResponse = zod.object({
+  "success": zod.boolean().default(getBankSharesApiV1BanksBankIdSharesGetResponseSuccessDefault),
+  "status": zod.number().default(getBankSharesApiV1BanksBankIdSharesGetResponseStatusDefault),
+  "message": zod.string().default(getBankSharesApiV1BanksBankIdSharesGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "owner": zod.object({
+  "id": zod.uuid(),
+  "user_id": zod.string(),
+  "name": zod.string(),
+  "email": zod.email()
+}).describe('Minimal user information for sharing and metadata views.'),
+  "shares": zod.array(zod.object({
+  "id": zod.uuid(),
+  "user_id": zod.string(),
+  "name": zod.string(),
+  "email": zod.email(),
+  "permission": zod.enum(['read', 'edit', 'owner']).describe('Enumeration of permissions for question banks.\n\nControls access levels for question banks, allowing fine-grained\npermission management for collaborative question management.\n\nAttributes:\n    read: Permission to view questions and bank metadata only.\n    edit: Permission to modify questions and bank content.\n    owner: Full control including permission management and deletion.')
+}).describe('User detail response with associated bank permission.'))
+}).describe('Comprehensive bank access list including owner and explicit shares.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Update permissions for multiple users shared on a bank.
+
+Args:
+    request (Request): Framework context.
+    bank_id (UUID): The unique identifier of the bank.
+    updates (List[BankShareItem]): The list of users and their new permission levels.
+    user_id (UUID): Authenticated user ID.
+    service (BankService): Injected domain service.
+
+Returns:
+    APIResponse: Success confirmation.
+ * @summary Update bank share permissions
+ */
+export const UpdateBankSharesApiV1BanksBankIdSharesPatchParams = zod.object({
+  "bank_id": zod.uuid()
+})
+
+export const updateBankSharesApiV1BanksBankIdSharesPatchBodyPermissionDefault = `read`;
+
+export const UpdateBankSharesApiV1BanksBankIdSharesPatchBodyItem = zod.object({
+  "user_id": zod.uuid().describe('User ID to share with'),
+  "permission": zod.enum(['read', 'edit', 'owner']).default(updateBankSharesApiV1BanksBankIdSharesPatchBodyPermissionDefault).describe('Permission level')
+}).describe('Schema representing an individual share instruction.\n\nUsed when processing a request to share a bank with specific users.')
+export const UpdateBankSharesApiV1BanksBankIdSharesPatchBody = zod.array(UpdateBankSharesApiV1BanksBankIdSharesPatchBodyItem)
+
+export const updateBankSharesApiV1BanksBankIdSharesPatchResponseSuccessDefault = true;
+export const updateBankSharesApiV1BanksBankIdSharesPatchResponseStatusDefault = 200;
+export const updateBankSharesApiV1BanksBankIdSharesPatchResponseMessageDefault = `Success`;
+
+export const UpdateBankSharesApiV1BanksBankIdSharesPatchResponse = zod.object({
+  "success": zod.boolean().default(updateBankSharesApiV1BanksBankIdSharesPatchResponseSuccessDefault),
+  "status": zod.number().default(updateBankSharesApiV1BanksBankIdSharesPatchResponseStatusDefault),
+  "message": zod.string().default(updateBankSharesApiV1BanksBankIdSharesPatchResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Remove a user from bank share.
+
+Only the owner or an editor can remove users.
+
+Args:
+    request (Request): Framework context.
+    bank_id (UUID): The unique identifier of the bank.
+    target_user_id (UUID): The user to remove.
     user_id (UUID): Authenticated user ID.
     service (BankService): Injected domain service.
 
 Returns:
     APIResponse: Explicit success confirmation.
- * @summary Remove users from bank share
+ * @summary Remove a user from bank share
  */
-export const UnshareBankApiV1BanksBankIdUnsharePostParams = zod.object({
-  "bank_id": zod.uuid()
+export const UnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteParams = zod.object({
+  "bank_id": zod.uuid(),
+  "target_user_id": zod.uuid()
 })
 
-export const UnshareBankApiV1BanksBankIdUnsharePostBody = zod.object({
-  "user_ids": zod.array(zod.uuid()).describe('List of user IDs to remove access for')
-}).describe('Schema for processing a bulk unshare request.\n\nContains a list of users whose access should be revoked from the bank.')
+export const unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseSuccessDefault = true;
+export const unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseStatusDefault = 200;
+export const unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseMessageDefault = `Success`;
 
-export const unshareBankApiV1BanksBankIdUnsharePostResponseSuccessDefault = true;
-export const unshareBankApiV1BanksBankIdUnsharePostResponseStatusDefault = 200;
-export const unshareBankApiV1BanksBankIdUnsharePostResponseMessageDefault = `Success`;
-
-export const UnshareBankApiV1BanksBankIdUnsharePostResponse = zod.object({
-  "success": zod.boolean().default(unshareBankApiV1BanksBankIdUnsharePostResponseSuccessDefault),
-  "status": zod.number().default(unshareBankApiV1BanksBankIdUnsharePostResponseStatusDefault),
-  "message": zod.string().default(unshareBankApiV1BanksBankIdUnsharePostResponseMessageDefault),
+export const UnshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponse = zod.object({
+  "success": zod.boolean().default(unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseSuccessDefault),
+  "status": zod.number().default(unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseStatusDefault),
+  "message": zod.string().default(unshareBankApiV1BanksBankIdSharesTargetUserIdDeleteResponseMessageDefault),
   "data": zod.union([zod.unknown(),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

@@ -5,14 +5,12 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { BankShareBase } from './bankShareBase';
-import type { QuestionResponse } from './questionResponse';
 
 /**
  * Schema for detailed bank responses.
 
-Includes the standard bank response and extends it significantly by loading
-related entities like associated questions and share configurations.
+Includes the standard bank response and extends it by providing
+aggregated counts of associated questions and share configurations.
  */
 export interface BankDetailResponse {
   /**
@@ -31,8 +29,14 @@ export interface BankDetailResponse {
   created_at: string;
   /** Last update time */
   updated_at: string;
-  /** List of questions in the bank */
-  questions?: QuestionResponse[];
-  /** List of users the bank is shared with */
-  shares?: BankShareBase[];
+  /** Total number of questions in the bank */
+  total_questions_count?: number;
+  /** Number of easy questions */
+  easy_questions_count?: number;
+  /** Number of medium questions */
+  medium_questions_count?: number;
+  /** Number of hard questions */
+  hard_questions_count?: number;
+  /** Number of users the bank is shared with */
+  shared_users_count?: number;
 }

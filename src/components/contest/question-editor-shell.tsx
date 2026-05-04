@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { EditorProvider, useEditorContext } from "../shared/TipTap";
+import { useEditorContext } from "../shared/TipTap";
 import { ProblemMetadataCard } from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
 import { QuestionWorkflowSection } from "../questions/question-workflow-section";
@@ -13,11 +13,13 @@ import { useQuestionEditorSync } from "@/hooks/use-question-editor-sync";
 import { Skeleton } from "../ui/skeleton";
 import type { useQuestionForm } from "@/hooks/use-question-form";
 import { useContestQuestion, usePlatformLanguages } from "@/query/contest-query";
+import { useGetQuestion } from "@/query/question-query";
 import { AsyncStateHandler } from "../shared/async-state-handler";
 
 export interface QuestionEditorShellProps {
     mode: "create" | "update";
-    contestId: string;
+    contestId?: string;
+    bankId?: string;
     questionId?: string;
     form: ReturnType<typeof useQuestionForm>;
     onSave: () => void;
@@ -27,6 +29,7 @@ export interface QuestionEditorShellProps {
 export function QuestionEditorShell({
     mode,
     contestId,
+    bankId,
     questionId,
     form,
     onSave,
@@ -36,11 +39,31 @@ export function QuestionEditorShell({
 
     // Data fetching
     const {
-        data: questionData,
-        isLoading: isFetchingQuestion,
-        error: fetchError,
-        refetch: refetchQuestion,
-    } = useContestQuestion(contestId, mode === "update" && questionId ? questionId : "");
+        data: contestQuestionData,
+        isLoading: isFetchingContestQuestion,
+        error: contestFetchError,
+        refetch: refetchContestQuestion,
+    } = useContestQuestion(
+        contestId || "",
+        mode === "update" && contestId && questionId ? questionId : "",
+    );
+
+    const {
+        data: genericQuestionData,
+        isLoading: isFetchingGenericQuestion,
+        error: genericFetchError,
+        refetch: refetchGenericQuestion,
+    } = useGetQuestion(mode === "update" && !contestId && questionId ? questionId : "", {
+        query: {
+            enabled: mode === "update" && !contestId && !!questionId,
+        },
+    });
+
+    const questionData = contestId ? contestQuestionData : genericQuestionData;
+    const isFetchingQuestion = contestId ? isFetchingContestQuestion : isFetchingGenericQuestion;
+    const fetchError = contestId ? contestFetchError : genericFetchError;
+    const refetchQuestion = contestId ? refetchContestQuestion : refetchGenericQuestion;
+
     const {
         data: languagesData,
         isLoading: isFetchingLangs,
@@ -73,7 +96,7 @@ export function QuestionEditorShell({
         if (!languagesData?.data?.languages) return;
         if (initializedQuestionIdRef.current === questionData.data.id) return;
 
-        initializeForm(questionData.data, languagesData.data.languages);
+        initializeForm(questionData.data as any, languagesData.data.languages);
         initializedQuestionIdRef.current = questionData.data.id;
     }, [mode, questionData?.data, languagesData?.data?.languages, initializeForm]);
 
@@ -102,6 +125,8 @@ export function QuestionEditorShell({
         },
     });
 
+    const backUrl = contestId ? `/contest/${contestId}/questions` : `/banks/${bankId}`;
+
     return (
         <AsyncStateHandler
             isLoading={(mode === "update" && isFetchingQuestion) || isFetchingLangs}
@@ -128,7 +153,7 @@ export function QuestionEditorShell({
                             ? "Edit the metadata and requirements for this programming challenge."
                             : "Configure the metadata and requirements for your new programming challenge."
                     }
-                    backUrl={`/contest/${contestId}/questions`}
+                    backUrl={backUrl}
                     onPreview={() => setIsPreviewMode(!isPreviewMode)}
                     isPreview={isPreviewMode}
                     onSave={onSave}

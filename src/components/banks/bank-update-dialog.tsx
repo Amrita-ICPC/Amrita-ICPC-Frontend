@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -14,6 +14,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     Form,
@@ -39,11 +40,21 @@ type BankUpdateFormValues = zod.infer<typeof UpdateBankApiV1BanksBankIdPatchBody
 
 interface BankUpdateDialogProps {
     bank: BankResponse;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    trigger?: React.ReactNode;
 }
 
-export function BankUpdateDialog({ bank, open, onOpenChange }: BankUpdateDialogProps) {
+export function BankUpdateDialog({
+    bank,
+    open: controlledOpen,
+    onOpenChange: setControlledOpen,
+    trigger,
+}: BankUpdateDialogProps) {
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+    const open = controlledOpen ?? uncontrolledOpen;
+    const onOpenChange = setControlledOpen ?? setUncontrolledOpen;
+
     const queryClient = useQueryClient();
 
     const { mutate: updateBank, isPending } = useUpdateBankApiV1BanksBankIdPatch({
@@ -89,6 +100,7 @@ export function BankUpdateDialog({ bank, open, onOpenChange }: BankUpdateDialogP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
+            {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
             <DialogContent className="sm:max-w-[500px] border-white/10 bg-[#0f1117] text-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold">Edit Bank Details</DialogTitle>

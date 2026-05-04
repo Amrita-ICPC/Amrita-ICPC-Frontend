@@ -108,12 +108,23 @@ export function ContestQuestionsTable({
     const debouncedSearch = useDebounce(search, 500);
     const debouncedTag = useDebounce(tagName, 500);
 
+    const isFirstSearch = useRef(true);
+    const isFirstTag = useRef(true);
+
     // Call handlers when debounced values change
     useEffect(() => {
+        if (isFirstSearch.current) {
+            isFirstSearch.current = false;
+            return;
+        }
         onSearchChange(debouncedSearch);
     }, [debouncedSearch, onSearchChange]);
 
     useEffect(() => {
+        if (isFirstTag.current) {
+            isFirstTag.current = false;
+            return;
+        }
         onTagChange(debouncedTag);
     }, [debouncedTag, onTagChange]);
 
