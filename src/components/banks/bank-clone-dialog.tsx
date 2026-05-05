@@ -129,7 +129,8 @@ export function BankCloneDialog({ targetId, targetType = "bank", children }: Ban
                 <DialogHeader>
                     <DialogTitle>Clone Questions</DialogTitle>
                     <DialogDescription>
-                        Select a source bank to clone questions into this bank.
+                        Select a source bank to clone questions into this{" "}
+                        {targetType === "contest" ? "contest" : "bank"}.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">

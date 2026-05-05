@@ -13,8 +13,12 @@ import {
     Settings,
     MoreVertical,
     Database,
+    Trash2,
 } from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,17 +27,46 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { StatCard } from "@/components/shared/stat-card";
 import { BankShareDialog } from "./bank-share-dialog";
 import { BankUpdateDialog } from "./bank-update-dialog";
 import { BankCloneDialog } from "./bank-clone-dialog";
 import type { BankDetailResponse } from "@/api/generated/model";
+import { useSoftDeleteBank, allBanksKey, bankDetailKey } from "@/query/bank-query";
 
 interface BankHeroProps {
     bank: BankDetailResponse;
 }
 
 export function BankHero({ bank }: BankHeroProps) {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    const { mutate: deleteBank, isPending: isDeleting } = useSoftDeleteBank({
+        mutation: {
+            onSuccess: () => {
+                toast.success("Bank deleted successfully");
+                queryClient.invalidateQueries({ queryKey: allBanksKey() });
+                queryClient.invalidateQueries({ queryKey: bankDetailKey(bank.id) });
+                router.push("/banks");
+            },
+            onError: (error: any) => {
+                toast.error(error?.response?.data?.message || "Failed to delete bank");
+            },
+        },
+    });
+
     const formattedDate = new Date(bank.created_at).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
@@ -107,11 +140,47 @@ export function BankHero({ bank }: BankHeroProps) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
-                                        <BarChart3 className="mr-2 h-4 w-4" /> Delete Bank
+                                    <DropdownMenuItem
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                        className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Bank
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+                            <AlertDialog
+                                open={isDeleteDialogOpen}
+                                onOpenChange={setIsDeleteDialogOpen}
+                            >
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you absolutely sure?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will move the bank to the trash. You can recover it
+                                            later if needed, but it will no longer be visible in
+                                            your active collections.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel disabled={isDeleting}>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                deleteBank({ bankId: bank.id });
+                                            }}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            disabled={isDeleting}
+                                        >
+                                            {isDeleting ? "Deleting..." : "Delete Bank"}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </div>
 
