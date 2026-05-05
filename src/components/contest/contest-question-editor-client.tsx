@@ -6,9 +6,9 @@ import {
     contestQuestionKey,
     contestQuestionsKey,
     useAddQuestionToContest,
-    useCreateQuestion,
     useUpdateContestQuestion,
 } from "@/query/contest-query";
+import { useCreateQuestion } from "@/query/question-query";
 import { useRouter } from "next/navigation";
 
 export default function ContestQuestionEditorPage({

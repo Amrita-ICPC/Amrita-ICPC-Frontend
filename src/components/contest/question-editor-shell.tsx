@@ -43,10 +43,11 @@ export function QuestionEditorShell({
         isLoading: isFetchingContestQuestion,
         error: contestFetchError,
         refetch: refetchContestQuestion,
-    } = useContestQuestion(
-        contestId || "",
-        mode === "update" && contestId && questionId ? questionId : "",
-    );
+    } = useContestQuestion(contestId || "", questionId || "", {
+        query: {
+            enabled: mode === "update" && !!contestId && !!questionId,
+        },
+    });
 
     const {
         data: genericQuestionData,
@@ -125,7 +126,11 @@ export function QuestionEditorShell({
         },
     });
 
-    const backUrl = contestId ? `/contest/${contestId}/questions` : `/banks/${bankId}`;
+    const backUrl = contestId
+        ? `/contest/${contestId}/questions`
+        : bankId
+          ? `/banks/${bankId}`
+          : "/";
 
     return (
         <AsyncStateHandler

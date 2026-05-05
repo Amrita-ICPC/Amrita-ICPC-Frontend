@@ -118,13 +118,14 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
         setPage(1);
     };
 
-    const handleRemoveSelected = async () => {
-        if (selectedIds.length === 0) return;
+    const removeQuestionIds = async (ids: string[]) => {
+        if (ids.length === 0) return;
         await removeMutation.mutateAsync({
             bankId,
-            data: { question_ids: selectedIds },
+            data: { question_ids: ids },
         });
     };
+    const handleRemoveSelected = () => removeQuestionIds(selectedIds);
 
     const toggleSelection = (id: string) => {
         setSelectedIds((prev) =>
@@ -244,12 +245,16 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                         <div className="flex justify-center">
                             <Checkbox
                                 checked={
-                                    questions &&
-                                    selectedIds.length === questions.length &&
-                                    questions.length > 0
+                                    questions.length > 0 &&
+                                    questions.every((q) => selectedIds.includes(q.id))
                                 }
                                 onCheckedChange={(checked) =>
-                                    setSelectedIds(checked ? questions?.map((q) => q.id) || [] : [])
+                                    setSelectedIds((prev) => {
+                                        const pageIds = questions.map((q) => q.id);
+                                        return checked
+                                            ? Array.from(new Set([...prev, ...pageIds]))
+                                            : prev.filter((id) => !pageIds.includes(id));
+                                    })
                                 }
                             />
                         </div>
@@ -380,10 +385,7 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                                             <DropdownMenuContent align="end" className="w-40">
                                                 <DropdownMenuItem
                                                     className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer gap-2"
-                                                    onClick={() => {
-                                                        setSelectedIds([question.id]);
-                                                        handleRemoveSelected();
-                                                    }}
+                                                    onClick={() => removeQuestionIds([question.id])}
                                                 >
                                                     <Trash2 className="h-4 w-4" /> Remove from Bank
                                                 </DropdownMenuItem>

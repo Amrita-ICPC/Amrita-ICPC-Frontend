@@ -271,14 +271,16 @@ export function BankPartialCloneClient({
                             <div className="flex justify-center">
                                 <Checkbox
                                     checked={
-                                        questions &&
-                                        selectedIds.length === questions.length &&
-                                        questions.length > 0
+                                        questions.length > 0 &&
+                                        questions.every((q) => selectedIds.includes(q.id))
                                     }
                                     onCheckedChange={(checked) =>
-                                        setSelectedIds(
-                                            checked ? questions?.map((q) => q.id) || [] : [],
-                                        )
+                                        setSelectedIds((prev) => {
+                                            const pageIds = questions.map((q) => q.id);
+                                            return checked
+                                                ? Array.from(new Set([...prev, ...pageIds]))
+                                                : prev.filter((id) => !pageIds.includes(id));
+                                        })
                                     }
                                 />
                             </div>

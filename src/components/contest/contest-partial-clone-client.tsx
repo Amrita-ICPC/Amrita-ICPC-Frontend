@@ -57,7 +57,8 @@ export function ContestPartialCloneClient({
     const searchParams = useSearchParams();
 
     // Initial values from query params (set in the dialog)
-    const initialScore = parseInt(searchParams.get("score") || "100");
+    const parsedScore = parseInt(searchParams.get("score") ?? "", 10);
+    const initialScore = Number.isFinite(parsedScore) ? parsedScore : 100;
     const initialDuration = searchParams.get("duration") || "";
 
     const [search, setSearch] = useState("");
@@ -324,15 +325,17 @@ export function ContestPartialCloneClient({
                             <div className="flex justify-center">
                                 <Checkbox
                                     checked={
-                                        questions &&
-                                        selectedIds.length === questions.length &&
-                                        questions.length > 0
+                                        questions.length > 0 &&
+                                        questions.every((q) => selectedIds.includes(q.id))
                                     }
-                                    onCheckedChange={(checked) =>
-                                        setSelectedIds(
-                                            checked ? questions?.map((q) => q.id) || [] : [],
-                                        )
-                                    }
+                                    onCheckedChange={(checked) => {
+                                        const pageIds = questions.map((q) => q.id);
+                                        setSelectedIds((prev) =>
+                                            checked
+                                                ? Array.from(new Set([...prev, ...pageIds]))
+                                                : prev.filter((id) => !pageIds.includes(id)),
+                                        );
+                                    }}
                                 />
                             </div>
                             <div
