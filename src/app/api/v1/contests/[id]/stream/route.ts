@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 "Cache-Control": "no-cache",
             },
             cache: "no-store",
-            signal: controller.signal,
+            signal: AbortSignal.any([request.signal, controller.signal]),
         });
 
         if (!upstreamResponse.ok || !upstreamResponse.body) {
