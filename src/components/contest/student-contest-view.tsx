@@ -25,7 +25,7 @@ interface StudentContestViewProps {
 
 export function StudentContestView({ contestId }: StudentContestViewProps) {
     const { subscribe, unsubscribe } = useRealtime();
-    const { serverTime } = useClockSync();
+    const { getServerTime } = useClockSync();
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
 
     const { data: contestData, isLoading, isError, error, refetch } = useContestDetails(contestId);
