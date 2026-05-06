@@ -45,7 +45,9 @@ export function ContestIDE({
     initialLanguageId,
 }: ContestIDEProps) {
     const [selectedLang, setSelectedLang] = useState(
-        allowedLanguages.find((l) => l.id === initialLanguageId) || allowedLanguages[0],
+        allowedLanguages && allowedLanguages.length > 0
+            ? allowedLanguages.find((l) => l.id === initialLanguageId) || allowedLanguages[0]
+            : null,
     );
     const [code, setCode] = useState(initialCode || selectedLang?.starterCode || "");
     const [stdin, setStdin] = useState("");
@@ -55,6 +57,15 @@ export function ContestIDE({
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const editorRef = useRef<any>(null);
+
+    if (!allowedLanguages || allowedLanguages.length === 0 || !selectedLang) {
+        return (
+            <div className="flex flex-col h-full items-center justify-center bg-[#0d1117] text-slate-400 border border-white/5 rounded-xl">
+                <AlertCircle className="h-10 w-10 mb-4 opacity-20" />
+                <p className="text-sm">No programming languages available for this problem.</p>
+            </div>
+        );
+    }
 
     const handleLangChange = (lang: typeof selectedLang) => {
         setSelectedLang(lang);
