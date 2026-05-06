@@ -40,9 +40,13 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         }
 
         const sseUrl = `/api/v1/contests/${contestId}/stream`;
-        const ctrl = new AbortController();
+        let ctrl = new AbortController();
+        let retryTimer: ReturnType<typeof setTimeout> | null = null;
+        let cancelled = false;
 
         const connect = async () => {
+            if (cancelled) return;
+            ctrl = new AbortController();
             try {
                 const response = await fetch(sseUrl, {
                     headers: { Accept: "text/event-stream" },
@@ -53,7 +57,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
                     throw new Error(`SSE Connection failed: ${response.status}`);
                 }
 
-                setConnected(true);
+                if (!cancelled) setConnected(true);
                 const reader = response.body?.getReader();
                 if (!reader) return;
 
@@ -62,14 +66,14 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
 
                 while (true) {
                     const { value, done } = await reader.read();
-                    if (done) break;
+                    if (done || cancelled) break;
 
                     buffer += decoder.decode(value, { stream: true });
                     const parts = buffer.split(/\r\n\r\n|\n\n|\r\r/);
                     buffer = parts.pop() ?? "";
 
                     for (const part of parts) {
-                        if (!part.trim()) continue;
+                        if (!part.trim() || cancelled) continue;
 
                         let dataPayload = "";
                         const lines = part.split(/\r\n|\r|\n/);
@@ -79,7 +83,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
                             }
                         }
 
-                        if (dataPayload) {
+                        if (dataPayload && !cancelled) {
                             try {
                                 const event = JSON.parse(dataPayload);
                                 setLastEvent(event);
@@ -91,11 +95,11 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
                     }
                 }
             } catch (err: any) {
-                if (err.name !== "AbortError") {
+                if (err.name !== "AbortError" && !cancelled) {
                     console.error("Realtime connection error:", err);
                     setConnected(false);
                     // Attempt retry after delay
-                    setTimeout(connect, 5000);
+                    retryTimer = setTimeout(connect, 5000);
                 }
             }
         };
@@ -103,6 +107,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         connect();
 
         return () => {
+            cancelled = true;
+            if (retryTimer) clearTimeout(retryTimer);
             ctrl.abort();
             setConnected(false);
         };
