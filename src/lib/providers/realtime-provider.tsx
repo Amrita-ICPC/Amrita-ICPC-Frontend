@@ -79,7 +79,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
                         const lines = part.split(/\r\n|\r|\n/);
                         for (const line of lines) {
                             if (line.startsWith("data:")) {
-                                dataPayload += line.slice(5).trim();
+                                // Join consecutive data lines with a newline as per SSE spec
+                                const data = line.slice(5).trim();
+                                dataPayload += (dataPayload ? "\n" : "") + data;
                             }
                         }
 
