@@ -6,6 +6,7 @@ import { type ReactNode } from "react";
 
 import { SessionIntegrityProvider } from "./session-integrity-provider";
 import { ClockSyncProvider } from "./clock-sync-provider";
+import { RealtimeProvider } from "./realtime-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TanstackQueryProvider from "./tanstack-query-provider";
 import { Toaster } from "sonner";
@@ -19,17 +20,19 @@ export default function Provider({ children }: ProviderProps) {
         <SessionProvider>
             <SessionIntegrityProvider>
                 <ClockSyncProvider>
-                    <TanstackQueryProvider>
-                        <ThemeProvider
-                            attribute="class"
-                            defaultTheme="system"
-                            enableSystem
-                            disableTransitionOnChange
-                        >
-                            <TooltipProvider>{children}</TooltipProvider>
-                            <Toaster richColors closeButton />
-                        </ThemeProvider>
-                    </TanstackQueryProvider>
+                    <RealtimeProvider>
+                        <TanstackQueryProvider>
+                            <ThemeProvider
+                                attribute="class"
+                                defaultTheme="system"
+                                enableSystem
+                                disableTransitionOnChange
+                            >
+                                <TooltipProvider>{children}</TooltipProvider>
+                                <Toaster richColors closeButton />
+                            </ThemeProvider>
+                        </TanstackQueryProvider>
+                    </RealtimeProvider>
                 </ClockSyncProvider>
             </SessionIntegrityProvider>
         </SessionProvider>
