@@ -162,9 +162,17 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                                                     variant="outline"
                                                     className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
                                                     onClick={() => handleAddInstructor(user.id)}
-                                                    disabled={assignMutation.isPending}
+                                                    disabled={
+                                                        assignMutation.isPending &&
+                                                        assignMutation.variables?.data.instructor_ids.includes(
+                                                            user.id,
+                                                        )
+                                                    }
                                                 >
-                                                    {assignMutation.isPending ? (
+                                                    {assignMutation.isPending &&
+                                                    assignMutation.variables?.data.instructor_ids.includes(
+                                                        user.id,
+                                                    ) ? (
                                                         <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
                                                     ) : (
                                                         <UserPlus className="h-3.5 w-3.5 mr-1.5" />
@@ -205,45 +213,52 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                         <ScrollArea className="h-[464px]">
                             {currentInstructors.length > 0 ? (
                                 <div className="space-y-3">
-                                    {currentInstructors.map((instructor: any) => (
-                                        <div
-                                            key={instructor.id}
-                                            className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-background/40 hover:bg-background transition-all group shadow-sm"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10 border-2 border-primary/10">
-                                                    <AvatarFallback className="bg-primary/5 text-primary font-bold">
-                                                        {getInitials(instructor.name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-bold flex items-center gap-1.5">
-                                                        {instructor.name}
-                                                    </span>
-                                                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                                        <Mail className="h-3 w-3" />
-                                                        {instructor.email}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
-                                                onClick={() =>
-                                                    handleRemoveInstructor(instructor.id)
-                                                }
-                                                disabled={removeMutation.isPending}
+                                    {currentInstructors.map((instructor: any) => {
+                                        const isRemoving =
+                                            removeMutation.isPending &&
+                                            removeMutation.variables?.data.instructor_ids.includes(
+                                                instructor.id,
+                                            );
+                                        return (
+                                            <div
+                                                key={instructor.id}
+                                                className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-background/40 hover:bg-background transition-all group shadow-sm"
                                             >
-                                                {removeMutation.isPending ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="h-4 w-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    ))}
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-10 w-10 border-2 border-primary/10">
+                                                        <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                                                            {getInitials(instructor.name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-bold flex items-center gap-1.5">
+                                                            {instructor.name}
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                            <Mail className="h-3 w-3" />
+                                                            {instructor.email}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
+                                                    onClick={() =>
+                                                        handleRemoveInstructor(instructor.id)
+                                                    }
+                                                    disabled={isRemoving}
+                                                >
+                                                    {isRemoving ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/40 border border-dashed border-border/40 rounded-xl bg-muted/5">
