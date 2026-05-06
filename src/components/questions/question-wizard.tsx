@@ -103,8 +103,8 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
     });
 
     const { data: languagesData } = useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet();
-    // Assuming platform languages have id and slug/name
-    const languages = (languagesData as any)?.data || [];
+    // The API returns { data: { languages: [...] } }
+    const languages = (languagesData as any)?.data?.languages || [];
 
     const form = useForm<QuestionFormValues>({
         resolver: zodResolver(CreateQuestionApiV1QuestionsPostBody) as any,

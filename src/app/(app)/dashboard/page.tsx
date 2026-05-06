@@ -1,10 +1,54 @@
 import { auth } from "@/lib/auth/auth";
-import { Trophy, FileCode2, Users, ShieldCheck } from "lucide-react";
+import { Trophy, FileCode2, Users, ShieldCheck, Database } from "lucide-react";
 
 export default async function DashboardPage() {
     const session = await auth();
     const roles = session?.user?.roles ?? [];
     const groups = session?.user?.groups ?? [];
+    const allRoles = [...roles, ...groups];
+
+    const hasRole = (role: string) => allRoles.some((r) => r.toLowerCase() === role.toLowerCase());
+
+    const isStudent =
+        hasRole("student") && !hasRole("admin") && !hasRole("manager") && !hasRole("instructor");
+
+    const quickLinks = [
+        {
+            icon: Trophy,
+            label: "Contests",
+            desc: "View and manage programming contests",
+            href: "/contest",
+            color: "text-indigo-500",
+            bg: "bg-indigo-500/10",
+        },
+        {
+            icon: Database,
+            label: "Question Banks",
+            desc: "Browse and edit question collections",
+            href: "/banks",
+            color: "text-emerald-500",
+            bg: "bg-emerald-500/10",
+            hide: isStudent,
+        },
+        {
+            icon: FileCode2,
+            label: isStudent ? "Code Editor" : "Question Editor",
+            desc: isStudent
+                ? "Practice coding in the online editor"
+                : "Browse and edit question collections",
+            href: "/questions",
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+        },
+        {
+            icon: Users,
+            label: "Teams",
+            desc: "Manage contest teams and approvals",
+            href: "/teams",
+            color: "text-orange-500",
+            bg: "bg-orange-500/10",
+        },
+    ].filter((link) => !link.hide);
 
     return (
         <div className="space-y-6">
@@ -13,44 +57,24 @@ export default async function DashboardPage() {
                     Welcome back{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Amrita ICPC Platform — manage contests, questions, and teams.
+                    Amrita ICPC Platform —{" "}
+                    {isStudent
+                        ? "participate in contests and manage your teams."
+                        : "manage contests, questions, and teams."}
                 </p>
             </div>
 
             {/* Quick nav cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[
-                    {
-                        icon: Trophy,
-                        label: "Contests",
-                        desc: "View and manage programming contests",
-                        href: "/contest",
-                        color: "text-indigo-500",
-                        bg: "bg-indigo-500/10",
-                    },
-                    {
-                        icon: FileCode2,
-                        label: "Question Banks",
-                        desc: "Browse and edit question collections",
-                        href: "/banks",
-                        color: "text-emerald-500",
-                        bg: "bg-emerald-500/10",
-                    },
-                    {
-                        icon: Users,
-                        label: "Teams",
-                        desc: "Manage contest teams and approvals",
-                        href: "/teams",
-                        color: "text-orange-500",
-                        bg: "bg-orange-500/10",
-                    },
-                ].map(({ icon: Icon, label, desc, href, color, bg }) => (
+                {quickLinks.map(({ icon: Icon, label, desc, href, color, bg }) => (
                     <a
                         key={href}
                         href={href}
                         className="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent"
                     >
-                        <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+                        <div
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}
+                        >
                             <Icon className={`h-5 w-5 ${color}`} />
                         </div>
                         <div>

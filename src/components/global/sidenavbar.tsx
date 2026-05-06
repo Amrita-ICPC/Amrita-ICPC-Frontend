@@ -7,7 +7,14 @@ export default async function Sidenavbar() {
     const session = await auth();
     const user = session?.user;
     const allRoles = [...(user?.roles ?? []), ...(user?.groups ?? [])];
-    const isAdmin = allRoles.some((r) => r.toLowerCase() === UserType.ADMIN.toLowerCase());
+
+    const hasRole = (role: string) => allRoles.some((r) => r.toLowerCase() === role.toLowerCase());
+
+    const isAdmin = hasRole(UserType.ADMIN);
+    const isManager = hasRole(UserType.MANAGER);
+    const isInstructor = hasRole(UserType.INSTRUCTOR);
+    const isStudent = hasRole(UserType.STUDENT);
+    const isStudentOnly = isStudent && !isAdmin && !isManager && !isInstructor;
 
     return (
         <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
@@ -27,7 +34,7 @@ export default async function Sidenavbar() {
             </div>
 
             {/* Nav */}
-            <NavLinks isAdmin={isAdmin} />
+            <NavLinks isAdmin={isAdmin} isStudent={isStudentOnly} />
 
             {/* User */}
             <div className="border-t border-sidebar-border px-3 pb-4 pt-2">
