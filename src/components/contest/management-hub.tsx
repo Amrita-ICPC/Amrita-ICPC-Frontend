@@ -56,14 +56,14 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaColor: "text-emerald-600 dark:text-emerald-500",
         },
         {
-            title: "Manage Staff",
+            title: "Contest Management Access",
             description: "Add or manage instructors, judges and contest staff.",
             metaText: "Manage Instructors", // Hardcoded or maybe instructors count if we have it
-            buttonText: "Open Staff",
+            buttonText: "Open Access",
             icon: UserCog,
             iconBg: "bg-yellow-500/10 dark:bg-yellow-500/20",
             iconColor: "text-yellow-600 dark:text-yellow-400",
-            href: `/contest/${contest.id}/staff`,
+            href: `/contest/${contest.id}/access`,
             metaColor: "text-yellow-600 dark:text-yellow-500",
         },
         {
