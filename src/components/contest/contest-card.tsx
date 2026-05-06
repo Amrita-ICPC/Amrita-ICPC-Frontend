@@ -3,6 +3,7 @@
 import { Calendar, ArrowRight, Edit2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import type { ContestSummaryResponse } from "@/api/generated/model";
 
@@ -136,10 +137,11 @@ export function ContestCard({ contest }: ContestCardProps) {
             <div className="relative h-32.5 w-full shrink-0 overflow-hidden z-0 pointer-events-none">
                 {contest.image && !imgErr ? (
                     <>
-                        <img
+                        <Image
                             src={contest.image}
                             alt={contest.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={() => setImgErr(true)}
                         />
                         <div className="absolute inset-0 bg-linear-to-t from-[#13285e]/88 via-[#13285e]/30 to-transparent" />
