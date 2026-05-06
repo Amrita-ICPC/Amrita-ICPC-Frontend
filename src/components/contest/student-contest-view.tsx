@@ -57,7 +57,7 @@ export function StudentContestView({ contestId }: StudentContestViewProps) {
     const handleSubmit = async (code: string, languageId: number) => {
         // TODO: Implement official submission
         console.log("Submitting code...", { code, languageId });
-        return { success: true };
+        throw new Error("Contest submission is not yet implemented.");
     };
 
     // Hardcoded languages for now until I fetch them from API
