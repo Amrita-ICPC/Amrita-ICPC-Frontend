@@ -32,8 +32,49 @@ export function StudentContestView({ contestId }: StudentContestViewProps) {
 
     const runCodeMutation = useRunCode();
 
-    const contest = contestData;
+    const contest = contestData?.data;
     const problems = (contest as any)?.problems || [];
+
+    // Timer and Status Logic
+    const [currentTime, setCurrentTime] = useState(getServerTime());
+    const [contestPhase, setContestPhase] = useState<"upcoming" | "running" | "ended">("upcoming");
+    const [timeLeft, setTimeLeft] = useState("");
+
+    const formatDuration = (ms: number) => {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return [hours, minutes, seconds].map((v) => v.toString().padStart(2, "0")).join(":");
+    };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = getServerTime();
+            setCurrentTime(now);
+
+            if (!contest) return;
+
+            const start = new Date(contest.start_time).getTime();
+            const end = new Date(contest.end_time).getTime();
+            const nowMs = now.getTime();
+
+            if (nowMs < start) {
+                setContestPhase("upcoming");
+                const diff = start - nowMs;
+                setTimeLeft(formatDuration(diff));
+            } else if (nowMs < end) {
+                setContestPhase("running");
+                const diff = end - nowMs;
+                setTimeLeft(formatDuration(diff));
+            } else {
+                setContestPhase("ended");
+                setTimeLeft("00:00:00");
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [contest, getServerTime]);
 
     // Derive selected problem based on state or default to first problem
     const activeProblemId = selectedProblemId || problems[0]?.id;
@@ -100,13 +141,21 @@ export function StudentContestView({ contestId }: StudentContestViewProps) {
                             <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
                                 <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    02:45:12 Remaining
+                                    {timeLeft} {contestPhase === "upcoming" ? "To Start" : "Left"}
                                 </span>
                                 <Badge
                                     variant="outline"
-                                    className="text-[9px] h-4 bg-emerald-500/5 text-emerald-500 border-emerald-500/20"
+                                    className={cn(
+                                        "text-[9px] h-4 border-emerald-500/20",
+                                        contestPhase === "upcoming" &&
+                                            "bg-blue-500/5 text-blue-500 border-blue-500/20",
+                                        contestPhase === "running" &&
+                                            "bg-emerald-500/5 text-emerald-500 border-emerald-500/20",
+                                        contestPhase === "ended" &&
+                                            "bg-red-500/5 text-red-500 border-red-500/20",
+                                    )}
                                 >
-                                    Running
+                                    {contestPhase.charAt(0).toUpperCase() + contestPhase.slice(1)}
                                 </Badge>
                             </div>
                         </div>
