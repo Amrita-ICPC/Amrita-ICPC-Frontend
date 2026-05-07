@@ -88,7 +88,13 @@ export function BankShareDialog({
         refetch: refetchShares,
     } = useGetBankShares(bankId, undefined, { query: { enabled: open } });
 
-    const { data: usersData, isLoading: isLoadingUsers } = useListUsers(
+    const {
+        data: usersData,
+        isLoading: isLoadingUsers,
+        isError: isErrorUsers,
+        error: errorUsers,
+        refetch: refetchUsers,
+    } = useListUsers(
         { q: debouncedSearch || undefined, page_size: 5 },
         { query: { enabled: open && debouncedSearch.length >= 2 } },
     );
@@ -231,65 +237,76 @@ export function BankShareDialog({
                             </div>
 
                             {/* Search Results */}
-                            {userSearch.length >= 2 && foundUsers.length > 0 && (
-                                <div className="mt-2 rounded-xl border border-border/40 bg-background/50 backdrop-blur-md overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 shadow-lg">
-                                    {foundUsers.map((user: any) => {
-                                        const isOwner = owner?.id === user.id;
-                                        const isShared = sharedUsers.some(
-                                            (su: any) => su.user_id === user.id,
-                                        );
-                                        const canShare = !isOwner && !isShared;
+                            {userSearch.length >= 2 && (
+                                <AsyncStateHandler
+                                    isError={isErrorUsers}
+                                    error={errorUsers}
+                                    onRetry={refetchUsers}
+                                    inline
+                                >
+                                    {foundUsers.length > 0 && (
+                                        <div className="mt-2 rounded-xl border border-border/40 bg-background/50 backdrop-blur-md overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 shadow-lg">
+                                            {foundUsers.map((user: any) => {
+                                                const isOwner = owner?.id === user.id;
+                                                const isShared = sharedUsers.some(
+                                                    (su: any) => su.user_id === user.id,
+                                                );
+                                                const canShare = !isOwner && !isShared;
 
-                                        return (
-                                            <div
-                                                key={user.id}
-                                                className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors border-b last:border-0 border-border/5"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-8 w-8 border border-border/40">
-                                                        <AvatarImage src={user.profile_image} />
-                                                        <AvatarFallback className="bg-primary/5 text-[10px] text-primary font-bold">
-                                                            {getInitials(
-                                                                user.name || user.username,
-                                                            )}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-sm font-semibold truncate max-w-[150px]">
-                                                            {user.name || user.username}
-                                                        </span>
-                                                        <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">
-                                                            {user.email}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {canShare ? (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="h-8 px-2 text-primary hover:bg-primary/10"
-                                                        onClick={() => handleShare(user.id)}
-                                                        disabled={shareMutation.isPending}
+                                                return (
+                                                    <div
+                                                        key={user.id}
+                                                        className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors border-b last:border-0 border-border/5"
                                                     >
-                                                        {shareMutation.isPending ? (
-                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar className="h-8 w-8 border border-border/40">
+                                                                <AvatarImage
+                                                                    src={user.profile_image}
+                                                                />
+                                                                <AvatarFallback className="bg-primary/5 text-[10px] text-primary font-bold">
+                                                                    {getInitials(
+                                                                        user.name || user.username,
+                                                                    )}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="text-sm font-semibold truncate max-w-[150px]">
+                                                                    {user.name || user.username}
+                                                                </span>
+                                                                <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">
+                                                                    {user.email}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        {canShare ? (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 px-2 text-primary hover:bg-primary/10"
+                                                                onClick={() => handleShare(user.id)}
+                                                                disabled={shareMutation.isPending}
+                                                            >
+                                                                {shareMutation.isPending ? (
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                ) : (
+                                                                    <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                                                )}
+                                                                Share
+                                                            </Button>
                                                         ) : (
-                                                            <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="text-[10px] bg-muted/50 border-none"
+                                                            >
+                                                                {isOwner ? "Owner" : "Added"}
+                                                            </Badge>
                                                         )}
-                                                        Share
-                                                    </Button>
-                                                ) : (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="text-[10px] bg-muted/50 border-none"
-                                                    >
-                                                        {isOwner ? "Owner" : "Added"}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </AsyncStateHandler>
                             )}
                         </div>
 

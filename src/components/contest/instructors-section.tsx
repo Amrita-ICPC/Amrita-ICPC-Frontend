@@ -37,7 +37,13 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
         refetch: refetchInstructors,
     } = useGetContestInstructors(contestId, { page: 1, page_size: 100 });
 
-    const { data: usersData, isLoading: isLoadingUsers } = useListUsers(
+    const {
+        data: usersData,
+        isLoading: isLoadingUsers,
+        isError: isErrorUsers,
+        error: errorUsers,
+        refetch: refetchUsers,
+    } = useListUsers(
         { q: debouncedSearch || undefined, page_size: 5 },
         { query: { enabled: debouncedSearch.length >= 2 } },
     );
@@ -116,80 +122,87 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                     </div>
 
                     <ScrollArea className="h-[400px]">
-                        {search.length < 2 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
-                                <Users className="h-12 w-12 opacity-20" />
-                                <p className="text-sm italic">
-                                    Type at least 2 characters to search
-                                </p>
-                            </div>
-                        ) : foundUsers.length > 0 ? (
-                            <div className="space-y-2">
-                                {foundUsers.map((user) => {
-                                    const isInstructor = currentInstructors.some(
-                                        (i: any) => i.id === user.id,
-                                    );
-                                    return (
-                                        <div
-                                            key={user.id}
-                                            className="flex items-center justify-between p-3 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10 border border-border/40">
-                                                    <AvatarFallback className="bg-primary/5 text-xs text-primary font-bold">
-                                                        {getInitials(user.name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex flex-col min-w-0">
-                                                    <span className="text-sm font-semibold truncate">
-                                                        {user.name}
-                                                    </span>
-                                                    <span className="text-[10px] text-muted-foreground truncate">
-                                                        {user.email}
-                                                    </span>
+                        <AsyncStateHandler
+                            isError={isErrorUsers}
+                            error={errorUsers}
+                            onRetry={refetchUsers}
+                            inline
+                        >
+                            {search.length < 2 ? (
+                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
+                                    <Users className="h-12 w-12 opacity-20" />
+                                    <p className="text-sm italic">
+                                        Type at least 2 characters to search
+                                    </p>
+                                </div>
+                            ) : foundUsers.length > 0 ? (
+                                <div className="space-y-2">
+                                    {foundUsers.map((user) => {
+                                        const isInstructor = currentInstructors.some(
+                                            (i: any) => i.id === user.id,
+                                        );
+                                        return (
+                                            <div
+                                                key={user.id}
+                                                className="flex items-center justify-between p-3 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-10 w-10 border border-border/40">
+                                                        <AvatarFallback className="bg-primary/5 text-xs text-primary font-bold">
+                                                            {getInitials(user.name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-sm font-semibold truncate">
+                                                            {user.name}
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground truncate">
+                                                            {user.email}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            {isInstructor ? (
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="h-7 text-[10px] uppercase tracking-wider font-bold"
-                                                >
-                                                    Already Added
-                                                </Badge>
-                                            ) : (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
-                                                    onClick={() => handleAddInstructor(user.id)}
-                                                    disabled={
-                                                        assignMutation.isPending &&
+                                                {isInstructor ? (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="h-7 text-[10px] uppercase tracking-wider font-bold"
+                                                    >
+                                                        Already Added
+                                                    </Badge>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
+                                                        onClick={() => handleAddInstructor(user.id)}
+                                                        disabled={
+                                                            assignMutation.isPending &&
+                                                            assignMutation.variables?.data.instructor_ids.includes(
+                                                                user.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        {assignMutation.isPending &&
                                                         assignMutation.variables?.data.instructor_ids.includes(
                                                             user.id,
-                                                        )
-                                                    }
-                                                >
-                                                    {assignMutation.isPending &&
-                                                    assignMutation.variables?.data.instructor_ids.includes(
-                                                        user.id,
-                                                    ) ? (
-                                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
-                                                    ) : (
-                                                        <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-                                                    )}
-                                                    Add
-                                                </Button>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
-                                <Search className="h-12 w-12 opacity-20" />
-                                <p className="text-sm italic">No users found</p>
-                            </div>
-                        )}
+                                                        ) ? (
+                                                            <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                                                        ) : (
+                                                            <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                                        )}
+                                                        Add
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
+                                    <Search className="h-12 w-12 opacity-20" />
+                                    <p className="text-sm italic">No users found</p>
+                                </div>
+                            )}
+                        </AsyncStateHandler>
                     </ScrollArea>
                 </CardContent>
             </Card>
