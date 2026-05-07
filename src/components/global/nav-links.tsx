@@ -26,6 +26,7 @@ const ADMIN_ITEMS = [{ href: "/audiences", label: "Manage Users", icon: UsersRou
 
 interface NavLinksProps {
     isAdmin: boolean;
+    isStudent: boolean;
 }
 
 function NavItem({
@@ -57,7 +58,19 @@ function NavItem({
     );
 }
 
-export function NavLinks({ isAdmin }: NavLinksProps) {
+export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
+    const filteredNavItems = NAV_ITEMS.filter((item) => {
+        // Hide Question Banks for students
+        if (isStudent && item.href === "/banks") return false;
+        return true;
+    }).map((item) => {
+        // Rename Question Editor to Code Editor for students
+        if (isStudent && item.href === "/questions") {
+            return { ...item, label: "Code Editor" };
+        }
+        return item;
+    });
+
     return (
         <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
             <div>
@@ -65,7 +78,7 @@ export function NavLinks({ isAdmin }: NavLinksProps) {
                     Menu
                 </p>
                 <ul className="space-y-0.5">
-                    {NAV_ITEMS.map((item) => (
+                    {filteredNavItems.map((item) => (
                         <NavItem key={item.href} {...item} />
                     ))}
                 </ul>
