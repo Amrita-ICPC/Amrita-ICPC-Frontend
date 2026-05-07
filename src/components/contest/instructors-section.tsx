@@ -55,6 +55,9 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                 setSearch("");
                 toast.success("Instructor added successfully");
             },
+            onError: (error: any) => {
+                toast.error(`Failed to add instructor: ${error.message}`);
+            },
         },
     });
 
@@ -63,6 +66,9 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: instructorKeys(contestId) });
                 toast.success("Instructor removed from contest");
+            },
+            onError: (error: any) => {
+                toast.error(`Failed to remove instructor: ${error.message}`);
             },
         },
     });

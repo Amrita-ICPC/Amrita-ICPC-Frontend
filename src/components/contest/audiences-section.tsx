@@ -49,6 +49,9 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                 setSearch("");
                 toast.success("Audience added to contest");
             },
+            onError: (error: any) => {
+                toast.error(`Failed to add audience: ${error.message}`);
+            },
         },
     });
 
@@ -57,6 +60,9 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: contestAudiencesKeys(contestId) });
                 toast.success("Audience removed from contest");
+            },
+            onError: (error: any) => {
+                toast.error(`Failed to remove audience: ${error.message}`);
             },
         },
     });
