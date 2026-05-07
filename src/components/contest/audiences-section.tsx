@@ -61,7 +61,10 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
         },
     });
 
-    const currentAudiences = contestAudiencesData?.data ?? [];
+    const currentAudiences = (contestAudiencesData?.data ?? []).map((a) => ({
+        ...a,
+        type: a.audience_type,
+    }));
     const availableAudiences = myAudiencesData?.data ?? [];
 
     const handleAddAudience = (audienceId: string) => {
@@ -145,9 +148,17 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                                                     variant="outline"
                                                     className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
                                                     onClick={() => handleAddAudience(audience.id)}
-                                                    disabled={assignMutation.isPending}
+                                                    disabled={
+                                                        assignMutation.isPending &&
+                                                        assignMutation.variables?.data.audience_ids.includes(
+                                                            audience.id,
+                                                        )
+                                                    }
                                                 >
-                                                    {assignMutation.isPending ? (
+                                                    {assignMutation.isPending &&
+                                                    assignMutation.variables?.data.audience_ids.includes(
+                                                        audience.id,
+                                                    ) ? (
                                                         <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
                                                     ) : (
                                                         <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -208,7 +219,7 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                                                             variant="outline"
                                                             className="text-[10px] h-4 px-1.5 font-bold border-emerald-500/20 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5"
                                                         >
-                                                            {audience.audience_type}
+                                                            {audience.type}
                                                         </Badge>
                                                     </div>
                                                 </div>
@@ -219,9 +230,17 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                                                 size="icon"
                                                 className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
                                                 onClick={() => handleRemoveAudience(audience.id)}
-                                                disabled={removeMutation.isPending}
+                                                disabled={
+                                                    removeMutation.isPending &&
+                                                    removeMutation.variables?.data.audience_ids.includes(
+                                                        audience.id,
+                                                    )
+                                                }
                                             >
-                                                {removeMutation.isPending ? (
+                                                {removeMutation.isPending &&
+                                                removeMutation.variables?.data.audience_ids.includes(
+                                                    audience.id,
+                                                ) ? (
                                                     <Loader2 className="h-4 w-4 animate-spin" />
                                                 ) : (
                                                     <Trash2 className="h-4 w-4" />
