@@ -239,6 +239,7 @@ export function BankShareDialog({
                             {/* Search Results */}
                             {userSearch.length >= 2 && (
                                 <AsyncStateHandler
+                                    isLoading={false}
                                     isError={isErrorUsers}
                                     error={errorUsers}
                                     onRetry={refetchUsers}

@@ -129,6 +129,7 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
 
                     <ScrollArea className="h-[400px]">
                         <AsyncStateHandler
+                            isLoading={false}
                             isError={isErrorUsers}
                             error={errorUsers}
                             onRetry={refetchUsers}
