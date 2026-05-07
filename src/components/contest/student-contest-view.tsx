@@ -32,7 +32,7 @@ export function StudentContestView({ contestId }: StudentContestViewProps) {
 
     const runCodeMutation = useRunCode();
 
-    const contest = contestData?.data;
+    const contest = contestData;
     const problems = (contest as any)?.problems || [];
 
     // Timer and Status Logic
