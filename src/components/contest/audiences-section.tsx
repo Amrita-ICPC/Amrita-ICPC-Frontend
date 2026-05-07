@@ -228,7 +228,8 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
+                                                className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                                                aria-label={`Remove ${audience.name} audience`}
                                                 onClick={() => handleRemoveAudience(audience.id)}
                                                 disabled={
                                                     removeMutation.isPending &&
