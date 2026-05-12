@@ -36,7 +36,13 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
         refetch: refetchContestAudiences,
     } = useGetContestAudiences(contestId);
 
-    const { data: myAudiencesData, isLoading: isLoadingMyAudiences } = useMyAudiences({
+    const {
+        data: myAudiencesData,
+        isLoading: isLoadingMyAudiences,
+        isError: isErrorMyAudiences,
+        error: errorMyAudiences,
+        refetch: refetchMyAudiences,
+    } = useMyAudiences({
         q: debouncedSearch || undefined,
         page: 1,
         page_size: 10,
@@ -116,73 +122,83 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                         )}
                     </div>
 
-                    <ScrollArea className="h-[400px]">
-                        {availableAudiences.length > 0 ? (
-                            <div className="space-y-2">
-                                {availableAudiences.map((audience) => {
-                                    const isAssigned = currentAudiences.some(
-                                        (a) => a.id === audience.id,
-                                    );
-                                    return (
-                                        <div
-                                            key={audience.id}
-                                            className="flex items-center justify-between p-4 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10">
-                                                    <School className="h-5 w-5 text-primary" />
-                                                </div>
-                                                <div className="flex flex-col min-w-0">
-                                                    <span className="text-sm font-semibold truncate">
-                                                        {audience.name}
-                                                    </span>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className="text-[10px] h-4 px-1.5 font-medium border-border/60"
-                                                        >
-                                                            {audience.type}
-                                                        </Badge>
+                    <AsyncStateHandler
+                        isLoading={false}
+                        isError={isErrorMyAudiences}
+                        error={errorMyAudiences}
+                        onRetry={refetchMyAudiences}
+                        inline
+                    >
+                        <ScrollArea className="h-[400px]">
+                            {availableAudiences.length > 0 ? (
+                                <div className="space-y-2">
+                                    {availableAudiences.map((audience) => {
+                                        const isAssigned = currentAudiences.some(
+                                            (a) => a.id === audience.id,
+                                        );
+                                        return (
+                                            <div
+                                                key={audience.id}
+                                                className="flex items-center justify-between p-4 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10">
+                                                        <School className="h-5 w-5 text-primary" />
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-sm font-semibold truncate">
+                                                            {audience.name}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="text-[10px] h-4 px-1.5 font-medium border-border/60"
+                                                            >
+                                                                {audience.type}
+                                                            </Badge>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            {isAssigned ? (
-                                                <CheckCircle2 className="h-5 w-5 text-emerald-500 mr-2" />
-                                            ) : (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
-                                                    onClick={() => handleAddAudience(audience.id)}
-                                                    disabled={
-                                                        assignMutation.isPending &&
+                                                {isAssigned ? (
+                                                    <CheckCircle2 className="h-5 w-5 text-emerald-500 mr-2" />
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
+                                                        onClick={() =>
+                                                            handleAddAudience(audience.id)
+                                                        }
+                                                        disabled={
+                                                            assignMutation.isPending &&
+                                                            assignMutation.variables?.data.audience_ids.includes(
+                                                                audience.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        {assignMutation.isPending &&
                                                         assignMutation.variables?.data.audience_ids.includes(
                                                             audience.id,
-                                                        )
-                                                    }
-                                                >
-                                                    {assignMutation.isPending &&
-                                                    assignMutation.variables?.data.audience_ids.includes(
-                                                        audience.id,
-                                                    ) ? (
-                                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
-                                                    ) : (
-                                                        <Plus className="h-3.5 w-3.5 mr-1.5" />
-                                                    )}
-                                                    Add
-                                                </Button>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
-                                <Layers className="h-12 w-12 opacity-20" />
-                                <p className="text-sm italic">No audiences found</p>
-                            </div>
-                        )}
-                    </ScrollArea>
+                                                        ) ? (
+                                                            <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                                                        ) : (
+                                                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                                        )}
+                                                        Add
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-2 py-20">
+                                    <Layers className="h-12 w-12 opacity-20" />
+                                    <p className="text-sm italic">No audiences found</p>
+                                </div>
+                            )}
+                        </ScrollArea>
+                    </AsyncStateHandler>
                 </CardContent>
             </Card>
 
