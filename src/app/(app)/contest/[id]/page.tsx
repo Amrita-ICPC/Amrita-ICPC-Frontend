@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { ContestDetailClient } from "@/components/contest/contest-detail-client";
 import { ContestForm } from "@/components/contest/contest-form";
 import AccessDenied from "@/components/global/access-denied";
