@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, FileText, Send, Activity, UserCog, BarChart2, ArrowRight } from "lucide-react";
+import { Users, FileText, Send, Activity, ShieldCheck, BarChart2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import type { ContestDetailResponse } from "@/api/generated/model";
@@ -56,14 +56,14 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaColor: "text-emerald-600 dark:text-emerald-500",
         },
         {
-            title: "Manage Staff",
-            description: "Add or manage instructors, judges and contest staff.",
-            metaText: "Manage Instructors", // Hardcoded or maybe instructors count if we have it
-            buttonText: "Open Staff",
-            icon: UserCog,
+            title: "Access Management",
+            description: "Manage management permissions and configure participation restrictions.",
+            metaText: "Permissions & Access",
+            buttonText: "Manage Access",
+            icon: ShieldCheck,
             iconBg: "bg-yellow-500/10 dark:bg-yellow-500/20",
             iconColor: "text-yellow-600 dark:text-yellow-400",
-            href: `/contest/${contest.id}/staff`,
+            href: `/contest/${contest.id}/access`,
             metaColor: "text-yellow-600 dark:text-yellow-500",
         },
         {

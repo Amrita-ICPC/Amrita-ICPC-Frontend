@@ -24,3 +24,19 @@ export { useUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch 
 export { useReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch as useReorderContestQuestions } from "@/api/generated/contests/contests";
 export { useRemoveQuestionFromContestApiV1ContestsContestIdQuestionsDelete as useRemoveQuestionsFromContest } from "@/api/generated/contests/contests";
 export { useCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost as useCloneQuestionsFromBank } from "@/api/generated/contests/contests";
+
+export { useGetContestApiV1ContestsContestIdGet as useGetContest } from "@/api/generated/contests/contests";
+export {
+    useGetContestInstructorsApiV1ContestsContestIdInstructorsGet as useGetContestInstructors,
+    useAssignInstructorsToContestApiV1ContestsContestIdInstructorsPost as useAssignInstructors,
+    useRemoveInstructorsFromContestApiV1ContestsContestIdInstructorsDelete as useRemoveInstructors,
+    getGetContestInstructorsApiV1ContestsContestIdInstructorsGetQueryKey as instructorKeys,
+} from "@/api/generated/contests/contests";
+export {
+    useGetContestAudiencesApiV1ContestsContestIdAudiencesGet as useGetContestAudiences,
+    useAssignAudiencesToContestApiV1ContestsContestIdAudiencesPost as useAssignAudiences,
+    useRemoveAudiencesFromContestApiV1ContestsContestIdAudiencesDelete as useRemoveAudiences,
+    getGetContestAudiencesApiV1ContestsContestIdAudiencesGetQueryKey as contestAudiencesKeys,
+} from "@/api/generated/contests/contests";
+export { useListUserAudiencesApiV1AudiencesMyGet as useMyAudiences } from "@/api/generated/audiences/audiences";
+export { useListUsersApiV1UsersGet as useListUsers } from "@/api/generated/users/users";
