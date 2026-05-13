@@ -109,6 +109,7 @@ export default function BankQuestionEditorClient({
                 form={form}
                 onSave={handleCreate}
                 isSaving={isSavingCreateQuestion}
+                compact
             />
         );
     }
@@ -121,6 +122,7 @@ export default function BankQuestionEditorClient({
             form={form}
             onSave={onUpdate}
             isSaving={isSavingUpdateQuestion}
+            compact
         />
     );
 }
