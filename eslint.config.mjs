@@ -8,6 +8,7 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "*.config.mjs",
       "src/api/generated/**",
     ],
   },
