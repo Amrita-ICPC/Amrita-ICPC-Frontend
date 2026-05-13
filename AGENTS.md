@@ -21,7 +21,7 @@ const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
 
 // Server component session
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth";
 const session = await getServerSession(authOptions);
 

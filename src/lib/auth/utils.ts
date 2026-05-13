@@ -88,6 +88,22 @@ export function hasAccess(
 
 export { UserType };
 
+export function getDefaultRoute(user: AuthUserClaims | null | undefined): string {
+    if (!user) return "/auth/login";
+
+    const roles = [...(user.roles || []), ...(user.groups || [])];
+
+    const hasAdminManagerInstructor = roles.some((r) =>
+        ["admin", "manager", "instructor"].includes(r.toLowerCase()),
+    );
+    const hasStudent = roles.some((r) => r.toLowerCase() === "student");
+
+    if (hasStudent && !hasAdminManagerInstructor) {
+        return "/student/dashboard";
+    }
+
+    return "/dashboard";
+}
 import { decodeJwt } from "jose";
 import { DecodedJWT, KeycloakToken } from "./types";
 import { logger } from "../logger";

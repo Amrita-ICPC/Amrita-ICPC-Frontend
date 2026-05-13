@@ -30,6 +30,7 @@ const ADMIN_ITEMS = [
 
 interface NavLinksProps {
     isAdmin: boolean;
+    isStudent?: boolean;
 }
 
 function NavItem({
@@ -61,7 +62,7 @@ function NavItem({
     );
 }
 
-export function NavLinks({ isAdmin }: NavLinksProps) {
+export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
     return (
         <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
             <div>
@@ -69,9 +70,21 @@ export function NavLinks({ isAdmin }: NavLinksProps) {
                     Menu
                 </p>
                 <ul className="space-y-0.5">
-                    {NAV_ITEMS.map((item) => (
-                        <NavItem key={item.href} {...item} />
-                    ))}
+                    {NAV_ITEMS.map((item) => {
+                        let href = item.href;
+                        if (isStudent) {
+                            if (item.label === "Dashboard") href = "/student/dashboard";
+                            if (item.label === "Contests") href = "/student/contest";
+                        }
+                        return (
+                            <NavItem
+                                key={item.label}
+                                href={href}
+                                label={item.label}
+                                icon={item.icon}
+                            />
+                        );
+                    })}
                 </ul>
             </div>
 

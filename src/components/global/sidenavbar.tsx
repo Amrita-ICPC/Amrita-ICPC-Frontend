@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth/auth";
-import { UserType } from "@/lib/auth/utils";
+import { UserType, getDefaultRoute } from "@/lib/auth/utils";
 import { NavLinks } from "./nav-links";
 import { UserMenu } from "./user-menu";
 
@@ -8,6 +8,7 @@ export default async function Sidenavbar() {
     const user = session?.user;
     const allRoles = [...(user?.roles ?? []), ...(user?.groups ?? [])];
     const isAdmin = allRoles.some((r) => r.toLowerCase() === UserType.ADMIN.toLowerCase());
+    const isStudent = getDefaultRoute(user) === "/student/dashboard";
 
     return (
         <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
@@ -27,7 +28,7 @@ export default async function Sidenavbar() {
             </div>
 
             {/* Nav */}
-            <NavLinks isAdmin={isAdmin} />
+            <NavLinks isAdmin={isAdmin} isStudent={isStudent} />
 
             {/* User */}
             <div className="border-t border-sidebar-border px-3 pb-4 pt-2">

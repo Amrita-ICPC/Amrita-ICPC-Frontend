@@ -1,7 +1,7 @@
 "use client";
 
 import Loading from "@/app/loading";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
@@ -31,8 +31,12 @@ export default function AuthGuard({
     useEffect(() => {
         if (status === "loading") return;
 
-        if (!session?.user) {
-            router.push("/auth/login");
+        if (!session?.user || session.error) {
+            if (session?.error) {
+                signOut({ callbackUrl: "/auth/login" });
+            } else {
+                router.push("/auth/login");
+            }
         }
     }, [session, status, router]);
 

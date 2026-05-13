@@ -2,10 +2,11 @@ import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import Sidenavbar from "@/components/global/sidenavbar";
 import { Header } from "@/components/global/header";
-import { UserType } from "@/lib/auth/utils";
+import { UserType, getDefaultRoute } from "@/lib/auth/utils";
 import AuthGuard from "@/components/global/auth-guard";
 import AccessDenied from "@/components/global/access-denied";
 import { logger } from "@/lib/logger";
+import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,8 @@ export default async function AppLayout({
         );
     }
 
+    const isStudent = getDefaultRoute(session.user) === "/student/dashboard";
+
     return (
         <div className="flex h-screen overflow-hidden bg-background text-foreground">
             <Sidenavbar />
@@ -54,7 +57,11 @@ export default async function AppLayout({
                 <Header />
                 <main className="flex-1 overflow-y-auto bg-background">
                     <div className="mx-auto max-w-7xl px-6 py-5">
-                        <div className="mb-6">{children}</div>
+                        <div className="mb-6">
+                            <StudentRouteEnforcer isStudent={isStudent}>
+                                {children}
+                            </StudentRouteEnforcer>
+                        </div>
                         <div>
                             {hasRole(UserType.ADMIN) ? (
                                 <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>

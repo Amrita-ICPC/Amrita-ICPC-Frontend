@@ -124,7 +124,9 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
-}).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest')
+}).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest'),
+  "max_teams": zod.union([zod.number(),zod.null()]).optional().describe('Maximum number of teams allowed'),
+  "tags": zod.array(zod.string()).optional().describe('Unique tags for this contest')
 }).describe('Schema for contest summary response (List view).')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -201,7 +203,9 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
-}).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest')
+}).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest'),
+  "max_teams": zod.union([zod.number(),zod.null()]).optional().describe('Maximum number of teams allowed'),
+  "tags": zod.array(zod.string()).optional().describe('Unique tags for this contest')
 }).describe('Schema for contest summary response (List view).')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1661,129 +1665,6 @@ export const GetContestAudiencesApiV1ContestsContestIdAudiencesGetResponse = zod
   "name": zod.string().describe('Audience name'),
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
 }).describe('Schema for audience information within a contest.')),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Perform a comprehensive update of a contest question.
-
-Updates metadata, tags, templates, and test cases in a single operation.
-Only contest creators and assigned instructors can perform this operation.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    question_id (UUID): The unique identifier of the question.
-    payload (QuestionUpdate): The update data.
-    user_id (UUID): Authenticated user ID.
-    service (ContestService): Injected domain service.
-
-Returns:
-    APIResponse[QuestionResponse]: The updated question.
- * @summary Update contest question metadata
- */
-export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "question_id": zod.uuid()
-})
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTitleOneMax = 255;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemIsHiddenDefault = true;
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemWeightDefault = 1;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemOrderOneMin = 0;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTemplatesOneItemLanguageIdExclusiveMin = 0;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTimeLimitMsOneExclusiveMin = 0;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyMemoryLimitMbOneExclusiveMin = 0;
-
-
-
-export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBody = zod.object({
-  "title": zod.union([zod.string().max(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTitleOneMax),zod.null()]).optional(),
-  "question_text": zod.union([zod.string(),zod.null()]).optional(),
-  "difficulty": zod.union([zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),zod.null()]).optional(),
-  "allowed_languages": zod.union([zod.array(zod.number()),zod.null()]).optional(),
-  "tag_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional(),
-  "testcases": zod.union([zod.array(zod.object({
-  "input": zod.string(),
-  "output": zod.string(),
-  "is_hidden": zod.boolean().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemIsHiddenDefault),
-  "weight": zod.number().min(1).default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemWeightDefault),
-  "order": zod.union([zod.number().min(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTestcasesOneItemOrderOneMin),zod.null()]).optional()
-})),zod.null()]).optional(),
-  "templates": zod.union([zod.array(zod.object({
-  "language_id": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTemplatesOneItemLanguageIdExclusiveMin),
-  "starter_code": zod.string(),
-  "driver_code": zod.union([zod.string(),zod.null()]).optional(),
-  "solution_code": zod.union([zod.string(),zod.null()]).optional()
-})),zod.null()]).optional(),
-  "time_limit_ms": zod.union([zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyTimeLimitMsOneExclusiveMin),zod.null()]).optional(),
-  "memory_limit_mb": zod.union([zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional()
-})
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseSuccessDefault = true;
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseStatusDefault = 200;
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseMessageDefault = `Success`;
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTitleMax = 255;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTimeLimitMsExclusiveMin = 0;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneMemoryLimitMbExclusiveMin = 0;
-
-export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTagsItemNameMax = 100;
-
-
-
-export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponse = zod.object({
-  "success": zod.boolean().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseSuccessDefault),
-  "status": zod.number().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseStatusDefault),
-  "message": zod.string().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseMessageDefault),
-  "data": zod.union([zod.object({
-  "title": zod.string().max(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTitleMax).describe('The title of the question'),
-  "question_text": zod.string().describe('The problem statement and description'),
-  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
-  "time_limit_ms": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
-  "memory_limit_mb": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
-  "id": zod.uuid(),
-  "created_by": zod.uuid(),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "testcases": zod.array(zod.object({
-  "id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "input": zod.string(),
-  "output": zod.string(),
-  "is_hidden": zod.boolean(),
-  "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
-})).optional(),
-  "templates": zod.array(zod.object({
-  "id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "language_id": zod.number(),
-  "starter_code": zod.string(),
-  "driver_code": zod.union([zod.string(),zod.null()]),
-  "solution_code": zod.union([zod.string(),zod.null()])
-})).optional(),
-  "allowed_languages": zod.array(zod.string()).optional(),
-  "tags": zod.array(zod.object({
-  "name": zod.string().max(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdMetadataPatchResponseDataOneTagsItemNameMax).describe('The name of the tag'),
-  "id": zod.uuid()
-})).optional()
-}),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

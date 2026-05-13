@@ -25,17 +25,25 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponseStudentContestListResponse,
+  ContestRunStatus,
   ExceptionResponse,
-  GetAvailableContestsApiV1StudentsContestsGetParams,
-  GetPastContestsApiV1StudentsContestsPastGetParams,
-  GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams,
+  GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams,
+  GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams,
+  GetStudentContestsApiV1StudentsContestsGetParams,
   HTTPValidationError,
-  StudentContestDetailsResponse,
-  StudentContestListResponse,
-  StudentContestProblemsListResponse,
-  StudentContestRegistrationRequest,
-  StudentContestRegistrationResponse,
-  StudentRegisteredContestListResponse
+  StudentCodeRunRequest,
+  StudentCodeRunResponse,
+  StudentLeaveTeamResponse,
+  StudentTeamAddMemberRequest,
+  StudentTeamAddMemberResponse,
+  StudentTeamCreateAndJoinResponse,
+  StudentTeamCreateRequest,
+  StudentTeamJoinRequest,
+  StudentTeamJoinResponse,
+  StudentTeamListResponse,
+  StudentTeamRemoveMemberResponse,
+  StudentTeamResponse
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -44,556 +52,246 @@ import { axiosWithAuth } from '../../../lib/api-client';
 
 
 /**
- * Get all available public contests.
-
-Optionally filter by difficulty level.
-
-Args:
-    user_id: Current authenticated user
-    service: StudentContestService instance
-    difficulty: Optional difficulty filter
-    limit: Pagination limit (1-100)
-    offset: Pagination offset
-
-Returns:
-    List of available contests with pagination
- * @summary List available contests
+ * Get all published contests available to the student.
+Filter by registration status and contest run status.
+ * @summary Get available contests for student
  */
-export const getAvailableContestsApiV1StudentsContestsGet = (
-    params?: GetAvailableContestsApiV1StudentsContestsGetParams,
+export const getStudentContestsApiV1StudentsContestsGet = (
+    contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams,
  signal?: AbortSignal
 ) => {
 
 
-      return axiosWithAuth<StudentContestListResponse>(
-      {url: `/api/v1/students/contests`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getGetAvailableContestsApiV1StudentsContestsGetQueryKey = (params?: GetAvailableContestsApiV1StudentsContestsGetParams,) => {
-    return [
-    `/api/v1/students/contests`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetAvailableContestsApiV1StudentsContestsGetQueryOptions = <TData = Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetAvailableContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetAvailableContestsApiV1StudentsContestsGetQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>> = ({ signal }) => getAvailableContestsApiV1StudentsContestsGet(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetAvailableContestsApiV1StudentsContestsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>>
-export type GetAvailableContestsApiV1StudentsContestsGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetAvailableContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params: undefined |  GetAvailableContestsApiV1StudentsContestsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAvailableContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetAvailableContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAvailableContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetAvailableContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary List available contests
- */
-
-export function useGetAvailableContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetAvailableContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableContestsApiV1StudentsContestsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetAvailableContestsApiV1StudentsContestsGetQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Get contests student is registered in.
-
-Args:
-    user_id: Current authenticated user
-    service: StudentContestService instance
-    limit: Pagination limit
-    offset: Pagination offset
-
-Returns:
-    List of registered contests
- * @summary List registered contests
- */
-export const getRegisteredContestsApiV1StudentsContestsRegisteredGet = (
-    params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentRegisteredContestListResponse>(
-      {url: `/api/v1/students/contests/registered`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getGetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryKey = (params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams,) => {
-    return [
-    `/api/v1/students/contests/registered`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryOptions = <TData = Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>> = ({ signal }) => getRegisteredContestsApiV1StudentsContestsRegisteredGet(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryResult = NonNullable<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>>
-export type GetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetRegisteredContestsApiV1StudentsContestsRegisteredGet<TData = Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params: undefined |  GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>,
-          TError,
-          Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetRegisteredContestsApiV1StudentsContestsRegisteredGet<TData = Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>,
-          TError,
-          Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetRegisteredContestsApiV1StudentsContestsRegisteredGet<TData = Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary List registered contests
- */
-
-export function useGetRegisteredContestsApiV1StudentsContestsRegisteredGet<TData = Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetRegisteredContestsApiV1StudentsContestsRegisteredGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegisteredContestsApiV1StudentsContestsRegisteredGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetRegisteredContestsApiV1StudentsContestsRegisteredGetQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Get contests that student participated in (finished).
-
-Args:
-    user_id: Current authenticated user
-    service: StudentContestService instance
-    limit: Pagination limit
-    offset: Pagination offset
-
-Returns:
-    List of past contests
- * @summary List past contests
- */
-export const getPastContestsApiV1StudentsContestsPastGet = (
-    params?: GetPastContestsApiV1StudentsContestsPastGetParams,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentRegisteredContestListResponse>(
-      {url: `/api/v1/students/contests/past`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getGetPastContestsApiV1StudentsContestsPastGetQueryKey = (params?: GetPastContestsApiV1StudentsContestsPastGetParams,) => {
-    return [
-    `/api/v1/students/contests/past`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetPastContestsApiV1StudentsContestsPastGetQueryOptions = <TData = Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetPastContestsApiV1StudentsContestsPastGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetPastContestsApiV1StudentsContestsPastGetQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>> = ({ signal }) => getPastContestsApiV1StudentsContestsPastGet(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetPastContestsApiV1StudentsContestsPastGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>>
-export type GetPastContestsApiV1StudentsContestsPastGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetPastContestsApiV1StudentsContestsPastGet<TData = Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params: undefined |  GetPastContestsApiV1StudentsContestsPastGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>,
-          TError,
-          Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPastContestsApiV1StudentsContestsPastGet<TData = Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetPastContestsApiV1StudentsContestsPastGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>,
-          TError,
-          Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPastContestsApiV1StudentsContestsPastGet<TData = Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetPastContestsApiV1StudentsContestsPastGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary List past contests
- */
-
-export function useGetPastContestsApiV1StudentsContestsPastGet<TData = Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError = ExceptionResponse | HTTPValidationError>(
- params?: GetPastContestsApiV1StudentsContestsPastGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPastContestsApiV1StudentsContestsPastGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetPastContestsApiV1StudentsContestsPastGetQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Get full details of a contest.
-
-Args:
-    contest_id: Contest UUID
-    user_id: Current authenticated user
-    service: StudentContestService instance
-
-Returns:
-    Full contest details
- * @summary Get contest details
- */
-export const getContestDetailsApiV1StudentsContestsContestIdGet = (
-    contestId: string,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentContestDetailsResponse>(
-      {url: `/api/v1/students/contests/${contestId}`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
-
-export const getGetContestDetailsApiV1StudentsContestsContestIdGetQueryKey = (contestId: string,) => {
-    return [
-    `/api/v1/students/contests/${contestId}`
-    ] as const;
-    }
-
-
-export const getGetContestDetailsApiV1StudentsContestsContestIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetContestDetailsApiV1StudentsContestsContestIdGetQueryKey(contestId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>> = ({ signal }) => getContestDetailsApiV1StudentsContestsContestIdGet(contestId, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(contestId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetContestDetailsApiV1StudentsContestsContestIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>>
-export type GetContestDetailsApiV1StudentsContestsContestIdGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetContestDetailsApiV1StudentsContestsContestIdGet<TData = Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestDetailsApiV1StudentsContestsContestIdGet<TData = Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestDetailsApiV1StudentsContestsContestIdGet<TData = Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get contest details
- */
-
-export function useGetContestDetailsApiV1StudentsContestsContestIdGet<TData = Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDetailsApiV1StudentsContestsContestIdGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetContestDetailsApiV1StudentsContestsContestIdGetQueryOptions(contestId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Get list of problems in a contest.
-
-Args:
-    contest_id: Contest UUID
-    user_id: Current authenticated user
-    service: StudentContestService instance
-
-Returns:
-    List of problems with metadata
- * @summary Get contest problems
- */
-export const getContestProblemsApiV1StudentsContestsContestIdProblemsGet = (
-    contestId: string,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentContestProblemsListResponse>(
-      {url: `/api/v1/students/contests/${contestId}/problems`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
-
-export const getGetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryKey = (contestId: string,) => {
-    return [
-    `/api/v1/students/contests/${contestId}/problems`
-    ] as const;
-    }
-
-
-export const getGetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryKey(contestId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>> = ({ signal }) => getContestProblemsApiV1StudentsContestsContestIdProblemsGet(contestId, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(contestId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>>
-export type GetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryError = ExceptionResponse | HTTPValidationError
-
-
-export function useGetContestProblemsApiV1StudentsContestsContestIdProblemsGet<TData = Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestProblemsApiV1StudentsContestsContestIdProblemsGet<TData = Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetContestProblemsApiV1StudentsContestsContestIdProblemsGet<TData = Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get contest problems
- */
-
-export function useGetContestProblemsApiV1StudentsContestsContestIdProblemsGet<TData = Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestProblemsApiV1StudentsContestsContestIdProblemsGet>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetContestProblemsApiV1StudentsContestsContestIdProblemsGetQueryOptions(contestId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Register a team for a contest.
-
-Student must be a member of the team.
-
-Args:
-    contest_id: Contest UUID
-    request: Registration request with team_id
-    user_id: Current authenticated user
-    service: StudentContestService instance
-
-Returns:
-    Registration confirmation
- * @summary Register team for contest
- */
-export const registerForContestApiV1StudentsContestsContestIdRegisterPost = (
-    contestId: string,
-    studentContestRegistrationRequest: StudentContestRegistrationRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentContestRegistrationResponse>(
-      {url: `/api/v1/students/contests/${contestId}/register`, method: 'POST',
+      return axiosWithAuth<APIResponseStudentContestListResponse>(
+      {url: `/api/v1/students/contests/`, method: 'GET',
       headers: {'Content-Type': 'application/json', },
-      data: studentContestRegistrationRequest, signal
+        params, signal
     },
       );
     }
 
 
 
-export const getRegisterForContestApiV1StudentsContestsContestIdRegisterPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>, TError,{contestId: string;data: StudentContestRegistrationRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>, TError,{contestId: string;data: StudentContestRegistrationRequest}, TContext> => {
 
-const mutationKey = ['registerForContestApiV1StudentsContestsContestIdRegisterPost'];
+export const getGetStudentContestsApiV1StudentsContestsGetQueryKey = (contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams,) => {
+    return [
+    `/api/v1/students/contests/`, ...(params ? [params] : []), contestRunStatusNull
+    ] as const;
+    }
+
+
+export const getGetStudentContestsApiV1StudentsContestsGetQueryOptions = <TData = Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentContestsApiV1StudentsContestsGetQueryKey(contestRunStatusNull,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>> = ({ signal }) => getStudentContestsApiV1StudentsContestsGet(contestRunStatusNull,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStudentContestsApiV1StudentsContestsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>>
+export type GetStudentContestsApiV1StudentsContestsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetStudentContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestRunStatusNull: undefined |  ContestRunStatus[] | null,
+    params: undefined |  GetStudentContestsApiV1StudentsContestsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get available contests for student
+ */
+
+export function useGetStudentContestsApiV1StudentsContestsGet<TData = Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestRunStatusNull?: ContestRunStatus[] | null,
+    params?: GetStudentContestsApiV1StudentsContestsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentContestsApiV1StudentsContestsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentContestsApiV1StudentsContestsGetQueryOptions(contestRunStatusNull,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Get all teams student is a member of.
+
+Args:
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+    limit: Pagination limit
+    offset: Pagination offset
+
+Returns:
+    List of teams
+ * @summary List my teams
+ */
+export const getMyTeamsApiV1StudentsTeamsStudentsTeamsGet = (
+    params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamListResponse>(
+      {url: `/api/v1/students/teams/students/teams`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryKey = (params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams,) => {
+    return [
+    `/api/v1/students/teams/students/teams`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>> = ({ signal }) => getMyTeamsApiV1StudentsTeamsStudentsTeamsGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>>
+export type GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetMyTeamsApiV1StudentsTeamsStudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamsApiV1StudentsTeamsStudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamsApiV1StudentsTeamsStudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List my teams
+ */
+
+export function useGetMyTeamsApiV1StudentsTeamsStudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsStudentsTeamsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTeamsApiV1StudentsTeamsStudentsTeamsGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Create a new team and join it.
+
+Only for public contests.
+
+Args:
+    request: Team creation request
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+
+Returns:
+    Created team details
+ * @summary Create and join team
+ */
+export const createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost = (
+    studentTeamCreateRequest: StudentTeamCreateRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamCreateAndJoinResponse>(
+      {url: `/api/v1/students/teams/students/teams`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamCreateRequest, signal
+    },
+      );
+    }
+
+
+
+export const getCreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext> => {
+
+const mutationKey = ['createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -603,10 +301,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>, {contestId: string;data: StudentContestRegistrationRequest}> = (props) => {
-          const {contestId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>, {data: StudentTeamCreateRequest}> = (props) => {
+          const {data} = props ?? {};
 
-          return  registerForContestApiV1StudentsContestsContestIdRegisterPost(contestId,data,)
+          return  createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost(data,)
         }
 
 
@@ -616,20 +314,602 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RegisterForContestApiV1StudentsContestsContestIdRegisterPostMutationResult = NonNullable<Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>>
-    export type RegisterForContestApiV1StudentsContestsContestIdRegisterPostMutationBody = StudentContestRegistrationRequest
-    export type RegisterForContestApiV1StudentsContestsContestIdRegisterPostMutationError = ExceptionResponse | HTTPValidationError
+    export type CreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>>
+    export type CreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPostMutationBody = StudentTeamCreateRequest
+    export type CreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPostMutationError = ExceptionResponse | HTTPValidationError
 
     /**
- * @summary Register team for contest
+ * @summary Create and join team
  */
-export const useRegisterForContestApiV1StudentsContestsContestIdRegisterPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>, TError,{contestId: string;data: StudentContestRegistrationRequest}, TContext>, }
+export const useCreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof registerForContestApiV1StudentsContestsContestIdRegisterPost>>,
+        Awaited<ReturnType<typeof createAndJoinTeamApiV1StudentsTeamsStudentsTeamsPost>>,
         TError,
-        {contestId: string;data: StudentContestRegistrationRequest},
+        {data: StudentTeamCreateRequest},
         TContext
       > => {
-      return useMutation(getRegisterForContestApiV1StudentsContestsContestIdRegisterPostMutationOptions(options), queryClient);
+      return useMutation(getCreateAndJoinTeamApiV1StudentsTeamsStudentsTeamsPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Get team details including members.
+
+Args:
+    team_id: Team UUID
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+
+Returns:
+    Team details with member list
+ * @summary Get team details
+ */
+export const getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet = (
+    teamId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamResponse>(
+      {url: `/api/v1/students/teams/students/teams/${teamId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryKey = (teamId: string,) => {
+    return [
+    `/api/v1/students/teams/students/teams/${teamId}`
+    ] as const;
+    }
+
+
+export const getGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryKey(teamId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>> = ({ signal }) => getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet(teamId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(teamId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>>
+export type GetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get team details
+ */
+
+export function useGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamDetailsApiV1StudentsTeamsStudentsTeamsTeamIdGetQueryOptions(teamId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Get teams available to join in a contest.
+
+Teams must have available slots.
+
+Args:
+    contest_id: Contest UUID
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+    limit: Pagination limit
+    offset: Pagination offset
+
+Returns:
+    List of available teams
+ * @summary Get available teams to join
+ */
+export const getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet = (
+    contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamListResponse>(
+      {url: `/api/v1/students/teams/students/teams/contests/${contestId}/available`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryKey = (contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams,) => {
+    return [
+    `/api/v1/students/teams/students/teams/contests/${contestId}/available`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryOptions = <TData = Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryKey(contestId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>> = ({ signal }) => getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet(contestId,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(contestId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryResult = NonNullable<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>>
+export type GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet<TData = Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    params: undefined |  GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet<TData = Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet<TData = Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get available teams to join
+ */
+
+export function useGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet<TData = Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    params?: GetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAvailableTeamsApiV1StudentsTeamsStudentsTeamsContestsContestIdAvailableGetQueryOptions(contestId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Join an existing team.
+
+Args:
+    team_id: Team UUID to join
+    request: Join request
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+
+Returns:
+    Join confirmation
+ * @summary Join existing team
+ */
+export const joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost = (
+    teamId: string,
+    studentTeamJoinRequest: StudentTeamJoinRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamJoinResponse>(
+      {url: `/api/v1/students/teams/students/teams/${teamId}/join`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamJoinRequest, signal
+    },
+      );
+    }
+
+
+
+export const getJoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>, TError,{teamId: string;data: StudentTeamJoinRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>, TError,{teamId: string;data: StudentTeamJoinRequest}, TContext> => {
+
+const mutationKey = ['joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>, {teamId: string;data: StudentTeamJoinRequest}> = (props) => {
+          const {teamId,data} = props ?? {};
+
+          return  joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost(teamId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type JoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPostMutationResult = NonNullable<Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>>
+    export type JoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPostMutationBody = StudentTeamJoinRequest
+    export type JoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Join existing team
+ */
+export const useJoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>, TError,{teamId: string;data: StudentTeamJoinRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof joinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPost>>,
+        TError,
+        {teamId: string;data: StudentTeamJoinRequest},
+        TContext
+      > => {
+      return useMutation(getJoinTeamApiV1StudentsTeamsStudentsTeamsTeamIdJoinPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Leave a team.
+
+Args:
+    team_id: Team UUID to leave
+    user_id: Current authenticated user
+    service: StudentTeamService instance
+
+Returns:
+    Leave confirmation
+ * @summary Leave team
+ */
+export const leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost = (
+    teamId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentLeaveTeamResponse>(
+      {url: `/api/v1/students/teams/students/teams/${teamId}/leave`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getLeaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>, TError,{teamId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>, TError,{teamId: string}, TContext> => {
+
+const mutationKey = ['leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>, {teamId: string}> = (props) => {
+          const {teamId} = props ?? {};
+
+          return  leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost(teamId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LeaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePostMutationResult = NonNullable<Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>>
+
+    export type LeaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Leave team
+ */
+export const useLeaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>, TError,{teamId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof leaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePost>>,
+        TError,
+        {teamId: string},
+        TContext
+      > => {
+      return useMutation(getLeaveTeamApiV1StudentsTeamsStudentsTeamsTeamIdLeavePostMutationOptions(options), queryClient);
+    }
+    /**
+ * Add members to team (leader only).
+
+Only the team leader can add new members. Follows the same strategy as
+the regular team endpoints.
+
+All member additions are assumed to be within the student's current contest context.
+The method determines the contest from the team's relationship.
+
+Args:
+    team_id: Team UUID
+    request: Add members request with list of user_ids
+    user_id: Current authenticated user (must be leader)
+    service: StudentTeamService instance
+
+Returns:
+    Updated team members list and confirmation
+
+Raises:
+    PermissionDenied: If user is not the team leader
+    TeamNotFound: If team does not exist
+    UserNotFound: If any user IDs don't exist
+    InvalidTeamSize: If adding members would exceed team size limit
+ * @summary Add members to team (leader only)
+ */
+export const addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost = (
+    teamId: string,
+    studentTeamAddMemberRequest: StudentTeamAddMemberRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamAddMemberResponse>(
+      {url: `/api/v1/students/teams/students/teams/${teamId}/members`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamAddMemberRequest, signal
+    },
+      );
+    }
+
+
+
+export const getAddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>, TError,{teamId: string;data: StudentTeamAddMemberRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>, TError,{teamId: string;data: StudentTeamAddMemberRequest}, TContext> => {
+
+const mutationKey = ['addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>, {teamId: string;data: StudentTeamAddMemberRequest}> = (props) => {
+          const {teamId,data} = props ?? {};
+
+          return  addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost(teamId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPostMutationResult = NonNullable<Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>>
+    export type AddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPostMutationBody = StudentTeamAddMemberRequest
+    export type AddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Add members to team (leader only)
+ */
+export const useAddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>, TError,{teamId: string;data: StudentTeamAddMemberRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPost>>,
+        TError,
+        {teamId: string;data: StudentTeamAddMemberRequest},
+        TContext
+      > => {
+      return useMutation(getAddMemberToTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Remove a member from team (leader only).
+
+Args:
+    team_id: Team UUID
+    member_id: Member UUID to remove
+    user_id: Current authenticated user (must be leader)
+    service: StudentTeamService instance
+
+Returns:
+    Removal confirmation
+ * @summary Remove member from team (leader only)
+ */
+export const removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete = (
+    teamId: string,
+    memberId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentTeamRemoveMemberResponse>(
+      {url: `/api/v1/students/teams/students/teams/${teamId}/members/${memberId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getRemoveMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext> => {
+
+const mutationKey = ['removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>, {teamId: string;memberId: string}> = (props) => {
+          const {teamId,memberId} = props ?? {};
+
+          return  removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete(teamId,memberId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>>
+
+    export type RemoveMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Remove member from team (leader only)
+ */
+export const useRemoveMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDelete>>,
+        TError,
+        {teamId: string;memberId: string},
+        TContext
+      > => {
+      return useMutation(getRemoveMemberFromTeamApiV1StudentsTeamsStudentsTeamsTeamIdMembersMemberIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
+ * Run student code against a single test case for immediate feedback
+ * @summary Test code against a test case
+ */
+export const runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost = (
+    contestId: string,
+    questionId: string,
+    studentCodeRunRequest: StudentCodeRunRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<StudentCodeRunResponse>(
+      {url: `/api/v1/students/run/contests/${contestId}/questions/${questionId}/run`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentCodeRunRequest, signal
+    },
+      );
+    }
+
+
+
+export const getRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationOptions = <TError = ExceptionResponse | void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext> => {
+
+const mutationKey = ['runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, {contestId: string;questionId: string;data: StudentCodeRunRequest}> = (props) => {
+          const {contestId,questionId,data} = props ?? {};
+
+          return  runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost(contestId,questionId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationResult = NonNullable<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>>
+    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationBody = StudentCodeRunRequest
+    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationError = ExceptionResponse | void
+
+    /**
+ * @summary Test code against a test case
+ */
+export const useRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost = <TError = ExceptionResponse | void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>,
+        TError,
+        {contestId: string;questionId: string;data: StudentCodeRunRequest},
+        TContext
+      > => {
+      return useMutation(getRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationOptions(options), queryClient);
     }

@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetMyTeamsApiV1StudentsTeamsGetParams = {
+export type GetMyTeamsApiV1StudentsTeamsStudentsTeamsGetParams = {
 /**
  * @minimum 1
  * @maximum 100

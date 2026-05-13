@@ -3,10 +3,12 @@ import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { Code2, Trophy, Users, FileCode2 } from "lucide-react";
 
+import { getDefaultRoute } from "@/lib/auth/utils";
+
 export default async function LandingPage() {
     const session = await auth();
     if (session?.user) {
-        redirect("/dashboard");
+        redirect(getDefaultRoute(session.user));
     }
 
     return (
@@ -48,13 +50,12 @@ export default async function LandingPage() {
                 </div>
 
                 <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-sidebar-foreground sm:text-6xl">
-                    Amrita{" "}
-                    <span className="text-sidebar-primary">ICPC</span>
+                    Amrita <span className="text-sidebar-primary">ICPC</span>
                 </h1>
 
                 <p className="mt-5 max-w-lg text-base text-sidebar-foreground/60">
-                    Manage contests, questions, teams, and submissions in one place.
-                    Built for instructors, students, and contest managers.
+                    Manage contests, questions, teams, and submissions in one place. Built for
+                    instructors, students, and contest managers.
                 </p>
 
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

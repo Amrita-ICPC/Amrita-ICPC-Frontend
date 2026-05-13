@@ -5,33 +5,17 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ContestAudienceResponse } from './contestAudienceResponse';
+import type { ContestMode } from './contestMode';
+import type { ContestRunStatus } from './contestRunStatus';
 import type { ContestStatus } from './contestStatus';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
 /**
- * Schema for contest summary in availability list.
-
-Used in GET /students/contests/available endpoint.
-Shows high-level contest information for discovery.
-
-Attributes:
-    id: Contest unique identifier
-    name: Contest name
-    description: Optional contest description
-    image: Optional contest image URL
-    start_time: Contest start time (UTC)
-    end_time: Contest end time (UTC)
-    registration_start: Registration window start
-    registration_end: Registration window end
-    status: Current contest status
-    is_public: Whether contest is publicly visible
-    problem_count: Number of problems in contest
-    team_approval_mode: How teams are approved
-    min_team_size: Minimum team size required
-    max_team_size: Maximum team size allowed
+ * Schema for contest available for students (List view).
  */
 export interface StudentContestAvailableResponse {
-  /** Contest unique identifier */
+  /** Contest ID */
   id: string;
   /** Contest name */
   name: string;
@@ -43,20 +27,30 @@ export interface StudentContestAvailableResponse {
   start_time: string;
   /** Contest end time (UTC) */
   end_time: string;
+  /** Contest lifecycle status */
+  status: ContestStatus;
+  /** Contest temporal run-state (UPCOMING / LIVE / ENDED) */
+  run_status: ContestRunStatus;
   /** Registration start time (UTC) */
   registration_start?: string | null;
   /** Registration end time (UTC) */
   registration_end?: string | null;
-  /** Contest status (DRAFT, PUBLISHED, PAUSED, CANCELLED) */
-  status: ContestStatus;
-  /** Whether contest is publicly visible */
+  /** Contest creation time (UTC) */
+  created_at: string;
+  /** Whether contest is public */
   is_public: boolean;
-  /** Number of problems in contest */
-  problem_count: number;
-  /** How teams are approved (AUTO_APPROVE or INSTRUCTOR_REVIEW) */
+  /** How teams are approved in this contest */
   team_approval_mode: TeamApprovalMode;
-  /** Minimum team size required */
+  /** Contest mode (individual or team) */
+  contest_mode: ContestMode;
+  /** List of audiences linked to this contest */
+  audiences?: ContestAudienceResponse[];
+  /** Maximum number of teams allowed */
+  max_teams?: number | null;
+  /** Total number of teams registered and approved */
+  teams_count?: number;
+  /** Minimum team size */
   min_team_size: number;
-  /** Maximum team size allowed */
+  /** Maximum team size */
   max_team_size: number;
 }

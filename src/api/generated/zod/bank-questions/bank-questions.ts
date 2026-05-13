@@ -94,7 +94,6 @@ export const getBankQuestionsApiV1BanksBankIdQuestionsGetQuerySkipMin = 0;
 export const getBankQuestionsApiV1BanksBankIdQuestionsGetQueryLimitDefault = 10;
 export const getBankQuestionsApiV1BanksBankIdQuestionsGetQueryLimitMax = 100;
 
-export const getBankQuestionsApiV1BanksBankIdQuestionsGetQuerySortByOneRegExp = new RegExp('^(name|difficulty)$');
 
 
 export const GetBankQuestionsApiV1BanksBankIdQuestionsGetQueryParams = zod.object({
@@ -103,7 +102,7 @@ export const GetBankQuestionsApiV1BanksBankIdQuestionsGetQueryParams = zod.objec
   "title": zod.union([zod.string(),zod.null()]).optional().describe('Filter by question title'),
   "difficulty": zod.union([zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),zod.null()]).optional().describe('Filter by difficulty'),
   "tag": zod.union([zod.string(),zod.null()]).optional().describe('Filter by tag name'),
-  "sort_by": zod.union([zod.string().regex(getBankQuestionsApiV1BanksBankIdQuestionsGetQuerySortByOneRegExp),zod.null()]).optional().describe('Sort by field'),
+  "sort_by": zod.enum(['name', 'difficulty']).optional().describe('Sort by field'),
   "sort_order": zod.enum(['asc', 'desc']).optional().describe('Sort order')
 })
 
