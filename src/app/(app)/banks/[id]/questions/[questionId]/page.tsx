@@ -19,7 +19,7 @@ export default async function BankQuestionPage({
 
     if (questionId === "new" || isEdit) {
         return (
-            <div className="container py-8">
+            <div className="mx-auto w-full max-w-6xl">
                 <BankQuestionEditorClient
                     bankId={id}
                     questionId={questionId === "new" ? undefined : questionId}
@@ -30,7 +30,7 @@ export default async function BankQuestionPage({
     }
 
     return (
-        <div className="container py-8">
+        <div className="mx-auto w-full max-w-6xl">
             <h1 className="text-2xl font-bold">Question View</h1>
             <p className="text-muted-foreground mt-2">
                 Viewing question {questionId} in bank {id}

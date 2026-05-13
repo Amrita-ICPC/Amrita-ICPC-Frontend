@@ -67,10 +67,10 @@ export function BankRowItem({ bank }: BankRowItemProps) {
             >
                 <TableCell>
                     <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <BookOpen className="h-4 w-4 text-primary" />
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <BookOpen className="size-4" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <p className="font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
                                 {bank.name}
                             </p>
@@ -87,9 +87,9 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                className="size-8 text-muted-foreground hover:text-foreground"
                             >
-                                <MoreVertical className="h-4 w-4" />
+                                <MoreVertical className="size-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">

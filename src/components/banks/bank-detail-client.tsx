@@ -16,16 +16,14 @@ interface BankDetailClientProps {
 
 function BankDetailSkeleton() {
     return (
-        <div className="space-y-8">
-            <Skeleton className="h-[280px] w-full rounded-2xl" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex flex-col gap-4">
+            <Skeleton className="h-36 w-full rounded-lg" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[1, 2, 3, 4].map((i) => (
-                    <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                    <Skeleton key={i} className="h-20 w-full rounded-lg" />
                 ))}
             </div>
-            <div className="space-y-4">
-                <Skeleton className="h-[400px] w-full rounded-xl" />
-            </div>
+            <Skeleton className="h-96 w-full rounded-lg" />
         </div>
     );
 }
@@ -44,22 +42,22 @@ export function BankDetailClient({ bankId }: BankDetailClientProps) {
             loadingComponent={<BankDetailSkeleton />}
         >
             {bank && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex animate-in flex-col gap-5 fade-in slide-in-from-bottom-4 duration-500">
                     <BankHero bank={bank} />
 
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                <h2 className="text-lg font-semibold tracking-tight text-foreground">
                                     Questions
                                 </h2>
-                                <p className="text-sm text-muted-foreground font-medium">
+                                <p className="text-sm text-muted-foreground">
                                     Manage the problems in this collection.
                                 </p>
                             </div>
-                            <Button asChild className="gap-2 shadow-lg shadow-primary/20">
+                            <Button asChild>
                                 <Link href={`/banks/${bankId}/questions/new`}>
-                                    <Plus className="h-4 w-4" />
+                                    <Plus data-icon="inline-start" />
                                     Add Question
                                 </Link>
                             </Button>

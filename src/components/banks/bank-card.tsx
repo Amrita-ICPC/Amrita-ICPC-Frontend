@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -59,81 +60,77 @@ export function BankCard({ bank }: BankCardProps) {
     };
 
     return (
-        <div
+        <Card
             onClick={handleCardClick}
-            className="group relative flex h-50 flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-[0_10px_24px_-18px_rgba(20,45,103,0.45)] transition-all duration-200 hover:-translate-y-1 hover:border-[#c7d3ef] hover:bg-[#f8faff] hover:shadow-[0_18px_30px_-18px_rgba(20,45,103,0.55)] dark:border-white/12 dark:bg-slate-900 dark:hover:border-white/20 dark:hover:bg-slate-900 cursor-pointer"
+            className="group cursor-pointer border-border/60 py-0 transition-all hover:border-primary/40 hover:shadow-md"
         >
-            {/* Hover accent line */}
-            <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-xl bg-linear-to-r from-[#2f4f9a] to-[#1f3678] opacity-40 transition-opacity duration-200 group-hover:opacity-100" />
-
-            {/* Header row */}
-            <div className="flex items-start justify-between gap-2">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#e7edfb] text-[#27438a] transition-colors group-hover:bg-[#dce6fa] dark:bg-blue-500/20 dark:text-blue-300 dark:group-hover:bg-blue-500/30">
-                    <BookOpen className="h-5 w-5" />
+            <CardContent className="flex h-44 flex-col p-4">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <BookOpen className="size-5" />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-8 text-muted-foreground hover:text-foreground"
+                                >
+                                    <MoreVertical className="size-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                    onClick={() => setUpdateOpen(true)}
+                                    className="cursor-pointer gap-2"
+                                >
+                                    <Edit className="size-4" /> Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setShareOpen(true)}
+                                    className="cursor-pointer gap-2"
+                                >
+                                    <Share2 className="size-4" /> Manage Access
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={handleDelete}
+                                    className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+                                    disabled={isDeleting}
+                                >
+                                    <Trash2 className="size-4" /> Delete Bank
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
+
+                <div className="mt-3 min-h-0 flex-1">
+                    <p className="line-clamp-1 font-semibold leading-tight transition-colors group-hover:text-primary">
+                        {bank.name}
+                    </p>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
+                        {bank.description || "No description added."}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="size-3.5" />
+                    Updated {formattedDate}
+                </div>
+
                 <div onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-slate-100"
-                            >
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                                onClick={() => setUpdateOpen(true)}
-                                className="gap-2 cursor-pointer"
-                            >
-                                <Edit className="h-4 w-4" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setShareOpen(true)}
-                                className="gap-2 cursor-pointer"
-                            >
-                                <Share2 className="h-4 w-4" /> Manage Access
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={handleDelete}
-                                className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-                                disabled={isDeleting}
-                            >
-                                <Trash2 className="h-4 w-4" /> Delete Bank
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <BankUpdateDialog bank={bank} open={updateOpen} onOpenChange={setUpdateOpen} />
+                    <BankShareDialog
+                        bankId={bank.id}
+                        bankName={bank.name}
+                        open={shareOpen}
+                        onOpenChange={setShareOpen}
+                        trigger={null}
+                    />
                 </div>
-            </div>
-
-            {/* Name + description */}
-            <div className="mt-3 flex-1 min-h-0">
-                <p className="line-clamp-1 font-bold text-slate-900 transition-colors group-hover:text-[#1f3678] dark:text-slate-100 dark:group-hover:text-blue-300">
-                    {bank.name}
-                </p>
-                <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300/90">
-                    {bank.description || "No description provided for this bank."}
-                </p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                <Clock className="h-3 w-3" />
-                Updated {formattedDate}
-            </div>
-
-            <div onClick={(e) => e.stopPropagation()}>
-                <BankUpdateDialog bank={bank} open={updateOpen} onOpenChange={setUpdateOpen} />
-                <BankShareDialog
-                    bankId={bank.id}
-                    bankName={bank.name}
-                    open={shareOpen}
-                    onOpenChange={setShareOpen}
-                    trigger={null}
-                />
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }

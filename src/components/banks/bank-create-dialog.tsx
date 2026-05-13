@@ -79,30 +79,29 @@ export function BankCreateDialog() {
                     New Bank
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] border-white/10 bg-[#0f1117] text-white">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">Create New Bank</DialogTitle>
-                    <DialogDescription className="text-white/60">
+                    <DialogTitle>Create Question Bank</DialogTitle>
+                    <DialogDescription>
                         Create a container for your questions. You can share this bank with other
                         instructors later.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
                         <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-white/80">Bank Name</FormLabel>
+                                    <FormLabel>Bank name</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="e.g., Dynamic Programming Basics"
-                                            className="border-white/10 bg-white/5 focus-visible:ring-primary/50"
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormMessage className="text-red-400" />
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -111,43 +110,39 @@ export function BankCreateDialog() {
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-white/80">
-                                        Description (Optional)
-                                    </FormLabel>
+                                    <FormLabel>Description</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder="Describe the purpose or content of this bank..."
-                                            className="min-h-[120px] resize-none border-white/10 bg-white/5 focus-visible:ring-primary/50"
+                                            className="min-h-24 resize-none"
                                             {...field}
                                             value={field.value ?? ""}
                                         />
                                     </FormControl>
-                                    <FormMessage className="text-red-400" />
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <DialogFooter className="pt-4">
+                        <DialogFooter>
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => setOpen(false)}
-                                className="border-white/10 hover:bg-white/5"
                                 disabled={isPending}
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={isPending}
-                                className="min-w-[120px] shadow-[0_0_20px_rgba(var(--primary),0.2)]"
-                            >
+                            <Button type="submit" disabled={isPending} className="min-w-28">
                                 {isPending ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <Loader2
+                                            data-icon="inline-start"
+                                            className="animate-spin"
+                                        />
                                         Creating...
                                     </>
                                 ) : (
-                                    "Create Bank"
+                                    "Create bank"
                                 )}
                             </Button>
                         </DialogFooter>

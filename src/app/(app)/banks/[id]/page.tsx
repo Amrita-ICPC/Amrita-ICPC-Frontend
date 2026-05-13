@@ -16,7 +16,7 @@ export default async function BankPage({ params }: BankPageProps) {
     const { id } = await params;
 
     return (
-        <div className="container py-8 max-w-7xl mx-auto">
+        <div className="mx-auto w-full max-w-7xl">
             <BankDetailClient bankId={id} />
         </div>
     );

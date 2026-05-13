@@ -15,6 +15,7 @@ import type { useQuestionForm } from "@/hooks/use-question-form";
 import { useContestQuestion, usePlatformLanguages } from "@/query/contest-query";
 import { useGetQuestion } from "@/query/question-query";
 import { AsyncStateHandler } from "../shared/async-state-handler";
+import { cn } from "@/lib/utils";
 
 export interface QuestionEditorShellProps {
     mode: "create" | "update";
@@ -24,6 +25,7 @@ export interface QuestionEditorShellProps {
     form: ReturnType<typeof useQuestionForm>;
     onSave: () => void;
     isSaving: boolean;
+    compact?: boolean;
 }
 
 export function QuestionEditorShell({
@@ -34,6 +36,7 @@ export function QuestionEditorShell({
     form,
     onSave,
     isSaving,
+    compact = false,
 }: QuestionEditorShellProps) {
     const { metadata, content, code, testCases, initializeForm } = form;
 
@@ -143,14 +146,24 @@ export function QuestionEditorShell({
             }}
             errorTitle={fetchError ? "Failed to Load Question" : "Failed to Load Platform Data"}
             loadingComponent={
-                <div className="space-y-8 max-w-5xl mx-auto pb-20">
-                    <Skeleton className="h-40 w-full rounded-2xl" />
-                    <Skeleton className="h-64 w-full rounded-2xl" />
-                    <Skeleton className="h-96 w-full rounded-2xl" />
+                <div
+                    className={cn(
+                        "mx-auto flex w-full flex-col",
+                        compact ? "max-w-6xl gap-5 pb-8" : "max-w-5xl gap-8 pb-20",
+                    )}
+                >
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                    <Skeleton className="h-56 w-full rounded-lg" />
+                    <Skeleton className="h-80 w-full rounded-lg" />
                 </div>
             }
         >
-            <div className="space-y-8 max-w-5xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div
+                className={cn(
+                    "mx-auto flex w-full animate-in flex-col fade-in slide-in-from-bottom-4 duration-500",
+                    compact ? "max-w-6xl gap-5 pb-8" : "max-w-5xl gap-8 pb-20",
+                )}
+            >
                 <QuestionCreateHero
                     title={mode === "update" ? "Update Question" : "Create Question"}
                     description={

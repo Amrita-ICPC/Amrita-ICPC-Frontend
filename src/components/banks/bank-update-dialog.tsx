@@ -101,29 +101,25 @@ export function BankUpdateDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[500px] border-white/10 bg-[#0f1117] text-white">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">Edit Bank Details</DialogTitle>
-                    <DialogDescription className="text-white/60">
+                    <DialogTitle>Edit Bank Details</DialogTitle>
+                    <DialogDescription>
                         Update the name and description of your question bank.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
                         <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-white/80">Bank Name</FormLabel>
+                                    <FormLabel>Bank name</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            className="border-white/10 bg-white/5 focus-visible:ring-primary/50"
-                                            {...field}
-                                            value={field.value ?? ""}
-                                        />
+                                        <Input {...field} value={field.value ?? ""} />
                                     </FormControl>
-                                    <FormMessage className="text-red-400" />
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -132,26 +128,23 @@ export function BankUpdateDialog({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-white/80">
-                                        Description (Optional)
-                                    </FormLabel>
+                                    <FormLabel>Description</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            className="min-h-[120px] resize-none border-white/10 bg-white/5 focus-visible:ring-primary/50"
+                                            className="min-h-24 resize-none"
                                             {...field}
                                             value={field.value ?? ""}
                                         />
                                     </FormControl>
-                                    <FormMessage className="text-red-400" />
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <DialogFooter className="pt-4">
+                        <DialogFooter>
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
-                                className="border-white/10 hover:bg-white/5"
                                 disabled={isPending}
                             >
                                 Cancel
