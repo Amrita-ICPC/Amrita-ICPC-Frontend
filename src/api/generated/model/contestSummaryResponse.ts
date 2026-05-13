@@ -41,4 +41,8 @@ export interface ContestSummaryResponse {
   contest_mode: ContestMode;
   /** List of audiences linked to this contest */
   audiences?: ContestAudienceResponse[];
+  /** Maximum number of teams allowed */
+  max_teams?: number | null;
+  /** Unique tags for this contest */
+  tags?: string[];
 }

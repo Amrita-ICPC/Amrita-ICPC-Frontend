@@ -1,8 +1,15 @@
 import { auth } from "@/lib/auth/auth";
 import { Trophy, FileCode2, Users, ShieldCheck } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getDefaultRoute } from "@/lib/auth/utils";
 
 export default async function DashboardPage() {
     const session = await auth();
+
+    if (session?.user && getDefaultRoute(session.user) === "/student/dashboard") {
+        redirect("/student/dashboard");
+    }
+
     const roles = session?.user?.roles ?? [];
     const groups = session?.user?.groups ?? [];
 
@@ -50,7 +57,9 @@ export default async function DashboardPage() {
                         href={href}
                         className="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent"
                     >
-                        <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+                        <div
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}
+                        >
                             <Icon className={`h-5 w-5 ${color}`} />
                         </div>
                         <div>

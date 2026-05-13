@@ -1,4 +1,5 @@
-import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
+import NextAuth, { type NextAuthOptions, type Account, type User } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import type { JWT } from "next-auth/jwt";
 import Keycloak from "next-auth/providers/keycloak";
 import { decodeJwt } from "jose";
@@ -34,12 +35,20 @@ export const authOptions: NextAuthOptions = {
             else if (new URL(url).origin === baseUrl) return url;
             return baseUrl;
         },
-        async jwt({ token, account, user }) {
+        async jwt({
+            token,
+            account,
+            user,
+        }: {
+            token: JWT;
+            account: Account | null;
+            user: User | null;
+        }) {
             // Initial sign-in
             if (account && user) {
                 const decoded = decodeJwt(account.access_token!);
                 const { groups, permissions } = processDecodedToken(decoded as DecodedJWT);
-                const keycloakAccount = account as typeof account & {
+                const keycloakAccount = account as Account & {
                     refresh_expires_in?: number;
                 };
                 const refreshExpiresIn =
@@ -74,7 +83,7 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Access token still valid
-            if (token.expires_at && Date.now() < token.expires_at * 1000 - 15 * 1000) {
+            if (token.expires_at && Date.now() < (token.expires_at as number) * 1000 - 15 * 1000) {
                 return token;
             }
 
@@ -106,8 +115,8 @@ export const authOptions: NextAuthOptions = {
         },
     },
     events: {
-        async signOut(message) {
-            const token = "token" in message ? message.token : null;
+        async signOut(message: { token: JWT; [key: string]: unknown }) {
+            const token = message.token;
             if (token?.id_token) {
                 try {
                     const logoutUrl = new URL(
@@ -133,7 +142,7 @@ export const authOptions: NextAuthOptions = {
     },
 };
 
-export function auth() {
+export async function auth() {
     return getServerSession(authOptions);
 }
 

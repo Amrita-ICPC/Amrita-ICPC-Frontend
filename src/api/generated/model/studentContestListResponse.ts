@@ -8,27 +8,12 @@
 import type { StudentContestAvailableResponse } from './studentContestAvailableResponse';
 
 /**
- * Schema for paginated list of available contests.
-
-Used in GET /students/contests/available endpoint.
-Returns paginated results with navigation info.
-
-Attributes:
-    contests: List of available contests
-    total: Total number of available contests
-    page: Current page number
-    page_size: Number of contests per page
-    has_more: Whether there are more pages
+ * Paginated list of contests for students.
  */
 export interface StudentContestListResponse {
-  /** List of available contests */
   contests: StudentContestAvailableResponse[];
-  /** Total number of available contests */
   total: number;
-  /** Current page number */
   page: number;
-  /** Number of contests per page */
   page_size: number;
-  /** Whether there are more pages */
   has_more: boolean;
 }

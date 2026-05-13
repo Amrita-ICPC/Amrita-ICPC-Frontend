@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { BankQuestionSortBy } from './bankQuestionSortBy';
 import type { QuestionDifficulty } from './questionDifficulty';
 import type { SortOrder } from './sortOrder';
 
@@ -33,7 +34,7 @@ tag?: string | null;
 /**
  * Sort by field
  */
-sort_by?: string | null;
+sort_by?: BankQuestionSortBy;
 /**
  * Sort order
  */
