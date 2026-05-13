@@ -22,7 +22,10 @@ const SEGMENT_LABELS: Record<string, string> = {
     banks: "Question Banks",
     questions: "Questions",
     settings: "Settings",
-    audiences: "Manage Users",
+    users: "Users",
+    group: "Group",
+    groups: "Groups",
+    audiences: "Groups",
 };
 
 function isUUID(s: string) {

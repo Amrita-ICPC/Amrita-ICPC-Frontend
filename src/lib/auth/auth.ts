@@ -1,5 +1,4 @@
-import NextAuth from "next-auth";
-import type { NextAuthConfig } from "next-auth";
+import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import Keycloak from "next-auth/providers/keycloak";
 import { decodeJwt } from "jose";
@@ -8,7 +7,7 @@ import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
 import { logger } from "../logger";
 import { env } from "@/lib/env";
 
-const config: NextAuthConfig = {
+export const authOptions: NextAuthOptions = {
     providers: [
         Keycloak({
             clientId: env.AUTH_KEYCLOAK_ID,
@@ -40,9 +39,12 @@ const config: NextAuthConfig = {
             if (account && user) {
                 const decoded = decodeJwt(account.access_token!);
                 const { groups, permissions } = processDecodedToken(decoded as DecodedJWT);
+                const keycloakAccount = account as typeof account & {
+                    refresh_expires_in?: number;
+                };
                 const refreshExpiresIn =
-                    typeof account.refresh_expires_in === "number"
-                        ? account.refresh_expires_in
+                    typeof keycloakAccount.refresh_expires_in === "number"
+                        ? keycloakAccount.refresh_expires_in
                         : 600;
                 const sessionExpiresAt = Math.floor(Date.now() / 1000) + refreshExpiresIn;
                 return {
@@ -65,7 +67,10 @@ const config: NextAuthConfig = {
                 Date.now() > token.session_expires_at * 1000
             ) {
                 logger.info("Session has expired based on Keycloak refresh token expiry");
-                return null;
+                return {
+                    ...token,
+                    error: "SessionExpired",
+                };
             }
 
             // Access token still valid
@@ -76,11 +81,16 @@ const config: NextAuthConfig = {
             // Try to refresh
             if (token.refresh_token) {
                 const refreshed = await refreshKeycloakAccessToken(token as KeycloakToken);
-                if (!refreshed) return null;
+                if (!refreshed) {
+                    return {
+                        ...token,
+                        error: "RefreshAccessTokenError",
+                    };
+                }
                 return refreshed as JWT;
             }
 
-            return null;
+            return token;
         },
         async session({ session, token }) {
             if (token) {
@@ -123,4 +133,13 @@ const config: NextAuthConfig = {
     },
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+export function auth() {
+    return getServerSession(authOptions);
+}
+
+const handler = NextAuth(authOptions);
+
+export const handlers = {
+    GET: handler,
+    POST: handler,
+};
