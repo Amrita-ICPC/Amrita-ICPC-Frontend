@@ -303,6 +303,9 @@ export function BankPartialCloneClient({
                                 size="icon"
                                 className="size-9"
                                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                                aria-label={
+                                    sortOrder === "asc" ? "Sort descending" : "Sort ascending"
+                                }
                                 title="Toggle sort order"
                             >
                                 <ArrowUpDown
@@ -396,7 +399,7 @@ export function BankPartialCloneClient({
                                         {questions.map((question) => (
                                             <TableRow
                                                 key={question.id}
-                                                className="hover:bg-muted/40"
+                                                className="group cursor-pointer hover:bg-muted/40 transition-colors"
                                             >
                                                 <TableCell>
                                                     <Checkbox

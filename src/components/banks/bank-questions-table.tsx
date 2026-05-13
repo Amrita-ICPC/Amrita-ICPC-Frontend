@@ -185,7 +185,12 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
             </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        aria-label={`More options for ${question.title}`}
+                    >
                         <MoreHorizontal className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
@@ -393,7 +398,10 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                                 </TableHeader>
                                 <TableBody>
                                     {questions.map((question) => (
-                                        <TableRow key={question.id} className="hover:bg-muted/40">
+                                        <TableRow
+                                            key={question.id}
+                                            className="group cursor-pointer hover:bg-muted/40 transition-colors"
+                                        >
                                             <TableCell>
                                                 <Checkbox
                                                     checked={selectedIds.includes(question.id)}
