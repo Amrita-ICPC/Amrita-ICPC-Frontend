@@ -1,11 +1,15 @@
-import { auth } from "@/lib/auth/auth";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { UserType, hasAccess } from "@/lib/auth/utils";
 
-export default auth((req) => {
+export default async function proxy(req: NextRequest) {
     const { nextUrl } = req;
     const pathname = nextUrl.pathname;
-    const session = req.auth;
+    const token = await getToken({
+        req,
+        secret: process.env.NEXTAUTH_SECRET,
+    });
 
     // Public paths — always allow
     if (pathname === "/" || pathname.startsWith("/auth")) {
@@ -13,14 +17,14 @@ export default auth((req) => {
     }
 
     // Not authenticated — redirect to login
-    if (!session?.user) {
+    if (!token || token.error) {
         const loginUrl = new URL("/auth/login", nextUrl);
-        loginUrl.searchParams.set("callbackUrl", pathname);
+        loginUrl.searchParams.set("callbackUrl", `${pathname}${nextUrl.search}`);
         return NextResponse.redirect(loginUrl);
     }
 
-    const userRoles = session.user.roles;
-    const userGroups = session.user.groups;
+    const userRoles = token.roles;
+    const userGroups = token.groups;
 
     // RBAC for specific path prefixes
     const roleMappedPaths: { path: string; roles: UserType[] }[] = [
@@ -39,7 +43,7 @@ export default auth((req) => {
     }
 
     return NextResponse.next();
-});
+}
 
 export const config = {
     matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

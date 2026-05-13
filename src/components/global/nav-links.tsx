@@ -11,6 +11,7 @@ import {
     FileCode2,
     UsersRound,
     Settings,
+    UserRoundCog,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -22,7 +23,10 @@ const NAV_ITEMS = [
     { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const ADMIN_ITEMS = [{ href: "/audiences", label: "Manage Users", icon: UsersRound }];
+const ADMIN_ITEMS = [
+    { href: "/users", label: "Users", icon: UserRoundCog },
+    { href: "/groups", label: "Groups", icon: UsersRound },
+];
 
 interface NavLinksProps {
     isAdmin: boolean;
