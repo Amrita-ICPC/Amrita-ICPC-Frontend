@@ -1,14 +1,7 @@
-import type { Session } from "next-auth";
-
 import AccessDenied from "@/components/global/access-denied";
 import { GroupsClient } from "@/components/groups/groups-client";
 import { auth } from "@/lib/auth/auth";
-import { UserType } from "@/lib/auth/utils";
-
-function isAdmin(user?: Session["user"] | null) {
-    const claims = [...(user?.roles ?? []), ...(user?.groups ?? [])];
-    return claims.some((claim) => claim.toLowerCase() === UserType.ADMIN);
-}
+import { isAdmin } from "@/lib/auth/guards";
 
 export default async function GroupsPage() {
     const session = await auth();

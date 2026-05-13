@@ -225,7 +225,7 @@ function PeoplePicker({
     }
 
     return (
-        <Card className="border-border/60">
+        <Card className="border-border/60 transition-all hover:border-primary/40 hover:shadow-md">
             <CardHeader className="pb-3">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                     <div>
@@ -345,7 +345,7 @@ function PeoplePicker({
                                         type="button"
                                         onClick={() => toggleUser(user)}
                                         className={cn(
-                                            "flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/50",
+                                            "group flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/40",
                                             selected && "bg-primary/10",
                                         )}
                                     >
@@ -456,7 +456,7 @@ function GroupMembers({ group }: { group: AudienceResponse }) {
 
     return (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_560px]">
-            <Card className="border-border/60">
+            <Card className="border-border/60 transition-all hover:border-primary/40 hover:shadow-md">
                 <CardHeader className="pb-3">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div>
@@ -555,7 +555,10 @@ function GroupMembers({ group }: { group: AudienceResponse }) {
                                 </TableHeader>
                                 <TableBody>
                                     {users.map((user) => (
-                                        <TableRow key={user.id} className="hover:bg-muted/40">
+                                        <TableRow
+                                            key={user.id}
+                                            className="group cursor-pointer hover:bg-muted/40 transition-colors"
+                                        >
                                             <TableCell>
                                                 <div className="flex min-w-0 items-center gap-3">
                                                     <Avatar>

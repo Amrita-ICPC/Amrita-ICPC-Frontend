@@ -64,7 +64,7 @@ import { toApiError } from "@/lib/api/error";
 const groupSchema = z.object({
     name: z.string().min(1, "Group name is required").max(255),
     audience_type: z.nativeEnum(AudienceType),
-    description: z.string().nullable().optional(),
+    description: z.string().nullish(),
 });
 
 type GroupFormValues = z.infer<typeof groupSchema>;
@@ -75,6 +75,14 @@ const TYPE_LABELS: Record<AudienceType, string> = {
     [AudienceType.batch]: "Batch",
     [AudienceType.campus]: "Campus",
 };
+
+function getGroupFormValues(group?: AudienceResponse | null): GroupFormValues {
+    return {
+        name: group?.name ?? "",
+        audience_type: group?.audience_type ?? AudienceType.class,
+        description: group?.description ?? "",
+    };
+}
 
 function getErrorMessage(error: unknown, fallback: string) {
     return toApiError(error).message || fallback;
@@ -92,12 +100,13 @@ function GroupDialog({ open, onOpenChange, group }: GroupDialogProps) {
 
     const form = useForm<GroupFormValues>({
         resolver: zodResolver(groupSchema),
-        values: {
-            name: group?.name ?? "",
-            audience_type: group?.audience_type ?? AudienceType.class,
-            description: group?.description ?? "",
-        },
+        defaultValues: getGroupFormValues(group),
     });
+
+    useEffect(() => {
+        if (!open) return;
+        form.reset(getGroupFormValues(group));
+    }, [form, group, open]);
 
     const { mutate: createGroup, isPending: isCreating } = useCreateAudienceApiV1AudiencesPost({
         mutation: {
@@ -326,7 +335,7 @@ export function GroupsClient() {
                     </div>
 
                     {isLoading ? (
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }).map((_, index) => (
                                 <Skeleton key={index} className="h-28 rounded-lg" />
                             ))}
@@ -351,7 +360,7 @@ export function GroupsClient() {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {groups.map((group) => (
                                 <Card
                                     key={group.id}

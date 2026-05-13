@@ -7,6 +7,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -29,11 +39,13 @@ export function BankCard({ bank }: BankCardProps) {
     const queryClient = useQueryClient();
     const [updateOpen, setUpdateOpen] = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const { mutate: deleteBank, isPending: isDeleting } = useDeleteBank({
         mutation: {
             onSuccess: () => {
                 toast.success("Bank deleted successfully");
+                setDeleteOpen(false);
                 queryClient.invalidateQueries({ queryKey: allBanksKey() });
                 queryClient.invalidateQueries({ queryKey: bankDetailKey(bank.id) });
             },
@@ -44,9 +56,7 @@ export function BankCard({ bank }: BankCardProps) {
     });
 
     const handleDelete = () => {
-        if (confirm("Are you sure you want to delete this bank? This action cannot be undone.")) {
-            deleteBank({ bankId: bank.id });
-        }
+        deleteBank({ bankId: bank.id });
     };
 
     const formattedDate = new Date(bank.updated_at).toLocaleDateString(undefined, {
@@ -95,7 +105,7 @@ export function BankCard({ bank }: BankCardProps) {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                    onClick={handleDelete}
+                                    onClick={() => setDeleteOpen(true)}
                                     className="cursor-pointer gap-2 text-destructive focus:text-destructive"
                                     disabled={isDeleting}
                                 >
@@ -129,6 +139,30 @@ export function BankCard({ bank }: BankCardProps) {
                         onOpenChange={setShareOpen}
                         trigger={null}
                     />
+                    <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Delete {bank.name}?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to delete this bank? This action cannot be
+                                    undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        handleDelete();
+                                    }}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? "Deleting..." : "Delete Bank"}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </CardContent>
         </Card>

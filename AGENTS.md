@@ -10,28 +10,29 @@ Next.js 16 (App Router) exam/contest platform for Amrita University's ICPC progr
 - **Data fetching**: TanStack Query v5 + orval-generated API clients (axios)
 - **Runtime**: Bun
 
-## Auth Pattern (v5 beta)
+## Auth Pattern (next-auth v4)
 
 ```ts
 // Route handler — src/app/api/auth/[...nextauth]/route.ts
-import { handlers } from "@/lib/auth/auth";
-export const { GET, POST } = handlers;
+import NextAuth from "next-auth";
+import { authOptions } from "@/lib/auth/auth";
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
 
 // Server component session
-import { auth } from "@/lib/auth/auth";
-const session = await auth();
-
-// Server action signout (server components/actions)
-import { signOut } from "@/lib/auth/auth";
-await signOut({ redirectTo: "/auth/login" });
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth";
+const session = await getServerSession(authOptions);
 
 // Client signout (client components)
 import { signOut } from "next-auth/react";
 signOut({ callbackUrl: "/auth/login" });
 ```
 
-v5 exports `{ handlers, auth, signIn, signOut }` from `NextAuth(config)`. No more `getServerSession` or `withAuth`.
-Middleware uses `auth` from our auth.ts — `req.auth` is the session in the middleware callback.
+`src/lib/auth/auth.ts` may export small v4 helpers, but they should wrap
+`authOptions`/`getServerSession`. Do not use NextAuth v5 `auth()`,
+`signIn`, `signOut`, or middleware `req.auth` patterns.
 
 ## Commands
 
@@ -47,7 +48,7 @@ Pre-push hook runs `lint && typecheck` — fix all TS/ESLint errors before pushi
 
 ## Project Structure
 
-```
+```text
 src/
   app/
     (app)/          # authenticated app shell (sidebar layout)
@@ -101,7 +102,7 @@ API base URL configured via `NEXT_PUBLIC_API_URL` env var.
 
 ## Key Env Vars
 
-```
+```bash
 AUTH_KEYCLOAK_ID
 AUTH_KEYCLOAK_SECRET
 AUTH_KEYCLOAK_ISSUER
@@ -114,7 +115,7 @@ NEXT_PUBLIC_API_URL
 
 All list pages follow this structure:
 
-```
+```text
 <PageHeader>          title + subtitle + action button (server component)
 <Toolbar>             search input | filter selects | <ViewToggle />
 <Content>             grid (cards) OR table rows — driven by ViewToggle state
