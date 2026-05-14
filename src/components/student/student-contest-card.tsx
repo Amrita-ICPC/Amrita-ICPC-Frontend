@@ -1,49 +1,70 @@
 "use client";
 
-import { Users, Shield, ArrowRight, Clock } from "lucide-react";
+import { Users, Shield, ArrowRight, Clock, Trophy, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import type { StudentContestAvailableResponse } from "@/api/generated/model";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-const CONTEST_STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
+const CONTEST_STATUS_STYLES: Record<
+    string,
+    { bg: string; dot: string; label: string; text: string }
+> = {
     PUBLISHED: {
+        bg: "bg-emerald-50 dark:bg-emerald-500/10",
         dot: "bg-emerald-500",
         label: "Published",
-        text: "text-emerald-700 dark:text-emerald-300",
+        text: "text-emerald-700 dark:text-emerald-400",
     },
-    DRAFT: { dot: "bg-amber-500", label: "Draft", text: "text-amber-700 dark:text-amber-300" },
-    PAUSED: { dot: "bg-sky-600", label: "Paused", text: "text-sky-700 dark:text-sky-300" },
-    CANCELLED: { dot: "bg-red-500", label: "Cancelled", text: "text-red-700 dark:text-red-300" },
+    DRAFT: {
+        bg: "bg-amber-50 dark:bg-amber-500/10",
+        dot: "bg-amber-500",
+        label: "Draft",
+        text: "text-amber-700 dark:text-amber-400",
+    },
+    PAUSED: {
+        bg: "bg-sky-50 dark:bg-sky-500/10",
+        dot: "bg-sky-600",
+        label: "Paused",
+        text: "text-sky-700 dark:text-sky-400",
+    },
+    CANCELLED: {
+        bg: "bg-red-50 dark:bg-red-500/10",
+        dot: "bg-red-500",
+        label: "Cancelled",
+        text: "text-red-700 dark:text-red-400",
+    },
 };
 
 const RUN_STATUS_STYLES: Record<string, { bg: string; text: string; label: string; glow: string }> =
     {
         LIVE: {
-            bg: "bg-emerald-500/10",
-            text: "text-emerald-600 dark:text-emerald-400",
+            bg: "bg-emerald-500",
+            text: "text-white",
             label: "Live Now",
-            glow: "shadow-[0_0_12px_rgba(16,185,129,0.3)]",
+            glow: "shadow-[0_0_15px_rgba(16,185,129,0.5)]",
         },
         UPCOMING: {
-            bg: "bg-blue-500/10",
-            text: "text-blue-600 dark:text-blue-400",
+            bg: "bg-primary",
+            text: "text-primary-foreground",
             label: "Upcoming",
-            glow: "shadow-none",
+            glow: "shadow-[0_0_15px_rgba(22,45,104,0.3)] dark:shadow-[0_0_15px_rgba(111,151,255,0.3)]",
         },
         ENDED: {
-            bg: "bg-slate-500/10",
-            text: "text-slate-600 dark:text-slate-400",
+            bg: "bg-slate-600",
+            text: "text-white",
             label: "Ended",
             glow: "shadow-none",
         },
     };
 
 const BANNERS = [
-    { from: "#294892", to: "#162d68", accent: "#93b1ff" },
-    { from: "#28458a", to: "#15285f", accent: "#a7bcff" },
-    { from: "#223e80", to: "#142659", accent: "#89adff" },
-    { from: "#315098", to: "#193066", accent: "#b5c7ff" },
-    { from: "#26458a", to: "#13275b", accent: "#9ab6ff" },
+    { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue
+    { from: "#0891b2", to: "#164e63", accent: "#a5f3fc" }, // Cyan
+    { from: "#059669", to: "#064e3b", accent: "#a7f3d0" }, // Emerald
+    { from: "#2563eb", to: "#1e3a8a", accent: "#bfdbfe" }, // Blue
+    { from: "#4338ca", to: "#312e81", accent: "#c7d2fe" }, // Indigo
 ];
 
 function hashIndex(id: string, len: number) {
@@ -68,69 +89,56 @@ function FallbackBanner({ id, name }: { id: string; name: string }) {
                     <stop offset="0%" stopColor={b.from} />
                     <stop offset="100%" stopColor={b.to} />
                 </linearGradient>
-                <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
                     <path
-                        d="M 24 0 L 0 0 0 24"
+                        d="M 20 0 L 0 0 0 20"
                         fill="none"
                         stroke="white"
                         strokeWidth="0.5"
-                        strokeOpacity="0.08"
+                        strokeOpacity="0.1"
                     />
                 </pattern>
             </defs>
             <rect width="280" height="280" fill={`url(#${bgId})`} />
             <rect width="280" height="280" fill="url(#grid)" />
-            {/* Decorative Tech Elements */}
-            <circle cx="240" cy="40" r="80" fill={b.accent} fillOpacity="0.1" />
-            <circle cx="240" cy="40" r="50" fill={b.accent} fillOpacity="0.05" />
-            <g transform="translate(140, 110)" opacity="0.15">
-                <path d="M-30 -30 L30 -30 L30 30 L-30 30 Z" fill="white" />
-                <path d="M0 -40 L40 0 L0 40 L-40 0 Z" stroke="white" strokeWidth="2" fill="none" />
-            </g>{" "}
-            {/* Content Centered */}
-            <g textAnchor="middle">
+
+            <circle cx="220" cy="60" r="100" fill={b.accent} fillOpacity="0.15" />
+            <circle cx="60" cy="220" r="80" fill={b.accent} fillOpacity="0.1" />
+
+            <g transform="translate(140, 140)" textAnchor="middle">
                 <text
-                    x="140"
-                    y="140"
+                    y="-40"
                     fontSize="10"
                     fontWeight="700"
-                    fontFamily="system-ui"
-                    letterSpacing="3"
+                    fontFamily="Inter, system-ui"
+                    letterSpacing="4"
                     fill="white"
-                    fillOpacity="0.4"
+                    fillOpacity="0.5"
                     style={{ textTransform: "uppercase" }}
                 >
-                    Challenge
+                    Amrita ICPC
                 </text>
                 <text
-                    x="140"
-                    y="175"
-                    fontSize="24"
+                    y="10"
+                    fontSize="22"
                     fontWeight="800"
-                    fontFamily="system-ui"
+                    fontFamily="Inter, system-ui"
                     fill="white"
-                    fillOpacity="0.95"
+                    fillOpacity="1"
                 >
                     {display.split(" ")[0]}
                 </text>
                 <text
-                    x="140"
-                    y="205"
+                    y="40"
                     fontSize="16"
                     fontWeight="600"
-                    fontFamily="system-ui"
+                    fontFamily="Inter, system-ui"
                     fill="white"
-                    fillOpacity="0.7"
+                    fillOpacity="0.8"
                 >
                     {display.split(" ").slice(1).join(" ") || "Contest"}
                 </text>
             </g>
-            {/* Bottom Wave */}
-            <path
-                d="M0 240 Q 70 220, 140 240 T 280 240 L 280 280 L 0 280 Z"
-                fill="white"
-                fillOpacity="0.05"
-            />
         </svg>
     );
 }
@@ -164,8 +172,12 @@ export function StudentContestCard({ contest }: StudentContestCardProps) {
     const formattedDate = useMemo(() => {
         const date = new Date(contest.start_time);
         return {
-            day: date.toLocaleDateString(undefined, { day: "numeric", month: "short" }),
-            time: date.toLocaleTimeString(undefined, {
+            dateStr: date.toLocaleDateString(undefined, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            }),
+            timeStr: date.toLocaleTimeString(undefined, {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
@@ -178,175 +190,187 @@ export function StudentContestCard({ contest }: StudentContestCardProps) {
             ? `${contest.min_team_size}`
             : `${contest.min_team_size}-${contest.max_team_size}`;
 
-    const occupancyPercent = contest.max_teams
-        ? Math.min(100, ((contest.teams_count || 0) / contest.max_teams) * 100)
-        : 0;
+    const registrationProgress = useMemo(() => {
+        if (!contest.max_teams || contest.max_teams === 0) return null;
+        return Math.round(((contest.teams_count || 0) / contest.max_teams) * 100);
+    }, [contest.teams_count, contest.max_teams]);
 
     return (
-        <div className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 dark:border-white/10 dark:bg-slate-900/50 dark:hover:border-primary/30 min-h-64 sm:h-72">
+        <div className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-card shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 dark:border-white/5 dark:bg-slate-900/60 dark:hover:border-primary/40 min-h-[16rem]">
             <Link
                 href={`/student/contest/${contest.id}`}
                 className="absolute inset-0 z-0"
                 aria-label={`View contest ${contest.name}`}
             />
 
-            {/* Top Section: Content + Image */}
-            <div className="flex flex-1 flex-col sm:flex-row overflow-hidden">
-                {/* Content Section (Left) */}
-                <div className="flex flex-1 flex-col p-6 z-10">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex flex-col gap-1 w-full">
-                            <div className="flex items-center gap-2 mb-1">
-                                <div
-                                    className={`flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${rStatus.bg} ${rStatus.text} border border-current/20 ${rStatus.glow}`}
-                                >
-                                    {rStatus.label}
-                                </div>
-                                {timeRelative && (
-                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider animate-pulse">
-                                        • {timeRelative}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-3 mb-1">
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
-                                    {contest.name}
-                                </h3>
-                                <div
-                                    className={`flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-800 ${cStatus.text} border border-current/20 shadow-sm`}
-                                >
-                                    <span
-                                        className={`mr-1.5 h-1.5 w-1.5 rounded-full ${cStatus.dot}`}
-                                    />
-                                    {cStatus.label}
-                                </div>
-                            </div>
-                            <p className="line-clamp-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400 max-w-2xl mt-1">
-                                {contest.description || "No description provided for this contest."}
-                            </p>
-                        </div>
-                    </div>
+            <div className="flex flex-1 flex-col sm:flex-row">
+                {/* Image Section */}
+                <div className="relative h-40 w-full shrink-0 sm:h-auto sm:w-64 overflow-hidden border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-white/5">
+                    {contest.image && !imgErr ? (
+                        <img
+                            src={contest.image}
+                            alt={contest.name}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            onError={() => setImgErr(true)}
+                        />
+                    ) : (
+                        <FallbackBanner id={contest.id} name={contest.name} />
+                    )}
 
-                    {/* Information Layout */}
-                    <div className="mt-6 flex flex-col sm:flex-row gap-8 items-end sm:items-center">
-                        {/* Refined Minimalist Date/Time Component */}
-                        <div className="flex items-center gap-5 shrink-0 bg-slate-50/80 dark:bg-slate-800/40 px-5 py-3.5 rounded-2xl border border-slate-200/50 dark:border-white/5 backdrop-blur-sm">
-                            <div className="flex flex-col items-start border-r border-slate-200 dark:border-white/10 pr-5">
-                                <span className="text-[10px] font-extrabold text-primary/60 dark:text-primary/80 uppercase tracking-[0.2em] mb-1">
-                                    {formattedDate.day.split(" ")[1]}
-                                </span>
-                                <span className="text-2xl font-bold text-slate-900 dark:text-white leading-none">
-                                    {formattedDate.day.split(" ")[0]}
-                                </span>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Clock className="h-3 w-3 text-primary/50" />
-                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                        Start Time
-                                    </span>
-                                </div>
-                                <span className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-none tabular-nums">
-                                    {formattedDate.time}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Secondary Details Grid */}
-                        <div className="flex flex-wrap gap-x-10 gap-y-4 flex-1">
-                            <div className="flex items-center gap-2.5">
-                                <Users className="h-4 w-4 text-slate-400" />
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                                        Team Size
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-1">
-                                        {teamSizeText} Member{contest.max_team_size > 1 ? "s" : ""}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col min-w-[120px]">
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                                        Capacity
-                                    </span>
-                                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                                        {contest.teams_count ?? 0}/{contest.max_teams || "∞"}
-                                    </span>
-                                </div>
-                                {contest.max_teams ? (
-                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full transition-all duration-500 rounded-full ${occupancyPercent > 80 ? "bg-rose-500" : "bg-primary"}`}
-                                            style={{ width: `${occupancyPercent}%` }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <span className="text-[10px] font-bold text-emerald-500">
-                                        Unlimited Slots
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2.5">
-                                <Shield className="h-4 w-4 text-slate-400" />
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                                        Approval
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-1 capitalize">
-                                        {contest.team_approval_mode.toLowerCase().replace("_", " ")}
-                                    </span>
-                                </div>
-                            </div>
+                    {/* Run Status Badge — Solid for visibility on images */}
+                    <div className="absolute left-3 top-3 flex flex-col gap-2">
+                        <div
+                            className={cn(
+                                "flex items-center rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest shadow-xl border border-white/10",
+                                rStatus.bg,
+                                rStatus.text,
+                                rStatus.glow,
+                            )}
+                        >
+                            {rStatus.label}
                         </div>
                     </div>
                 </div>
 
-                {/* Image Section (Right) */}
-                <div className="relative w-full shrink-0 sm:w-64 z-10">
-                    <div className="m-4 h-[calc(100%-2rem)] overflow-hidden rounded-xl bg-primary/10 dark:bg-primary/20 shadow-inner">
-                        {contest.image && !imgErr ? (
-                            <img
-                                src={contest.image}
-                                alt={contest.name}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                onError={() => setImgErr(true)}
-                            />
+                {/* Content Section */}
+                <div className="flex flex-1 flex-col p-5 sm:p-7">
+                    {/* Header: Title + Status */}
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-3">
+                            <h3 className="text-2xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+                                {contest.name}
+                            </h3>
+                            {/* Contest Status Badge — Semi-solid for visibility */}
+                            <div
+                                className={cn(
+                                    "hidden sm:flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide border border-current/20 shadow-sm",
+                                    cStatus.bg,
+                                    cStatus.text,
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        "mr-1.5 h-1.5 w-1.5 rounded-full shadow-sm",
+                                        cStatus.dot,
+                                    )}
+                                />
+                                {cStatus.label}
+                            </div>
+                        </div>
+                        <p className="line-clamp-1 text-sm text-muted-foreground max-w-2xl">
+                            {contest.description ||
+                                "Join this exciting coding competition and showcase your skills."}
+                        </p>
+                    </div>
+
+                    {/* Integrated Metadata Row */}
+                    <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+                        <div className="flex items-center gap-2 text-foreground/80">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Calendar className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">
+                                    Start Time
+                                </span>
+                                <span className="text-xs font-bold tabular-nums">
+                                    {formattedDate.dateStr} • {formattedDate.timeStr}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-foreground/80">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                <Users className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">
+                                    Team Size
+                                </span>
+                                <span className="text-xs font-bold">{teamSizeText} Members</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-foreground/80">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                <Shield className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">
+                                    Approval
+                                </span>
+                                <span className="text-xs font-bold capitalize">
+                                    {contest.team_approval_mode.toLowerCase().replace("_", " ")}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Progress Section */}
+                    <div className="mt-7 flex flex-col gap-3">
+                        {registrationProgress !== null ? (
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Trophy className="h-3.5 w-3.5 text-primary" />
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                                            Registration Capacity
+                                        </span>
+                                    </div>
+                                    <span className="text-xs font-bold text-primary tabular-nums">
+                                        {contest.teams_count} / {contest.max_teams} Teams
+                                    </span>
+                                </div>
+                                <Progress
+                                    value={registrationProgress}
+                                    indicatorClassName="bg-primary shadow-[0_0_8px_rgba(var(--primary),0.3)]"
+                                    className="h-1.5"
+                                />
+                            </div>
                         ) : (
-                            <FallbackBanner id={contest.id} name={contest.name} />
+                            <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                    <Trophy className="h-3.5 w-3.5 text-primary/50" />
+                                    <span className="uppercase tracking-widest">
+                                        Active Registrations
+                                    </span>
+                                </div>
+                                <span className="text-primary">
+                                    {contest.teams_count || 0} Teams Joined
+                                </span>
+                            </div>
                         )}
                     </div>
-                </div>
-            </div>
 
-            {/* Full Width Footer */}
-            <div className="z-10 mt-auto flex items-center justify-between border-t border-slate-100 px-6 py-4 dark:border-white/5 bg-slate-50/30 dark:bg-slate-900/30">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5 text-amber-500" />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                            <span className="font-bold text-slate-700 dark:text-slate-300">
-                                Registration Closes:
-                            </span>{" "}
-                            {new Date(contest.registration_end || "").toLocaleDateString()}
-                        </span>
-                    </div>
-                    {contest.audiences && contest.audiences.length > 0 && (
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                            <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                            <span>
-                                {contest.audiences[0].name}
-                                {contest.audiences.length > 1
-                                    ? ` +${contest.audiences.length - 1}`
-                                    : ""}
-                            </span>
+                    {/* Footer: Timer + Action */}
+                    <div className="mt-auto pt-6 flex items-center justify-between border-t border-border/50">
+                        <div className="flex items-center gap-2.5">
+                            {timeRelative ? (
+                                <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/5 px-3 py-1.5 border border-amber-100 dark:border-amber-500/10">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                    <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                                        {timeRelative}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                                        Registration Closed
+                                    </span>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                <div className="flex items-center gap-2 font-bold text-primary transition-all group-hover:translate-x-1 dark:text-primary">
-                    <span className="text-sm">Enter Contest</span>
-                    <ArrowRight className="h-5 w-5 ml-1" />
+                        <div className="flex items-center gap-2.5 group/btn cursor-pointer">
+                            <span className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] transition-all group-hover/btn:mr-1">
+                                Enter Contest
+                            </span>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 group-hover/btn:scale-110 transition-transform">
+                                <ArrowRight className="h-4 w-4" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
