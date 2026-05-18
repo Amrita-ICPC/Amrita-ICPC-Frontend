@@ -19,7 +19,7 @@ import {
     getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
     getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
 } from "@/api/generated/students/students";
-import type { StudentTeamInvitationResponse } from "@/api/generated/model";
+import type { StudentTeamInvitationResponse, InvitationType } from "@/api/generated/model";
 
 interface StudentInvitationsDrawerProps {
     pendingCount?: number;
@@ -62,15 +62,31 @@ function formatTimeAgo(dateString: string): string {
 export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitationsDrawerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [actionId, setActionId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<InvitationType>("INVITE");
 
-    // Fetch only PENDING team invitations
+    // Fetch pending received invitations (type = INVITE)
     const {
-        data: invitationsData,
-        isLoading,
-        isError,
-        refetch,
+        data: invitesData,
+        isLoading: isInvitesLoading,
+        isError: isInvitesError,
+        refetch: refetchInvites,
     } = useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet(
-        { status: "PENDING" },
+        { status: "PENDING", type: "INVITE" },
+        {
+            query: {
+                enabled: true,
+            },
+        },
+    );
+
+    // Fetch pending sent requests (type = REQUEST)
+    const {
+        data: requestsData,
+        isLoading: isRequestsLoading,
+        isError: isRequestsError,
+        refetch: refetchRequests,
+    } = useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet(
+        { status: "PENDING", type: "REQUEST", sent: true },
         {
             query: {
                 enabled: isOpen,
@@ -78,7 +94,15 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
         },
     );
 
-    const invitations = invitationsData?.data?.invitations || [];
+    const invites = invitesData?.data?.invitations || [];
+    const requests = requestsData?.data?.invitations || [];
+
+    const invitations = activeTab === "INVITE" ? invites : requests;
+    const isLoading = activeTab === "INVITE" ? isInvitesLoading : isRequestsLoading;
+    const isError = activeTab === "INVITE" ? isInvitesError : isRequestsError;
+    const refetch = activeTab === "INVITE" ? refetchInvites : refetchRequests;
+
+    const displayPendingCount = invitesData ? invites.length : pendingCount;
 
     // Respond to invitation mutation
     const { mutate: respondToInvitation, isPending: isUpdating } =
@@ -90,6 +114,11 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                         getGetMyTeamsApiV1StudentsTeamsGetQueryKey(),
                         getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey({
                             status: "PENDING",
+                            type: "INVITE",
+                        }),
+                        getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey({
+                            status: "PENDING",
+                            type: "REQUEST",
                         }),
                     ],
                 },
@@ -141,9 +170,9 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                 >
                     <Mail className="h-4 w-4 stroke-[2]" />
                     Invitations
-                    {pendingCount > 0 && (
+                    {displayPendingCount > 0 && (
                         <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white border-2 border-slate-950 shadow-md animate-pulse">
-                            {pendingCount}
+                            {displayPendingCount}
                         </span>
                     )}
                 </Button>
@@ -170,6 +199,31 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                 </SheetHeader>
 
                 <div className="flex-1 overflow-hidden p-6 py-4 flex flex-col gap-4">
+                    {/* Glassmorphic Segmented Tabs */}
+                    <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-inner">
+                        <button
+                            onClick={() => setActiveTab("INVITE")}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-black transition-all duration-300 cursor-pointer ${
+                                activeTab === "INVITE"
+                                    ? "bg-white dark:bg-slate-800 text-primary shadow-xs"
+                                    : "text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Mail className="h-3.5 w-3.5" />
+                            Received {displayPendingCount > 0 && `(${displayPendingCount})`}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("REQUEST")}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-black transition-all duration-300 cursor-pointer ${
+                                activeTab === "REQUEST"
+                                    ? "bg-white dark:bg-slate-800 text-primary shadow-xs"
+                                    : "text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Users className="h-3.5 w-3.5" />
+                            Sent Requests {requests.length > 0 && `(${requests.length})`}
+                        </button>
+                    </div>
                     {isLoading ? (
                         /* Loading Skeletons */
                         <div className="flex-1 space-y-4 py-4">
@@ -249,12 +303,16 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                                                         {invitation.title}
                                                     </h3>
                                                     <p className="text-[10px] text-muted-foreground font-semibold truncate mt-0.5 flex items-center gap-1.5">
-                                                        <span>
-                                                            Invited by{" "}
-                                                            <strong className="text-foreground/90 font-bold">
-                                                                {invitation.invited_by_name}
-                                                            </strong>
-                                                        </span>
+                                                        {activeTab === "INVITE" ? (
+                                                            <span>
+                                                                Invited by{" "}
+                                                                <strong className="text-foreground/90 font-bold">
+                                                                    {invitation.invited_by_name}
+                                                                </strong>
+                                                            </span>
+                                                        ) : (
+                                                            <span>Requested to join</span>
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
@@ -286,35 +344,44 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                                             </div>
 
                                             {/* Bottom Interactive Decision Buttons */}
-                                            <div className="grid grid-cols-2 gap-3.5 pt-1">
-                                                <Button
-                                                    onClick={() => handleReject(invitation)}
-                                                    disabled={isAnyActionPending}
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-8.5 rounded-xl text-xs font-black gap-1.5 border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 cursor-pointer transition-colors"
-                                                >
-                                                    {isCurrentAction && !isUpdating ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <X className="h-3.5 w-3.5 stroke-[2.5]" />
-                                                    )}
-                                                    Reject
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleApprove(invitation)}
-                                                    disabled={isAnyActionPending}
-                                                    size="sm"
-                                                    className="h-8.5 rounded-xl text-xs font-black gap-1.5 shadow-md shadow-primary/10 hover:shadow-lg transition-all cursor-pointer"
-                                                >
-                                                    {isCurrentAction && isUpdating ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Check className="h-3.5 w-3.5 stroke-[2.5]" />
-                                                    )}
-                                                    Approve
-                                                </Button>
-                                            </div>
+                                            {activeTab === "INVITE" ? (
+                                                <div className="grid grid-cols-2 gap-3.5 pt-1">
+                                                    <Button
+                                                        onClick={() => handleReject(invitation)}
+                                                        disabled={isAnyActionPending}
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8.5 rounded-xl text-xs font-black gap-1.5 border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 cursor-pointer transition-colors"
+                                                    >
+                                                        {isCurrentAction && !isUpdating ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 stroke-[2.5]" />
+                                                        )}
+                                                        Reject
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleApprove(invitation)}
+                                                        disabled={isAnyActionPending}
+                                                        size="sm"
+                                                        className="h-8.5 rounded-xl text-xs font-black gap-1.5 shadow-md shadow-primary/10 hover:shadow-lg transition-all cursor-pointer"
+                                                    >
+                                                        {isCurrentAction && isUpdating ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                                                        )}
+                                                        Approve
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="pt-1 w-full">
+                                                    <div className="flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-black bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/20 w-full transition-all">
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin stroke-[2.5]" />
+                                                        Pending Team Leader Approval
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -331,11 +398,14 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                             </div>
                             <div className="space-y-1 max-w-xs">
                                 <h4 className="text-sm font-bold text-foreground">
-                                    No Pending Invitations
+                                    {activeTab === "INVITE"
+                                        ? "No Pending Invitations"
+                                        : "No Sent Requests"}
                                 </h4>
                                 <p className="text-xs text-muted-foreground font-semibold leading-normal">
-                                    When other students invite you to join their team, they will
-                                    show up here.
+                                    {activeTab === "INVITE"
+                                        ? "When other students invite you to join their team, they will show up here."
+                                        : "When you request to join another team, your pending requests will show up here."}
                                 </p>
                             </div>
                         </div>

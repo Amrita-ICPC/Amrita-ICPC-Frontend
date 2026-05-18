@@ -73,6 +73,9 @@ export function StudentTeamRowSkeleton() {
                 <Skeleton className="h-3.5 w-44 rounded" />
             </td>
             <td className="py-4 px-4">
+                <Skeleton className="h-5 w-16 rounded" />
+            </td>
+            <td className="py-4 px-4">
                 <div className="flex items-center gap-2">
                     <div className="flex items-center -space-x-1">
                         <Skeleton className="h-6 w-6 rounded-full" />

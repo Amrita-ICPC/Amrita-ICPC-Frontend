@@ -39,6 +39,9 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
     const maxSizeRaw = searchParams.get("max_size");
     const maxSize = maxSizeRaw ? parseInt(maxSizeRaw) : undefined;
 
+    const isPublicRaw = searchParams.get("is_public");
+    const isPublic = isPublicRaw === "true" ? true : isPublicRaw === "false" ? false : undefined;
+
     const params: GetMyTeamsApiV1StudentsTeamsGetParams = {
         page,
         page_size: pageSize,
@@ -47,6 +50,7 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
         leader_only: leaderOnly,
         min_size: minSize,
         max_size: maxSize,
+        is_public: isPublic,
     };
 
     // Query teams using the newly regenerated OpenAPI hook
@@ -102,10 +106,13 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                                             Description
                                         </th>
                                         <th className="py-3 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                                            Code
+                                        </th>
+                                        <th className="py-3 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                                             Members
                                         </th>
                                         <th className="py-3 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                                            Status
+                                            Join Requests
                                         </th>
                                         <th className="py-3 px-4 text-right text-xs font-extrabold uppercase tracking-wider text-muted-foreground"></th>
                                     </tr>
@@ -146,10 +153,13 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                                                 Description
                                             </th>
                                             <th className="py-3.5 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                                                Code
+                                            </th>
+                                            <th className="py-3.5 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                                                 Members
                                             </th>
                                             <th className="py-3.5 px-4 text-left text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                                                Status
+                                                Join Requests
                                             </th>
                                             <th className="py-3.5 px-4 text-right text-xs font-extrabold uppercase tracking-wider text-muted-foreground"></th>
                                         </tr>

@@ -27,6 +27,12 @@ export interface StudentTeamCardResponse {
   is_leader: boolean;
   /** Total count of members currently in the team */
   member_count: number;
+  /** Whether the team is public */
+  is_public: boolean;
+  /** The unique 6-digit random code of the team */
+  code: string;
+  /** Whether the requesting student has a pending join request */
+  has_requested: boolean;
   /**
      * List of up to the first 3 members to display in the UI avatar stack
      * @maxItems 3

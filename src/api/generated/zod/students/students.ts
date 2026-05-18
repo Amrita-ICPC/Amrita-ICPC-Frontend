@@ -212,6 +212,7 @@ Args:
     leader_only: Filter only teams where you are the leader.
     min_size: Minimum team member size.
     max_size: Maximum team member size.
+    is_public: Filter by public/private setting.
     user_id: ID of the authenticated user.
     service: Injected StudentTeamService.
 
@@ -234,7 +235,8 @@ export const GetMyTeamsApiV1StudentsTeamsGetQueryParams = zod.object({
   "created_only": zod.boolean().default(getMyTeamsApiV1StudentsTeamsGetQueryCreatedOnlyDefault).describe('Filter only teams created by you'),
   "leader_only": zod.boolean().default(getMyTeamsApiV1StudentsTeamsGetQueryLeaderOnlyDefault).describe('Filter only teams where you are the leader'),
   "min_size": zod.union([zod.number(),zod.null()]).optional().describe('Minimum team size filter'),
-  "max_size": zod.union([zod.number(),zod.null()]).optional().describe('Maximum team size filter')
+  "max_size": zod.union([zod.number(),zod.null()]).optional().describe('Maximum team size filter'),
+  "is_public": zod.union([zod.boolean(),zod.null()]).optional().describe('Filter by public\/private setting')
 })
 
 export const getMyTeamsApiV1StudentsTeamsGetResponseSuccessDefault = true;
@@ -258,6 +260,9 @@ export const GetMyTeamsApiV1StudentsTeamsGetResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of last team update'),
   "is_leader": zod.boolean().describe('Whether the requesting student is the leader of this team'),
   "member_count": zod.number().describe('Total count of members currently in the team'),
+  "is_public": zod.boolean().describe('Whether the team is public'),
+  "code": zod.string().describe('The unique 6-digit random code of the team'),
+  "has_requested": zod.boolean().describe('Whether the requesting student has a pending join request'),
   "members": zod.array(zod.object({
   "id": zod.uuid().describe('Unique identifier of the member'),
   "name": zod.string().describe('Full name of the member'),
@@ -266,7 +271,8 @@ export const GetMyTeamsApiV1StudentsTeamsGetResponse = zod.object({
   "has_more_members": zod.boolean().describe('Indicates whether the team has more than 3 members (i.e. if a \'+X\' bubble is needed)'),
   "more_members_count": zod.number().describe('The count of additional members beyond the first 3 (e.g. 2 for a team of 5)')
 }).describe('Schema representing a student team card with a membership overview.')).describe('List of team cards'),
-  "pending_invitation": zod.number().describe('Total count of pending invitations for this student')
+  "pending_invitation": zod.number().describe('Total count of pending invitations for this student'),
+  "pending_request": zod.number().describe('Total count of pending join requests for teams led by this student')
 }).describe('Schema representing the list of teams and pending invitation count.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -300,28 +306,37 @@ export const createTeamApiV1StudentsTeamsPostBodyNameMax = 100;
 
 export const createTeamApiV1StudentsTeamsPostBodyDescriptionOneMax = 500;
 
-
+export const createTeamApiV1StudentsTeamsPostBodyIsPublicDefault = true;
 
 export const CreateTeamApiV1StudentsTeamsPostBody = zod.object({
   "name": zod.string().min(createTeamApiV1StudentsTeamsPostBodyNameMin).max(createTeamApiV1StudentsTeamsPostBodyNameMax).describe('The name of the team'),
-  "description": zod.union([zod.string().max(createTeamApiV1StudentsTeamsPostBodyDescriptionOneMax),zod.null()]).optional().describe('Description of the team')
+  "description": zod.union([zod.string().max(createTeamApiV1StudentsTeamsPostBodyDescriptionOneMax),zod.null()]).optional().describe('Description of the team'),
+  "is_public": zod.boolean().default(createTeamApiV1StudentsTeamsPostBodyIsPublicDefault).describe('Whether the team is public')
 }).describe('Schema representing the request to create a student team.')
 
 /**
- * Retrieve all team invitations for the authenticated student.
+ * Retrieve all team invitations or requests for the authenticated student.
 
 Args:
     request: FastAPI Request object.
+    invitation_type: Type of invitation filter.
     status_filter: Optional invitation status filter.
+    team_id: Optional team ID filter.
+    sent: Optional bool to retrieve sent invitations/requests.
     user_id: ID of the authenticated user.
     service: Injected StudentTeamService.
 
 Returns:
-    API response containing list of invitations.
+    API response containing list of invitations/requests.
  * @summary Get Team Invitations
  */
+export const getTeamInvitationsApiV1StudentsTeamsInvitationsGetQuerySentDefault = false;
+
 export const GetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryParams = zod.object({
-  "status": zod.union([zod.enum(['PENDING', 'ACCEPTED', 'REJECTED']).describe('Enumeration of team invitation statuses.\n\nAttributes:\n    PENDING: Invitation is pending.\n    ACCEPTED: Invitation is accepted.\n    REJECTED: Invitation is rejected.'),zod.null()]).optional().describe('Filter invitations by status')
+  "type": zod.enum(['REQUEST', 'INVITE']).optional().describe('Type of invitation (INVITE or REQUEST)'),
+  "status": zod.union([zod.enum(['PENDING', 'ACCEPTED', 'REJECTED']).describe('Enumeration of team invitation statuses.\n\nAttributes:\n    PENDING: Invitation is pending.\n    ACCEPTED: Invitation is accepted.\n    REJECTED: Invitation is rejected.'),zod.null()]).optional().describe('Filter invitations by status'),
+  "team_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Optional team ID filter'),
+  "sent": zod.boolean().default(getTeamInvitationsApiV1StudentsTeamsInvitationsGetQuerySentDefault).describe('Filter for sent invitations\/requests where current user is the sender')
 })
 
 export const getTeamInvitationsApiV1StudentsTeamsInvitationsGetResponseSuccessDefault = true;
@@ -342,7 +357,8 @@ export const GetTeamInvitationsApiV1StudentsTeamsInvitationsGetResponse = zod.ob
   "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp of the invitation creation'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of the last invitation update'),
   "member_count": zod.number().describe('Total count of members currently in the team'),
-  "invited_by_name": zod.string().describe('Name of the user who sent the invitation')
+  "invited_by_name": zod.string().describe('Name of the user who sent the invitation'),
+  "invitation_type": zod.enum(['REQUEST', 'INVITE']).describe('The type of invitation: INVITE or REQUEST')
 }).describe('Schema representing a team invitation, with team metadata but without full member details.')).describe('List of invitations'),
   "total": zod.number().describe('Total count of active invitations')
 }).describe('Schema representing a list of team invitations.'),zod.null()]).optional(),
@@ -406,6 +422,87 @@ export const AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchRes
 })
 
 /**
+ * Search student teams by name with case-insensitive partial match.
+
+Args:
+    request: FastAPI Request object.
+    name: Name query to search.
+    page: Current page number.
+    page_size: Items per page.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing paginated list of matched student team cards.
+ * @summary Search Teams By Name
+ */
+
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageDefault = 1;
+
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageSizeDefault = 10;
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageSizeMax = 100;
+
+
+
+export const SearchTeamsByNameApiV1StudentsTeamsSearchGetQueryParams = zod.object({
+  "name": zod.string().min(1).describe('Search teams by name'),
+  "page": zod.number().min(1).default(searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageDefault).describe('Current page number (1-indexed)'),
+  "page_size": zod.number().min(1).max(searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageSizeMax).default(searchTeamsByNameApiV1StudentsTeamsSearchGetQueryPageSizeDefault).describe('Items per page')
+})
+
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetResponseSuccessDefault = true;
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetResponseStatusDefault = 200;
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetResponseMessageDefault = `Success`;
+export const searchTeamsByNameApiV1StudentsTeamsSearchGetResponseDataOneTeamsItemMembersMax = 3;
+
+
+
+export const SearchTeamsByNameApiV1StudentsTeamsSearchGetResponse = zod.object({
+  "success": zod.boolean().default(searchTeamsByNameApiV1StudentsTeamsSearchGetResponseSuccessDefault),
+  "status": zod.number().default(searchTeamsByNameApiV1StudentsTeamsSearchGetResponseStatusDefault),
+  "message": zod.string().default(searchTeamsByNameApiV1StudentsTeamsSearchGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "teams": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the team'),
+  "title": zod.string().describe('Name or title of the team'),
+  "description": zod.union([zod.string(),zod.null()]).optional().describe('Description of the team'),
+  "logo": zod.union([zod.string(),zod.null()]).optional().describe('Logo\/avatar URL of the team'),
+  "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp of team creation'),
+  "updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of last team update'),
+  "is_leader": zod.boolean().describe('Whether the requesting student is the leader of this team'),
+  "member_count": zod.number().describe('Total count of members currently in the team'),
+  "is_public": zod.boolean().describe('Whether the team is public'),
+  "code": zod.string().describe('The unique 6-digit random code of the team'),
+  "has_requested": zod.boolean().describe('Whether the requesting student has a pending join request'),
+  "members": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the member'),
+  "name": zod.string().describe('Full name of the member'),
+  "logo": zod.union([zod.string(),zod.null()]).optional().describe('Avatar\/logo URL of the member\'s profile image')
+}).describe('Schema representing a team member\'s summary for display in the avatar stack.')).max(searchTeamsByNameApiV1StudentsTeamsSearchGetResponseDataOneTeamsItemMembersMax).describe('List of up to the first 3 members to display in the UI avatar stack'),
+  "has_more_members": zod.boolean().describe('Indicates whether the team has more than 3 members (i.e. if a \'+X\' bubble is needed)'),
+  "more_members_count": zod.number().describe('The count of additional members beyond the first 3 (e.g. 2 for a team of 5)')
+}).describe('Schema representing a student team card with a membership overview.')).describe('List of team cards'),
+  "total": zod.number().describe('Total count of teams matching filters'),
+  "skip": zod.number().describe('Number of items skipped'),
+  "limit": zod.number().describe('Maximum number of items returned'),
+  "pending_invitation_count": zod.number().describe('Total count of pending invitations for this student'),
+  "pending_request_count": zod.number().describe('Total count of pending join requests for teams led by this student')
+}).describe('Schema representing a list of student team cards with pagination metadata.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Retrieve details of a specific team the student belongs to.
 
 Args:
@@ -445,6 +542,9 @@ export const GetTeamByIdApiV1StudentsTeamsTeamIdGetResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of last team update'),
   "is_leader": zod.boolean().describe('Whether the requesting student is the leader of this team'),
   "member_count": zod.number().describe('Total count of members currently in the team'),
+  "is_public": zod.boolean().describe('Whether the team is public'),
+  "code": zod.string().describe('The unique 6-digit random code of the team'),
+  "has_requested": zod.boolean().describe('Whether the requesting student has a pending join request'),
   "members": zod.array(zod.object({
   "id": zod.uuid().describe('Unique identifier of the member'),
   "name": zod.string().describe('Full name of the member'),
@@ -534,7 +634,8 @@ export const editTeamApiV1StudentsTeamsTeamIdPatchBodyDescriptionOneMax = 500;
 
 export const EditTeamApiV1StudentsTeamsTeamIdPatchBody = zod.object({
   "name": zod.union([zod.string().min(editTeamApiV1StudentsTeamsTeamIdPatchBodyNameOneMin).max(editTeamApiV1StudentsTeamsTeamIdPatchBodyNameOneMax),zod.null()]).optional().describe('The new name of the team'),
-  "description": zod.union([zod.string().max(editTeamApiV1StudentsTeamsTeamIdPatchBodyDescriptionOneMax),zod.null()]).optional().describe('The new description of the team')
+  "description": zod.union([zod.string().max(editTeamApiV1StudentsTeamsTeamIdPatchBodyDescriptionOneMax),zod.null()]).optional().describe('The new description of the team'),
+  "is_public": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether the team is public')
 }).describe('Schema representing the request to update\/edit a student team.')
 
 export const editTeamApiV1StudentsTeamsTeamIdPatchResponseSuccessDefault = true;
@@ -557,6 +658,9 @@ export const EditTeamApiV1StudentsTeamsTeamIdPatchResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of last team update'),
   "is_leader": zod.boolean().describe('Whether the requesting student is the leader of this team'),
   "member_count": zod.number().describe('Total count of members currently in the team'),
+  "is_public": zod.boolean().describe('Whether the team is public'),
+  "code": zod.string().describe('The unique 6-digit random code of the team'),
+  "has_requested": zod.boolean().describe('Whether the requesting student has a pending join request'),
   "members": zod.array(zod.object({
   "id": zod.uuid().describe('Unique identifier of the member'),
   "name": zod.string().describe('Full name of the member'),
@@ -580,12 +684,52 @@ export const EditTeamApiV1StudentsTeamsTeamIdPatchResponse = zod.object({
 })
 
 /**
- * Invite a user to join the team.
+ * Invite a user to join the team (INVITE type) or request to join a team (REQUEST type).
+ * @summary Invite To Team
+ */
+export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationPostParams = zod.object({
+  "team_id": zod.uuid()
+})
+
+export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationPostQueryParams = zod.object({
+  "invite_user_id": zod.union([zod.uuid(),zod.null()]).optional(),
+  "type": zod.enum(['REQUEST', 'INVITE']).optional().describe('Type of invitation (INVITE or REQUEST)')
+})
+
+export const inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseSuccessDefault = true;
+export const inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseStatusDefault = 200;
+export const inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseMessageDefault = `Success`;
+
+export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponse = zod.object({
+  "success": zod.boolean().default(inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseSuccessDefault),
+  "status": zod.number().default(inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseStatusDefault),
+  "message": zod.string().default(inviteToTeamApiV1StudentsTeamsTeamIdInvitationPostResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Invite a user to join the team (INVITE type) or request to join a team (REQUEST type).
  * @summary Invite To Team
  */
 export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostParams = zod.object({
-  "invite_user_id": zod.uuid(),
-  "team_id": zod.uuid()
+  "team_id": zod.uuid(),
+  "invite_user_id": zod.union([zod.uuid(),zod.null()])
+})
+
+export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostQueryParams = zod.object({
+  "type": zod.enum(['REQUEST', 'INVITE']).optional().describe('Type of invitation (INVITE or REQUEST)')
 })
 
 export const inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostResponseSuccessDefault = true;

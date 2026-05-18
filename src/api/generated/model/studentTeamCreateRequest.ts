@@ -18,4 +18,6 @@ export interface StudentTeamCreateRequest {
   name: string;
   /** Description of the team */
   description?: string | null;
+  /** Whether the team is public */
+  is_public?: boolean;
 }

@@ -5,11 +5,24 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { InvitationType } from './invitationType';
 import type { TeamInvitationStatus } from './teamInvitationStatus';
 
 export type GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams = {
 /**
+ * Type of invitation (INVITE or REQUEST)
+ */
+type?: InvitationType;
+/**
  * Filter invitations by status
  */
 status?: TeamInvitationStatus | null;
+/**
+ * Optional team ID filter
+ */
+team_id?: string | null;
+/**
+ * Filter for sent invitations/requests where current user is the sender
+ */
+sent?: boolean;
 };
