@@ -25,9 +25,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponseListStudentUserSearchResponse,
   APIResponseListUserResponse,
   ExceptionResponse,
   HTTPValidationError,
+  ListStudentsApiV1UsersStudentsGetParams,
   ListUsersApiV1UsersGetParams,
   UserProfile,
   UserSyncResponse
@@ -305,6 +307,114 @@ export function useListUsersApiV1UsersGet<TData = Awaited<ReturnType<typeof list
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListUsersApiV1UsersGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * List student users with search query support.
+
+This endpoint is accessible to all logged-in users (e.g. students sending team invitations).
+
+Args:
+    request: FastAPI request context.
+    db: Database session.
+    user_id: ID of the authenticated user.
+    page: Page number for pagination.
+    page_size: Number of items per page.
+    q: Optional search query (matches name or email).
+    team_id: Optional team ID to check membership.
+
+Returns:
+    Paginated list of student users with is_in_team field.
+ * @summary List student users for team invitations
+ */
+export const listStudentsApiV1UsersStudentsGet = (
+    params?: ListStudentsApiV1UsersStudentsGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseListStudentUserSearchResponse>(
+      {url: `/api/v1/users/students`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getListStudentsApiV1UsersStudentsGetQueryKey = (params?: ListStudentsApiV1UsersStudentsGetParams,) => {
+    return [
+    `/api/v1/users/students`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListStudentsApiV1UsersStudentsGetQueryOptions = <TData = Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: ListStudentsApiV1UsersStudentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStudentsApiV1UsersStudentsGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>> = ({ signal }) => listStudentsApiV1UsersStudentsGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListStudentsApiV1UsersStudentsGetQueryResult = NonNullable<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>>
+export type ListStudentsApiV1UsersStudentsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useListStudentsApiV1UsersStudentsGet<TData = Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  ListStudentsApiV1UsersStudentsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>,
+          TError,
+          Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListStudentsApiV1UsersStudentsGet<TData = Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: ListStudentsApiV1UsersStudentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>,
+          TError,
+          Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListStudentsApiV1UsersStudentsGet<TData = Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: ListStudentsApiV1UsersStudentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List student users for team invitations
+ */
+
+export function useListStudentsApiV1UsersStudentsGet<TData = Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: ListStudentsApiV1UsersStudentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudentsApiV1UsersStudentsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListStudentsApiV1UsersStudentsGetQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -25,15 +25,24 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  APIResponseNoneType,
   APIResponseStudentContestDetailsResponse,
   APIResponseStudentContestListResponse,
   APIResponseStudentContestStatusResponse,
+  APIResponseStudentTeamCardResponse,
+  APIResponseStudentTeamInvitationListResponse,
+  APIResponseStudentTeamsResponse,
   ContestRunStatus,
   ExceptionResponse,
+  GetMyTeamsApiV1StudentsTeamsGetParams,
   GetStudentContestsApiV1StudentsContestsGetParams,
+  GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams,
   HTTPValidationError,
   StudentCodeRunRequest,
-  StudentCodeRunResponse
+  StudentCodeRunResponse,
+  StudentTeamCreateRequest,
+  StudentTeamInvitationUpdateRequest,
+  StudentTeamUpdateRequest
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -331,6 +340,680 @@ export function useGetStudentContestStatusApiV1StudentsContestsContestIdParticip
 
 
 /**
+ * Retrieve paginated and filtered list of teams that the student belongs to.
+
+Args:
+    request: FastAPI Request object.
+    page: Current page number.
+    page_size: Items per page.
+    search: Optional search term.
+    created_only: Filter only created teams.
+    leader_only: Filter only teams where you are the leader.
+    min_size: Minimum team member size.
+    max_size: Maximum team member size.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing team cards list and paginated metadata.
+ * @summary Get My Teams
+ */
+export const getMyTeamsApiV1StudentsTeamsGet = (
+    params?: GetMyTeamsApiV1StudentsTeamsGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentTeamsResponse>(
+      {url: `/api/v1/students/teams`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyTeamsApiV1StudentsTeamsGetQueryKey = (params?: GetMyTeamsApiV1StudentsTeamsGetParams,) => {
+    return [
+    `/api/v1/students/teams`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyTeamsApiV1StudentsTeamsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetMyTeamsApiV1StudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTeamsApiV1StudentsTeamsGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>> = ({ signal }) => getMyTeamsApiV1StudentsTeamsGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyTeamsApiV1StudentsTeamsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>>
+export type GetMyTeamsApiV1StudentsTeamsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetMyTeamsApiV1StudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  GetMyTeamsApiV1StudentsTeamsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamsApiV1StudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamsApiV1StudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get My Teams
+ */
+
+export function useGetMyTeamsApiV1StudentsTeamsGet<TData = Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamsApiV1StudentsTeamsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamsApiV1StudentsTeamsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTeamsApiV1StudentsTeamsGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Create a new team led by the authenticated student.
+
+Args:
+    request: FastAPI Request object.
+    team_create_request: Request body with team details.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing the created team's card.
+ * @summary Create Team
+ */
+export const createTeamApiV1StudentsTeamsPost = (
+    studentTeamCreateRequest: StudentTeamCreateRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentTeamCardResponse>(
+      {url: `/api/v1/students/teams`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamCreateRequest, signal
+    },
+      );
+    }
+
+
+
+export const getCreateTeamApiV1StudentsTeamsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext> => {
+
+const mutationKey = ['createTeamApiV1StudentsTeamsPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>, {data: StudentTeamCreateRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTeamApiV1StudentsTeamsPost(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTeamApiV1StudentsTeamsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>>
+    export type CreateTeamApiV1StudentsTeamsPostMutationBody = StudentTeamCreateRequest
+    export type CreateTeamApiV1StudentsTeamsPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Create Team
+ */
+export const useCreateTeamApiV1StudentsTeamsPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>, TError,{data: StudentTeamCreateRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createTeamApiV1StudentsTeamsPost>>,
+        TError,
+        {data: StudentTeamCreateRequest},
+        TContext
+      > => {
+      return useMutation(getCreateTeamApiV1StudentsTeamsPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Retrieve all team invitations for the authenticated student.
+
+Args:
+    request: FastAPI Request object.
+    status_filter: Optional invitation status filter.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing list of invitations.
+ * @summary Get Team Invitations
+ */
+export const getTeamInvitationsApiV1StudentsTeamsInvitationsGet = (
+    params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentTeamInvitationListResponse>(
+      {url: `/api/v1/students/teams/invitations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey = (params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams,) => {
+    return [
+    `/api/v1/students/teams/invitations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryOptions = <TData = Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>> = ({ signal }) => getTeamInvitationsApiV1StudentsTeamsInvitationsGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>>
+export type GetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet<TData = Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet<TData = Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet<TData = Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Team Invitations
+ */
+
+export function useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet<TData = Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetTeamInvitationsApiV1StudentsTeamsInvitationsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamInvitationsApiV1StudentsTeamsInvitationsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Accept or reject a team invitation.
+
+Args:
+    request: FastAPI Request object.
+    id: UUID of the target invitation.
+    body: Request body containing the status.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful update.
+ * @summary Accept Or Reject Team Invitation
+ */
+export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch = (
+    id: string,
+    studentTeamInvitationUpdateRequest: StudentTeamInvitationUpdateRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/invitations/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamInvitationUpdateRequest, signal
+    },
+      );
+    }
+
+
+
+export const getAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext> => {
+
+const mutationKey = ['acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, {id: string;data: StudentTeamInvitationUpdateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch(id,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>>
+    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationBody = StudentTeamInvitationUpdateRequest
+    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Accept Or Reject Team Invitation
+ */
+export const useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>,
+        TError,
+        {id: string;data: StudentTeamInvitationUpdateRequest},
+        TContext
+      > => {
+      return useMutation(getAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Retrieve details of a specific team the student belongs to.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the target team.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing team card details.
+
+Raises:
+    AppBaseException: If the team is not found or student lacks permission.
+ * @summary Get Team By Id
+ */
+export const getTeamByIdApiV1StudentsTeamsTeamIdGet = (
+    teamId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentTeamCardResponse>(
+      {url: `/api/v1/students/teams/${teamId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetTeamByIdApiV1StudentsTeamsTeamIdGetQueryKey = (teamId: string,) => {
+    return [
+    `/api/v1/students/teams/${teamId}`
+    ] as const;
+    }
+
+
+export const getGetTeamByIdApiV1StudentsTeamsTeamIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamByIdApiV1StudentsTeamsTeamIdGetQueryKey(teamId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>> = ({ signal }) => getTeamByIdApiV1StudentsTeamsTeamIdGet(teamId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: teamId !== null && teamId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamByIdApiV1StudentsTeamsTeamIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>>
+export type GetTeamByIdApiV1StudentsTeamsTeamIdGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetTeamByIdApiV1StudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamByIdApiV1StudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamByIdApiV1StudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Team By Id
+ */
+
+export function useGetTeamByIdApiV1StudentsTeamsTeamIdGet<TData = Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamByIdApiV1StudentsTeamsTeamIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamByIdApiV1StudentsTeamsTeamIdGetQueryOptions(teamId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Delete an existing student team. Only the team leader is permitted.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team to delete.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response indicating successful deletion.
+ * @summary Delete Team
+ */
+export const deleteTeamApiV1StudentsTeamsTeamIdDelete = (
+    teamId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/${teamId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteTeamApiV1StudentsTeamsTeamIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>, TError,{teamId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>, TError,{teamId: string}, TContext> => {
+
+const mutationKey = ['deleteTeamApiV1StudentsTeamsTeamIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>, {teamId: string}> = (props) => {
+          const {teamId} = props ?? {};
+
+          return  deleteTeamApiV1StudentsTeamsTeamIdDelete(teamId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTeamApiV1StudentsTeamsTeamIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>>
+
+    export type DeleteTeamApiV1StudentsTeamsTeamIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Delete Team
+ */
+export const useDeleteTeamApiV1StudentsTeamsTeamIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>, TError,{teamId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTeamApiV1StudentsTeamsTeamIdDelete>>,
+        TError,
+        {teamId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTeamApiV1StudentsTeamsTeamIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
+ * Edit/Update an existing student team. Only the team leader is permitted.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team to edit/update.
+    team_update_request: Request body with team details to update.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    API response containing the updated team's card.
+ * @summary Edit Team
+ */
+export const editTeamApiV1StudentsTeamsTeamIdPatch = (
+    teamId: string,
+    studentTeamUpdateRequest: StudentTeamUpdateRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentTeamCardResponse>(
+      {url: `/api/v1/students/teams/${teamId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamUpdateRequest, signal
+    },
+      );
+    }
+
+
+
+export const getEditTeamApiV1StudentsTeamsTeamIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>, TError,{teamId: string;data: StudentTeamUpdateRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>, TError,{teamId: string;data: StudentTeamUpdateRequest}, TContext> => {
+
+const mutationKey = ['editTeamApiV1StudentsTeamsTeamIdPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>, {teamId: string;data: StudentTeamUpdateRequest}> = (props) => {
+          const {teamId,data} = props ?? {};
+
+          return  editTeamApiV1StudentsTeamsTeamIdPatch(teamId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EditTeamApiV1StudentsTeamsTeamIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>>
+    export type EditTeamApiV1StudentsTeamsTeamIdPatchMutationBody = StudentTeamUpdateRequest
+    export type EditTeamApiV1StudentsTeamsTeamIdPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Edit Team
+ */
+export const useEditTeamApiV1StudentsTeamsTeamIdPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>, TError,{teamId: string;data: StudentTeamUpdateRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof editTeamApiV1StudentsTeamsTeamIdPatch>>,
+        TError,
+        {teamId: string;data: StudentTeamUpdateRequest},
+        TContext
+      > => {
+      return useMutation(getEditTeamApiV1StudentsTeamsTeamIdPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Invite a user to join the team.
+ * @summary Invite To Team
+ */
+export const inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost = (
+    teamId: string,
+    inviteUserId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/${teamId}/invitation/${inviteUserId}`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getInviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>, TError,{teamId: string;inviteUserId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>, TError,{teamId: string;inviteUserId: string}, TContext> => {
+
+const mutationKey = ['inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>, {teamId: string;inviteUserId: string}> = (props) => {
+          const {teamId,inviteUserId} = props ?? {};
+
+          return  inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost(teamId,inviteUserId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostMutationResult = NonNullable<Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>>
+
+    export type InviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Invite To Team
+ */
+export const useInviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>, TError,{teamId: string;inviteUserId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost>>,
+        TError,
+        {teamId: string;inviteUserId: string},
+        TContext
+      > => {
+      return useMutation(getInviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostMutationOptions(options), queryClient);
+    }
+    /**
  * Run student code against a single test case for immediate feedback
  * @summary Test code against a test case
  */

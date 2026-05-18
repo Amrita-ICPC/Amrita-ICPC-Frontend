@@ -383,11 +383,11 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
     }
 
     const allOnPageSelected = useMemo(
-        () => teams.length > 0 && teams.every((t) => selectedTeamIds.has(t.id)),
+        () => teams.length > 0 && teams.every((t: any) => selectedTeamIds.has(t.id)),
         [teams, selectedTeamIds],
     );
     const someOnPageSelected = useMemo(
-        () => teams.some((t) => selectedTeamIds.has(t.id)) && !allOnPageSelected,
+        () => teams.some((t: any) => selectedTeamIds.has(t.id)) && !allOnPageSelected,
         [teams, selectedTeamIds, allOnPageSelected],
     );
 
@@ -416,7 +416,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         if (ids.length === 0) return;
         setBulkBusy(action);
         try {
-            const teamById = new Map(teams.map((t) => [t.id, t]));
+            const teamById = new Map(teams.map((t: any) => [t.id, t]));
             await Promise.allSettled(
                 ids.map(async (id) => {
                     const t = teamById.get(id) ?? ({ id, name: "team" } as ContestTeamResponse);
@@ -706,7 +706,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    teams.map((team) => (
+                                    teams.map((team: any) => (
                                         <TableRow
                                             key={team.id}
                                             className="hover:bg-muted/25 transition-colors"
