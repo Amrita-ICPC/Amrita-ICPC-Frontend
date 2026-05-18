@@ -32,8 +32,19 @@ import {
 } from "@/api/generated/students/students";
 import { CreateTeamApiV1StudentsTeamsPostBody } from "@/api/generated/zod/students/students";
 import * as zod from "zod";
+import { Switch } from "@/components/ui/switch";
 
-type CreateTeamFormValues = zod.infer<typeof CreateTeamApiV1StudentsTeamsPostBody>;
+interface CreateTeamInput {
+    name: string;
+    description?: string | null | undefined;
+    is_public?: boolean | undefined;
+}
+
+interface CreateTeamOutput {
+    name: string;
+    description?: string | null | undefined;
+    is_public: boolean;
+}
 
 interface StudentCreateTeamDialogProps {
     /** Optionally render as a standalone trigger button (default) */
@@ -56,15 +67,16 @@ export function StudentCreateTeamDialog({ trigger }: StudentCreateTeamDialogProp
         },
     });
 
-    const form = useForm<CreateTeamFormValues>({
+    const form = useForm<CreateTeamInput, any, CreateTeamOutput>({
         resolver: zodResolver(CreateTeamApiV1StudentsTeamsPostBody),
         defaultValues: {
             name: "",
             description: null,
+            is_public: true,
         },
     });
 
-    const onSubmit = (data: CreateTeamFormValues) => {
+    const onSubmit = (data: CreateTeamOutput) => {
         createTeam({ data });
     };
 
@@ -150,6 +162,31 @@ export function StudentCreateTeamDialog({ trigger }: StudentCreateTeamDialogProp
                                         Max 500 characters.
                                     </FormDescription>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Public/Private Visibility Toggle */}
+                        <FormField
+                            control={form.control}
+                            name="is_public"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200/60 dark:border-white/10 p-3.5 shadow-xs bg-slate-50/50 dark:bg-slate-900/10">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-sm font-semibold flex items-center gap-1.5 text-foreground cursor-pointer">
+                                            🌐 Public Team
+                                        </FormLabel>
+                                        <FormDescription className="text-[11px] text-muted-foreground max-w-[290px] font-semibold leading-normal">
+                                            Allows other students to search for your team and
+                                            request to join. If disabled, your team is private.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value ?? true}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
                                 </FormItem>
                             )}
                         />

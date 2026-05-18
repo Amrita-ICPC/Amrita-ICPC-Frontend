@@ -15,4 +15,6 @@ export interface StudentTeamsResponse {
   teams: StudentTeamCardResponse[];
   /** Total count of pending invitations for this student */
   pending_invitation: number;
+  /** Total count of pending join requests for teams led by this student */
+  pending_request: number;
 }

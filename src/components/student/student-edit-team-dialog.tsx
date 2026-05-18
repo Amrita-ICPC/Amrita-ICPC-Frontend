@@ -32,6 +32,7 @@ import {
 } from "@/api/generated/students/students";
 import { EditTeamApiV1StudentsTeamsTeamIdPatchBody } from "@/api/generated/zod/students/students";
 import type { StudentTeamCardResponse } from "@/api/generated/model";
+import { Switch } from "@/components/ui/switch";
 
 type EditTeamFormValues = zod.infer<typeof EditTeamApiV1StudentsTeamsTeamIdPatchBody>;
 
@@ -59,6 +60,7 @@ export function StudentEditTeamDialog({ team, open, onOpenChange }: StudentEditT
         defaultValues: {
             name: team.title || "",
             description: team.description || null,
+            is_public: team.is_public ?? true,
         },
     });
 
@@ -68,6 +70,7 @@ export function StudentEditTeamDialog({ team, open, onOpenChange }: StudentEditT
             form.reset({
                 name: team.title || "",
                 description: team.description || null,
+                is_public: team.is_public ?? true,
             });
         }
     }, [open, team, form]);
@@ -150,6 +153,31 @@ export function StudentEditTeamDialog({ team, open, onOpenChange }: StudentEditT
                                         Max 500 characters.
                                     </FormDescription>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Public/Private Visibility Toggle */}
+                        <FormField
+                            control={form.control}
+                            name="is_public"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200/60 dark:border-white/10 p-3.5 shadow-xs bg-slate-50/50 dark:bg-slate-900/10">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-sm font-semibold flex items-center gap-1.5 text-foreground cursor-pointer">
+                                            🌐 Public Team
+                                        </FormLabel>
+                                        <FormDescription className="text-[11px] text-muted-foreground max-w-[290px] font-semibold leading-normal">
+                                            Allows other students to search for your team and
+                                            request to join. If disabled, your team is private.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value ?? true}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
                                 </FormItem>
                             )}
                         />

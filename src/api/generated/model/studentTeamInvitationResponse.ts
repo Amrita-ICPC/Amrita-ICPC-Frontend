@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { InvitationType } from './invitationType';
 
 /**
  * Schema representing a team invitation, with team metadata but without full member details.
@@ -28,4 +29,6 @@ export interface StudentTeamInvitationResponse {
   member_count: number;
   /** Name of the user who sent the invitation */
   invited_by_name: string;
+  /** The type of invitation: INVITE or REQUEST */
+  invitation_type: InvitationType;
 }

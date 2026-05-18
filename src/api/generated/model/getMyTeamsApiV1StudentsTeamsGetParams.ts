@@ -38,4 +38,8 @@ min_size?: number | null;
  * Maximum team size filter
  */
 max_size?: number | null;
+/**
+ * Filter by public/private setting
+ */
+is_public?: boolean | null;
 };

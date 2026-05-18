@@ -69,7 +69,11 @@ export function StudentInviteDialog({ team, open, onOpenChange }: StudentInviteD
     const handleInvite = (studentUserId: string) => {
         setActiveInviteId(studentUserId);
         inviteUser(
-            { teamId: team.id, inviteUserId: studentUserId },
+            {
+                teamId: team.id,
+                inviteUserId: studentUserId,
+                params: { type: "INVITE" },
+            },
             {
                 onSuccess: () => {
                     setActiveInviteId(null);

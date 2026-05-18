@@ -1,17 +1,6 @@
 "use client";
 
-import {
-    MoreVertical,
-    Users,
-    Zap,
-    CheckCircle2,
-    AlertCircle,
-    Trash2,
-    LogOut,
-    Loader2,
-    Pencil,
-    UserPlus,
-} from "lucide-react";
+import { MoreVertical, Users, Trash2, LogOut, Loader2, Pencil, UserPlus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,10 +25,12 @@ import { toast } from "sonner";
 import {
     useDeleteTeamApiV1StudentsTeamsTeamIdDelete,
     getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
+    useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
 } from "@/api/generated/students/students";
 import { useState } from "react";
 import { StudentEditTeamDialog } from "./student-edit-team-dialog";
 import { StudentInviteDialog } from "./student-invite-dialog";
+import { StudentTeamRequestsDialog } from "./student-team-requests-dialog";
 
 interface StudentTeamCardProps {
     team: StudentTeamCardResponse;
@@ -83,7 +74,24 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const timeAgo = formatTimeAgo(team.updated_at);
+
+    // Fetch pending requests count (only for leaders)
+    const { data: requestsData } = useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet(
+        {
+            status: "PENDING",
+            type: "REQUEST",
+            team_id: team.id,
+            sent: false,
+        },
+        {
+            query: {
+                enabled: team.is_leader,
+            },
+        },
+    );
+    const pendingRequestsCount = requestsData?.data?.invitations?.length || 0;
 
     const isReady = team.member_count >= 3;
     const statusText = isReady ? "Ready" : "Incomplete";
@@ -144,6 +152,15 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                                     Member
                                 </span>
                             )}
+                            {team.is_public ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-sky-500/10 text-sky-500 dark:bg-sky-500/20 border border-sky-500/20">
+                                    🌐 Public
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/20">
+                                    🔒 Private
+                                </span>
+                            )}
                         </div>
                         <p className="text-[10px] text-muted-foreground font-semibold">
                             Updated {timeAgo}
@@ -157,6 +174,29 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                         {team.description ||
                             "No description provided. Add one to describe your team."}
                     </p>
+                </div>
+
+                {/* Team Code Display */}
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/30 px-3 py-1.5 rounded-lg border border-border/30">
+                    <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wider">
+                        Team Code
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        <code className="text-xs font-bold font-mono tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10 select-all">
+                            {team.code}
+                        </code>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(team.code);
+                                toast.success("Team code copied to clipboard!");
+                            }}
+                            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer p-0.5 rounded hover:bg-muted"
+                            title="Copy Code"
+                        >
+                            <Copy className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Roster & Members Info */}
@@ -188,24 +228,43 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                 {/* Divider Line */}
                 <div className="border-t border-border/40" />
 
-                {/* Team Status block */}
+                {/* Join Requests or Role block */}
                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/80">
-                        Team Status
-                    </span>
-                    <div className="inline-flex">
-                        {isReady ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 border border-emerald-500/20">
-                                <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
-                                {statusText}
+                    {team.is_leader ? (
+                        <>
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/80">
+                                Join Requests
                             </span>
-                        ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/20">
-                                <AlertCircle className="h-3 w-3 stroke-[2.5]" />
-                                {statusText}
+                            <div className="inline-flex">
+                                {pendingRequestsCount > 0 ? (
+                                    <Button
+                                        onClick={() => setIsRequestsDialogOpen(true)}
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider gap-1.5 bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 hover:text-amber-500 transition-all cursor-pointer animate-pulse"
+                                    >
+                                        <UserPlus className="h-3.5 w-3.5" />
+                                        {pendingRequestsCount} Pending
+                                    </Button>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-500/10 text-slate-500 border border-slate-500/10">
+                                        0 Pending
+                                    </span>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/80">
+                                Role
                             </span>
-                        )}
-                    </div>
+                            <div className="inline-flex">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 border border-indigo-500/20">
+                                    Team Member
+                                </span>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Actions Bottom Bar */}
@@ -290,6 +349,13 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                         onOpenChange={setIsEditDialogOpen}
                     />
 
+                    {/* Manage Requests Dialog */}
+                    <StudentTeamRequestsDialog
+                        team={team}
+                        open={isRequestsDialogOpen}
+                        onOpenChange={setIsRequestsDialogOpen}
+                    />
+
                     {/* Delete Confirmation Alert Dialog */}
                     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                         <AlertDialogContent>
@@ -334,7 +400,24 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const timeAgo = formatTimeAgo(team.updated_at);
+
+    // Fetch pending requests count (only for leaders)
+    const { data: requestsData } = useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet(
+        {
+            status: "PENDING",
+            type: "REQUEST",
+            team_id: team.id,
+            sent: false,
+        },
+        {
+            query: {
+                enabled: team.is_leader,
+            },
+        },
+    );
+    const pendingRequestsCount = requestsData?.data?.invitations?.length || 0;
 
     const isReady = team.member_count >= 3;
     const statusText = isReady ? "Ready" : "Incomplete";
@@ -395,6 +478,15 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                                     Member
                                 </span>
                             )}
+                            {team.is_public ? (
+                                <span className="inline-flex px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wide bg-sky-500/10 text-sky-500 dark:bg-sky-500/20">
+                                    🌐 Public
+                                </span>
+                            ) : (
+                                <span className="inline-flex px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wide bg-amber-500/10 text-amber-500 dark:bg-amber-500/20">
+                                    🔒 Private
+                                </span>
+                            )}
                         </div>
                         <span className="text-[9px] text-muted-foreground block font-medium">
                             Updated {timeAgo}
@@ -406,6 +498,26 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
             {/* Description Column */}
             <td className="py-4 px-4 align-middle hidden md:table-cell text-left max-w-xs truncate text-xs text-muted-foreground font-semibold">
                 {team.description || "No description provided."}
+            </td>
+
+            {/* Code Column */}
+            <td className="py-4 px-4 align-middle">
+                <div className="flex items-center gap-1.5">
+                    <code className="text-xs font-bold font-mono tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10 select-all">
+                        {team.code}
+                    </code>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(team.code);
+                            toast.success("Team code copied to clipboard!");
+                        }}
+                        className="text-muted-foreground hover:text-primary transition-colors cursor-pointer p-0.5 rounded hover:bg-muted"
+                        title="Copy Code"
+                    >
+                        <Copy className="h-3.5 w-3.5" />
+                    </button>
+                </div>
             </td>
 
             {/* Members Stack Column */}
@@ -435,18 +547,28 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                 </div>
             </td>
 
-            {/* Status Column */}
+            {/* Join Requests Column */}
             <td className="py-4 px-4 align-middle">
                 <div className="flex justify-start">
-                    {isReady ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 border border-emerald-500/20">
-                            <CheckCircle2 className="h-2.5 w-2.5 stroke-[2.5]" />
-                            {statusText}
-                        </span>
+                    {team.is_leader ? (
+                        pendingRequestsCount > 0 ? (
+                            <Button
+                                onClick={() => setIsRequestsDialogOpen(true)}
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2.5 rounded-lg text-[9px] font-black uppercase tracking-wider gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 hover:text-amber-500 transition-all cursor-pointer animate-pulse"
+                            >
+                                <UserPlus className="h-3 w-3" />
+                                {pendingRequestsCount} Pending
+                            </Button>
+                        ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-500/10 text-slate-500 border border-slate-500/10">
+                                0 Pending
+                            </span>
+                        )
                     ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/20">
-                            <AlertCircle className="h-2.5 w-2.5 stroke-[2.5]" />
-                            {statusText}
+                        <span className="text-[10px] text-muted-foreground font-semibold">
+                            &mdash;
                         </span>
                     )}
                 </div>
@@ -535,6 +657,13 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                         team={team}
                         open={isEditDialogOpen}
                         onOpenChange={setIsEditDialogOpen}
+                    />
+
+                    {/* Manage Requests Dialog */}
+                    <StudentTeamRequestsDialog
+                        team={team}
+                        open={isRequestsDialogOpen}
+                        onOpenChange={setIsRequestsDialogOpen}
                     />
 
                     {/* Delete Confirmation Alert Dialog */}

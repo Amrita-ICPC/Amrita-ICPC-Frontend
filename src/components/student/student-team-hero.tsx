@@ -1,10 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { StudentCreateTeamDialog } from "@/components/student/student-create-team-dialog";
+import { StudentSearchTeamDialog } from "@/components/student/student-search-team-dialog";
 import { StudentInvitationsDrawer } from "@/components/student/student-invitations-drawer";
 
 interface StudentTeamHeroProps {
@@ -61,20 +59,8 @@ export function StudentTeamHero({ onJoinTeam, pendingInvitations = 0 }: StudentT
                         {/* Create Team — opens dialog */}
                         <StudentCreateTeamDialog />
 
-                        <Button
-                            onClick={
-                                onJoinTeam ||
-                                (() =>
-                                    toast.info(
-                                        "To join a team, please navigate to an active contest page.",
-                                    ))
-                            }
-                            variant="outline"
-                            className="bg-slate-900/60 backdrop-blur-md text-slate-100 hover:text-white gap-1.5 h-9 px-4.5 border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all font-extrabold text-xs rounded-lg"
-                        >
-                            <UserPlus className="h-4 w-4 stroke-[2]" />
-                            Join Team
-                        </Button>
+                        {/* Search and Request Join Team Dialog */}
+                        <StudentSearchTeamDialog />
 
                         {/* Team Invitations Drawer */}
                         <StudentInvitationsDrawer pendingCount={pendingInvitations} />

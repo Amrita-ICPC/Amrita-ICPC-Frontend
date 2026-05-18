@@ -7,6 +7,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface StudentTeamFiltersProps {
     view: ViewMode;
@@ -62,6 +69,9 @@ export function StudentTeamFilters({ view, onViewChange }: StudentTeamFiltersPro
     // Read current boolean filter state directly from URL
     const isLeaderOnly = searchParams.get("leader_only") === "true";
     const isCreatedOnly = searchParams.get("created_only") === "true";
+    const isPublicParam = searchParams.get("is_public");
+    const visibility =
+        isPublicParam === "true" ? "public" : isPublicParam === "false" ? "private" : "all";
 
     // Toggle a boolean URL param on/off
     const handleToggleFilter = (key: "leader_only" | "created_only") => {
@@ -72,6 +82,21 @@ export function StudentTeamFilters({ view, onViewChange }: StudentTeamFiltersPro
             params.delete(key);
         } else {
             params.set(key, "true");
+        }
+
+        params.set("page", "1");
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
+    const handleVisibilityChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (value === "public") {
+            params.set("is_public", "true");
+        } else if (value === "private") {
+            params.set("is_public", "false");
+        } else {
+            params.delete("is_public");
         }
 
         params.set("page", "1");
@@ -147,6 +172,24 @@ export function StudentTeamFilters({ view, onViewChange }: StudentTeamFiltersPro
                 >
                     🛠️ Teams I Created
                 </button>
+
+                {/* Visibility Filter Dropdown */}
+                <Select value={visibility} onValueChange={handleVisibilityChange}>
+                    <SelectTrigger className="w-[145px] h-10 border-slate-200/60 dark:border-white/10 dark:bg-slate-900/50 text-xs font-extrabold text-muted-foreground bg-slate-50 dark:bg-slate-900/50">
+                        <SelectValue placeholder="Visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="text-xs font-semibold">
+                            🌐 All Visibility
+                        </SelectItem>
+                        <SelectItem value="public" className="text-xs font-semibold">
+                            🌐 Public Only
+                        </SelectItem>
+                        <SelectItem value="private" className="text-xs font-semibold">
+                            🔒 Private Only
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
 
                 {/* View Toggle */}
                 <ViewToggle view={view} onChange={onViewChange} />
