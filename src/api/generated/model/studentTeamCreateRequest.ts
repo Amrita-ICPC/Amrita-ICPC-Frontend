@@ -7,25 +7,15 @@
  */
 
 /**
- * Schema for creating a new team in a contest.
-
-Student creates a team to participate in a contest.
-Creator becomes team leader and first member.
-
-Attributes:
-    name: Name of the team (1-255 characters)
-    description: Optional team description (max 1000 characters)
-    contest_id: ID of the contest to create team for
+ * Schema representing the request to create a student team.
  */
 export interface StudentTeamCreateRequest {
   /**
-     * Team name
-     * @minLength 1
-     * @maxLength 255
+     * The name of the team
+     * @minLength 3
+     * @maxLength 100
      */
   name: string;
-  /** Team description */
+  /** Description of the team */
   description?: string | null;
-  /** Contest UUID to create team for */
-  contest_id: string;
 }

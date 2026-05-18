@@ -129,3 +129,76 @@ export const ListUsersApiV1UsersGetResponse = zod.object({
 })
 })
 
+/**
+ * List student users with search query support.
+
+This endpoint is accessible to all logged-in users (e.g. students sending team invitations).
+
+Args:
+    request: FastAPI request context.
+    db: Database session.
+    user_id: ID of the authenticated user.
+    page: Page number for pagination.
+    page_size: Number of items per page.
+    q: Optional search query (matches name or email).
+    team_id: Optional team ID to check membership.
+
+Returns:
+    Paginated list of student users with is_in_team field.
+ * @summary List student users for team invitations
+ */
+export const listStudentsApiV1UsersStudentsGetQueryPageDefault = 1;
+
+export const listStudentsApiV1UsersStudentsGetQueryPageSizeDefault = 20;
+export const listStudentsApiV1UsersStudentsGetQueryPageSizeMax = 100;
+
+
+
+export const ListStudentsApiV1UsersStudentsGetQueryParams = zod.object({
+  "page": zod.number().min(1).default(listStudentsApiV1UsersStudentsGetQueryPageDefault).describe('Page number (starts from 1)'),
+  "page_size": zod.number().min(1).max(listStudentsApiV1UsersStudentsGetQueryPageSizeMax).default(listStudentsApiV1UsersStudentsGetQueryPageSizeDefault).describe('Number of items per page'),
+  "q": zod.union([zod.string(),zod.null()]).optional().describe('Search by name or email'),
+  "team_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Check if the student is already in this team')
+})
+
+export const listStudentsApiV1UsersStudentsGetResponseSuccessDefault = true;
+export const listStudentsApiV1UsersStudentsGetResponseStatusDefault = 200;
+export const listStudentsApiV1UsersStudentsGetResponseMessageDefault = `Success`;
+export const listStudentsApiV1UsersStudentsGetResponseDataOneItemAudienceLinksDefault = [];
+
+export const ListStudentsApiV1UsersStudentsGetResponse = zod.object({
+  "success": zod.boolean().default(listStudentsApiV1UsersStudentsGetResponseSuccessDefault),
+  "status": zod.number().default(listStudentsApiV1UsersStudentsGetResponseStatusDefault),
+  "message": zod.string().default(listStudentsApiV1UsersStudentsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "id": zod.uuid(),
+  "user_id": zod.string(),
+  "name": zod.string(),
+  "email": zod.email(),
+  "phone_no": zod.union([zod.string(),zod.null()]).optional(),
+  "role": zod.enum(['student', 'instructor', 'admin', 'manager']).describe('Enumeration of user roles within the ICPC backend system.\n\nDefines the hierarchical roles that control access permissions\nand determine what actions users can perform.\n\nAttributes:\n    student: Regular students who can participate in contests and join teams.\n    instructor: Instructors who can create and manage contests for their courses.\n    admin: System administrators with full access to all system features.\n    manager: Organizational managers with elevated permissions across contests.'),
+  "gender": zod.union([zod.string(),zod.null()]).optional(),
+  "dob": zod.union([zod.iso.date(),zod.null()]).optional(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "last_updated": zod.iso.datetime({"offset":true}),
+  "audience_links": zod.array(zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+})).default(listStudentsApiV1UsersStudentsGetResponseDataOneItemAudienceLinksDefault),
+  "is_in_team": zod.union([zod.boolean(),zod.null()]).optional(),
+  "is_already_invited": zod.union([zod.boolean(),zod.null()]).optional()
+})),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+

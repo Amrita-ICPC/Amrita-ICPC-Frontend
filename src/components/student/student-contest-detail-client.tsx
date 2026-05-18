@@ -26,6 +26,7 @@ import {
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { cn } from "@/lib/utils";
 import { ContestTeamCards, OverallRegistrationProgressCard } from "./contest-team-cards";
+import { StudentContestDetailSkeleton } from "./student-contest-skeleton";
 
 const BANNERS = [
     { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue
@@ -393,11 +394,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
             error={error}
             onRetry={refetch}
             errorTitle="Contest Not Found"
-            loadingComponent={
-                <div className="flex justify-center p-8 text-muted-foreground">
-                    Loading contest details...
-                </div>
-            }
+            loadingComponent={<StudentContestDetailSkeleton />}
         >
             {contest && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

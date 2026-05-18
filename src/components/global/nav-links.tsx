@@ -75,6 +75,7 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
                         if (isStudent) {
                             if (item.label === "Dashboard") href = "/student/dashboard";
                             if (item.label === "Contests") href = "/student/contest";
+                            if (item.label === "Teams") href = "/student/teams";
                         }
                         return (
                             <NavItem
