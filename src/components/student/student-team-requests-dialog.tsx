@@ -13,9 +13,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
     useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
-    useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch,
+    useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch,
     getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
     getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
+    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
 } from "@/api/generated/students/students";
 import type { StudentTeamCardResponse, StudentTeamInvitationResponse } from "@/api/generated/model";
 import { Check, X, Loader2, Users, Inbox, AlertCircle } from "lucide-react";
@@ -79,7 +80,7 @@ export function StudentTeamRequestsDialog({
 
     // Mutation to accept or reject requests
     const { mutate: respondToInvitation, isPending: isUpdating } =
-        useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch({
+        useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch({
             mutation: {
                 meta: {
                     successMessage: "Join request processed successfully!",
@@ -91,6 +92,7 @@ export function StudentTeamRequestsDialog({
                             team_id: team.id,
                             sent: false,
                         }),
+                        getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey(),
                     ],
                 },
                 onSuccess: () => {

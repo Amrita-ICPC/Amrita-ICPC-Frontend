@@ -164,7 +164,7 @@ export const GetStudentContestStatusApiV1StudentsContestsContestIdParticipationM
   "registration_status": zod.object({
   "registered": zod.boolean().describe('Whether the student is registered for the contest'),
   "approved": zod.boolean().describe('Whether the registration is approved'),
-  "status": zod.string().describe('Combined registration status (e.g., REGISTERED, PENDING, NOT_REGISTERED)')
+  "status": zod.enum(['NOT_REGISTERED', 'PENDING_APPROVAL', 'APPROVED']).describe('Combined registration status (e.g., APPROVED, PENDING_APPROVAL, NOT_REGISTERED)')
 }).describe('Registration and approval status'),
   "readiness": zod.object({
   "can_start": zod.boolean().describe('Whether the student\/team can start the contest'),
@@ -334,7 +334,7 @@ export const getTeamInvitationsApiV1StudentsTeamsInvitationsGetQuerySentDefault 
 
 export const GetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryParams = zod.object({
   "type": zod.enum(['REQUEST', 'INVITE']).optional().describe('Type of invitation (INVITE or REQUEST)'),
-  "status": zod.union([zod.enum(['PENDING', 'ACCEPTED', 'REJECTED']).describe('Enumeration of team invitation statuses.\n\nAttributes:\n    PENDING: Invitation is pending.\n    ACCEPTED: Invitation is accepted.\n    REJECTED: Invitation is rejected.'),zod.null()]).optional().describe('Filter invitations by status'),
+  "status": zod.union([zod.enum(['PENDING', 'CANCELLED', 'ACCEPTED', 'REJECTED']).describe('Enumeration of team invitation statuses.\n\nAttributes:\n    PENDING: Invitation is pending.\n    CANCELLED: Invitation is cancelled.\n    ACCEPTED: Invitation is accepted.\n    REJECTED: Invitation is rejected.'),zod.null()]).optional().describe('Filter invitations by status'),
   "team_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Optional team ID filter'),
   "sent": zod.boolean().default(getTeamInvitationsApiV1StudentsTeamsInvitationsGetQuerySentDefault).describe('Filter for sent invitations\/requests where current user is the sender')
 })
@@ -377,7 +377,7 @@ export const GetTeamInvitationsApiV1StudentsTeamsInvitationsGetResponse = zod.ob
 })
 
 /**
- * Accept or reject a team invitation.
+ * Update a team invitation status (accept, reject, or cancel).
 
 Args:
     request: FastAPI Request object.
@@ -388,24 +388,151 @@ Args:
 
 Returns:
     APIResponse indicating successful update.
- * @summary Accept Or Reject Team Invitation
+ * @summary Update Team Invitation Status
  */
-export const AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchParams = zod.object({
+export const UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchParams = zod.object({
   "id": zod.uuid()
 })
 
-export const AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchBody = zod.object({
-  "status": zod.enum(['ACCEPTED', 'REJECTED']).describe('The action status for the invitation, must be ACCEPTED or REJECTED')
-}).describe('Schema representing the request to accept or reject a team invitation.')
+export const UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchBody = zod.object({
+  "status": zod.enum(['ACCEPTED', 'REJECTED', 'CANCELLED']).describe('The action status for the invitation, must be ACCEPTED, REJECTED, or CANCELLED')
+}).describe('Schema representing the request to accept, reject, or cancel a team invitation.')
 
-export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseSuccessDefault = true;
-export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseStatusDefault = 200;
-export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseMessageDefault = `Success`;
+export const updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseSuccessDefault = true;
+export const updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseStatusDefault = 200;
+export const updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseMessageDefault = `Success`;
 
-export const AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponse = zod.object({
-  "success": zod.boolean().default(acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseSuccessDefault),
-  "status": zod.number().default(acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseStatusDefault),
-  "message": zod.string().default(acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchResponseMessageDefault),
+export const UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponse = zod.object({
+  "success": zod.boolean().default(updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseSuccessDefault),
+  "status": zod.number().default(updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseStatusDefault),
+  "message": zod.string().default(updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Transfer team leadership to another member.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the target team.
+    body: Request body containing the new leader ID.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful leadership transfer.
+ * @summary Transfer Team Leadership
+ */
+export const TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostParams = zod.object({
+  "team_id": zod.uuid()
+})
+
+export const TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostBody = zod.object({
+  "new_leader_id": zod.uuid().describe('The UUID of the team member to transfer leadership to')
+}).describe('Schema representing the request to transfer team leadership to another member.')
+
+export const transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseSuccessDefault = true;
+export const transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseStatusDefault = 200;
+export const transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseMessageDefault = `Success`;
+
+export const TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponse = zod.object({
+  "success": zod.boolean().default(transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseSuccessDefault),
+  "status": zod.number().default(transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseStatusDefault),
+  "message": zod.string().default(transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Leave the team voluntarily (authenticated user leaves).
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful team exit.
+ * @summary Leave Team Me
+ */
+export const LeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteParams = zod.object({
+  "team_id": zod.uuid()
+})
+
+export const leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseSuccessDefault = true;
+export const leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseStatusDefault = 200;
+export const leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseMessageDefault = `Success`;
+
+export const LeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponse = zod.object({
+  "success": zod.boolean().default(leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseSuccessDefault),
+  "status": zod.number().default(leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseStatusDefault),
+  "message": zod.string().default(leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Remove/kick a member from the team. Only the team leader is permitted, or if it is me, the user leaves.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team.
+    member_id: UUID of the member to remove.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful member removal.
+ * @summary Remove Team Member
+ */
+export const RemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteParams = zod.object({
+  "team_id": zod.uuid(),
+  "member_id": zod.uuid()
+})
+
+export const removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseSuccessDefault = true;
+export const removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseStatusDefault = 200;
+export const removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseMessageDefault = `Success`;
+
+export const RemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponse = zod.object({
+  "success": zod.boolean().default(removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseSuccessDefault),
+  "status": zod.number().default(removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseStatusDefault),
+  "message": zod.string().default(removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteResponseMessageDefault),
   "data": zod.null().optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

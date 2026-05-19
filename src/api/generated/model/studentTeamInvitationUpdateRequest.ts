@@ -8,9 +8,9 @@
 import type { StudentTeamInvitationUpdateRequestStatus } from './studentTeamInvitationUpdateRequestStatus';
 
 /**
- * Schema representing the request to accept or reject a team invitation.
+ * Schema representing the request to accept, reject, or cancel a team invitation.
  */
 export interface StudentTeamInvitationUpdateRequest {
-  /** The action status for the invitation, must be ACCEPTED or REJECTED */
+  /** The action status for the invitation, must be ACCEPTED, REJECTED, or CANCELLED */
   status: StudentTeamInvitationUpdateRequestStatus;
 }

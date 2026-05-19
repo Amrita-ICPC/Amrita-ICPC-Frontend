@@ -11,6 +11,7 @@
 
 Attributes:
     PENDING: Invitation is pending.
+    CANCELLED: Invitation is cancelled.
     ACCEPTED: Invitation is accepted.
     REJECTED: Invitation is rejected.
  */
@@ -19,6 +20,7 @@ export type TeamInvitationStatus = typeof TeamInvitationStatus[keyof typeof Team
 
 export const TeamInvitationStatus = {
   PENDING: 'PENDING',
+  CANCELLED: 'CANCELLED',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
 } as const;

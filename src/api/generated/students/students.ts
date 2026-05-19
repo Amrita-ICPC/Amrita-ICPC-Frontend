@@ -46,6 +46,7 @@ import type {
   StudentCodeRunResponse,
   StudentTeamCreateRequest,
   StudentTeamInvitationUpdateRequest,
+  StudentTeamTransferLeaderRequest,
   StudentTeamUpdateRequest
 } from '../model';
 
@@ -633,7 +634,7 @@ export function useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet<TData = Aw
 
 
 /**
- * Accept or reject a team invitation.
+ * Update a team invitation status (accept, reject, or cancel).
 
 Args:
     request: FastAPI Request object.
@@ -644,9 +645,9 @@ Args:
 
 Returns:
     APIResponse indicating successful update.
- * @summary Accept Or Reject Team Invitation
+ * @summary Update Team Invitation Status
  */
-export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch = (
+export const updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch = (
     id: string,
     studentTeamInvitationUpdateRequest: StudentTeamInvitationUpdateRequest,
  signal?: AbortSignal
@@ -663,11 +664,11 @@ export const acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch = 
 
 
 
-export const getAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext> => {
+export const getUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext> => {
 
-const mutationKey = ['acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch'];
+const mutationKey = ['updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -677,10 +678,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, {id: string;data: StudentTeamInvitationUpdateRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>, {id: string;data: StudentTeamInvitationUpdateRequest}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch(id,data,)
+          return  updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch(id,data,)
         }
 
 
@@ -690,22 +691,241 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>>
-    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationBody = StudentTeamInvitationUpdateRequest
-    export type AcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationError = ExceptionResponse | HTTPValidationError
+    export type UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>>
+    export type UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchMutationBody = StudentTeamInvitationUpdateRequest
+    export type UpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchMutationError = ExceptionResponse | HTTPValidationError
 
     /**
- * @summary Accept Or Reject Team Invitation
+ * @summary Update Team Invitation Status
  */
-export const useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
+export const useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>, TError,{id: string;data: StudentTeamInvitationUpdateRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof acceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch>>,
+        Awaited<ReturnType<typeof updateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch>>,
         TError,
         {id: string;data: StudentTeamInvitationUpdateRequest},
         TContext
       > => {
-      return useMutation(getAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatchMutationOptions(options), queryClient);
+      return useMutation(getUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Transfer team leadership to another member.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the target team.
+    body: Request body containing the new leader ID.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful leadership transfer.
+ * @summary Transfer Team Leadership
+ */
+export const transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost = (
+    teamId: string,
+    studentTeamTransferLeaderRequest: StudentTeamTransferLeaderRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/${teamId}/leader`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentTeamTransferLeaderRequest, signal
+    },
+      );
+    }
+
+
+
+export const getTransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>, TError,{teamId: string;data: StudentTeamTransferLeaderRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>, TError,{teamId: string;data: StudentTeamTransferLeaderRequest}, TContext> => {
+
+const mutationKey = ['transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>, {teamId: string;data: StudentTeamTransferLeaderRequest}> = (props) => {
+          const {teamId,data} = props ?? {};
+
+          return  transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost(teamId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostMutationResult = NonNullable<Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>>
+    export type TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostMutationBody = StudentTeamTransferLeaderRequest
+    export type TransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Transfer Team Leadership
+ */
+export const useTransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>, TError,{teamId: string;data: StudentTeamTransferLeaderRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof transferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPost>>,
+        TError,
+        {teamId: string;data: StudentTeamTransferLeaderRequest},
+        TContext
+      > => {
+      return useMutation(getTransferTeamLeadershipApiV1StudentsTeamsTeamIdLeaderPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Leave the team voluntarily (authenticated user leaves).
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful team exit.
+ * @summary Leave Team Me
+ */
+export const leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete = (
+    teamId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/${teamId}/members/me`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>, TError,{teamId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>, TError,{teamId: string}, TContext> => {
+
+const mutationKey = ['leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>, {teamId: string}> = (props) => {
+          const {teamId} = props ?? {};
+
+          return  leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete(teamId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>>
+
+    export type LeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Leave Team Me
+ */
+export const useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>, TError,{teamId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof leaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete>>,
+        TError,
+        {teamId: string},
+        TContext
+      > => {
+      return useMutation(getLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDeleteMutationOptions(options), queryClient);
+    }
+    /**
+ * Remove/kick a member from the team. Only the team leader is permitted, or if it is me, the user leaves.
+
+Args:
+    request: FastAPI Request object.
+    team_id: UUID of the team.
+    member_id: UUID of the member to remove.
+    user_id: ID of the authenticated user.
+    service: Injected StudentTeamService.
+
+Returns:
+    APIResponse indicating successful member removal.
+ * @summary Remove Team Member
+ */
+export const removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete = (
+    teamId: string,
+    memberId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/teams/${teamId}/members/${memberId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getRemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext> => {
+
+const mutationKey = ['removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>, {teamId: string;memberId: string}> = (props) => {
+          const {teamId,memberId} = props ?? {};
+
+          return  removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete(teamId,memberId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>>
+
+    export type RemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Remove Team Member
+ */
+export const useRemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>, TError,{teamId: string;memberId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDelete>>,
+        TError,
+        {teamId: string;memberId: string},
+        TContext
+      > => {
+      return useMutation(getRemoveTeamMemberApiV1StudentsTeamsTeamIdMembersMemberIdDeleteMutationOptions(options), queryClient);
     }
     /**
  * Search student teams by name with case-insensitive partial match.
