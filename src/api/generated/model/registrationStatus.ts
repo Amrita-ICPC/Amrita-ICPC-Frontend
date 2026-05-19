@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { RegistrationState } from './registrationState';
 
 /**
  * Schema for student registration status in a contest.
@@ -14,6 +15,6 @@ export interface RegistrationStatus {
   registered: boolean;
   /** Whether the registration is approved */
   approved: boolean;
-  /** Combined registration status (e.g., REGISTERED, PENDING, NOT_REGISTERED) */
-  status: string;
+  /** Combined registration status (e.g., APPROVED, PENDING_APPROVAL, NOT_REGISTERED) */
+  status: RegistrationState;
 }

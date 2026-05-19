@@ -7,7 +7,7 @@
  */
 
 /**
- * The action status for the invitation, must be ACCEPTED or REJECTED
+ * The action status for the invitation, must be ACCEPTED, REJECTED, or CANCELLED
  */
 export type StudentTeamInvitationUpdateRequestStatus = typeof StudentTeamInvitationUpdateRequestStatus[keyof typeof StudentTeamInvitationUpdateRequestStatus];
 
@@ -15,4 +15,5 @@ export type StudentTeamInvitationUpdateRequestStatus = typeof StudentTeamInvitat
 export const StudentTeamInvitationUpdateRequestStatus = {
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED',
 } as const;

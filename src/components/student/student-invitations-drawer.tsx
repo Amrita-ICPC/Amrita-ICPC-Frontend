@@ -15,9 +15,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
     useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
-    useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch,
+    useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch,
     getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
     getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
+    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
 } from "@/api/generated/students/students";
 import type { StudentTeamInvitationResponse, InvitationType } from "@/api/generated/model";
 
@@ -106,7 +107,7 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
 
     // Respond to invitation mutation
     const { mutate: respondToInvitation, isPending: isUpdating } =
-        useAcceptOrRejectTeamInvitationApiV1StudentsTeamsInvitationsIdPatch({
+        useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch({
             mutation: {
                 meta: {
                     successMessage: "Response submitted successfully!",
@@ -120,6 +121,7 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                             status: "PENDING",
                             type: "REQUEST",
                         }),
+                        getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey(),
                     ],
                 },
             },
@@ -149,6 +151,24 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
             {
                 id: invitation.id,
                 data: { status: "REJECTED" },
+            },
+            {
+                onSuccess: () => {
+                    setActionId(null);
+                },
+                onError: () => {
+                    setActionId(null);
+                },
+            },
+        );
+    };
+
+    const handleCancel = (invitation: StudentTeamInvitationResponse) => {
+        setActionId(invitation.id);
+        respondToInvitation(
+            {
+                id: invitation.id,
+                data: { status: "CANCELLED" },
             },
             {
                 onSuccess: () => {
@@ -375,11 +395,27 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <div className="pt-1 w-full">
-                                                    <div className="flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-black bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/20 w-full transition-all">
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin stroke-[2.5]" />
-                                                        Pending Team Leader Approval
+                                                <div className="flex items-center gap-3 pt-1 w-full">
+                                                    <div className="flex-1 flex h-8.5 items-center justify-center gap-1.5 rounded-xl text-[10px] font-black bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 border border-amber-500/10 transition-all truncate px-2.5">
+                                                        <span className="relative flex h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+                                                        </span>
+                                                        Pending Approval
                                                     </div>
+                                                    <Button
+                                                        onClick={() => handleCancel(invitation)}
+                                                        disabled={isAnyActionPending}
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8.5 rounded-xl text-xs font-black gap-1.5 border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 cursor-pointer transition-colors shrink-0"
+                                                    >
+                                                        {isCurrentAction && isUpdating ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 stroke-[2.5]" />
+                                                        )}
+                                                        Cancel Request
+                                                    </Button>
                                                 </div>
                                             )}
                                         </div>

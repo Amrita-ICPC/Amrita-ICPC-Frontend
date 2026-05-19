@@ -26,6 +26,8 @@ import {
     useDeleteTeamApiV1StudentsTeamsTeamIdDelete,
     getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
     useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
+    useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete,
+    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
 } from "@/api/generated/students/students";
 import { useState } from "react";
 import { StudentEditTeamDialog } from "./student-edit-team-dialog";
@@ -75,6 +77,7 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
+    const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
     const timeAgo = formatTimeAgo(team.updated_at);
 
     // Fetch pending requests count (only for leaders)
@@ -103,7 +106,10 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
             mutation: {
                 meta: {
                     successMessage: `Team "${team.title}" deleted successfully!`,
-                    invalidateKeys: [getGetMyTeamsApiV1StudentsTeamsGetQueryKey()],
+                    invalidateKeys: [
+                        getGetMyTeamsApiV1StudentsTeamsGetQueryKey(),
+                        getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey(),
+                    ],
                 },
                 onSuccess: () => {
                     setIsDeleteDialogOpen(false);
@@ -113,6 +119,26 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
 
     const handleDelete = () => {
         deleteTeam({ teamId: team.id });
+    };
+
+    const { mutate: leaveTeam, isPending: isLeaving } =
+        useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete({
+            mutation: {
+                meta: {
+                    successMessage: `Successfully left team "${team.title}"`,
+                    invalidateKeys: [
+                        getGetMyTeamsApiV1StudentsTeamsGetQueryKey(),
+                        getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey(),
+                    ],
+                },
+                onSuccess: () => {
+                    setIsLeaveDialogOpen(false);
+                },
+            },
+        });
+
+    const handleLeave = () => {
+        leaveTeam({ teamId: team.id });
     };
 
     return (
@@ -313,6 +339,17 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                                         variant="destructive"
                                         onSelect={(e) => {
                                             e.preventDefault();
+                                            setIsLeaveDialogOpen(true);
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        Leave Team
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onSelect={(e) => {
+                                            e.preventDefault();
                                             setIsDeleteDialogOpen(true);
                                         }}
                                         className="cursor-pointer"
@@ -323,8 +360,9 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                                 </>
                             ) : (
                                 <DropdownMenuItem
-                                    onSelect={() => {
-                                        toast.info("Leave Team functionality is coming soon!");
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        setIsLeaveDialogOpen(true);
                                     }}
                                     className="cursor-pointer"
                                 >
@@ -390,6 +428,56 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+
+                    {/* Leave Confirmation Alert Dialog */}
+                    <AlertDialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Leave Team</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {team.is_leader ? (
+                                        <>
+                                            Are you sure you want to leave the team{" "}
+                                            <strong className="text-foreground">
+                                                &quot;{team.title}&quot;
+                                            </strong>
+                                            ? As the leader, leaving the team will dissolve it, and
+                                            all members will lose access. This action is permanent
+                                            and cannot be undone.
+                                        </>
+                                    ) : (
+                                        <>
+                                            Are you sure you want to leave the team{" "}
+                                            <strong className="text-foreground">
+                                                &quot;{team.title}&quot;
+                                            </strong>
+                                            ? You will lose access to this team and will need to
+                                            request to join again or be invited by the leader to
+                                            return.
+                                        </>
+                                    )}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isLeaving}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    variant="destructive"
+                                    onClick={handleLeave}
+                                    disabled={isLeaving}
+                                    className="min-w-[100px]"
+                                >
+                                    {isLeaving ? (
+                                        <>
+                                            <Loader2 className="mr-2.5 h-4 w-4 animate-spin" />
+                                            Leaving...
+                                        </>
+                                    ) : (
+                                        "Leave Team"
+                                    )}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </CardContent>
         </Card>
@@ -401,6 +489,7 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
+    const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
     const timeAgo = formatTimeAgo(team.updated_at);
 
     // Fetch pending requests count (only for leaders)
@@ -439,6 +528,23 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
 
     const handleDelete = () => {
         deleteTeam({ teamId: team.id });
+    };
+
+    const { mutate: leaveTeam, isPending: isLeaving } =
+        useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete({
+            mutation: {
+                meta: {
+                    successMessage: `Successfully left team "${team.title}"`,
+                    invalidateKeys: [getGetMyTeamsApiV1StudentsTeamsGetQueryKey()],
+                },
+                onSuccess: () => {
+                    setIsLeaveDialogOpen(false);
+                },
+            },
+        });
+
+    const handleLeave = () => {
+        leaveTeam({ teamId: team.id });
     };
 
     return (
@@ -623,6 +729,17 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                                         variant="destructive"
                                         onSelect={(e) => {
                                             e.preventDefault();
+                                            setIsLeaveDialogOpen(true);
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        Leave Team
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onSelect={(e) => {
+                                            e.preventDefault();
                                             setIsDeleteDialogOpen(true);
                                         }}
                                         className="cursor-pointer"
@@ -633,8 +750,9 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                                 </>
                             ) : (
                                 <DropdownMenuItem
-                                    onSelect={() => {
-                                        toast.info("Leave Team functionality is coming soon!");
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        setIsLeaveDialogOpen(true);
                                     }}
                                     className="cursor-pointer"
                                 >
@@ -695,6 +813,56 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
                                         </>
                                     ) : (
                                         "Delete Team"
+                                    )}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                    {/* Leave Confirmation Alert Dialog */}
+                    <AlertDialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Leave Team</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {team.is_leader ? (
+                                        <>
+                                            Are you sure you want to leave the team{" "}
+                                            <strong className="text-foreground">
+                                                &quot;{team.title}&quot;
+                                            </strong>
+                                            ? As the leader, leaving the team will dissolve it, and
+                                            all members will lose access. This action is permanent
+                                            and cannot be undone.
+                                        </>
+                                    ) : (
+                                        <>
+                                            Are you sure you want to leave the team{" "}
+                                            <strong className="text-foreground">
+                                                &quot;{team.title}&quot;
+                                            </strong>
+                                            ? You will lose access to this team and will need to
+                                            request to join again or be invited by the leader to
+                                            return.
+                                        </>
+                                    )}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isLeaving}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    variant="destructive"
+                                    onClick={handleLeave}
+                                    disabled={isLeaving}
+                                    className="min-w-[100px]"
+                                >
+                                    {isLeaving ? (
+                                        <>
+                                            <Loader2 className="mr-2.5 h-4 w-4 animate-spin" />
+                                            Leaving...
+                                        </>
+                                    ) : (
+                                        "Leave Team"
                                     )}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
