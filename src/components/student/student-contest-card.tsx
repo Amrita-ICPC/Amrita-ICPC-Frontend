@@ -192,7 +192,10 @@ export function StudentContestCard({ contest }: StudentContestCardProps) {
 
     const registrationProgress = useMemo(() => {
         if (!contest.max_teams || contest.max_teams === 0) return null;
-        return Math.round(((contest.teams_count || 0) / contest.max_teams) * 100);
+        return Math.min(
+            100,
+            Math.max(0, Math.round(((contest.teams_count || 0) / contest.max_teams) * 100)),
+        );
     }, [contest.teams_count, contest.max_teams]);
 
     return (

@@ -120,6 +120,7 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                         getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey({
                             status: "PENDING",
                             type: "REQUEST",
+                            sent: true,
                         }),
                         getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey(),
                     ],
@@ -373,7 +374,7 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
                                                         size="sm"
                                                         className="h-8.5 rounded-xl text-xs font-black gap-1.5 border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 cursor-pointer transition-colors"
                                                     >
-                                                        {isCurrentAction && !isUpdating ? (
+                                                        {isCurrentAction && isUpdating ? (
                                                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                         ) : (
                                                             <X className="h-3.5 w-3.5 stroke-[2.5]" />
