@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -41,7 +42,7 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
     const totalCount = membersList.length;
     const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
     const isApproved = !!participation.registration_status?.approved;
-    const completionPercentage = team.completion_percentage ?? 0;
+    const completionPercentage = Math.max(0, Math.min(100, team.completion_percentage ?? 0));
 
     return (
         <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
@@ -377,11 +378,14 @@ export function ContestTeamCards({
                         members to participate.
                     </p>
                     <Button
+                        asChild
                         size="sm"
                         className="mt-4 w-full font-bold shadow-md shadow-primary/15 hover:shadow-lg transition-all flex items-center justify-center gap-1.5"
                     >
-                        <UserPlus className="h-4 w-4" />
-                        Join or Create Team
+                        <Link href="/student/teams">
+                            <UserPlus className="h-4 w-4" />
+                            Join or Create Team
+                        </Link>
                     </Button>
                 </div>
             </CardContent>

@@ -20,7 +20,6 @@ import {
 } from "@/api/generated/students/students";
 import type { StudentTeamCardResponse, StudentTeamInvitationResponse } from "@/api/generated/model";
 import { Check, X, Loader2, Users, Inbox, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 
 interface StudentTeamRequestsDialogProps {
     team: StudentTeamCardResponse;
@@ -209,7 +208,7 @@ export function StudentTeamRequestsDialog({
                                                     className="h-8 w-8 rounded-lg border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 cursor-pointer"
                                                     title="Reject Request"
                                                 >
-                                                    {isCurrentAction && !isUpdating ? (
+                                                    {isCurrentAction && isUpdating ? (
                                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                     ) : (
                                                         <X className="h-4 w-4 stroke-[2.5]" />

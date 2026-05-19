@@ -37,6 +37,15 @@ export function StudentTeamFilters({ view, onViewChange }: StudentTeamFiltersPro
     const debouncedMinSize = useDebounce(minSize, 500);
     const debouncedMaxSize = useDebounce(maxSize, 500);
 
+    // Sync URL search params back to local inputs if they are changed externally
+    useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
+        setSearchTerm(searchParams.get("search") || "");
+        setMinSize(searchParams.get("min_size") || "");
+        setMaxSize(searchParams.get("max_size") || "");
+        /* eslint-enable react-hooks/set-state-in-effect */
+    }, [searchParams]);
+
     // Sync debounced text inputs → URL
     useEffect(() => {
         const params = new URLSearchParams(searchParams.toString());

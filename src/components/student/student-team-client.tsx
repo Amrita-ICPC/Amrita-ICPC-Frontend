@@ -26,18 +26,24 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
     // Track grid vs list/table view locally (defaults to "grid")
     const [view, setView] = useState<ViewMode>("grid");
 
+    const parsePositiveInt = (value: string | null, fallback?: number) => {
+        if (!value) return fallback;
+        const n = Number.parseInt(value, 10);
+        return Number.isFinite(n) && n > 0 ? n : fallback;
+    };
+
     // Gather URL search parameters to make the filter dynamic and URL-driven
-    const page = parseInt(searchParams.get("page") || String(initialParams.page || 1));
+    const page = parsePositiveInt(searchParams.get("page"), initialParams.page || 1) || 1;
     const pageSize = initialParams.page_size || 12;
     const search = searchParams.get("search") || undefined;
     const createdOnly = searchParams.get("created_only") === "true" ? true : undefined;
     const leaderOnly = searchParams.get("leader_only") === "true" ? true : undefined;
 
     const minSizeRaw = searchParams.get("min_size");
-    const minSize = minSizeRaw ? parseInt(minSizeRaw) : undefined;
+    const minSize = parsePositiveInt(minSizeRaw);
 
     const maxSizeRaw = searchParams.get("max_size");
-    const maxSize = maxSizeRaw ? parseInt(maxSizeRaw) : undefined;
+    const maxSize = parsePositiveInt(maxSizeRaw);
 
     const isPublicRaw = searchParams.get("is_public");
     const isPublic = isPublicRaw === "true" ? true : isPublicRaw === "false" ? false : undefined;
