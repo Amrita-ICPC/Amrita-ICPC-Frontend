@@ -45,6 +45,8 @@ import {
     Mail,
     CheckCircle2,
     UserCheck,
+    Plus,
+    AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TeamStatus, ContestTeamMemberStatus } from "@/api/generated/model";
@@ -57,7 +59,8 @@ import {
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
     useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete,
     useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
-    useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch,
+    useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch,
+    useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
 } from "@/api/generated/students/students";
 import {
     getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey,
@@ -409,6 +412,17 @@ export function YourTeamCard({
                         )}
                     </div>
                 )}
+                {teamStatus === "CANCELLED" && (
+                    <div className="mt-6 pt-5 border-t border-border/50">
+                        <div className="flex flex-col items-center justify-center p-5 border border-dashed border-border/80 rounded-xl bg-slate-50/50 dark:bg-slate-950/10 text-center gap-3">
+                            <p className="text-xs font-semibold text-muted-foreground max-w-[280px]">
+                                This team has been cancelled. Create a new team to register and
+                                participate in the contest.
+                            </p>
+                            <CreateContestTeamDialog contestId={contestId} />
+                        </div>
+                    </div>
+                )}
             </CardContent>
             <LeaveTeamDialog
                 teamId={team.id}
@@ -424,6 +438,142 @@ export function YourTeamCard({
                 setOpen={setInviteDialogOpen}
             />
         </Card>
+    );
+}
+
+// ─── Create Contest Team Dialog ───────────────────────────────────────────────
+export function CreateContestTeamDialog({
+    contestId,
+    trigger,
+}: {
+    contestId: string;
+    trigger?: React.ReactNode;
+}) {
+    const [open, setOpen] = useState(false);
+    const [name, setName] = useState("");
+    const [error, setError] = useState("");
+    const queryClient = useQueryClient();
+
+    const { mutate: createContestTeam, isPending } =
+        useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost({
+            mutation: {
+                meta: {
+                    successMessage: "Contest team created successfully!",
+                    invalidateKeys: [
+                        getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                            contestId,
+                        ),
+                    ],
+                },
+                onSuccess: () => {
+                    setOpen(false);
+                    setName("");
+                    setError("");
+                },
+                onError: (err: any) => {
+                    setError(err?.response?.data?.message || "Failed to create team.");
+                },
+            },
+        });
+
+    const handleCreate = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!name.trim()) {
+            setError("Team name is required");
+            return;
+        }
+        createContestTeam({
+            contestId,
+            data: {
+                name: name.trim(),
+                team_status: "DRAFT",
+            },
+        });
+    };
+
+    return (
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) {
+                    setName("");
+                    setError("");
+                }
+            }}
+        >
+            <DialogTrigger asChild>
+                {trigger || (
+                    <Button
+                        size="sm"
+                        className="font-bold bg-primary hover:bg-primary/90 text-white gap-1.5 shadow-sm"
+                    >
+                        <Plus className="h-4 w-4 stroke-[2.5]" />
+                        Create New Team
+                    </Button>
+                )}
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[420px]">
+                <form onSubmit={handleCreate} className="space-y-4">
+                    <DialogHeader>
+                        <DialogTitle className="text-base font-bold">Create New Team</DialogTitle>
+                        <DialogDescription className="text-xs">
+                            Create a new team to register and participate in this contest.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="team-name" className="text-xs font-bold">
+                            Team Name
+                        </Label>
+                        <Input
+                            id="team-name"
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                if (error) setError("");
+                            }}
+                            placeholder="Enter team name..."
+                            maxLength={100}
+                            className="h-9 text-xs"
+                        />
+                        {error && (
+                            <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                {error}
+                            </p>
+                        )}
+                    </div>
+
+                    <DialogFooter className="gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setOpen(false)}
+                            disabled={isPending}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            disabled={isPending}
+                            className="bg-primary hover:bg-primary/90 text-white font-bold"
+                        >
+                            {isPending ? (
+                                <>
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                                    Creating...
+                                </>
+                            ) : (
+                                "Create Team"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -982,6 +1132,8 @@ function ContestTeamInviteDialog({
                     email: m.email,
                     isInTeam,
                     isAlreadyInvited,
+                    isInContest: !!m.is_in_contest,
+                    isLeader: m.team_role === "LEADER",
                 };
             });
         } else {
@@ -997,6 +1149,8 @@ function ContestTeamInviteDialog({
                     email: s.email,
                     isInTeam,
                     isAlreadyInvited,
+                    isInContest: false,
+                    isLeader: false,
                 };
             });
         }
@@ -1006,7 +1160,7 @@ function ContestTeamInviteDialog({
 
     // Mutation to invite a member
     const { mutate: inviteMembers, isPending: isInviting } =
-        useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch(
+        useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch(
             {
                 mutation: {
                     onSuccess: () => {
@@ -1036,7 +1190,6 @@ function ContestTeamInviteDialog({
         inviteMembers(
             {
                 contestId,
-                teamId: team.team_id || "None",
                 contestTeamId: team.id,
                 data: {
                     user_ids: [studentUserId],
@@ -1107,10 +1260,19 @@ function ContestTeamInviteDialog({
                                     return (
                                         <div
                                             key={student.id}
-                                            className="flex items-center justify-between p-3 border border-border/40 bg-slate-50/30 dark:bg-slate-900/10 rounded-xl hover:bg-slate-50/70 dark:hover:bg-slate-900/30 transition-all duration-200"
+                                            className={cn(
+                                                "flex items-center justify-between p-3 border rounded-xl transition-all duration-200 bg-card",
+                                                student.isInTeam
+                                                    ? "border-emerald-500/20 bg-emerald-500/[0.02]"
+                                                    : student.isAlreadyInvited || isInvitedLocally
+                                                      ? "border-indigo-500/20 bg-indigo-500/[0.02]"
+                                                      : student.isInContest
+                                                        ? "opacity-60 bg-slate-50 dark:bg-slate-900/40 border-border/60"
+                                                        : "border-border/60 hover:border-primary/30",
+                                            )}
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <Avatar className="h-8 w-8 border border-border shadow-xs">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <Avatar className="h-8 w-8 border border-border/80 shadow-xs shrink-0">
                                                     <AvatarFallback className="text-[10px] font-black bg-primary/10 text-primary">
                                                         {student.name
                                                             .split(" ")
@@ -1120,11 +1282,31 @@ function ContestTeamInviteDialog({
                                                             .slice(0, 2)}
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <div className="flex flex-col leading-none text-left min-w-0">
-                                                    <span className="text-xs font-bold text-foreground truncate">
-                                                        {student.name}
-                                                    </span>
-                                                    <span className="text-[10px] text-muted-foreground font-semibold truncate mt-0.5">
+                                                <div className="flex flex-col leading-none text-left min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-xs font-bold text-foreground truncate">
+                                                            {student.name}
+                                                        </span>
+                                                        {student.isLeader && (
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="text-[8px] font-bold uppercase tracking-wider text-indigo-500 border-indigo-500/25 bg-indigo-500/10 py-0 px-1.5 h-3.5"
+                                                            >
+                                                                Leader
+                                                            </Badge>
+                                                        )}
+                                                        {student.isInContest &&
+                                                            !student.isInTeam &&
+                                                            !student.isAlreadyInvited && (
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="text-[8px] font-bold uppercase tracking-wider text-amber-500 border-amber-500/25 bg-amber-500/10 py-0 px-1.5 h-3.5"
+                                                                >
+                                                                    Already Registered
+                                                                </Badge>
+                                                            )}
+                                                    </div>
+                                                    <span className="text-[10px] text-muted-foreground font-semibold truncate mt-1">
                                                         {student.email}
                                                     </span>
                                                 </div>
@@ -1146,6 +1328,14 @@ function ContestTeamInviteDialog({
                                                     >
                                                         <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
                                                         Invited
+                                                    </Badge>
+                                                ) : student.isInContest ? (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border-amber-500/20 py-0.5 px-2 flex items-center gap-1"
+                                                    >
+                                                        <AlertCircle className="h-3 w-3" />
+                                                        Registered
                                                     </Badge>
                                                 ) : (
                                                     <Button

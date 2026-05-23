@@ -87,6 +87,7 @@ export * from './contestQuestionsListResponse';
 export * from './contestRunStatus';
 export * from './contestStatus';
 export * from './contestSummaryResponse';
+export * from './contestTeamCreate';
 export * from './contestTeamImport';
 export * from './contestTeamInfo';
 export * from './contestTeamInviteRequest';

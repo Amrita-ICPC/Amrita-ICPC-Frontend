@@ -42,6 +42,7 @@ export const GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponse = zod.obj
   "data": zod.union([zod.array(zod.object({
   "id": zod.uuid(),
   "can_accept_invitation": zod.boolean(),
+  "reason": zod.union([zod.string(),zod.null()]).optional(),
   "contest": zod.object({
   "id": zod.uuid(),
   "name": zod.string(),

@@ -35,6 +35,7 @@ import type {
   APIResponseStudentTeamListResponse,
   APIResponseStudentTeamsResponse,
   ContestRunStatus,
+  ContestTeamCreate,
   ContestTeamImport,
   ContestTeamInviteRequest,
   ContestTeamLeaderTransfer,
@@ -418,6 +419,71 @@ export const useImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPost =
       return useMutation(getImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPostMutationOptions(options), queryClient);
     }
     /**
+ * Create a new contest team directly in a contest (not in standard teams).
+ * @summary Create a new contest team directly in a contest
+ */
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPost = (
+    contestId: string,
+    contestTeamCreate: ContestTeamCreate,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseNoneType>(
+      {url: `/api/v1/students/contests/${contestId}/teams`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: contestTeamCreate, signal
+    },
+      );
+    }
+
+
+
+export const getCreateContestTeamApiV1StudentsContestsContestIdTeamsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>, TError,{contestId: string;data: ContestTeamCreate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>, TError,{contestId: string;data: ContestTeamCreate}, TContext> => {
+
+const mutationKey = ['createContestTeamApiV1StudentsContestsContestIdTeamsPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>, {contestId: string;data: ContestTeamCreate}> = (props) => {
+          const {contestId,data} = props ?? {};
+
+          return  createContestTeamApiV1StudentsContestsContestIdTeamsPost(contestId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateContestTeamApiV1StudentsContestsContestIdTeamsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>>
+    export type CreateContestTeamApiV1StudentsContestsContestIdTeamsPostMutationBody = ContestTeamCreate
+    export type CreateContestTeamApiV1StudentsContestsContestIdTeamsPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Create a new contest team directly in a contest
+ */
+export const useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>, TError,{contestId: string;data: ContestTeamCreate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createContestTeamApiV1StudentsContestsContestIdTeamsPost>>,
+        TError,
+        {contestId: string;data: ContestTeamCreate},
+        TContext
+      > => {
+      return useMutation(getCreateContestTeamApiV1StudentsContestsContestIdTeamsPostMutationOptions(options), queryClient);
+    }
+    /**
  * Update a contest team.
  * @summary Update a contest team
  */
@@ -686,9 +752,8 @@ export const useUpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeams
  * Invite members to a contest team.
  * @summary Invite members to a contest team
  */
-export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch = (
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch = (
     contestId: string,
-    teamId: string,
     contestTeamId: string,
     contestTeamInviteRequest: ContestTeamInviteRequest,
  signal?: AbortSignal
@@ -696,7 +761,7 @@ export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamId
 
 
       return axiosWithAuth<APIResponseNoneType>(
-      {url: `/api/v1/students/contests/${contestId}/teams/${teamId}/teams/${contestTeamId}/invitation`, method: 'PATCH',
+      {url: `/api/v1/students/contests/${contestId}/teams/${contestTeamId}/invitation`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: contestTeamInviteRequest, signal
     },
@@ -705,11 +770,11 @@ export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamId
 
 
 
-export const getInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;teamId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;teamId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext> => {
+export const getInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext> => {
 
-const mutationKey = ['inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch'];
+const mutationKey = ['inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -719,10 +784,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>, {contestId: string;teamId: string;contestTeamId: string;data: ContestTeamInviteRequest}> = (props) => {
-          const {contestId,teamId,contestTeamId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>, {contestId: string;contestTeamId: string;data: ContestTeamInviteRequest}> = (props) => {
+          const {contestId,contestTeamId,data} = props ?? {};
 
-          return  inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch(contestId,teamId,contestTeamId,data,)
+          return  inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch(contestId,contestTeamId,data,)
         }
 
 
@@ -732,22 +797,22 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchMutationResult = NonNullable<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>>
-    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchMutationBody = ContestTeamInviteRequest
-    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchMutationError = ExceptionResponse | HTTPValidationError
+    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchMutationResult = NonNullable<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>>
+    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchMutationBody = ContestTeamInviteRequest
+    export type InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchMutationError = ExceptionResponse | HTTPValidationError
 
     /**
  * @summary Invite members to a contest team
  */
-export const useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;teamId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext>, }
+export const useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>, TError,{contestId: string;contestTeamId: string;data: ContestTeamInviteRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatch>>,
+        Awaited<ReturnType<typeof inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch>>,
         TError,
-        {contestId: string;teamId: string;contestTeamId: string;data: ContestTeamInviteRequest},
+        {contestId: string;contestTeamId: string;data: ContestTeamInviteRequest},
         TContext
       > => {
-      return useMutation(getInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchMutationOptions(options), queryClient);
+      return useMutation(getInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchMutationOptions(options), queryClient);
     }
     /**
  * Retrieve paginated and filtered list of teams that the student belongs to.
