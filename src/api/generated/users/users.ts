@@ -26,8 +26,10 @@ import type {
 
 import type {
   APIResponseListStudentUserSearchResponse,
+  APIResponseListUserInvitationResponse,
   APIResponseListUserResponse,
   ExceptionResponse,
+  GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams,
   HTTPValidationError,
   ListStudentsApiV1UsersStudentsGetParams,
   ListUsersApiV1UsersGetParams,
@@ -122,6 +124,100 @@ export function useGetMeApiV1UsersMeGet<TData = Awaited<ReturnType<typeof getMeA
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMeApiV1UsersMeGetQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Get all contest team invitations for the currently authenticated user.
+ * @summary Get current user's contest team invitations
+ */
+export const getMyTeamInvitationsApiV1UsersMeTeamInvitationGet = (
+    params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseListUserInvitationResponse>(
+      {url: `/api/v1/users/me/team-invitation`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey = (params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams,) => {
+    return [
+    `/api/v1/users/me/team-invitation`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryOptions = <TData = Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError = ExceptionResponse | HTTPValidationError>(params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>> = ({ signal }) => getMyTeamInvitationsApiV1UsersMeTeamInvitationGet(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>>
+export type GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params: undefined |  GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current user's contest team invitations
+ */
+
+export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ params?: GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeamInvitationsApiV1UsersMeTeamInvitationGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

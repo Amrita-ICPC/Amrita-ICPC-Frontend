@@ -13,6 +13,7 @@ Attributes:
     DRAFT: Team is being formed and can still be modified.
     CONFIRMED: Team is finalized and ready for contest participation.
     DISQUALIFIED: Team has been disqualified from the contest.
+    CANCELLED: Team has been cancelled from the contest.
  */
 export type TeamStatus = typeof TeamStatus[keyof typeof TeamStatus];
 
@@ -20,5 +21,6 @@ export type TeamStatus = typeof TeamStatus[keyof typeof TeamStatus];
 export const TeamStatus = {
   DRAFT: 'DRAFT',
   CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
   DISQUALIFIED: 'DISQUALIFIED',
 } as const;

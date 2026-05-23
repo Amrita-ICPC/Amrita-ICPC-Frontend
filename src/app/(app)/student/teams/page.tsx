@@ -1,4 +1,4 @@
-import { StudentTeamClient } from "@/components/student/student-team-client";
+import { StudentTeamClient } from "@/components/student/team/student-team-client";
 
 export default function StudentTeamPage() {
     const initialParams = {

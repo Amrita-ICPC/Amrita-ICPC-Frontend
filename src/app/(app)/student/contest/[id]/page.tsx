@@ -1,4 +1,4 @@
-import { StudentContestDetailClient } from "@/components/student/student-contest-detail-client";
+import { StudentContestDetailClient } from "@/components/student/contest/student-contest-detail-client";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

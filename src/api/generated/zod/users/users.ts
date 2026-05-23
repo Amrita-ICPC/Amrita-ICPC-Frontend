@@ -24,6 +24,61 @@ export const GetMeApiV1UsersMeGetResponse = zod.object({
 })
 
 /**
+ * Get all contest team invitations for the currently authenticated user.
+ * @summary Get current user's contest team invitations
+ */
+export const GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryParams = zod.object({
+  "status": zod.union([zod.enum(['INVITED', 'ACCEPTED', 'REMOVED', 'CANCELLED', 'REJECTED', 'LEFT']).describe('Enumeration of contest team registration statuses.\n\nAttributes:\n    INVITED: User has been invited to join a team but has not yet accepted.\n    ACCEPTED: User has accepted the team invitation and is a member of the team.\n    CANCELLED: User or team has cancelled the registration.\n    REJECTED: User has rejected the team invitation.\n    LEFT: User was a member but has left the team.'),zod.null()]).optional().describe('Filter by invitation status')
+})
+
+export const getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseSuccessDefault = true;
+export const getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseStatusDefault = 200;
+export const getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseMessageDefault = `Success`;
+
+export const GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponse = zod.object({
+  "success": zod.boolean().default(getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseSuccessDefault),
+  "status": zod.number().default(getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseStatusDefault),
+  "message": zod.string().default(getMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "id": zod.uuid(),
+  "can_accept_invitation": zod.boolean(),
+  "contest": zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "description": zod.union([zod.string(),zod.null()]).optional(),
+  "image": zod.union([zod.string(),zod.null()]).optional(),
+  "min_team_size": zod.number(),
+  "max_team_size": zod.number(),
+  "registered_teams_count": zod.number()
+}),
+  "team": zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "members": zod.array(zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "email": zod.email(),
+  "status": zod.enum(['INVITED', 'ACCEPTED', 'REMOVED', 'CANCELLED', 'REJECTED', 'LEFT']).describe('Enumeration of contest team registration statuses.\n\nAttributes:\n    INVITED: User has been invited to join a team but has not yet accepted.\n    ACCEPTED: User has accepted the team invitation and is a member of the team.\n    CANCELLED: User or team has cancelled the registration.\n    REJECTED: User has rejected the team invitation.\n    LEFT: User was a member but has left the team.'),
+  "role": zod.enum(['LEADER', 'MEMBER']).describe('Enumeration of team member roles in a contest.\n\nAttributes:\n    LEADER: The leader of the team.\n    MEMBER: A regular member of the team.')
+})),
+  "joined_members_count": zod.number()
+})
+})),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Synchronize Keycloak users with the local database.
 
 Only administrators can trigger this operation. This endpoint fetches all users

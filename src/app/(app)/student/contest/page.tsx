@@ -1,5 +1,5 @@
 import type { GetStudentContestsApiV1StudentsContestsGetParams } from "@/api/generated/model";
-import { StudentContestClient } from "@/components/student/student-contest-client";
+import { StudentContestClient } from "@/components/student/contest/student-contest-client";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

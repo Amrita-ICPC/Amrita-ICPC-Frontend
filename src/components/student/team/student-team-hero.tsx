@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { StudentCreateTeamDialog } from "@/components/student/student-create-team-dialog";
-import { StudentSearchTeamDialog } from "@/components/student/student-search-team-dialog";
-import { StudentInvitationsDrawer } from "@/components/student/student-invitations-drawer";
+import { StudentCreateTeamDialog } from "./student-create-team-dialog";
+import { StudentInvitationsDrawer } from "./student-invitations-drawer";
+import { StudentSearchTeamDialog } from "./student-search-team-dialog";
 
 interface StudentTeamHeroProps {
     onJoinTeam?: () => void;
