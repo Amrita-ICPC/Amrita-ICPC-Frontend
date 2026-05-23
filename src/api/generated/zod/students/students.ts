@@ -242,6 +242,47 @@ export const ImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPostRespo
 })
 
 /**
+ * Create a new contest team directly in a contest (not in standard teams).
+ * @summary Create a new contest team directly in a contest
+ */
+export const CreateContestTeamApiV1StudentsContestsContestIdTeamsPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPostBodyNameMax = 100;
+
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPostBodyTeamStatusDefault = `DRAFT`;
+
+export const CreateContestTeamApiV1StudentsContestsContestIdTeamsPostBody = zod.object({
+  "name": zod.string().min(1).max(createContestTeamApiV1StudentsContestsContestIdTeamsPostBodyNameMax).describe('Name of the team.'),
+  "leader_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Leader ID for the team.'),
+  "team_status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).default(createContestTeamApiV1StudentsContestsContestIdTeamsPostBodyTeamStatusDefault).describe('Status of the team in the contest.')
+}).describe('Schema for creating a new contest team from scratch.\n\nAttributes:\n    name: Name of the team.\n    leader_id: Optional leader ID for the team.\n    team_status: Status of the team in the contest (default: DRAFT).')
+
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseSuccessDefault = true;
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseStatusDefault = 200;
+export const createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseMessageDefault = `Success`;
+
+export const CreateContestTeamApiV1StudentsContestsContestIdTeamsPostResponse = zod.object({
+  "success": zod.boolean().default(createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseSuccessDefault),
+  "status": zod.number().default(createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseStatusDefault),
+  "message": zod.string().default(createContestTeamApiV1StudentsContestsContestIdTeamsPostResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Update a contest team.
  * @summary Update a contest team
  */
@@ -390,24 +431,23 @@ export const UpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsCon
  * Invite members to a contest team.
  * @summary Invite members to a contest team
  */
-export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchParams = zod.object({
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchParams = zod.object({
   "contest_id": zod.uuid(),
-  "team_id": zod.uuid(),
   "contest_team_id": zod.uuid()
 })
 
-export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchBody = zod.object({
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchBody = zod.object({
   "user_ids": zod.array(zod.uuid()).describe('List of user IDs to invite')
 }).describe('Schema for inviting members to a contest team.')
 
-export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault = true;
-export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseStatusDefault = 200;
-export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseMessageDefault = `Success`;
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault = true;
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseStatusDefault = 200;
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseMessageDefault = `Success`;
 
-export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponse = zod.object({
-  "success": zod.boolean().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault),
-  "status": zod.number().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseStatusDefault),
-  "message": zod.string().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseMessageDefault),
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponse = zod.object({
+  "success": zod.boolean().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault),
+  "status": zod.number().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseStatusDefault),
+  "message": zod.string().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseMessageDefault),
   "data": zod.null().optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

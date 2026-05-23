@@ -11,6 +11,7 @@ import type { ContestTeamInfo } from './contestTeamInfo';
 export interface UserInvitationResponse {
   id: string;
   can_accept_invitation: boolean;
+  reason?: string | null;
   contest: ContestInfoForInvitation;
   team: ContestTeamInfo;
 }

@@ -206,8 +206,8 @@ export function StudentInvitationCard({ invitation }: StudentInvitationCardProps
                     <div className="flex gap-2.5 p-3.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-semibold leading-relaxed">
                         <AlertTriangle className="h-4.5 w-4.5 shrink-0 mt-0.5" />
                         <span>
-                            You cannot accept this invitation. You may already be registered in
-                            another team for this contest or the team is currently full.
+                            {invitation.reason ||
+                                "You cannot accept this invitation. You may already be registered in another team for this contest or the team is currently full."}
                         </span>
                     </div>
                 )}

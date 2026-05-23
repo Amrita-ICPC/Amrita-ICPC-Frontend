@@ -17,8 +17,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useGetMeApiV1UsersMeGet } from "@/api/generated/users/users";
 import { StudentImportTeamDialog } from "./student-import-team-dialog";
-import { YourTeamCard } from "./your-team-card";
-import { StudentCreateTeamDialog } from "../team/student-create-team-dialog";
+import { YourTeamCard, CreateContestTeamDialog } from "./your-team-card";
 
 interface ContestTeamCardsProps {
     participation: any;
@@ -444,7 +443,8 @@ export function ContestTeamCards({
                                 }
                             />
                         )}
-                        <StudentCreateTeamDialog
+                        <CreateContestTeamDialog
+                            contestId={contest.id || ""}
                             trigger={
                                 <Button
                                     size="sm"
