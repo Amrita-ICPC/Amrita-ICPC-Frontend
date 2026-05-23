@@ -11,8 +11,8 @@ import { StudentTeamCard, StudentTeamRowItem } from "./student-team-card";
 import { StudentTeamHero } from "./student-team-hero";
 import { StudentTeamCardSkeleton, StudentTeamRowSkeleton } from "./student-team-skeleton";
 import { AppPagination } from "@/components/shared/app-pagination";
-import { AsyncStateHandler } from "../shared/async-state-handler";
 import type { ViewMode } from "@/components/shared/view-toggle";
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 
 interface StudentTeamClientProps {
     initialParams: GetMyTeamsApiV1StudentsTeamsGetParams;

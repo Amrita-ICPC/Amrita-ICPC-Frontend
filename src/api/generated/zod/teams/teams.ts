@@ -36,7 +36,7 @@ export const CreateTeamApiV1ContestsContestIdTeamsPostBody = zod.object({
   "logo": zod.union([zod.string(),zod.null()]).optional(),
   "member_ids": zod.array(zod.uuid()).optional(),
   "leader_id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).default(createTeamApiV1ContestsContestIdTeamsPostBodyStatusDefault).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.')
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).default(createTeamApiV1ContestsContestIdTeamsPostBodyStatusDefault).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.')
 }).describe('Schema for creating a new team.\n\nAttributes:\n    name: Name of the team.\n    description: Description of the team.\n    logo: URL or path to the team logo.\n    member_ids: List of user IDs to include in the team.\n    status: Status of the team (default: DRAFT).')
 
 /**
@@ -69,8 +69,8 @@ export const getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeMax = 100
 
 export const GetContestTeamsApiV1ContestsContestIdTeamsGetQueryParams = zod.object({
   "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by team name'),
-  "team_status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),zod.null()]).optional().describe('Filter by team status'),
-  "approval_status": zod.union([zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),zod.null()]).optional().describe('Filter by approval status'),
+  "team_status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),zod.null()]).optional().describe('Filter by team status'),
+  "approval_status": zod.union([zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),zod.null()]).optional().describe('Filter by approval status'),
   "page": zod.number().min(1).default(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageDefault).describe('Page number (starts from 1)'),
   "page_size": zod.number().min(1).max(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeMax).default(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeDefault).describe('Number of teams per page')
 })
@@ -95,8 +95,8 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetResponse = zod.object(
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -156,7 +156,7 @@ export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchBody = zod.object({
   "name": zod.union([zod.string().min(1).max(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchBodyNameOneMax),zod.null()]).optional(),
   "description": zod.union([zod.string(),zod.null()]).optional(),
   "logo": zod.union([zod.string(),zod.null()]).optional(),
-  "status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),zod.null()]).optional(),
+  "status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),zod.null()]).optional(),
   "leader_id": zod.union([zod.uuid(),zod.null()]).optional()
 }).describe('Schema for updating an existing team.\n\nOnly allows updating basic team information.\nMembers management should be handled through separate endpoints.\n\nAttributes:\n    name: Updated name of the team.\n    description: Updated description of the team.\n    logo: Updated URL or path to the team logo.\n    status: Updated status of the team in the contest.\n    leader_id: Updated leader ID for the team.')
 
@@ -174,8 +174,8 @@ export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponse = zod.obje
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -235,8 +235,8 @@ export const GetTeamApiV1ContestsContestIdTeamsTeamIdGetResponse = zod.object({
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -296,8 +296,8 @@ export const ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponse = 
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -357,8 +357,8 @@ export const RejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponse = zo
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -418,8 +418,8 @@ export const ConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponse = 
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),
@@ -479,8 +479,8 @@ export const DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchRespo
   "name": zod.string(),
   "description": zod.union([zod.string(),zod.null()]),
   "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.'),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
   "created_by": zod.union([zod.uuid(),zod.null()]),
   "created_at": zod.iso.datetime({"offset":true}),

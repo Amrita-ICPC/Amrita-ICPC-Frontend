@@ -11,8 +11,10 @@ import type { TeamMemberRole } from './teamMemberRole';
  * Schema for team member status in participation view.
  */
 export interface TeamMemberStatus {
-  /** User ID of the member */
+  /** ContestTeamMember ID of the member */
   id: string;
+  /** User ID of the member */
+  user_id: string;
   /** Name of the member */
   name: string;
   /** Role in the team (LEADER / MEMBER) */
@@ -21,4 +23,6 @@ export interface TeamMemberStatus {
   joined: boolean;
   /** Whether the user has confirmed participation */
   confirmed: boolean;
+  /** Whether the user is the current user */
+  is_current_user: boolean;
 }

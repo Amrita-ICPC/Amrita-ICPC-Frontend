@@ -5,7 +5,9 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { TeamApprovalStatus } from './teamApprovalStatus';
 import type { TeamMemberStatus } from './teamMemberStatus';
+import type { TeamStatus } from './teamStatus';
 
 /**
  * Schema for team participation status in a contest.
@@ -23,6 +25,12 @@ export interface TeamParticipationStatus {
   min_team_size: number;
   /** Maximum team size allowed */
   max_team_size: number;
+  /** Team status */
+  team_status: TeamStatus;
+  /** Team approval status */
+  team_approval_status: TeamApprovalStatus;
   /** Percentage of team completion */
   completion_percentage: number;
+  /** Team ID if registered else None */
+  team_id?: string | null;
 }

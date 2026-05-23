@@ -15,18 +15,18 @@ import {
     Users,
     Shield,
     Laptop,
-    Play,
     AlertCircle,
-    Crown,
     ArrowRight,
-    UserPlus,
     Sparkles,
     CheckCircle2,
+    Activity,
+    Calendar,
+    Trophy,
 } from "lucide-react";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { cn } from "@/lib/utils";
-import { ContestTeamCards, OverallRegistrationProgressCard } from "./contest-team-cards";
 import { StudentContestDetailSkeleton } from "./student-contest-skeleton";
+import { OverallRegistrationProgressCard, ContestTeamCards } from "./contest-team-cards";
 
 const BANNERS = [
     { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue
@@ -252,6 +252,17 @@ function fmt(dateStr: string | null | undefined) {
     });
 }
 
+const TimeBlock = ({ value, label }: { value: string; label: string }) => (
+    <div className="flex flex-col items-center justify-center bg-card border border-border/50 rounded-xl px-3 py-2 min-w-[56px] shadow-sm transition-all duration-200 hover:border-primary/20">
+        <span className="text-xl font-extrabold text-foreground tracking-tight tabular-nums">
+            {value}
+        </span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+            {label}
+        </span>
+    </div>
+);
+
 function CountdownTimer({ targetDate, label }: { targetDate: string; label: string }) {
     const [timeLeft, setTimeLeft] = useState<{
         days?: string;
@@ -301,50 +312,23 @@ function CountdownTimer({ targetDate, label }: { targetDate: string; label: stri
     if (!timeLeft) return null;
 
     return (
-        <div className="flex flex-col gap-2 items-center p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-border/50">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+        <div className="flex flex-col gap-3 items-center p-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-border/40 backdrop-blur-sm">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/80 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-pulse" />
                 {label}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
                 {timeLeft.days !== undefined && (
                     <>
-                        <div className="flex flex-col items-center">
-                            <span className="text-2xl font-black text-foreground tabular-nums">
-                                {timeLeft.days}
-                            </span>
-                            <span className="text-[8px] font-bold text-muted-foreground uppercase">
-                                Days
-                            </span>
-                        </div>
-                        <span className="text-xl font-bold text-muted-foreground/60 mb-4">:</span>
+                        <TimeBlock value={timeLeft.days} label="Days" />
+                        <span className="text-muted-foreground/45 font-semibold text-lg">:</span>
                     </>
                 )}
-                <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-foreground tabular-nums">
-                        {timeLeft.hours}
-                    </span>
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase">
-                        Hrs
-                    </span>
-                </div>
-                <span className="text-xl font-bold text-muted-foreground/60 mb-4">:</span>
-                <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-foreground tabular-nums">
-                        {timeLeft.minutes}
-                    </span>
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase">
-                        Min
-                    </span>
-                </div>
-                <span className="text-xl font-bold text-muted-foreground/60 mb-4">:</span>
-                <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-foreground tabular-nums">
-                        {timeLeft.seconds}
-                    </span>
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase">
-                        Sec
-                    </span>
-                </div>
+                <TimeBlock value={timeLeft.hours} label="Hrs" />
+                <span className="text-muted-foreground/45 font-semibold text-lg">:</span>
+                <TimeBlock value={timeLeft.minutes} label="Min" />
+                <span className="text-muted-foreground/45 font-semibold text-lg">:</span>
+                <TimeBlock value={timeLeft.seconds} label="Sec" />
             </div>
         </div>
     );
@@ -613,75 +597,173 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                     {/* Right Column (Cards) */}
                     <div className="lg:col-span-1 space-y-6">
                         {/* Contest Action Card */}
-                        <Card className="border-border/60 shadow-sm overflow-hidden">
-                            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30">
-                                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                                    <Play className="h-4 w-4 text-primary" />
-                                    Contest Control
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6 space-y-4">
-                                {isStatusLoading ? (
-                                    <div className="h-28 flex items-center justify-center text-xs text-muted-foreground">
-                                        Loading status...
-                                    </div>
-                                ) : (
-                                    <>
-                                        {/* Countdown Logic */}
-                                        {contest.run_status === "UPCOMING" && (
-                                            <CountdownTimer
-                                                targetDate={contest.start_time}
-                                                label="Starts In"
+                        {(() => {
+                            const headerDetails = (() => {
+                                if (isStatusLoading) {
+                                    return {
+                                        title: "Checking Status...",
+                                        icon: Clock,
+                                        iconClass: "text-muted-foreground animate-pulse",
+                                        bgClass:
+                                            "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                    };
+                                }
+
+                                if (contest.run_status === "LIVE") {
+                                    if (participation?.readiness?.can_start) {
+                                        return {
+                                            title: "You're all set to go!",
+                                            icon: Sparkles,
+                                            iconClass: "text-emerald-500 animate-pulse",
+                                            bgClass:
+                                                "bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5 border-b border-emerald-500/20",
+                                        };
+                                    } else {
+                                        return {
+                                            title: "Contest is Live",
+                                            icon: Activity,
+                                            iconClass: "text-rose-500 animate-pulse",
+                                            bgClass:
+                                                "bg-gradient-to-r from-rose-500/10 to-amber-500/10 dark:from-rose-500/5 dark:to-amber-500/5 border-b border-rose-500/20",
+                                        };
+                                    }
+                                }
+
+                                if (contest.run_status === "UPCOMING") {
+                                    const regStatus = participation?.registration_status?.status;
+                                    if (regStatus === "APPROVED") {
+                                        return {
+                                            title: "You're Registered!",
+                                            icon: CheckCircle2,
+                                            iconClass: "text-indigo-500",
+                                            bgClass:
+                                                "bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/5 dark:to-blue-500/5 border-b border-indigo-500/20",
+                                        };
+                                    } else if (regStatus === "PENDING_APPROVAL") {
+                                        return {
+                                            title: "Registration Pending",
+                                            icon: Clock,
+                                            iconClass: "text-amber-500 animate-pulse",
+                                            bgClass:
+                                                "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 dark:from-amber-500/5 dark:to-yellow-500/5 border-b border-amber-500/20",
+                                        };
+                                    } else {
+                                        return {
+                                            title: "Upcoming Contest",
+                                            icon: Calendar,
+                                            iconClass: "text-blue-500",
+                                            bgClass:
+                                                "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                        };
+                                    }
+                                }
+
+                                if (contest.run_status === "ENDED") {
+                                    return {
+                                        title: "Contest Ended",
+                                        icon: Trophy,
+                                        iconClass: "text-slate-400 dark:text-slate-600",
+                                        bgClass:
+                                            "bg-slate-100/50 dark:bg-slate-900/40 border-b border-border/50",
+                                    };
+                                }
+
+                                return {
+                                    title: "Contest Status",
+                                    icon: Shield,
+                                    iconClass: "text-primary",
+                                    bgClass:
+                                        "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                };
+                            })();
+
+                            const HeaderIcon = headerDetails.icon;
+
+                            return (
+                                <Card className="border-border/60 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
+                                    <CardHeader className={cn("py-3.5", headerDetails.bgClass)}>
+                                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                                            <HeaderIcon
+                                                className={cn(
+                                                    "h-5 w-5 shrink-0",
+                                                    headerDetails.iconClass,
+                                                )}
                                             />
-                                        )}
-                                        {contest.run_status === "LIVE" && (
-                                            <CountdownTimer
-                                                targetDate={contest.end_time}
-                                                label="Time Remaining"
-                                            />
-                                        )}
-                                        {contest.run_status === "ENDED" && (
-                                            <div className="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-border/50 text-muted-foreground">
-                                                <Clock className="h-6 w-6 mb-1 text-muted-foreground/60" />
-                                                <span className="text-sm font-bold">
-                                                    Contest Ended
-                                                </span>
+                                            {headerDetails.title}
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-6 space-y-4">
+                                        {isStatusLoading ? (
+                                            <div className="h-28 flex items-center justify-center text-xs text-muted-foreground">
+                                                Loading status...
                                             </div>
-                                        )}
-
-                                        {/* Start Contest Button */}
-                                        <Button
-                                            className={cn(
-                                                "w-full h-11 font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-2",
-                                                participation?.readiness?.can_start
-                                                    ? "bg-primary hover:bg-primary/90 text-white shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
-                                                    : "bg-muted text-muted-foreground cursor-not-allowed border border-border",
-                                            )}
-                                            disabled={!participation?.readiness?.can_start}
-                                        >
-                                            Start Contest
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Button>
-
-                                        {/* If start is blocked, explain why */}
-                                        {!participation?.readiness?.can_start &&
-                                            participation?.readiness?.reason && (
-                                                <div className="flex gap-2.5 p-3 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive">
-                                                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-xs font-bold leading-tight">
-                                                            Access Blocked
+                                        ) : (
+                                            <>
+                                                {/* Countdown Logic */}
+                                                {contest.run_status === "UPCOMING" && (
+                                                    <CountdownTimer
+                                                        targetDate={contest.start_time}
+                                                        label="Starts In"
+                                                    />
+                                                )}
+                                                {contest.run_status === "LIVE" && (
+                                                    <CountdownTimer
+                                                        targetDate={contest.end_time}
+                                                        label="Time Remaining"
+                                                    />
+                                                )}
+                                                {contest.run_status === "ENDED" && (
+                                                    <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
+                                                        <Trophy className="h-8 w-8 mb-2 text-slate-400 dark:text-slate-600 animate-pulse" />
+                                                        <span className="text-sm font-bold text-foreground">
+                                                            Contest Closed
                                                         </span>
-                                                        <span className="text-[11px] text-destructive/80 leading-normal font-medium">
-                                                            {participation.readiness.reason}
+                                                        <span className="text-[11px] text-muted-foreground/80 mt-1 font-medium">
+                                                            Submissions are disabled. Results will
+                                                            be published soon.
                                                         </span>
                                                     </div>
-                                                </div>
-                                            )}
-                                    </>
-                                )}
-                            </CardContent>
-                        </Card>
+                                                )}
+
+                                                {/* Start Contest Button */}
+                                                {contest.run_status !== "ENDED" && (
+                                                    <Button
+                                                        className={cn(
+                                                            "w-full h-11 font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-2 group",
+                                                            participation?.readiness?.can_start
+                                                                ? "bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
+                                                                : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60",
+                                                        )}
+                                                        disabled={
+                                                            !participation?.readiness?.can_start
+                                                        }
+                                                    >
+                                                        Start Contest
+                                                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                                    </Button>
+                                                )}
+
+                                                {/* If start is blocked, explain why */}
+                                                {!participation?.readiness?.can_start &&
+                                                    participation?.readiness?.reason && (
+                                                        <div className="flex gap-3 p-3.5 rounded-2xl border border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10">
+                                                            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="text-xs font-bold leading-tight">
+                                                                    Access Blocked
+                                                                </span>
+                                                                <span className="text-[11px] text-destructive/80 leading-normal font-medium">
+                                                                    {participation.readiness.reason}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                            </>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            );
+                        })()}
 
                         {/* Overall Registrations Card */}
                         <OverallRegistrationProgressCard contest={contest} />

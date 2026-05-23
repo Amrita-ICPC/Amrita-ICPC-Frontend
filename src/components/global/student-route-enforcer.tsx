@@ -12,7 +12,7 @@ export default function StudentRouteEnforcer({
 }) {
     const pathname = usePathname();
 
-    if (isStudent && !pathname.startsWith("/student")) {
+    if (isStudent && !pathname.startsWith("/student") && pathname !== "/invitation") {
         if (pathname === "/dashboard") {
             redirect("/student/dashboard");
         }

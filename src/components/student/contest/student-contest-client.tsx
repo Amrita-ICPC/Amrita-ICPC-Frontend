@@ -11,7 +11,7 @@ import { StudentContestFilters } from "./student-contest-filters";
 import { StudentContestCard, StudentContestCardData } from "./student-contest-card";
 import { StudentContestSkeleton } from "./student-contest-skeleton";
 import { AppPagination } from "@/components/shared/app-pagination";
-import { AsyncStateHandler } from "../shared/async-state-handler";
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 
 interface StudentContestClientProps {
     initialParams: GetStudentContestsApiV1StudentsContestsGetParams;

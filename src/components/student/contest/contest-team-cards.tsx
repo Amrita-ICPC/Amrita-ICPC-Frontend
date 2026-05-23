@@ -1,31 +1,37 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Users,
-    Crown,
-    Sparkles,
-    CheckCircle2,
-    AlertCircle,
-    Clock,
-    UserPlus,
-    Trophy,
-} from "lucide-react";
+import { Users, Sparkles, CheckCircle2, AlertCircle, Clock, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Plus, Download } from "lucide-react";
+import { useConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch } from "@/api/generated/teams/teams";
+import {
+    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    useUpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatch,
+    useUpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatch,
+} from "@/api/generated/students/students";
+import { TeamStatus, TeamApprovalStatus } from "@/api/generated/model";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useGetMeApiV1UsersMeGet } from "@/api/generated/users/users";
+import { StudentImportTeamDialog } from "./student-import-team-dialog";
+import { YourTeamCard } from "./your-team-card";
+import { StudentCreateTeamDialog } from "../team/student-create-team-dialog";
 
 interface ContestTeamCardsProps {
     participation: any;
     isStatusLoading: boolean;
     contest: {
+        id?: string;
         name: string;
         min_team_size: number;
         max_team_size: number;
     };
 }
 
+// ─── Registration Progress Card ───────────────────────────────────────────────
 function TeamRegistrationProgressCard({ participation }: { participation: any }) {
     if (!participation || !participation.team) {
         return null;
@@ -41,7 +47,8 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
     const confirmedCount = membersList.filter((m: any) => m.confirmed).length;
     const totalCount = membersList.length;
     const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
-    const isApproved = !!participation.registration_status?.approved;
+    const isApproved = team.team_approval_status === TeamApprovalStatus.APPROVED;
+    const isTeamConfirmed = team.team_status === TeamStatus.CONFIRMED;
     const completionPercentage = Math.max(0, Math.min(100, team.completion_percentage ?? 0));
 
     return (
@@ -121,7 +128,33 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
                             </div>
                         </div>
 
-                        {/* Requirement 3: Approval */}
+                        {/* Requirement 3: Team Confirmed */}
+                        <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
+                            {isTeamConfirmed ? (
+                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                            ) : (
+                                <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex flex-col leading-tight">
+                                <span
+                                    className={cn(
+                                        "text-xs font-bold",
+                                        isTeamConfirmed
+                                            ? "text-foreground"
+                                            : "text-muted-foreground",
+                                    )}
+                                >
+                                    Team confirmed
+                                </span>
+                                <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
+                                    {isTeamConfirmed
+                                        ? "Team is locked and finalised"
+                                        : "Waiting for leader to confirm the team"}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Requirement 4: Instructor Approval */}
                         <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
                             {isApproved ? (
                                 <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -151,6 +184,7 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
     );
 }
 
+// ─── Overall Registrations Progress Card (exported for the detail page) ───────
 interface OverallRegistrationProgressCardProps {
     contest:
         | {
@@ -238,11 +272,96 @@ export function OverallRegistrationProgressCard({ contest }: OverallRegistration
     );
 }
 
+// ─── Main exported component ──────────────────────────────────────────────────
 export function ContestTeamCards({
     participation,
     isStatusLoading,
     contest,
 }: ContestTeamCardsProps) {
+    const { data: session } = useSession();
+    const currentUserId = session?.user?.id;
+    const contestId = contest.id;
+    const team = participation?.team;
+
+    // ── Mutation hooks ────────────────────────────────────────────────────────
+    const participationQueryKey = contestId
+        ? getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+              contestId,
+          )
+        : undefined;
+
+    const { mutate: updateTeamStatus, isPending: isUpdatingStatus } =
+        useUpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatch({
+            mutation: {
+                meta: {
+                    invalidateKeys: participationQueryKey ? [participationQueryKey] : [],
+                },
+            },
+        });
+
+    const { mutate: editTeam, isPending: isEditingTeam } =
+        useUpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatch({
+            mutation: {
+                meta: {
+                    successMessage: "Team updated successfully.",
+                    invalidateKeys: participationQueryKey ? [participationQueryKey] : [],
+                },
+            },
+        });
+
+    // ── Handlers ──────────────────────────────────────────────────────────────
+    const handleConfirmTeam = () => {
+        if (!contestId || !team?.id) return;
+        toast.promise(
+            new Promise((resolve, reject) =>
+                updateTeamStatus(
+                    {
+                        contestId,
+                        contestTeamId: team.id,
+                        data: { status: TeamStatus.CONFIRMED },
+                    },
+                    { onSuccess: resolve, onError: reject },
+                ),
+            ),
+            {
+                loading: "Confirming team...",
+                success: "Team confirmed! Your team is now locked.",
+                error: "Failed to confirm team.",
+            },
+        );
+    };
+
+    const handleEditTeam = (newName: string) => {
+        if (!contestId || !team?.id) return;
+        editTeam({ contestId, contestTeamId: team.id, data: { name: newName } });
+    };
+
+    const handleLeaveTeam = () => {
+        toast.info("Leave Team endpoint not yet available.");
+    };
+
+    const handleCancelTeam = () => {
+        if (!contestId || !team?.id) return;
+        toast.promise(
+            new Promise((resolve, reject) =>
+                updateTeamStatus(
+                    {
+                        contestId,
+                        contestTeamId: team.id,
+                        data: { status: TeamStatus.CANCELLED },
+                    },
+                    { onSuccess: resolve, onError: reject },
+                ),
+            ),
+            {
+                loading: "Cancelling team...",
+                success: "Team has been cancelled.",
+                error: "Failed to cancel team.",
+            },
+        );
+    };
+
+    // ── Loading state ─────────────────────────────────────────────────────────
     if (isStatusLoading) {
         return (
             <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
@@ -253,96 +372,27 @@ export function ContestTeamCards({
         );
     }
 
-    if (participation?.registration_status?.registered && participation.team) {
+    // ── Registered with a team ────────────────────────────────────────────────
+    if (participation?.registration_status?.registered && team) {
         return (
             <>
-                {/* Registration Progress Card */}
+                {/* Your Team card — shown FIRST */}
+                <YourTeamCard
+                    team={team}
+                    contestName={contest.name}
+                    contestId={contestId ?? ""}
+                    currentUserId={currentUserId}
+                    onConfirmTeam={handleConfirmTeam}
+                    isConfirming={isUpdatingStatus}
+                    onLeaveTeam={handleLeaveTeam}
+                    onCancelTeam={handleCancelTeam}
+                    isCancelling={isUpdatingStatus}
+                    onEditTeam={(newName) => handleEditTeam(newName)}
+                    isEditingTeam={isEditingTeam}
+                />
+
+                {/* Registration Progress card — shown BELOW */}
                 <TeamRegistrationProgressCard participation={participation} />
-
-                {/* Your Team Roster Card */}
-                <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
-                    <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30 flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                            <Users className="h-4 w-4 text-primary" />
-                            Your Team
-                        </CardTitle>
-                        <Badge
-                            variant="outline"
-                            className={cn(
-                                "text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5",
-                                participation.registration_status.approved
-                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                    : "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400",
-                            )}
-                        >
-                            {participation.registration_status.approved
-                                ? "Approved"
-                                : "Pending Review"}
-                        </Badge>
-                    </CardHeader>
-                    <CardContent className="p-5 space-y-5">
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-black text-foreground tracking-tight leading-none">
-                                {participation.team.name}
-                            </h3>
-                            <span className="text-[11px] font-semibold text-muted-foreground">
-                                Registered for {contest.name}
-                            </span>
-                        </div>
-
-                        {/* Members List */}
-                        <div className="space-y-2.5">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">
-                                Team Members
-                            </span>
-                            <div className="space-y-2">
-                                {participation.team.members.map((member: any) => (
-                                    <div
-                                        key={member.id}
-                                        className="flex items-center justify-between p-2.5 border border-border/40 hover:border-border rounded-xl transition-all"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                                                {member.name
-                                                    .split(" ")
-                                                    .map((n: string) => n[0])
-                                                    .join("")
-                                                    .slice(0, 2)
-                                                    .toUpperCase()}
-                                            </div>
-                                            <div className="flex flex-col leading-none">
-                                                <span className="text-xs font-bold text-foreground">
-                                                    {member.name}
-                                                </span>
-                                                <span className="text-[9px] text-muted-foreground font-semibold mt-0.5 capitalize flex items-center gap-1">
-                                                    {member.role === "LEADER" ? (
-                                                        <>
-                                                            <Crown className="h-2.5 w-2.5 text-amber-500 fill-amber-500" />
-                                                            Leader
-                                                        </>
-                                                    ) : (
-                                                        "Member"
-                                                    )}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(
-                                                "text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0",
-                                                member.confirmed
-                                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                                    : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
-                                            )}
-                                        >
-                                            {member.confirmed ? "Joined" : "Pending"}
-                                        </Badge>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
             </>
         );
     }
@@ -377,16 +427,35 @@ export function ContestTeamCards({
                             : `${contest.min_team_size} - ${contest.max_team_size}`}{" "}
                         members to participate.
                     </p>
-                    <Button
-                        asChild
-                        size="sm"
-                        className="mt-4 w-full font-bold shadow-md shadow-primary/15 hover:shadow-lg transition-all flex items-center justify-center gap-1.5"
-                    >
-                        <Link href="/student/teams">
-                            <UserPlus className="h-4 w-4" />
-                            Join or Create Team
-                        </Link>
-                    </Button>
+                    <div className="flex flex-col gap-2 mt-4 w-full">
+                        {contest.id && (
+                            <StudentImportTeamDialog
+                                contestId={contest.id}
+                                maxTeamSize={contest.max_team_size}
+                                trigger={
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full font-bold shadow-sm transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Import Team
+                                    </Button>
+                                }
+                            />
+                        )}
+                        <StudentCreateTeamDialog
+                            trigger={
+                                <Button
+                                    size="sm"
+                                    className="w-full font-bold shadow-md shadow-primary/15 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-white"
+                                >
+                                    <Plus className="h-4 w-4 stroke-[2.5]" />
+                                    Create New Team
+                                </Button>
+                            }
+                        />
+                    </div>
                 </div>
             </CardContent>
         </Card>

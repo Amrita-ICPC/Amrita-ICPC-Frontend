@@ -174,18 +174,241 @@ export const GetStudentContestStatusApiV1StudentsContestsContestIdParticipationM
   "id": zod.uuid().describe('Team ID'),
   "name": zod.string().describe('Team name'),
   "members": zod.array(zod.object({
-  "id": zod.uuid().describe('User ID of the member'),
+  "id": zod.uuid().describe('ContestTeamMember ID of the member'),
+  "user_id": zod.uuid().describe('User ID of the member'),
   "name": zod.string().describe('Name of the member'),
   "role": zod.enum(['LEADER', 'MEMBER']).describe('Role in the team (LEADER \/ MEMBER)'),
   "joined": zod.boolean().describe('Whether the user has joined the team'),
-  "confirmed": zod.boolean().describe('Whether the user has confirmed participation')
+  "confirmed": zod.boolean().describe('Whether the user has confirmed participation'),
+  "is_current_user": zod.boolean().describe('Whether the user is the current user')
 }).describe('Schema for team member status in participation view.')).describe('List of team members and their status'),
   "member_count": zod.number().describe('Current number of members'),
   "min_team_size": zod.number().describe('Minimum team size'),
   "max_team_size": zod.number().describe('Maximum team size allowed'),
-  "completion_percentage": zod.number().describe('Percentage of team completion')
+  "team_status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Team status'),
+  "team_approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Team approval status'),
+  "completion_percentage": zod.number().describe('Percentage of team completion'),
+  "team_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Team ID if registered else None')
 }).describe('Schema for team participation status in a contest.'),zod.null()]).optional().describe('Team details if registered')
 }).describe('Combined response for student\'s status and participation in a contest.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Import an existing team and its members into the specified contest.
+ * @summary Import an existing student team into a contest
+ */
+export const ImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const ImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPostBody = zod.object({
+  "team_id": zod.uuid().describe('UUID of the existing team to import.'),
+  "member_ids": zod.array(zod.uuid()).optional().describe('List of user IDs representing the members of the team.')
+}).describe('Schema for importing an existing team and its members into a contest.\n\nAttributes:\n    team_id: UUID of the existing team to import.\n    member_ids: List of user IDs of the members to be imported.')
+
+export const importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseSuccessDefault = true;
+export const importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseStatusDefault = 200;
+export const importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseMessageDefault = `Success`;
+
+export const ImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponse = zod.object({
+  "success": zod.boolean().default(importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseSuccessDefault),
+  "status": zod.number().default(importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseStatusDefault),
+  "message": zod.string().default(importStudentTeamApiV1StudentsContestsContestIdTeamsImportPostResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Update a contest team.
+ * @summary Update a contest team
+ */
+export const UpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const UpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchBody = zod.object({
+  "name": zod.string().describe('The name of the team')
+}).describe('Schema for updating a contest team.')
+
+export const updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseSuccessDefault = true;
+export const updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseStatusDefault = 200;
+export const updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseMessageDefault = `Success`;
+
+export const UpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponse = zod.object({
+  "success": zod.boolean().default(updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseSuccessDefault),
+  "status": zod.number().default(updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseStatusDefault),
+  "message": zod.string().default(updateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatchResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Transfer team leadership to another member.
+ * @summary Transfer team leadership
+ */
+export const TransferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const TransferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchBody = zod.object({
+  "new_leader_id": zod.uuid().describe('The ID of the new team leader')
+}).describe('Schema for transferring team leadership.')
+
+export const transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseSuccessDefault = true;
+export const transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseStatusDefault = 200;
+export const transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseMessageDefault = `Success`;
+
+export const TransferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponse = zod.object({
+  "success": zod.boolean().default(transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseSuccessDefault),
+  "status": zod.number().default(transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseStatusDefault),
+  "message": zod.string().default(transferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatchResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Update a contest team status.
+ * @summary Update a contest team status
+ */
+export const UpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const UpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchBody = zod.object({
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('The status of the team')
+})
+
+export const updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseSuccessDefault = true;
+export const updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseStatusDefault = 200;
+export const updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseMessageDefault = `Success`;
+
+export const UpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponse = zod.object({
+  "success": zod.boolean().default(updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseSuccessDefault),
+  "status": zod.number().default(updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseStatusDefault),
+  "message": zod.string().default(updateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatchResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Update a contest team member status.
+ * @summary Update a contest team member status
+ */
+export const UpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid()
+})
+
+export const UpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchBody = zod.object({
+  "status": zod.enum(['INVITED', 'ACCEPTED', 'REMOVED', 'CANCELLED', 'REJECTED', 'LEFT']).describe('The status of the contest team member')
+}).describe('Schema for updating a contest team member status.')
+
+export const updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseSuccessDefault = true;
+export const updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseStatusDefault = 200;
+export const updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseMessageDefault = `Success`;
+
+export const UpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponse = zod.object({
+  "success": zod.boolean().default(updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseSuccessDefault),
+  "status": zod.number().default(updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseStatusDefault),
+  "message": zod.string().default(updateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatchResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Invite members to a contest team.
+ * @summary Invite members to a contest team
+ */
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "team_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchBody = zod.object({
+  "user_ids": zod.array(zod.uuid()).describe('List of user IDs to invite')
+}).describe('Schema for inviting members to a contest team.')
+
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault = true;
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseStatusDefault = 200;
+export const inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseMessageDefault = `Success`;
+
+export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponse = zod.object({
+  "success": zod.boolean().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseSuccessDefault),
+  "status": zod.number().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseStatusDefault),
+  "message": zod.string().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsTeamIdTeamsContestTeamIdInvitationPatchResponseMessageDefault),
+  "data": zod.null().optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -868,6 +1091,64 @@ export const InviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostRespo
   "status": zod.number().default(inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostResponseStatusDefault),
   "message": zod.string().default(inviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPostResponseMessageDefault),
   "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve detailed information of all members in the specified team.
+
+Optional filters for name, email, and joined_at timestamp are supported.
+Sorting/ordering is supported on name, email, and joined_at.
+If contest_id is provided, checks if each member is already registered in it.
+ * @summary Get details of all members in a team
+ */
+export const GetTeamMembersApiV1StudentsTeamsTeamIdMembersGetParams = zod.object({
+  "team_id": zod.uuid()
+})
+
+export const getTeamMembersApiV1StudentsTeamsTeamIdMembersGetQuerySortByDefault = `joined_at`;
+export const getTeamMembersApiV1StudentsTeamsTeamIdMembersGetQueryOrderDefault = `asc`;
+
+export const GetTeamMembersApiV1StudentsTeamsTeamIdMembersGetQueryParams = zod.object({
+  "name": zod.union([zod.string(),zod.null()]).optional().describe('Filter members by name'),
+  "email": zod.union([zod.string(),zod.null()]).optional().describe('Filter members by email'),
+  "joined_after": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Filter members who joined after this timestamp'),
+  "joined_before": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Filter members who joined before this timestamp'),
+  "sort_by": zod.enum(['name', 'email', 'joined_at']).default(getTeamMembersApiV1StudentsTeamsTeamIdMembersGetQuerySortByDefault).describe('Field to sort members by'),
+  "order": zod.enum(['asc', 'desc']).default(getTeamMembersApiV1StudentsTeamsTeamIdMembersGetQueryOrderDefault).describe('Sort order (asc or desc)'),
+  "contest_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Optional contest ID to check if team members are already registered in it')
+})
+
+export const getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseSuccessDefault = true;
+export const getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseStatusDefault = 200;
+export const getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseMessageDefault = `Success`;
+
+export const GetTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponse = zod.object({
+  "success": zod.boolean().default(getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseSuccessDefault),
+  "status": zod.number().default(getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseStatusDefault),
+  "message": zod.string().default(getTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the member'),
+  "name": zod.string().describe('Full name of the member'),
+  "email": zod.string().describe('Email address of the member'),
+  "phone_no": zod.union([zod.string(),zod.null()]).optional().describe('Phone number of the member'),
+  "gender": zod.union([zod.string(),zod.null()]).optional().describe('Gender of the member'),
+  "role": zod.enum(['student', 'instructor', 'admin', 'manager']).describe('Global role of the user'),
+  "team_role": zod.enum(['LEADER', 'MEMBER']).describe('Role of the member within this team (LEADER or MEMBER)'),
+  "joined_at": zod.iso.datetime({"offset":true}).describe('Timestamp when the member joined the team'),
+  "is_in_contest": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether the member is already registered in the specified contest')
+}).describe('Schema representing detailed information of a team member.')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
