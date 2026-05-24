@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ParentTeamInfo } from './parentTeamInfo';
 import type { TeamApprovalStatus } from './teamApprovalStatus';
 import type { TeamMemberPreview } from './teamMemberPreview';
 import type { TeamStatus } from './teamStatus';
@@ -16,27 +17,22 @@ Used for team listings and basic team information.
 Attributes:
     id: Unique identifier for the team.
     name: Name of the team.
-    description: Description of the team.
-    logo: Team logo.
     status: Status of the team in the contest.
+    approval_status: Approval status of the team.
     leader_id: ID of the team leader.
-    created_by: ID of the user who created the team.
-    created_at: Timestamp when the team was created.
-    updated_at: Timestamp when the team was last updated.
+    enrolled_at: Timestamp when the team enrolled.
     members_preview: List of first 3 members for display.
     extra_members_count: Number of members beyond the preview.
+    parent_team: Basic information about the parent team.
  */
 export interface ContestTeamResponse {
   id: string;
   name: string;
-  description: string | null;
-  logo: string | null;
   status: TeamStatus;
   approval_status: TeamApprovalStatus;
   leader_id: string | null;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
+  enrolled_at?: string;
   members_preview?: TeamMemberPreview[];
   extra_members_count?: number;
+  parent_team?: ParentTeamInfo | null;
 }

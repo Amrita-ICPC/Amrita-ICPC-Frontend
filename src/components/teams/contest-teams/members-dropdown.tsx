@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
 import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
 import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
-import { useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet } from "@/api/generated/teams/teams";
+import { useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet } from "@/api/generated/teams/teams";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,12 +17,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function initialsColor(initials: string) {
     const palette = [
-        "bg-blue-500/20 text-blue-300 ring-blue-500/20",
-        "bg-emerald-500/20 text-emerald-300 ring-emerald-500/20",
-        "bg-violet-500/20 text-violet-300 ring-violet-500/20",
-        "bg-amber-500/20 text-amber-300 ring-amber-500/20",
-        "bg-rose-500/20 text-rose-300 ring-rose-500/20",
-        "bg-cyan-500/20 text-cyan-300 ring-cyan-500/20",
+        "bg-blue-500/15 text-blue-600 dark:text-blue-300 ring-blue-500/20",
+        "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/20",
+        "bg-violet-500/15 text-violet-600 dark:text-violet-300 ring-violet-500/20",
+        "bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-amber-500/20",
+        "bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-rose-500/20",
+        "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 ring-cyan-500/20",
     ];
     const n = initials.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return palette[n % palette.length];
@@ -44,10 +44,10 @@ function MembersPreview({
                     return (
                         <Avatar
                             key={m.id}
-                            className={`h-8 w-8 border border-white/10 ring-1 ring-white/10 ${c}`}
+                            className={`h-8 w-8 border border-border/40 ring-1 ring-border/20 ${c}`}
                         >
                             {m.avatar ? <AvatarImage src={m.avatar} alt={m.name} /> : null}
-                            <AvatarFallback className="bg-transparent text-[11px] font-semibold">
+                            <AvatarFallback className="bg-transparent text-[11px] font-bold">
                                 {m.initials}
                             </AvatarFallback>
                         </Avatar>
@@ -71,7 +71,7 @@ export function TeamMembersDropdown({
     const [open, setOpen] = useState(false);
 
     const { data, isLoading, isError } =
-        useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet(
+        useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet(
             contestId,
             team.id,
             { page: 1, page_size: 50 },

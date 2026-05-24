@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Sparkles, CheckCircle2, AlertCircle, Clock, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Plus, Download } from "lucide-react";
-import { useConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch } from "@/api/generated/teams/teams";
 import {
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
     useUpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatch,
