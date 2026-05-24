@@ -9,35 +9,187 @@ import * as zod from 'zod';
 
 
 /**
- * Create a new team in a specific contest.
+ * Approve a contest team.
 
 Args:
     request (Request): Framework context.
     contest_id (UUID): The unique identifier of the contest.
-    team_data (TeamCreate): The team data to create.
+    contest_team_id (UUID): The unique identifier of the contest team.
     user_id (UUID): Authenticated user ID.
     service (TeamService): Injected domain service.
 
 Returns:
-    APIResponse: Standardized response encapsulating creation metadata.
- * @summary Create a team in a contest
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Approve a team in a contest
  */
-export const CreateTeamApiV1ContestsContestIdTeamsPostParams = zod.object({
-  "contest_id": zod.uuid()
+export const ApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
 })
 
-export const createTeamApiV1ContestsContestIdTeamsPostBodyNameMax = 255;
+export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseSuccessDefault = true;
+export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseStatusDefault = 200;
+export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseMessageDefault = `Success`;
+export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseDataOneExtraMembersCountDefault = 0;
 
-export const createTeamApiV1ContestsContestIdTeamsPostBodyStatusDefault = `DRAFT`;
+export const ApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponse = zod.object({
+  "success": zod.boolean().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseSuccessDefault),
+  "status": zod.number().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseStatusDefault),
+  "message": zod.string().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
+  "leader_id": zod.union([zod.uuid(),zod.null()]),
+  "enrolled_at": zod.iso.datetime({"offset":true}).optional(),
+  "members_preview": zod.array(zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "avatar": zod.union([zod.string(),zod.null()]).optional(),
+  "initials": zod.string()
+}).describe('Schema for a minimal team member preview.')).optional(),
+  "extra_members_count": zod.number().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseDataOneExtraMembersCountDefault),
+  "parent_team": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
-export const CreateTeamApiV1ContestsContestIdTeamsPostBody = zod.object({
-  "name": zod.string().min(1).max(createTeamApiV1ContestsContestIdTeamsPostBodyNameMax),
-  "description": zod.union([zod.string(),zod.null()]).optional(),
-  "logo": zod.union([zod.string(),zod.null()]).optional(),
-  "member_ids": zod.array(zod.uuid()).optional(),
-  "leader_id": zod.union([zod.uuid(),zod.null()]).optional(),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).default(createTeamApiV1ContestsContestIdTeamsPostBodyStatusDefault).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.')
-}).describe('Schema for creating a new team.\n\nAttributes:\n    name: Name of the team.\n    description: Description of the team.\n    logo: URL or path to the team logo.\n    member_ids: List of user IDs to include in the team.\n    status: Status of the team (default: DRAFT).')
+/**
+ * Reject a contest team.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    contest_team_id (UUID): The unique identifier of the contest team.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Reject a team in a contest
+ */
+export const RejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseSuccessDefault = true;
+export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseStatusDefault = 200;
+export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseMessageDefault = `Success`;
+export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseDataOneExtraMembersCountDefault = 0;
+
+export const RejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponse = zod.object({
+  "success": zod.boolean().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseSuccessDefault),
+  "status": zod.number().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseStatusDefault),
+  "message": zod.string().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
+  "leader_id": zod.union([zod.uuid(),zod.null()]),
+  "enrolled_at": zod.iso.datetime({"offset":true}).optional(),
+  "members_preview": zod.array(zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "avatar": zod.union([zod.string(),zod.null()]).optional(),
+  "initials": zod.string()
+}).describe('Schema for a minimal team member preview.')).optional(),
+  "extra_members_count": zod.number().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseDataOneExtraMembersCountDefault),
+  "parent_team": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Disqualify a contest team.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    contest_team_id (UUID): The unique identifier of the contest team.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response encapsulating the updated team data.
+ * @summary Disqualify a team in a contest
+ */
+export const DisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseSuccessDefault = true;
+export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseStatusDefault = 200;
+export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseMessageDefault = `Success`;
+export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseDataOneExtraMembersCountDefault = 0;
+
+export const DisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponse = zod.object({
+  "success": zod.boolean().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseSuccessDefault),
+  "status": zod.number().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseStatusDefault),
+  "message": zod.string().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
+  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
+  "leader_id": zod.union([zod.uuid(),zod.null()]),
+  "enrolled_at": zod.iso.datetime({"offset":true}).optional(),
+  "members_preview": zod.array(zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "avatar": zod.union([zod.string(),zod.null()]).optional(),
+  "initials": zod.string()
+}).describe('Schema for a minimal team member preview.')).optional(),
+  "extra_members_count": zod.number().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseDataOneExtraMembersCountDefault),
+  "parent_team": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 
 /**
  * Get all teams in a specific contest.
@@ -93,101 +245,27 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetResponse = zod.object(
   "teams": zod.array(zod.object({
   "id": zod.uuid(),
   "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
   "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
   "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
+  "enrolled_at": zod.iso.datetime({"offset":true}).optional(),
   "members_preview": zod.array(zod.object({
   "id": zod.uuid(),
   "name": zod.string(),
   "avatar": zod.union([zod.string(),zod.null()]).optional(),
   "initials": zod.string()
 }).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneTeamsItemExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.')),
+  "extra_members_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneTeamsItemExtraMembersCountDefault),
+  "parent_team": zod.union([zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.')),
   "approved_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneApprovedCountDefault),
   "waiting_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneWaitingCountDefault),
   "rejected_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneRejectedCountDefault),
   "disqualified_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneDisqualifiedCountDefault)
 }).describe('Schema for paginated team list with status counts.'),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Update an existing team in a contest.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
-    team_data (TeamUpdate): The fields to update.
-    user_id (UUID): Authenticated user ID.
-    service (TeamService): Injected domain service.
-
-Returns:
-    APIResponse: Standardized response encapsulating updated team data.
- * @summary Update a team in a contest
- */
-export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
-})
-
-export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatchBodyNameOneMax = 255;
-
-
-
-export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchBody = zod.object({
-  "name": zod.union([zod.string().min(1).max(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchBodyNameOneMax),zod.null()]).optional(),
-  "description": zod.union([zod.string(),zod.null()]).optional(),
-  "logo": zod.union([zod.string(),zod.null()]).optional(),
-  "status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),zod.null()]).optional(),
-  "leader_id": zod.union([zod.uuid(),zod.null()]).optional()
-}).describe('Schema for updating an existing team.\n\nOnly allows updating basic team information.\nMembers management should be handled through separate endpoints.\n\nAttributes:\n    name: Updated name of the team.\n    description: Updated description of the team.\n    logo: Updated URL or path to the team logo.\n    status: Updated status of the team in the contest.\n    leader_id: Updated leader ID for the team.')
-
-export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseSuccessDefault = true;
-export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseStatusDefault = 200;
-export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseMessageDefault = `Success`;
-export const updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseDataOneExtraMembersCountDefault = 0;
-
-export const UpdateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponse = zod.object({
-  "success": zod.boolean().default(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseSuccessDefault),
-  "status": zod.number().default(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseStatusDefault),
-  "message": zod.string().default(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseMessageDefault),
-  "data": zod.union([zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
-  "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "members_preview": zod.array(zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "avatar": zod.union([zod.string(),zod.null()]).optional(),
-  "initials": zod.string()
-}).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(updateTeamApiV1ContestsContestIdTeamsTeamIdPatchResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -233,266 +311,22 @@ export const GetTeamApiV1ContestsContestIdTeamsTeamIdGetResponse = zod.object({
   "data": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
   "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
   "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
   "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
+  "enrolled_at": zod.iso.datetime({"offset":true}).optional(),
   "members_preview": zod.array(zod.object({
   "id": zod.uuid(),
   "name": zod.string(),
   "avatar": zod.union([zod.string(),zod.null()]).optional(),
   "initials": zod.string()
 }).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Approve a contest team.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
-    user_id (UUID): Authenticated user ID.
-    service (TeamService): Injected domain service.
-
-Returns:
-    APIResponse: Standardized response encapsulating the updated team data.
- * @summary Approve a team in a contest
- */
-export const ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
-})
-
-export const approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseSuccessDefault = true;
-export const approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseStatusDefault = 200;
-export const approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseMessageDefault = `Success`;
-export const approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseDataOneExtraMembersCountDefault = 0;
-
-export const ApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponse = zod.object({
-  "success": zod.boolean().default(approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseSuccessDefault),
-  "status": zod.number().default(approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseStatusDefault),
-  "message": zod.string().default(approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseMessageDefault),
-  "data": zod.union([zod.object({
+  "extra_members_count": zod.number().default(getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseDataOneExtraMembersCountDefault),
+  "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
-  "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
-  "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "members_preview": zod.array(zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "avatar": zod.union([zod.string(),zod.null()]).optional(),
-  "initials": zod.string()
-}).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(approveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatchResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Reject a contest team.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
-    user_id (UUID): Authenticated user ID.
-    service (TeamService): Injected domain service.
-
-Returns:
-    APIResponse: Standardized response encapsulating the updated team data.
- * @summary Reject a team in a contest
- */
-export const RejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
-})
-
-export const rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseSuccessDefault = true;
-export const rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseStatusDefault = 200;
-export const rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseMessageDefault = `Success`;
-export const rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseDataOneExtraMembersCountDefault = 0;
-
-export const RejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponse = zod.object({
-  "success": zod.boolean().default(rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseSuccessDefault),
-  "status": zod.number().default(rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseStatusDefault),
-  "message": zod.string().default(rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseMessageDefault),
-  "data": zod.union([zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
-  "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "members_preview": zod.array(zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "avatar": zod.union([zod.string(),zod.null()]).optional(),
-  "initials": zod.string()
-}).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(rejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatchResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Confirm a contest team.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
-    user_id (UUID): Authenticated user ID.
-    service (TeamService): Injected domain service.
-
-Returns:
-    APIResponse: Standardized response encapsulating the updated team data.
- * @summary Confirm a team in a contest
- */
-export const ConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
-})
-
-export const confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseSuccessDefault = true;
-export const confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseStatusDefault = 200;
-export const confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseMessageDefault = `Success`;
-export const confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseDataOneExtraMembersCountDefault = 0;
-
-export const ConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponse = zod.object({
-  "success": zod.boolean().default(confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseSuccessDefault),
-  "status": zod.number().default(confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseStatusDefault),
-  "message": zod.string().default(confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseMessageDefault),
-  "data": zod.union([zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
-  "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "members_preview": zod.array(zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "avatar": zod.union([zod.string(),zod.null()]).optional(),
-  "initials": zod.string()
-}).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(confirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatchResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
-  "pagination": zod.union([zod.object({
-  "total": zod.number(),
-  "page": zod.number(),
-  "page_size": zod.number(),
-  "total_pages": zod.number(),
-  "has_next": zod.boolean(),
-  "has_previous": zod.boolean()
-}),zod.null()]).optional(),
-  "meta": zod.object({
-  "request_id": zod.string(),
-  "timestamp": zod.iso.datetime({"offset":true})
-})
-})
-
-/**
- * Disqualify a contest team.
-
-Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
-    user_id (UUID): Authenticated user ID.
-    service (TeamService): Injected domain service.
-
-Returns:
-    APIResponse: Standardized response encapsulating the updated team data.
- * @summary Disqualify a team in a contest
- */
-export const DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchParams = zod.object({
-  "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
-})
-
-export const disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseSuccessDefault = true;
-export const disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseStatusDefault = 200;
-export const disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseMessageDefault = `Success`;
-export const disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseDataOneExtraMembersCountDefault = 0;
-
-export const DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponse = zod.object({
-  "success": zod.boolean().default(disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseSuccessDefault),
-  "status": zod.number().default(disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseStatusDefault),
-  "message": zod.string().default(disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseMessageDefault),
-  "data": zod.union([zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "description": zod.union([zod.string(),zod.null()]),
-  "logo": zod.union([zod.string(),zod.null()]),
-  "status": zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),
-  "approval_status": zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),
-  "leader_id": zod.union([zod.uuid(),zod.null()]),
-  "created_by": zod.union([zod.uuid(),zod.null()]),
-  "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true}),
-  "members_preview": zod.array(zod.object({
-  "id": zod.uuid(),
-  "name": zod.string(),
-  "avatar": zod.union([zod.string(),zod.null()]).optional(),
-  "initials": zod.string()
-}).describe('Schema for a minimal team member preview.')).optional(),
-  "extra_members_count": zod.number().default(disqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchResponseDataOneExtraMembersCountDefault)
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    description: Description of the team.\n    logo: Team logo.\n    status: Status of the team in the contest.\n    leader_id: ID of the team leader.\n    created_by: ID of the user who created the team.\n    created_at: Timestamp when the team was created.\n    updated_at: Timestamp when the team was last updated.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.'),zod.null()]).optional(),
+  "name": zod.string()
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -513,7 +347,7 @@ export const DisqualifyTeamApiV1ContestsContestIdTeamsTeamIdDisqualifyPatchRespo
 Args:
     request (Request): Framework context.
     contest_id (UUID): The unique identifier of the contest.
-    team_id (UUID): The unique identifier of the team.
+    contest_team_id (UUID): The unique identifier of the contest team.
     search (str | None): Optional string to search member names or emails.
     page (int): Page number (starts from 1).
     page_size (int): Number of members per page.
@@ -524,40 +358,40 @@ Returns:
     APIResponse: Standardized response with list of members and pagination state.
  * @summary Get team members
  */
-export const GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetParams = zod.object({
+export const GetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetParams = zod.object({
   "contest_id": zod.uuid(),
-  "team_id": zod.uuid()
+  "contest_team_id": zod.uuid()
 })
 
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageDefault = 1;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageDefault = 1;
 
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageSizeDefault = 10;
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageSizeMax = 100;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageSizeDefault = 10;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageSizeMax = 100;
 
 
 
-export const GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryParams = zod.object({
+export const GetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryParams = zod.object({
   "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by member name or email'),
-  "page": zod.number().min(1).default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageDefault).describe('Page number (starts from 1)'),
-  "page_size": zod.number().min(1).max(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageSizeMax).default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetQueryPageSizeDefault).describe('Number of members per page')
+  "page": zod.number().min(1).default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageDefault).describe('Page number (starts from 1)'),
+  "page_size": zod.number().min(1).max(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageSizeMax).default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetQueryPageSizeDefault).describe('Number of members per page')
 })
 
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseSuccessDefault = true;
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseStatusDefault = 200;
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseMessageDefault = `Success`;
-export const getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseDataOneItemIsLeaderDefault = false;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseSuccessDefault = true;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseStatusDefault = 200;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseMessageDefault = `Success`;
+export const getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseDataOneItemIsLeaderDefault = false;
 
-export const GetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponse = zod.object({
-  "success": zod.boolean().default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseSuccessDefault),
-  "status": zod.number().default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseStatusDefault),
-  "message": zod.string().default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseMessageDefault),
+export const GetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponse = zod.object({
+  "success": zod.boolean().default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseSuccessDefault),
+  "status": zod.number().default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseStatusDefault),
+  "message": zod.string().default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseMessageDefault),
   "data": zod.union([zod.array(zod.object({
   "id": zod.uuid(),
   "user_id": zod.string(),
   "name": zod.string(),
   "email": zod.string(),
   "role": zod.string(),
-  "is_leader": zod.boolean().default(getTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGetResponseDataOneItemIsLeaderDefault)
+  "is_leader": zod.boolean().default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseDataOneItemIsLeaderDefault)
 }).describe('Schema for team member response.\n\nRepresents a user who is part of a team with essential information.\n\nAttributes:\n    id: Unique identifier for the user.\n    user_id: External user identifier (e.g., student ID).\n    name: Full name of the user.\n    email: Email address of the user.\n    role: Role of the user in the system.\n    is_leader: Whether this member is the team leader.')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

@@ -10,17 +10,16 @@ import {
     Search,
     MoreVertical,
     Eye,
-    Flag,
     FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import {
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
-    useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet,
-    useApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch,
-    useRejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch,
-    useConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch,
+    useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet,
+    useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch,
+    useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch,
+    useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
     getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey,
 } from "@/api/generated/teams/teams";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -43,6 +42,7 @@ import { TeamStatus } from "@/api/generated/model/teamStatus";
 import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
 import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
 import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
+import type { ParentTeamInfo } from "@/api/generated/model/parentTeamInfo";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -148,12 +148,12 @@ function TeamStatusBadge({ status }: { status: string }) {
 
 function initialsColor(initials: string) {
     const palette = [
-        "bg-blue-500/20 text-blue-300 ring-blue-500/20",
-        "bg-emerald-500/20 text-emerald-300 ring-emerald-500/20",
-        "bg-violet-500/20 text-violet-300 ring-violet-500/20",
-        "bg-amber-500/20 text-amber-300 ring-amber-500/20",
-        "bg-rose-500/20 text-rose-300 ring-rose-500/20",
-        "bg-cyan-500/20 text-cyan-300 ring-cyan-500/20",
+        "bg-blue-500/15 text-blue-600 dark:text-blue-300 ring-blue-500/20",
+        "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/20",
+        "bg-violet-500/15 text-violet-600 dark:text-violet-300 ring-violet-500/20",
+        "bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-amber-500/20",
+        "bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-rose-500/20",
+        "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 ring-cyan-500/20",
     ];
     const n = initials.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return palette[n % palette.length];
@@ -175,10 +175,10 @@ function MembersPreview({
                     return (
                         <Avatar
                             key={m.id}
-                            className={`h-8 w-8 border border-white/10 ring-1 ring-white/10 ${c}`}
+                            className={`h-8 w-8 border border-border/40 ring-1 ring-border/20 ${c}`}
                         >
                             {m.avatar ? <AvatarImage src={m.avatar} alt={m.name} /> : null}
-                            <AvatarFallback className="bg-transparent text-[11px] font-semibold">
+                            <AvatarFallback className="bg-transparent text-[11px] font-bold">
                                 {m.initials}
                             </AvatarFallback>
                         </Avatar>
@@ -202,7 +202,7 @@ function TeamMembersDropdown({
     const [open, setOpen] = useState(false);
 
     const { data, isLoading, isError } =
-        useGetTeamMembersApiV1ContestsContestIdTeamsTeamIdMembersGet(
+        useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet(
             contestId,
             team.id,
             { page: 1, page_size: 50 },
@@ -267,12 +267,12 @@ function TeamMembersDropdown({
 function TeamActionsDropdown({
     onApprove,
     onReject,
-    onConfirm,
+    onDisqualify,
     busy,
 }: {
     onApprove: () => void;
     onReject: () => void;
-    onConfirm: () => void;
+    onDisqualify: () => void;
     busy?: boolean;
 }) {
     return (
@@ -291,18 +291,9 @@ function TeamActionsDropdown({
                     <XCircle className="mr-2 h-4 w-4 text-red-500" />
                     Reject team
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={onConfirm}>
-                    <Clock className="mr-2 h-4 w-4 text-blue-500" />
-                    Confirm team
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={onDisqualify}>
                     <Ban className="mr-2 h-4 w-4 text-violet-500" />
                     Disqualify team
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                    <Flag className="mr-2 h-4 w-4 text-amber-500" />
-                    Report team
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -317,7 +308,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
     const [teamStatus, setTeamStatus] = useState<TeamStatus | "ALL">("ALL");
     const [approvalStatus, setApprovalStatus] = useState<TeamApprovalStatus | "ALL">("ALL");
     const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(new Set());
-    const [bulkBusy, setBulkBusy] = useState<null | "approve" | "reject" | "confirm">(null);
+    const [bulkBusy, setBulkBusy] = useState<null | "approve" | "reject" | "disqualify">(null);
 
     const { data, isLoading, isError } = useGetContestTeamsApiV1ContestsContestIdTeamsGet(
         contestId,
@@ -342,9 +333,10 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         disqualified: teamStats?.disqualified_count ?? 0,
     };
 
-    const approveMutation = useApproveTeamApiV1ContestsContestIdTeamsTeamIdApprovePatch();
-    const rejectMutation = useRejectTeamApiV1ContestsContestIdTeamsTeamIdRejectPatch();
-    const confirmMutation = useConfirmTeamApiV1ContestsContestIdTeamsTeamIdConfirmPatch();
+    const approveMutation = useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch();
+    const rejectMutation = useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch();
+    const disqualifyMutation =
+        useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch();
 
     const baseTeamsQueryKey = getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId);
 
@@ -354,7 +346,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
 
     async function approveTeam(team: ContestTeamResponse) {
         try {
-            await approveMutation.mutateAsync({ contestId, teamId: team.id });
+            await approveMutation.mutateAsync({ contestId, contestTeamId: team.id });
             toast.success(`Approved "${team.name}"`);
             await refreshTeams();
         } catch {
@@ -364,7 +356,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
 
     async function rejectTeam(team: ContestTeamResponse) {
         try {
-            await rejectMutation.mutateAsync({ contestId, teamId: team.id });
+            await rejectMutation.mutateAsync({ contestId, contestTeamId: team.id });
             toast.success(`Rejected "${team.name}"`);
             await refreshTeams();
         } catch {
@@ -372,13 +364,13 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         }
     }
 
-    async function confirmTeam(team: ContestTeamResponse) {
+    async function disqualifyTeam(team: ContestTeamResponse) {
         try {
-            await confirmMutation.mutateAsync({ contestId, teamId: team.id });
-            toast.success(`Confirmed "${team.name}"`);
+            await disqualifyMutation.mutateAsync({ contestId, contestTeamId: team.id });
+            toast.success(`Disqualified "${team.name}"`);
             await refreshTeams();
         } catch {
-            toast.error(`Failed to confirm "${team.name}"`);
+            toast.error(`Failed to disqualify "${team.name}"`);
         }
     }
 
@@ -411,20 +403,18 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         });
     }
 
-    async function runBulk(action: "approve" | "reject" | "confirm") {
+    async function runBulk(action: "approve" | "reject" | "disqualify") {
         const ids = Array.from(selectedTeamIds);
         if (ids.length === 0) return;
         setBulkBusy(action);
         try {
-            const teamById = new Map(teams.map((t: any) => [t.id, t]));
             await Promise.allSettled(
-                ids.map(async (id) => {
-                    const t = teamById.get(id) ?? ({ id, name: "team" } as ContestTeamResponse);
+                ids.map((id) => {
                     if (action === "approve")
-                        return approveMutation.mutateAsync({ contestId, teamId: id });
+                        return approveMutation.mutateAsync({ contestId, contestTeamId: id });
                     if (action === "reject")
-                        return rejectMutation.mutateAsync({ contestId, teamId: id });
-                    return confirmMutation.mutateAsync({ contestId, teamId: id });
+                        return rejectMutation.mutateAsync({ contestId, contestTeamId: id });
+                    return disqualifyMutation.mutateAsync({ contestId, contestTeamId: id });
                 }),
             );
             toast.success(`${action[0].toUpperCase() + action.slice(1)}d ${ids.length} team(s)`);
@@ -450,7 +440,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                     </div>
 
                     {/* Counts */}
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                         <StatCard icon={Users} label="Total" value={stats.total} color="primary" />
                         <StatCard
                             icon={CheckCircle2}
@@ -605,10 +595,10 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                     size="sm"
                                     variant="outline"
                                     disabled={bulkBusy !== null}
-                                    onClick={() => runBulk("confirm")}
+                                    onClick={() => runBulk("disqualify")}
                                 >
-                                    <Clock className="mr-2 h-4 w-4 text-blue-500" />
-                                    Bulk confirm
+                                    <Ban className="mr-2 h-4 w-4 text-violet-500" />
+                                    Bulk disqualify
                                 </Button>
                                 <Button
                                     size="sm"
@@ -640,12 +630,13 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                             aria-label="Select all teams on this page"
                                         />
                                     </TableHead>
-                                    <TableHead className="w-[260px]">Team Name</TableHead>
+                                    <TableHead className="w-[240px]">Team Name</TableHead>
                                     <TableHead>Members</TableHead>
                                     <TableHead>Approval</TableHead>
-                                    <TableHead>Team Status</TableHead>
-                                    <TableHead className="w-[180px]">Registered At</TableHead>
-                                    <TableHead className="text-right w-[120px]">Actions</TableHead>
+                                    <TableHead>Contest Status</TableHead>
+                                    <TableHead>Parent Team</TableHead>
+                                    <TableHead className="w-[160px]">Enrolled At</TableHead>
+                                    <TableHead className="text-right w-[100px]">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -659,25 +650,28 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                                 <Skeleton className="h-5 w-40" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-9 w-44" />
+                                                <Skeleton className="h-9 w-32" />
                                             </TableCell>
                                             <TableCell>
                                                 <Skeleton className="h-6 w-24 rounded-full" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-6 w-28 rounded-full" />
+                                                <Skeleton className="h-6 w-24 rounded-full" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Skeleton className="h-5 w-28" />
                                             </TableCell>
                                             <TableCell>
                                                 <Skeleton className="h-5 w-32" />
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Skeleton className="h-9 w-20 ml-auto" />
+                                                <Skeleton className="h-9 w-16 ml-auto" />
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : isError ? (
                                     <TableRow>
-                                        <TableCell colSpan={7}>
+                                        <TableCell colSpan={8}>
                                             <div className="flex min-h-[140px] items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 text-sm text-destructive">
                                                 Failed to load teams.
                                             </div>
@@ -685,7 +679,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                     </TableRow>
                                 ) : teams.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={7}>
+                                        <TableCell colSpan={8}>
                                             <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
                                                 <Users className="h-9 w-9 opacity-30" />
                                                 <p className="text-sm">
@@ -742,8 +736,24 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                             <TableCell>
                                                 <TeamStatusBadge status={team.status} />
                                             </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground">
-                                                {new Date(team.created_at).toLocaleString(
+                                            <TableCell>
+                                                {team.parent_team ? (
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-xs font-medium truncate max-w-[140px]">
+                                                            {team.parent_team.name}
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            Global team
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        —
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                                                {new Date(team.enrolled_at).toLocaleString(
                                                     undefined,
                                                     {
                                                         month: "short",
@@ -767,11 +777,11 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                                         busy={
                                                             approveMutation.isPending ||
                                                             rejectMutation.isPending ||
-                                                            confirmMutation.isPending
+                                                            disqualifyMutation.isPending
                                                         }
                                                         onApprove={() => approveTeam(team)}
                                                         onReject={() => rejectTeam(team)}
-                                                        onConfirm={() => confirmTeam(team)}
+                                                        onDisqualify={() => disqualifyTeam(team)}
                                                     />
                                                 </div>
                                             </TableCell>
