@@ -61,6 +61,7 @@ import {
     useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
     useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch,
     useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
+    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
 } from "@/api/generated/students/students";
 import {
     getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey,
@@ -463,6 +464,9 @@ export function CreateContestTeamDialog({
                     successMessage: "Contest team created successfully!",
                     invalidateKeys: [
                         getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                            contestId,
+                        ),
+                        getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(
                             contestId,
                         ),
                     ],
