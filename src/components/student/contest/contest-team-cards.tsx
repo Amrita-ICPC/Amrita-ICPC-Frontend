@@ -47,7 +47,9 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
     const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
     const isApproved = team.team_approval_status === TeamApprovalStatus.APPROVED;
     const isTeamConfirmed = team.team_status === TeamStatus.CONFIRMED;
-    const completionPercentage = Math.max(0, Math.min(100, team.completion_percentage ?? 0));
+    const requirements = [minSizeMet, allConfirmed, isTeamConfirmed, isApproved];
+    const completedCount = requirements.filter(Boolean).length;
+    const completionPercentage = (completedCount / requirements.length) * 100;
 
     return (
         <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
@@ -70,7 +72,7 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
                         <div
-                            className="bg-primary h-full rounded-full transition-all duration-500 bg-gradient-to-r from-primary to-indigo-500"
+                            className="bg-primary h-full rounded-full transition-all duration-500"
                             style={{ width: `${completionPercentage}%` }}
                         />
                     </div>
@@ -186,7 +188,7 @@ function TeamRegistrationProgressCard({ participation }: { participation: any })
 interface OverallRegistrationProgressCardProps {
     contest:
         | {
-              team_count?: number;
+              teams_count?: number;
               max_teams?: number | null;
           }
         | null
@@ -196,7 +198,7 @@ interface OverallRegistrationProgressCardProps {
 export function OverallRegistrationProgressCard({ contest }: OverallRegistrationProgressCardProps) {
     if (!contest) return null;
 
-    const teamCount = contest.team_count ?? 0;
+    const teamCount = contest.teams_count ?? 0;
     const maxTeams = contest.max_teams;
     const hasLimit = maxTeams !== null && maxTeams !== undefined && maxTeams > 0;
     const fillPercentage = hasLimit ? Math.min(100, Math.max(0, (teamCount / maxTeams) * 100)) : 0;
@@ -245,7 +247,7 @@ export function OverallRegistrationProgressCard({ contest }: OverallRegistration
                         {/* Progress Bar */}
                         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden border border-border/50">
                             <div
-                                className="bg-primary h-full rounded-full transition-all duration-500 bg-gradient-to-r from-violet-600 to-indigo-600"
+                                className="bg-primary h-full rounded-full transition-all duration-500"
                                 style={{ width: `${fillPercentage}%` }}
                             />
                         </div>
@@ -442,18 +444,20 @@ export function ContestTeamCards({
                                 }
                             />
                         )}
-                        <CreateContestTeamDialog
-                            contestId={contest.id || ""}
-                            trigger={
-                                <Button
-                                    size="sm"
-                                    className="w-full font-bold shadow-md shadow-primary/15 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-white"
-                                >
-                                    <Plus className="h-4 w-4 stroke-[2.5]" />
-                                    Create New Team
-                                </Button>
-                            }
-                        />
+                        {contest.id && (
+                            <CreateContestTeamDialog
+                                contestId={contest.id || ""}
+                                trigger={
+                                    <Button
+                                        size="sm"
+                                        className="w-full font-bold shadow-md shadow-primary/15 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-white"
+                                    >
+                                        <Plus className="h-4 w-4 stroke-[2.5]" />
+                                        Create New Team
+                                    </Button>
+                                }
+                            />
+                        )}
                     </div>
                 </div>
             </CardContent>

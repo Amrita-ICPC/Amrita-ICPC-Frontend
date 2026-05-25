@@ -20,13 +20,12 @@ export default function ContestTeamInvitationClient() {
 
     const invitations = data?.data || [];
     const pageSize = 6;
-    const currentPage = parseInt(searchParams.get("page") || "1", 10);
-    const totalPages = Math.ceil(invitations.length / pageSize) || 1;
+    const pageParam = Number(searchParams.get("page"));
+    const totalPages = Math.max(1, Math.ceil(invitations.length / pageSize));
+    const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+    const safePage = Math.min(currentPage, totalPages);
 
-    const paginatedInvitations = invitations.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize,
-    );
+    const paginatedInvitations = invitations.slice((safePage - 1) * pageSize, safePage * pageSize);
 
     const setPage = (newPage: number) => {
         const newParams = new URLSearchParams(searchParams.toString());
@@ -73,10 +72,10 @@ export default function ContestTeamInvitationClient() {
                         {invitations.length > pageSize && (
                             <div className="mt-4">
                                 <AppPagination
-                                    currentPage={currentPage}
+                                    currentPage={safePage}
                                     totalPages={totalPages}
-                                    hasPrevious={currentPage > 1}
-                                    hasNext={currentPage < totalPages}
+                                    hasPrevious={safePage > 1}
+                                    hasNext={safePage < totalPages}
                                     onPageChange={setPage}
                                 />
                             </div>

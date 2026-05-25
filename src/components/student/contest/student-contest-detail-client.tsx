@@ -731,7 +731,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                         className={cn(
                                                             "w-full h-11 font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-2 group",
                                                             participation?.readiness?.can_start
-                                                                ? "bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
+                                                                ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
                                                                 : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60",
                                                         )}
                                                         disabled={
