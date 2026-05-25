@@ -42,7 +42,6 @@ import { TeamStatus } from "@/api/generated/model/teamStatus";
 import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
 import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
 import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
-import type { ParentTeamInfo } from "@/api/generated/model/parentTeamInfo";
 import {
     DropdownMenu,
     DropdownMenuContent,

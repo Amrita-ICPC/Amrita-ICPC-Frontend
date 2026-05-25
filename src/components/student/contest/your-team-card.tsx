@@ -424,13 +424,15 @@ export function YourTeamCard({
                     </div>
                 )}
             </CardContent>
-            <LeaveTeamDialog
-                teamId={team.id}
-                contestId={contestId}
-                memberId={myMember?.id || ""}
-                open={leaveDialogOpen}
-                setOpen={setLeaveDialogOpen}
-            />
+            {myMember && (
+                <LeaveTeamDialog
+                    teamId={team.id}
+                    contestId={contestId}
+                    memberId={myMember.id}
+                    open={leaveDialogOpen}
+                    setOpen={setLeaveDialogOpen}
+                />
+            )}
             <ContestTeamInviteDialog
                 team={team}
                 contestId={contestId}
@@ -739,7 +741,7 @@ function MemberActionsDropdown({
                         </>
                     )}
 
-                    {isCurrentUser && (
+                    {isCurrentUser && isLeader && (
                         <DropdownMenuItem
                             onClick={() => setLeaveAlertOpen(true)}
                             className="cursor-pointer flex items-center gap-2 text-xs font-semibold text-rose-600 focus:text-rose-700 focus:bg-rose-500/10"

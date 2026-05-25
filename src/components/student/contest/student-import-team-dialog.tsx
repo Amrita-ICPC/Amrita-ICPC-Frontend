@@ -107,7 +107,7 @@ export function StudentImportTeamDialog({
                     ],
                 },
                 onSuccess: () => {
-                    setOpen(false);
+                    handleOpenChange(false);
                 },
             },
         });
@@ -211,7 +211,12 @@ export function StudentImportTeamDialog({
                                             <button
                                                 key={team.id}
                                                 type="button"
-                                                onClick={() => setSelectedTeamId(team.id)}
+                                                onClick={() => {
+                                                    if (selectedTeamId !== team.id) {
+                                                        setSelectedMemberIds([]);
+                                                    }
+                                                    setSelectedTeamId(team.id);
+                                                }}
                                                 className={cn(
                                                     "w-full flex items-start text-left gap-3 p-3.5 rounded-xl border transition-all",
                                                     selectedTeamId === team.id

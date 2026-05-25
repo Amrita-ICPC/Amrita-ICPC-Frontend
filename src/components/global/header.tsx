@@ -62,10 +62,12 @@ export function Header() {
 
     const segments = pathname.split("/").filter(Boolean);
 
+    const segmentsWithIndex = segments.map((seg, index) => ({ seg, originalIndex: index }));
+
     // Filter out redundant UUIDs in nested paths (e.g. /contest/[id]/questions/[id]/edit)
-    const filteredSegments = segments.filter((seg, i) => {
-        const prev = segments[i - 1];
-        const next = segments[i + 1];
+    const filteredSegments = segmentsWithIndex.filter(({ seg, originalIndex }) => {
+        const prev = segments[originalIndex - 1];
+        const next = segments[originalIndex + 1];
 
         // If this is a question UUID and there's a next segment (like edit), skip it
         if (isUUID(seg) && prev === "questions" && next) {
@@ -82,8 +84,7 @@ export function Header() {
             { href: "/invitation", label: "Invitation", isLast: true },
         ];
     } else {
-        crumbs = filteredSegments.map((seg, i) => {
-            const originalIndex = segments.indexOf(seg);
+        crumbs = filteredSegments.map(({ seg, originalIndex }, i) => {
             const href = "/" + segments.slice(0, originalIndex + 1).join("/");
             const label = segmentLabel(seg, segments[originalIndex - 1]);
             const isLast = i === filteredSegments.length - 1;
@@ -151,6 +152,8 @@ export function Header() {
                             variant="ghost"
                             size="icon"
                             className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+                            aria-label="Notifications"
+                            title="Notifications"
                         >
                             <Bell className="h-5 w-5" />
                             <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-background animate-pulse" />
@@ -189,6 +192,8 @@ export function Header() {
                             variant="ghost"
                             size="icon"
                             className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+                            aria-label="Notifications"
+                            title="Notifications"
                         >
                             <Bell className="h-5 w-5" />
                         </Button>
