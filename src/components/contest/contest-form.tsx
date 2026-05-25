@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 
 import type { ContestCreate, ContestUpdate, ContestDetailResponse } from "@/api/generated/model";
-import { ScoringType, TeamApprovalMode } from "@/api/generated/model";
+import { ScoringType, TeamApprovalMode, ContestMode } from "@/api/generated/model";
 import type { ImageUploadResponse } from "@/api/generated/model";
 import {
     useCreateContest,
@@ -87,6 +87,7 @@ const formSchema = z
         team_approval_mode: z
             .enum([TeamApprovalMode.AUTO_APPROVE, TeamApprovalMode.INSTRUCTOR_REVIEW])
             .optional(),
+        contest_mode: z.enum([ContestMode.individual, ContestMode.team]).optional(),
     })
     .refine(
         (values) => {
@@ -150,11 +151,20 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             rules: initialData?.rules ?? "",
             scoring_type: initialData?.scoring_type ?? ScoringType.AUTO,
             team_approval_mode: initialData?.team_approval_mode ?? TeamApprovalMode.AUTO_APPROVE,
+            contest_mode: initialData?.contest_mode ?? ContestMode.individual,
         },
         mode: "onTouched",
     });
 
     const imageUrl = useWatch({ control, name: "image" }) ?? null;
+    const contestMode = useWatch({ control, name: "contest_mode" }) ?? ContestMode.individual;
+
+    useEffect(() => {
+        if (contestMode === ContestMode.individual) {
+            setValue("min_team_size", 1);
+            setValue("max_team_size", 1);
+        }
+    }, [contestMode, setValue]);
 
     const [uploadedImage, setUploadedImage] = useState<ImageUploadResponse | null>(null);
     const uploadImageMutation = useUploadContestImage({
@@ -203,11 +213,14 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 ? toUtcIsoString(values.registration_end)
                 : null,
             max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
-            min_team_size: values.min_team_size,
-            max_team_size: values.max_team_size,
+            min_team_size:
+                values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
+            max_team_size:
+                values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
             rules: values.rules?.trim() ? values.rules.trim() : null,
             scoring_type: values.scoring_type,
             team_approval_mode: values.team_approval_mode,
+            contest_mode: values.contest_mode,
         };
 
         if (initialData && contestId) {
@@ -337,6 +350,34 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                 </p>
                             </div>
 
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label>Contest mode</Label>
+                                    <Controller
+                                        control={control}
+                                        name="contest_mode"
+                                        render={({ field }) => (
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={(value) => field.onChange(value)}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select mode" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value={ContestMode.individual}>
+                                                        Individual
+                                                    </SelectItem>
+                                                    <SelectItem value={ContestMode.team}>
+                                                        Team
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div className="space-y-2">
                                     <Label htmlFor="max_teams">Max teams</Label>
@@ -366,6 +407,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                         id="min_team_size"
                                         type="number"
                                         min={1}
+                                        disabled={contestMode === ContestMode.individual}
                                         {...register("min_team_size", { valueAsNumber: true })}
                                     />
                                     {errors.min_team_size && (
@@ -381,6 +423,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                         id="max_team_size"
                                         type="number"
                                         min={1}
+                                        disabled={contestMode === ContestMode.individual}
                                         {...register("max_team_size", { valueAsNumber: true })}
                                     />
                                     {errors.max_team_size && (
