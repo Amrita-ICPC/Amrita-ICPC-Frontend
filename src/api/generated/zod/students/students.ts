@@ -49,8 +49,8 @@ export const GetStudentContestsApiV1StudentsContestsGetResponse = zod.object({
   "description": zod.union([zod.string(),zod.null()]).optional().describe('Contest description'),
   "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
-  "end_time": zod.iso.datetime({"offset":true}).describe('Contest end time (UTC)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'PAUSED', 'CANCELLED']).describe('Contest lifecycle status'),
+  "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).describe('Contest end time (UTC)'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
   "registration_start": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration start time (UTC)'),
   "registration_end": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration end time (UTC)'),
@@ -66,7 +66,10 @@ export const GetStudentContestsApiV1StudentsContestsGetResponse = zod.object({
   "max_teams": zod.union([zod.number(),zod.null()]).optional().describe('Maximum number of teams allowed'),
   "teams_count": zod.number().default(getStudentContestsApiV1StudentsContestsGetResponseDataOneContestsItemTeamsCountDefault).describe('Total number of teams registered and approved'),
   "min_team_size": zod.number().describe('Minimum team size'),
-  "max_team_size": zod.number().describe('Maximum team size')
+  "max_team_size": zod.number().describe('Maximum team size'),
+  "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
+  "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests')
 }).describe('Schema for contest available for students (List view).')),
   "total": zod.number(),
   "page": zod.number(),
@@ -110,8 +113,8 @@ export const GetStudentContestByIdApiV1StudentsContestsContestIdGetResponse = zo
   "description": zod.union([zod.string(),zod.null()]).optional().describe('Contest description'),
   "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
-  "end_time": zod.iso.datetime({"offset":true}).describe('Contest end time (UTC)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED', 'PAUSED', 'CANCELLED']).describe('Contest lifecycle status'),
+  "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).describe('Contest end time (UTC)'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
   "registration_start": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration start time (UTC)'),
   "registration_end": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration end time (UTC)'),
@@ -128,6 +131,9 @@ export const GetStudentContestByIdApiV1StudentsContestsContestIdGetResponse = zo
   "teams_count": zod.number().default(getStudentContestByIdApiV1StudentsContestsContestIdGetResponseDataOneTeamsCountDefault).describe('Total number of teams registered and approved'),
   "min_team_size": zod.number().describe('Minimum team size'),
   "max_team_size": zod.number().describe('Maximum team size'),
+  "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
+  "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules')
 }).describe('Placeholder for contest details response.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
@@ -166,10 +172,12 @@ export const GetStudentContestStatusApiV1StudentsContestsContestIdParticipationM
   "approved": zod.boolean().describe('Whether the registration is approved'),
   "status": zod.enum(['NOT_REGISTERED', 'PENDING_APPROVAL', 'APPROVED']).describe('Combined registration status (e.g., APPROVED, PENDING_APPROVAL, NOT_REGISTERED)')
 }).describe('Registration and approval status'),
-  "readiness": zod.object({
+  "session": zod.object({
   "can_start": zod.boolean().describe('Whether the student\/team can start the contest'),
-  "reason": zod.union([zod.string(),zod.null()]).optional().describe('Reason if the student\/team cannot start')
-}).describe('Readiness to start the contest'),
+  "reason": zod.union([zod.string(),zod.null()]).optional().describe('Reason if the student\/team cannot start'),
+  "contest_runtime_status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The runtime status of the contest'),
+  "already_started": zod.boolean().describe('Whether the student\/team has already started the session')
+}).describe('Contest session status for the student'),
   "team": zod.union([zod.object({
   "id": zod.uuid().describe('Team ID'),
   "name": zod.string().describe('Team name'),
@@ -449,6 +457,156 @@ export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContes
   "status": zod.number().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseStatusDefault),
   "message": zod.string().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseMessageDefault),
   "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Start or resume a contest session for a team.
+ * @summary Start or resume a contest session for a team
+ */
+export const StartContestSessionApiV1StudentsContestsContestIdStartPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const startContestSessionApiV1StudentsContestsContestIdStartPostResponseSuccessDefault = true;
+export const startContestSessionApiV1StudentsContestsContestIdStartPostResponseStatusDefault = 200;
+export const startContestSessionApiV1StudentsContestsContestIdStartPostResponseMessageDefault = `Success`;
+
+export const StartContestSessionApiV1StudentsContestsContestIdStartPostResponse = zod.object({
+  "success": zod.boolean().default(startContestSessionApiV1StudentsContestsContestIdStartPostResponseSuccessDefault),
+  "status": zod.number().default(startContestSessionApiV1StudentsContestsContestIdStartPostResponseStatusDefault),
+  "message": zod.string().default(startContestSessionApiV1StudentsContestsContestIdStartPostResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_id": zod.uuid().describe('The UUID of the contest'),
+  "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "session": zod.object({
+  "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was ended')
+}).describe('Active session details'),
+  "runtime": zod.object({
+  "status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The current status of the contest runtime'),
+  "effective_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('The effective end time of the contest for the team'),
+  "remaining_seconds": zod.number().describe('Remaining seconds in the contest'),
+  "is_paused": zod.boolean().describe('Indicates if the contest is currently paused'),
+  "paused_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the contest was paused'),
+  "scoreboard_frozen": zod.boolean().describe('Indicates if the scoreboard is currently frozen')
+}).describe('Current runtime and timer state'),
+  "workspace": zod.object({
+  "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
+  "current_editor_user_id": zod.union([zod.uuid(),zod.null()]).optional().describe('The user ID of the current active editor, if applicable'),
+  "participants": zod.array(zod.object({
+  "user_id": zod.uuid().describe('The UUID of the participant'),
+  "name": zod.string().describe('Name of the participant'),
+  "avatar_url": zod.union([zod.string(),zod.null()]).optional().describe('URL to the participant\'s avatar image'),
+  "role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant'),
+  "team_role": zod.enum(['LEADER', 'MEMBER']).describe('The team role of the participant (LEADER or MEMBER)'),
+  "workspace_role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant (EDITOR or VIEWER)'),
+  "is_self": zod.boolean().describe('Indicates if this participant is the current user'),
+  "is_online": zod.union([zod.boolean(),zod.null()]).optional().describe('Indicates if the participant is currently online')
+}).describe('Schema representing a participant in the team\'s shared workspace.\n\nAttributes:\n    user_id: The UUID of the participant.\n    name: Name of the participant.\n    avatar_url: URL to the participant\'s avatar image.\n    role: The workspace role of the participant.\n    team_role: The team role of the participant (LEADER or MEMBER).\n    workspace_role: The workspace role of the participant (EDITOR or VIEWER).\n    is_self: Indicates if this participant is the current requesting user.\n    is_online: Indicates if the participant is currently online.')).describe('List of participants in the workspace')
+}).describe('Workspace collaboration state'),
+  "team_progress": zod.object({
+  "score": zod.number().describe('The team\'s current score in the contest'),
+  "penalty": zod.number().describe('The team\'s penalty points'),
+  "solved_count": zod.number().describe('Number of questions solved by the team'),
+  "last_submission_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp of the team\'s last code submission'),
+  "extra_time_seconds": zod.number().describe('Amount of extra time granted to the team in seconds'),
+  "has_extra_time": zod.boolean().describe('Indicates if the team has extra time')
+}).describe('Current performance metrics'),
+  "permissions": zod.object({
+  "can_view": zod.boolean().describe('Indicates if the user can view the workspace'),
+  "can_edit": zod.boolean().describe('Indicates if the user can edit code'),
+  "can_submit": zod.boolean().describe('Indicates if the user can submit code'),
+  "can_switch_editor": zod.boolean().describe('Indicates if the user can request or become the active editor')
+}).describe('Permissions for the requesting user')
+}).describe('Schema representing the complete contest progress and workspace status of a team.\n\nAttributes:\n    contest_id: The UUID of the contest.\n    contest_team_id: The UUID of the contest team.\n    session: Active session details.\n    runtime: Current runtime and timer state.\n    workspace: Workspace participant and collaboration state.\n    team_progress: Current performance metrics.\n    permissions: Permissions for the requesting user.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get a contest session for a team.
+ * @summary Get a contest session for a team
+ */
+export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseSuccessDefault = true;
+export const getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseStatusDefault = 200;
+export const getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseMessageDefault = `Success`;
+
+export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse = zod.object({
+  "success": zod.boolean().default(getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseSuccessDefault),
+  "status": zod.number().default(getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseStatusDefault),
+  "message": zod.string().default(getRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_id": zod.uuid().describe('The UUID of the contest'),
+  "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "session": zod.object({
+  "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was ended')
+}).describe('Active session details'),
+  "runtime": zod.object({
+  "status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The current status of the contest runtime'),
+  "effective_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('The effective end time of the contest for the team'),
+  "remaining_seconds": zod.number().describe('Remaining seconds in the contest'),
+  "is_paused": zod.boolean().describe('Indicates if the contest is currently paused'),
+  "paused_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the contest was paused'),
+  "scoreboard_frozen": zod.boolean().describe('Indicates if the scoreboard is currently frozen')
+}).describe('Current runtime and timer state'),
+  "workspace": zod.object({
+  "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
+  "current_editor_user_id": zod.union([zod.uuid(),zod.null()]).optional().describe('The user ID of the current active editor, if applicable'),
+  "participants": zod.array(zod.object({
+  "user_id": zod.uuid().describe('The UUID of the participant'),
+  "name": zod.string().describe('Name of the participant'),
+  "avatar_url": zod.union([zod.string(),zod.null()]).optional().describe('URL to the participant\'s avatar image'),
+  "role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant'),
+  "team_role": zod.enum(['LEADER', 'MEMBER']).describe('The team role of the participant (LEADER or MEMBER)'),
+  "workspace_role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant (EDITOR or VIEWER)'),
+  "is_self": zod.boolean().describe('Indicates if this participant is the current user'),
+  "is_online": zod.union([zod.boolean(),zod.null()]).optional().describe('Indicates if the participant is currently online')
+}).describe('Schema representing a participant in the team\'s shared workspace.\n\nAttributes:\n    user_id: The UUID of the participant.\n    name: Name of the participant.\n    avatar_url: URL to the participant\'s avatar image.\n    role: The workspace role of the participant.\n    team_role: The team role of the participant (LEADER or MEMBER).\n    workspace_role: The workspace role of the participant (EDITOR or VIEWER).\n    is_self: Indicates if this participant is the current requesting user.\n    is_online: Indicates if the participant is currently online.')).describe('List of participants in the workspace')
+}).describe('Workspace collaboration state'),
+  "team_progress": zod.object({
+  "score": zod.number().describe('The team\'s current score in the contest'),
+  "penalty": zod.number().describe('The team\'s penalty points'),
+  "solved_count": zod.number().describe('Number of questions solved by the team'),
+  "last_submission_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp of the team\'s last code submission'),
+  "extra_time_seconds": zod.number().describe('Amount of extra time granted to the team in seconds'),
+  "has_extra_time": zod.boolean().describe('Indicates if the team has extra time')
+}).describe('Current performance metrics'),
+  "permissions": zod.object({
+  "can_view": zod.boolean().describe('Indicates if the user can view the workspace'),
+  "can_edit": zod.boolean().describe('Indicates if the user can edit code'),
+  "can_submit": zod.boolean().describe('Indicates if the user can submit code'),
+  "can_switch_editor": zod.boolean().describe('Indicates if the user can request or become the active editor')
+}).describe('Permissions for the requesting user')
+}).describe('Schema representing the complete contest progress and workspace status of a team.\n\nAttributes:\n    contest_id: The UUID of the contest.\n    contest_team_id: The UUID of the contest team.\n    session: Active session details.\n    runtime: Current runtime and timer state.\n    workspace: Workspace participant and collaboration state.\n    team_progress: Current performance metrics.\n    permissions: Permissions for the requesting user.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -1245,4 +1403,167 @@ export const RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdR
   "expected_output": zod.union([zod.string(),zod.null()]).optional().describe('What output was expected')
 }).describe('Response with execution result for a test case.\n\nContains all execution details: status, output, time, memory.\n\nExample:\n    ```json\n    {\n        \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n        \"passed\": true,\n        \"status_description\": \"Accepted\",\n        \"time\": 0.125,\n        \"memory\": 12.5,\n        \"stdout\": \"output line 1\\noutput line 2\",\n        \"stderr\": null,\n        \"compile_output\": null,\n        \"expected_output\": \"output line 1\\noutput line 2\"\n    }\n    ```')
 }).describe('Response to student code run request.\n\nContains execution result for the requested test case.\n\nExample:\n    ```json\n    {\n        \"success\": true,\n        \"message\": \"Test case executed successfully\",\n        \"question_id\": \"550e8400-e29b-41d4-a716-446655440001\",\n        \"result\": {\n            \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440002\",\n            \"passed\": true,\n            \"status_description\": \"Accepted\",\n            \"time\": 0.125,\n            \"memory\": 12.5,\n            \"stdout\": \"output\",\n            \"stderr\": null,\n            \"compile_output\": null,\n            \"expected_output\": \"output\"\n        }\n    }\n    ```')
+
+/**
+ * Retrieve questions for a contest, ordered by sequence order,
+with attempted/solved status flags.
+ * @summary Get questions for a contest
+ */
+export const GetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseSuccessDefault = true;
+export const getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseStatusDefault = 200;
+export const getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseMessageDefault = `Success`;
+
+export const GetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getContestQuestionsApiV1StudentsContestsContestIdQuestionsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "questions": zod.array(zod.object({
+  "id": zod.uuid().describe('The ID of the question'),
+  "attempted": zod.boolean().describe('Whether the student has attempted the question'),
+  "solved": zod.boolean().describe('Whether the student has solved the question')
+}).describe('Schema for a contest question in student view.')).describe('List of questions in the contest')
+}).describe('Schema for a list of contest questions in student view.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve details of a specific question in a contest (title, description,
+limits, allowed languages, tags, public testcases, templates) for student preview.
+ * @summary Get contest question details for student
+ */
+export const GetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseSuccessDefault = true;
+export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseStatusDefault = 200;
+export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseMessageDefault = `Success`;
+export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
+
+
+
+export const GetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseStatusDefault),
+  "message": zod.string().default(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid(),
+  "title": zod.string(),
+  "question_text": zod.string(),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),
+  "time_limit_ms": zod.number(),
+  "memory_limit_mb": zod.number(),
+  "allowed_languages": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.object({
+  "name": zod.string().max(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseDataOneTagsItemNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+})).optional(),
+  "templates": zod.array(zod.object({
+  "language_id": zod.number(),
+  "starter_code": zod.string()
+})).optional()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve the saved workspace (programming language, source code) for a question.
+ * @summary Get workspace code for a question
+ */
+export const GetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseSuccessDefault = true;
+export const getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseStatusDefault = 200;
+export const getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseMessageDefault = `Success`;
+
+export const GetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponse = zod.object({
+  "success": zod.boolean().default(getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseSuccessDefault),
+  "status": zod.number().default(getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseStatusDefault),
+  "message": zod.string().default(getWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "language_id": zod.number(),
+  "source_code": zod.string(),
+  "updated_at": zod.iso.datetime({"offset":true})
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Save the current code and programming language for a question to the student's/team's workspace.
+ * @summary Save workspace code for a question
+ */
+export const SaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const SaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutBody = zod.object({
+  "language_id": zod.number(),
+  "source_code": zod.string()
+})
+
+export const saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseSuccessDefault = true;
+export const saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseStatusDefault = 200;
+export const saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseMessageDefault = `Success`;
+
+export const SaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponse = zod.object({
+  "success": zod.boolean().default(saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseSuccessDefault),
+  "status": zod.number().default(saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseStatusDefault),
+  "message": zod.string().default(saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseMessageDefault),
+  "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
 

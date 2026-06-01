@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ContestMode } from './contestMode';
+import type { ContestTeamParticpationType } from './contestTeamParticpationType';
 import type { ScoringType } from './scoringType';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
@@ -43,6 +44,10 @@ export interface ContestUpdate {
   contest_mode?: ContestMode | null;
   /** How teams are approved in this contest */
   team_approval_mode?: TeamApprovalMode | null;
-  /** Whether to show leaderboard */
-  show_leaderboard?: boolean | null;
+  /** Contest duration in seconds */
+  duration?: number | null;
+  /** Whether to show leaderboard during the contest */
+  show_leaderboard_during_contest?: boolean | null;
+  /** Participation type for team contests */
+  participation_type?: ContestTeamParticpationType | null;
 }

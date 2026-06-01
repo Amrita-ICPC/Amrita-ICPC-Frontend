@@ -8,6 +8,7 @@
 import type { ContestMode } from './contestMode';
 import type { ContestRunStatus } from './contestRunStatus';
 import type { ContestStatus } from './contestStatus';
+import type { ContestTeamParticpationType } from './contestTeamParticpationType';
 import type { InstructorResponse } from './instructorResponse';
 import type { ScoringType } from './scoringType';
 import type { TeamApprovalMode } from './teamApprovalMode';
@@ -31,7 +32,7 @@ export interface ContestDetailResponse {
   /** Contest start time (UTC) */
   start_time: string;
   /** Contest end time (UTC) */
-  end_time: string;
+  end_time?: string | null;
   /** Registration start time (UTC) */
   registration_start?: string | null;
   /** Registration end time (UTC) */
@@ -50,6 +51,12 @@ export interface ContestDetailResponse {
   team_approval_mode?: TeamApprovalMode;
   /** Contest mode (individual or team) */
   contest_mode?: ContestMode;
+  /** Contest duration in seconds */
+  duration?: number | null;
+  /** Whether to show leaderboard during the contest */
+  show_leaderboard_during_contest?: boolean;
+  /** Participation type for team contests */
+  participation_type?: ContestTeamParticpationType;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */
@@ -86,8 +93,6 @@ export interface ContestDetailResponse {
   updated_at: string;
   /** User ID who last updated */
   updated_by?: string | null;
-  /** Whether leaderboard is shown */
-  show_leaderboard: boolean;
   /** Published time (UTC) */
   published_at?: string | null;
   /** User ID who published the contest */

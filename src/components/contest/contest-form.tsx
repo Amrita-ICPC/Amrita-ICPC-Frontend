@@ -33,7 +33,12 @@ import {
 } from "@/components/ui/select";
 
 import type { ContestCreate, ContestUpdate, ContestDetailResponse } from "@/api/generated/model";
-import { ScoringType, TeamApprovalMode, ContestMode } from "@/api/generated/model";
+import {
+    ScoringType,
+    TeamApprovalMode,
+    ContestMode,
+    ContestTeamParticpationType,
+} from "@/api/generated/model";
 import type { ImageUploadResponse } from "@/api/generated/model";
 import {
     useCreateContest,
@@ -88,6 +93,15 @@ const formSchema = z
             .enum([TeamApprovalMode.AUTO_APPROVE, TeamApprovalMode.INSTRUCTOR_REVIEW])
             .optional(),
         contest_mode: z.enum([ContestMode.individual, ContestMode.team]).optional(),
+        show_leaderboard_during_contest: z.boolean().optional(),
+        participation_type: z
+            .enum([
+                ContestTeamParticpationType.LEADER_ONLY,
+                ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE,
+                ContestTeamParticpationType.INDIVIDUAL_WORKSPACE,
+            ])
+            .optional()
+            .nullable(),
     })
     .refine(
         (values) => {
@@ -152,6 +166,9 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             scoring_type: initialData?.scoring_type ?? ScoringType.AUTO,
             team_approval_mode: initialData?.team_approval_mode ?? TeamApprovalMode.AUTO_APPROVE,
             contest_mode: initialData?.contest_mode ?? ContestMode.individual,
+            show_leaderboard_during_contest: initialData?.show_leaderboard_during_contest ?? true,
+            participation_type:
+                initialData?.participation_type ?? ContestTeamParticpationType.LEADER_ONLY,
         },
         mode: "onTouched",
     });
@@ -199,37 +216,68 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
     }
 
     const onSubmit = handleSubmit(async (values) => {
-        const payload: ContestCreate | ContestUpdate = {
-            name: values.name,
-            description: values.description?.trim() ? values.description.trim() : null,
-            image: values.image ?? null,
-            is_public: values.is_public,
-            start_time: toUtcIsoString(values.start_time),
-            end_time: toUtcIsoString(values.end_time),
-            registration_start: values.registration_start?.trim()
-                ? toUtcIsoString(values.registration_start)
-                : null,
-            registration_end: values.registration_end?.trim()
-                ? toUtcIsoString(values.registration_end)
-                : null,
-            max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
-            min_team_size:
-                values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
-            max_team_size:
-                values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
-            rules: values.rules?.trim() ? values.rules.trim() : null,
-            scoring_type: values.scoring_type,
-            team_approval_mode: values.team_approval_mode,
-            contest_mode: values.contest_mode,
-        };
-
         if (initialData && contestId) {
+            const payload: ContestUpdate = {
+                name: values.name,
+                description: values.description?.trim() ? values.description.trim() : null,
+                image: values.image ?? null,
+                is_public: values.is_public,
+                start_time: toUtcIsoString(values.start_time),
+                end_time: toUtcIsoString(values.end_time),
+                registration_start: values.registration_start?.trim()
+                    ? toUtcIsoString(values.registration_start)
+                    : null,
+                registration_end: values.registration_end?.trim()
+                    ? toUtcIsoString(values.registration_end)
+                    : null,
+                max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
+                min_team_size:
+                    values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
+                max_team_size:
+                    values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
+                rules: values.rules?.trim() ? values.rules.trim() : null,
+                scoring_type: values.scoring_type,
+                team_approval_mode: values.team_approval_mode,
+                contest_mode: values.contest_mode,
+                show_leaderboard: values.show_leaderboard_during_contest,
+                show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                participation_type:
+                    values.contest_mode === ContestMode.team ? values.participation_type : null,
+            };
             await updateContestMutation.mutateAsync({
                 contestId,
-                data: payload as ContestUpdate,
+                data: payload,
             });
         } else {
-            await createContestMutation.mutateAsync({ data: payload as ContestCreate });
+            const payload: ContestCreate = {
+                name: values.name,
+                description: values.description?.trim() ? values.description.trim() : null,
+                image: values.image ?? null,
+                is_public: values.is_public,
+                start_time: toUtcIsoString(values.start_time),
+                end_time: toUtcIsoString(values.end_time),
+                registration_start: values.registration_start?.trim()
+                    ? toUtcIsoString(values.registration_start)
+                    : null,
+                registration_end: values.registration_end?.trim()
+                    ? toUtcIsoString(values.registration_end)
+                    : null,
+                max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
+                min_team_size:
+                    values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
+                max_team_size:
+                    values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
+                rules: values.rules?.trim() ? values.rules.trim() : null,
+                scoring_type: values.scoring_type,
+                team_approval_mode: values.team_approval_mode,
+                contest_mode: values.contest_mode,
+                show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                participation_type:
+                    values.contest_mode === ContestMode.team
+                        ? (values.participation_type ?? undefined)
+                        : undefined,
+            };
+            await createContestMutation.mutateAsync({ data: payload });
         }
 
         router.push("/contest");
@@ -376,6 +424,89 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                         )}
                                     />
                                 </div>
+
+                                {contestMode === ContestMode.team && (
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label>Team Participation Mode</Label>
+                                        <Controller
+                                            control={control}
+                                            name="participation_type"
+                                            render={({ field }) => (
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            field.onChange(
+                                                                ContestTeamParticpationType.LEADER_ONLY,
+                                                            )
+                                                        }
+                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
+                                                            field.value ===
+                                                            ContestTeamParticpationType.LEADER_ONLY
+                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                : "border-border/60 bg-card text-card-foreground"
+                                                        }`}
+                                                    >
+                                                        <span className="font-semibold text-sm mb-1">
+                                                            Leader Only
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground leading-normal">
+                                                            Only the team leader is allowed to write
+                                                            and submit code. Other members have
+                                                            read-only access.
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            field.onChange(
+                                                                ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE,
+                                                            )
+                                                        }
+                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
+                                                            field.value ===
+                                                            ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE
+                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                : "border-border/60 bg-card text-card-foreground"
+                                                        }`}
+                                                    >
+                                                        <span className="font-semibold text-sm mb-1">
+                                                            Shared Editor
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground leading-normal">
+                                                            All team members share a single
+                                                            workspace. Anyone can code, but only one
+                                                            member can edit at a time.
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            field.onChange(
+                                                                ContestTeamParticpationType.INDIVIDUAL_WORKSPACE,
+                                                            )
+                                                        }
+                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
+                                                            field.value ===
+                                                            ContestTeamParticpationType.INDIVIDUAL_WORKSPACE
+                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                : "border-border/60 bg-card text-card-foreground"
+                                                        }`}
+                                                    >
+                                                        <span className="font-semibold text-sm mb-1">
+                                                            Individual Workspaces
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground leading-normal">
+                                                            Each team member gets their own separate
+                                                            workspace. They can code and submit
+                                                            independently.
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -511,8 +642,10 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 <div className="flex flex-col gap-6">
                     <Card>
                         <CardHeader className="space-y-1">
-                            <CardTitle>Visibility</CardTitle>
-                            <CardDescription>Control who can discover the contest.</CardDescription>
+                            <CardTitle>Visibility & Leaderboard</CardTitle>
+                            <CardDescription>
+                                Control visibility and leaderboard settings.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
@@ -537,6 +670,38 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                         </Select>
                                     )}
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Show Leaderboard during Contest</Label>
+                                <Controller
+                                    control={control}
+                                    name="show_leaderboard_during_contest"
+                                    render={({ field }) => (
+                                        <Select
+                                            value={String(field.value ?? true)}
+                                            onValueChange={(value) =>
+                                                field.onChange(value === "true")
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">
+                                                    Show Leaderboard
+                                                </SelectItem>
+                                                <SelectItem value="false">
+                                                    Hide Leaderboard
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Control whether the real-time leaderboard is visible to students
+                                    during the active contest.
+                                </p>
                             </div>
 
                             <Separator />

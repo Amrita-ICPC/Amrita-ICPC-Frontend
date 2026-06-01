@@ -5,8 +5,8 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ReadinessStatus } from './readinessStatus';
 import type { RegistrationStatus } from './registrationStatus';
+import type { StudentContestSessionStatus } from './studentContestSessionStatus';
 import type { TeamParticipationStatus } from './teamParticipationStatus';
 
 /**
@@ -15,8 +15,8 @@ import type { TeamParticipationStatus } from './teamParticipationStatus';
 export interface StudentContestStatusResponse {
   /** Registration and approval status */
   registration_status: RegistrationStatus;
-  /** Readiness to start the contest */
-  readiness: ReadinessStatus;
+  /** Contest session status for the student */
+  session: StudentContestSessionStatus;
   /** Team details if registered */
   team?: TeamParticipationStatus | null;
 }

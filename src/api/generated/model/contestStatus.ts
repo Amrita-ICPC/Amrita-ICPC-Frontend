@@ -15,8 +15,6 @@ controlling participant access and available operations.
 Attributes:
     DRAFT: Contest is being configured and not visible to participants.
     PUBLISHED: Contest is published and visible to participants.
-    PAUSED: Contest is temporarily halted, submissions disabled.
-    CANCELLED: Contest has been cancelled and will not proceed.
  */
 export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
 
@@ -24,6 +22,4 @@ export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
 export const ContestStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  PAUSED: 'PAUSED',
-  CANCELLED: 'CANCELLED',
 } as const;

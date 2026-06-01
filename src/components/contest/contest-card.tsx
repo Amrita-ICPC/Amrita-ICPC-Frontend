@@ -113,16 +113,20 @@ export function ContestCard({ contest }: ContestCardProps) {
     const cStatus = CONTEST_STATUS_STYLES[contest.status] ?? CONTEST_STATUS_STYLES.DRAFT;
     const rStatus = RUN_STATUS_STYLES[contest.run_status] ?? RUN_STATUS_STYLES.UPCOMING;
 
-    const startDate = new Date(contest.start_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
-    const endDate = new Date(contest.end_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    const startDate = contest.start_time
+        ? new Date(contest.start_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          })
+        : "Not Scheduled";
+    const endDate = contest.end_time
+        ? new Date(contest.end_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          })
+        : "Not Scheduled";
 
     return (
         <div className="group relative flex h-70 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(20,45,103,0.45)] transition-all duration-200 hover:-translate-y-1 hover:border-[#bdccee] hover:shadow-[0_18px_30px_-18px_rgba(16,35,82,0.58)] dark:border-white/12 dark:bg-slate-900 dark:hover:border-white/20">

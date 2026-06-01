@@ -31,23 +31,10 @@ import {
     useDeleteContest,
     contestKeys,
     usePublishContest,
-    usePauseContest,
-    useResumeContest,
-    useCancelContest,
     contestDetailKey,
 } from "@/query/contest-query";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import type { ContestDetailResponse } from "@/api/generated/model";
 import {
     DropdownMenu,
@@ -214,53 +201,24 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
         },
     });
 
-    const pauseMutation = usePauseContest({
-        mutation: {
-            meta: {
-                successMessage: "Contest paused",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
-    const resumeMutation = useResumeContest({
-        mutation: {
-            meta: {
-                successMessage: "Contest resumed",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
-    const cancelMutation = useCancelContest({
-        mutation: {
-            meta: {
-                successMessage: "Contest cancelled",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
     const handleDeleteContest = () => deleteMutation.mutate({ contestId });
     const handlePublish = () => publishMutation.mutate({ contestId });
-    const handlePause = () => pauseMutation.mutate({ contestId });
-    const handleResume = () => resumeMutation.mutate({ contestId });
-    const handleCancel = () => cancelMutation.mutate({ contestId });
 
     const statusCfg = contest
         ? (STATUS_CONFIG[contest.status] ?? STATUS_CONFIG.DRAFT)
         : STATUS_CONFIG.DRAFT;
     const StatusIcon = statusCfg.icon;
 
-    const duration = contest
-        ? (() => {
-              const ms =
-                  new Date(contest.end_time).getTime() - new Date(contest.start_time).getTime();
-              const h = Math.floor(ms / 3_600_000);
-              const m = Math.floor((ms % 3_600_000) / 60_000);
-              return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}`.trim() : `${m}m`;
-          })()
-        : "";
+    const duration =
+        contest && contest.end_time
+            ? (() => {
+                  const ms =
+                      new Date(contest.end_time).getTime() - new Date(contest.start_time).getTime();
+                  const h = Math.floor(ms / 3_600_000);
+                  const m = Math.floor((ms % 3_600_000) / 60_000);
+                  return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}`.trim() : `${m}m`;
+              })()
+            : "Not Scheduled";
 
     return (
         <AsyncStateHandler
@@ -353,120 +311,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         </Button>
                                     )}
 
-                                    {contest.status === "PUBLISHED" && (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="shadow-sm"
-                                                onClick={handlePause}
-                                                disabled={pauseMutation.isPending}
-                                            >
-                                                {pauseMutation.isPending ? (
-                                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                ) : (
-                                                    <Pause className="mr-1.5 h-3.5 w-3.5" />
-                                                )}
-                                                Pause
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        className="shadow-sm"
-                                                        disabled={cancelMutation.isPending}
-                                                    >
-                                                        {cancelMutation.isPending ? (
-                                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                        ) : (
-                                                            <Ban className="mr-1.5 h-3.5 w-3.5" />
-                                                        )}
-                                                        Cancel
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>
-                                                            Are you absolutely sure?
-                                                        </AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will cancel the contest. This
-                                                            action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>
-                                                            Go Back
-                                                        </AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            onClick={handleCancel}
-                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                        >
-                                                            Yes, Cancel Contest
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </>
-                                    )}
-
-                                    {contest.status === "PAUSED" && (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                className="shadow-sm"
-                                                onClick={handleResume}
-                                                disabled={resumeMutation.isPending}
-                                            >
-                                                {resumeMutation.isPending ? (
-                                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                ) : (
-                                                    <Play className="mr-1.5 h-3.5 w-3.5" />
-                                                )}
-                                                Resume
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        className="shadow-sm"
-                                                        disabled={cancelMutation.isPending}
-                                                    >
-                                                        {cancelMutation.isPending ? (
-                                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                        ) : (
-                                                            <Ban className="mr-1.5 h-3.5 w-3.5" />
-                                                        )}
-                                                        Cancel
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>
-                                                            Are you absolutely sure?
-                                                        </AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will cancel the contest. This
-                                                            action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>
-                                                            Go Back
-                                                        </AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            onClick={handleCancel}
-                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                        >
-                                                            Yes, Cancel Contest
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </>
-                                    )}
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button
@@ -651,10 +495,33 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                     }
                                 />
                                 <Separator className="my-0.5 bg-border/40" />
+                                <Separator className="my-0.5 bg-border/40" />
                                 <InfoRow
-                                    label="Leaderboard"
-                                    value={contest.show_leaderboard ? "Visible" : "Hidden"}
+                                    label="During Contest"
+                                    value={
+                                        contest.show_leaderboard_during_contest
+                                            ? "Visible"
+                                            : "Hidden"
+                                    }
                                 />
+                                {contest.contest_mode === "team" && contest.participation_type && (
+                                    <>
+                                        <Separator className="my-0.5 bg-border/40" />
+                                        <InfoRow
+                                            label="Participation type"
+                                            value={
+                                                <Badge
+                                                    variant="outline"
+                                                    className="border-border/60 text-xs capitalize"
+                                                >
+                                                    {contest.participation_type
+                                                        .replace(/_/g, " ")
+                                                        .toLowerCase()}
+                                                </Badge>
+                                            }
+                                        />
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
                     </div>

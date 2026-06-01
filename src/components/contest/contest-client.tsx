@@ -44,16 +44,20 @@ const RUN_STATUS_CLASSES: Record<string, string> = {
 };
 
 function ContestTableRow({ contest }: { contest: ContestSummaryResponse }) {
-    const start = new Date(contest.start_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
-    const end = new Date(contest.end_time).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    const start = contest.start_time
+        ? new Date(contest.start_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          })
+        : "Not Scheduled";
+    const end = contest.end_time
+        ? new Date(contest.end_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          })
+        : "Not Scheduled";
 
     return (
         <TableRow className="group cursor-pointer hover:bg-muted/40 transition-colors">

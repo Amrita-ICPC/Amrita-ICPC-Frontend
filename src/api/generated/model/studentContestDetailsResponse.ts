@@ -9,6 +9,7 @@ import type { ContestAudienceResponse } from './contestAudienceResponse';
 import type { ContestMode } from './contestMode';
 import type { ContestRunStatus } from './contestRunStatus';
 import type { ContestStatus } from './contestStatus';
+import type { ContestTeamParticpationType } from './contestTeamParticpationType';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
 /**
@@ -26,7 +27,7 @@ export interface StudentContestDetailsResponse {
   /** Contest start time (UTC) */
   start_time: string;
   /** Contest end time (UTC) */
-  end_time: string;
+  end_time: string | null;
   /** Contest lifecycle status */
   status: ContestStatus;
   /** Contest temporal run-state (UPCOMING / LIVE / ENDED) */
@@ -53,6 +54,12 @@ export interface StudentContestDetailsResponse {
   min_team_size: number;
   /** Maximum team size */
   max_team_size: number;
+  /** Contest duration in seconds */
+  duration?: number | null;
+  /** Whether to show leaderboard during the contest */
+  show_leaderboard_during_contest: boolean;
+  /** Participation type for team contests */
+  participation_type: ContestTeamParticpationType;
   /** Contest rules */
   rules?: string | null;
 }

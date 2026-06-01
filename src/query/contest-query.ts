@@ -5,9 +5,6 @@ export { useUploadImageApiV1UploadPost as useUploadContestImage } from "@/api/ge
 export { getGetAllContestsApiV1ContestsGetQueryKey as contestKeys } from "@/api/generated/contests/contests";
 export { useDeleteContestApiV1ContestsContestIdDelete as useDeleteContest } from "@/api/generated/contests/contests";
 export { usePublishContestApiV1ContestsContestIdPublishPost as usePublishContest } from "@/api/generated/contests/contests";
-export { usePauseContestApiV1ContestsContestIdPausePost as usePauseContest } from "@/api/generated/contests/contests";
-export { useResumeContestApiV1ContestsContestIdResumePost as useResumeContest } from "@/api/generated/contests/contests";
-export { useCancelContestApiV1ContestsContestIdCancelPost as useCancelContest } from "@/api/generated/contests/contests";
 export { getGetContestApiV1ContestsContestIdGetQueryKey as contestDetailKey } from "@/api/generated/contests/contests";
 export { useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet as usePlatformLanguages } from "@/api/generated/questions/questions";
 export {

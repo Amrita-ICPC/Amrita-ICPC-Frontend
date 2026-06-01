@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import {
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
     useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
+    useStartContestSessionApiV1StudentsContestsContestIdStartPost,
 } from "@/api/generated/students/students";
+import { useRouter } from "next/navigation";
+import { toast } from "@/lib/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -339,6 +342,7 @@ interface StudentContestDetailClientProps {
 }
 
 export function StudentContestDetailClient({ contestId }: StudentContestDetailClientProps) {
+    const router = useRouter();
     const { data, isLoading, isError, error, refetch } =
         useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
     const contest = data?.data;
@@ -346,6 +350,24 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
     const { data: statusData, isLoading: isStatusLoading } =
         useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet(contestId);
     const participation = statusData?.data;
+
+    const startMutation = useStartContestSessionApiV1StudentsContestsContestIdStartPost({
+        mutation: {
+            onSuccess: () => {
+                toast.success("Contest session started successfully");
+                router.push(`/student/contest/${contestId}/session`);
+            },
+            onError: (err: any) => {
+                toast.error(
+                    err.response?.data?.message || err.message || "Failed to start contest session",
+                );
+            },
+        },
+    });
+
+    const handleStartContest = () => {
+        startMutation.mutate({ contestId });
+    };
     console.log(
         "StudentContestDetailClient resolved, participation:",
         participation,
@@ -353,15 +375,16 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
         statusData,
     );
 
-    const duration = contest
-        ? (() => {
-              const ms =
-                  new Date(contest.end_time).getTime() - new Date(contest.start_time).getTime();
-              const h = Math.floor(ms / 3_600_000);
-              const m = Math.floor((ms % 3_600_000) / 60_000);
-              return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}`.trim() : `${m}m`;
-          })()
-        : "";
+    const duration =
+        contest && contest.end_time
+            ? (() => {
+                  const ms =
+                      new Date(contest.end_time).getTime() - new Date(contest.start_time).getTime();
+                  const h = Math.floor(ms / 3_600_000);
+                  const m = Math.floor((ms % 3_600_000) / 60_000);
+                  return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}`.trim() : `${m}m`;
+              })()
+            : "Not Scheduled";
 
     const cStatus = contest
         ? (CONTEST_STATUS_STYLES[contest.status] ?? CONTEST_STATUS_STYLES.DRAFT)
@@ -460,7 +483,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                 </div>
 
                                 {/* Mini Cards / Quick Info */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3 mt-8">
                                     <QuickInfoCard
                                         icon={Users}
                                         label="Team Size"
@@ -493,6 +516,29 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         label="Contest Mode"
                                         color="indigo"
                                         value={contest.contest_mode.toLowerCase()}
+                                    />
+
+                                    {contest.contest_mode.toLowerCase() === "team" &&
+                                        contest.participation_type && (
+                                            <QuickInfoCard
+                                                icon={Users}
+                                                label="Participation Type"
+                                                color="violet"
+                                                value={contest.participation_type
+                                                    .replace(/_/g, " ")
+                                                    .toLowerCase()}
+                                            />
+                                        )}
+
+                                    <QuickInfoCard
+                                        icon={Trophy}
+                                        label="Leaderboard during Contest"
+                                        color="rose"
+                                        value={
+                                            contest.show_leaderboard_during_contest
+                                                ? "Visible"
+                                                : "Hidden"
+                                        }
                                     />
                                 </div>
                             </CardContent>
@@ -547,18 +593,24 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         isCompleted={new Date() > new Date(contest.start_time)}
                                         isActive={
                                             new Date() >= new Date(contest.start_time) &&
-                                            new Date() <= new Date(contest.end_time)
+                                            (contest.end_time
+                                                ? new Date() <= new Date(contest.end_time)
+                                                : true)
                                         }
                                     />
                                     <TimelineItem
                                         label="Contest Ends"
                                         time={fmt(contest.end_time)}
                                         status={
+                                            contest.end_time &&
                                             new Date() > new Date(contest.end_time)
                                                 ? "Completed"
                                                 : "Upcoming"
                                         }
-                                        isCompleted={new Date() > new Date(contest.end_time)}
+                                        isCompleted={
+                                            !!contest.end_time &&
+                                            new Date() > new Date(contest.end_time)
+                                        }
                                     />
                                     <TimelineItem
                                         label="Result Published"
@@ -610,7 +662,16 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                 }
 
                                 if (contest.run_status === "LIVE") {
-                                    if (participation?.readiness?.can_start) {
+                                    if (participation?.session?.already_started) {
+                                        return {
+                                            title: "Session in Progress",
+                                            icon: Activity,
+                                            iconClass: "text-emerald-500 animate-pulse",
+                                            bgClass:
+                                                "bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5 border-b border-emerald-500/20",
+                                        };
+                                    }
+                                    if (participation?.session?.can_start) {
                                         return {
                                             title: "You're all set to go!",
                                             icon: Sparkles,
@@ -708,7 +769,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                 )}
                                                 {contest.run_status === "LIVE" && (
                                                     <CountdownTimer
-                                                        targetDate={contest.end_time}
+                                                        targetDate={contest.end_time ?? ""}
                                                         label="Time Remaining"
                                                     />
                                                 )}
@@ -725,27 +786,40 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                     </div>
                                                 )}
 
-                                                {/* Start Contest Button */}
+                                                {/* Start/Resume Contest Button */}
                                                 {contest.run_status !== "ENDED" && (
                                                     <Button
                                                         className={cn(
                                                             "w-full h-11 font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-2 group",
-                                                            participation?.readiness?.can_start
+                                                            participation?.session
+                                                                ?.already_started ||
+                                                                participation?.session?.can_start
                                                                 ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
                                                                 : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60",
                                                         )}
                                                         disabled={
-                                                            !participation?.readiness?.can_start
+                                                            (!participation?.session
+                                                                ?.already_started &&
+                                                                !participation?.session
+                                                                    ?.can_start) ||
+                                                            startMutation.isPending
                                                         }
+                                                        onClick={handleStartContest}
                                                     >
-                                                        Start Contest
+                                                        {startMutation.isPending
+                                                            ? "Loading..."
+                                                            : participation?.session
+                                                                    ?.already_started
+                                                              ? "Resume Contest"
+                                                              : "Start Contest"}
                                                         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                                                     </Button>
                                                 )}
 
                                                 {/* If start is blocked, explain why */}
-                                                {!participation?.readiness?.can_start &&
-                                                    participation?.readiness?.reason && (
+                                                {!participation?.session?.already_started &&
+                                                    !participation?.session?.can_start &&
+                                                    participation?.session?.reason && (
                                                         <div className="flex gap-3 p-3.5 rounded-2xl border border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10">
                                                             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                                                             <div className="flex flex-col gap-0.5">
@@ -753,7 +827,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                                     Access Blocked
                                                                 </span>
                                                                 <span className="text-[11px] text-destructive/80 leading-normal font-medium">
-                                                                    {participation.readiness.reason}
+                                                                    {participation.session.reason}
                                                                 </span>
                                                             </div>
                                                         </div>
