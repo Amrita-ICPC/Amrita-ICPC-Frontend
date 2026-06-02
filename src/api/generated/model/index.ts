@@ -41,6 +41,7 @@ export * from './aPIResponseNoneType';
 export * from './aPIResponsePlatformLanguageListResponse';
 export * from './aPIResponsePlatformLanguageResponse';
 export * from './aPIResponseQuestionResponse';
+export * from './aPIResponseStudentCodeRunResponse';
 export * from './aPIResponseStudentContestDetailsResponse';
 export * from './aPIResponseStudentContestListResponse';
 export * from './aPIResponseStudentContestQuestionsListResponse';

@@ -49,4 +49,6 @@ export interface StudentTestCaseRunResultResponse {
   compile_output?: string | null;
   /** What output was expected */
   expected_output?: string | null;
+  /** Program input */
+  input?: string | null;
 }

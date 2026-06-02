@@ -10,31 +10,11 @@ import type { StudentTestCaseRunResultResponse } from './studentTestCaseRunResul
 /**
  * Response to student code run request.
 
-Contains execution result for the requested test case.
-
-Example:
-    ```json
-    {
-        "success": true,
-        "message": "Test case executed successfully",
-        "question_id": "550e8400-e29b-41d4-a716-446655440001",
-        "result": {
-            "testcase_id": "550e8400-e29b-41d4-a716-446655440002",
-            "passed": true,
-            "status_description": "Accepted",
-            "time": 0.125,
-            "memory": 12.5,
-            "stdout": "output",
-            "stderr": null,
-            "compile_output": null,
-            "expected_output": "output"
-        }
-    }
-    ```
+Contains execution results for the public test cases.
  */
 export interface StudentCodeRunResponse {
   passed: boolean;
   message: string;
   question_id: string;
-  result: StudentTestCaseRunResultResponse;
+  results: StudentTestCaseRunResultResponse[];
 }

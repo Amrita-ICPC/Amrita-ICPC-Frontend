@@ -1362,49 +1362,6 @@ export const GetTeamMembersApiV1StudentsTeamsTeamIdMembersGetResponse = zod.obje
 })
 
 /**
- * Run student code against a single test case for immediate feedback
- * @summary Test code against a test case
- */
-export const RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostParams = zod.object({
-  "contest_id": zod.uuid(),
-  "question_id": zod.uuid()
-})
-
-
-export const runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostBodyLanguageIdExclusiveMin = 0;
-
-
-
-export const RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostBody = zod.object({
-  "code": zod.string().min(1).describe('Source code to execute'),
-  "language_id": zod.number().gt(runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostBodyLanguageIdExclusiveMin).describe('Judge0 language ID (54=Python, 71=Java, 50=C++, etc)'),
-  "testcase_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Specific test case to run. If null, runs first test case.')
-}).describe('Request to test\/run code against a test case.\n\nStudent submits code and specifies which test case to run against.\nThis is for quick testing before official submission.\n\nExample:\n    ```json\n    {\n        \"code\": \"print(\'hello\')\",\n        \"language_id\": 54,\n        \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440000\"\n    }\n    ```')
-
-export const runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostResponseResultTimeMin = 0;
-
-export const runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostResponseResultMemoryMin = 0;
-
-
-
-export const RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostResponse = zod.object({
-  "passed": zod.boolean(),
-  "message": zod.string(),
-  "question_id": zod.uuid(),
-  "result": zod.object({
-  "testcase_id": zod.uuid(),
-  "passed": zod.boolean(),
-  "status_description": zod.string().describe('Accepted, Wrong Answer, etc'),
-  "time": zod.number().min(runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostResponseResultTimeMin).describe('Execution time in seconds'),
-  "memory": zod.number().min(runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostResponseResultMemoryMin).describe('Memory used in MB'),
-  "stdout": zod.union([zod.string(),zod.null()]).optional().describe('Program output'),
-  "stderr": zod.union([zod.string(),zod.null()]).optional().describe('Error output if any'),
-  "compile_output": zod.union([zod.string(),zod.null()]).optional().describe('Compilation error if any'),
-  "expected_output": zod.union([zod.string(),zod.null()]).optional().describe('What output was expected')
-}).describe('Response with execution result for a test case.\n\nContains all execution details: status, output, time, memory.\n\nExample:\n    ```json\n    {\n        \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n        \"passed\": true,\n        \"status_description\": \"Accepted\",\n        \"time\": 0.125,\n        \"memory\": 12.5,\n        \"stdout\": \"output line 1\\noutput line 2\",\n        \"stderr\": null,\n        \"compile_output\": null,\n        \"expected_output\": \"output line 1\\noutput line 2\"\n    }\n    ```')
-}).describe('Response to student code run request.\n\nContains execution result for the requested test case.\n\nExample:\n    ```json\n    {\n        \"success\": true,\n        \"message\": \"Test case executed successfully\",\n        \"question_id\": \"550e8400-e29b-41d4-a716-446655440001\",\n        \"result\": {\n            \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440002\",\n            \"passed\": true,\n            \"status_description\": \"Accepted\",\n            \"time\": 0.125,\n            \"memory\": 12.5,\n            \"stdout\": \"output\",\n            \"stderr\": null,\n            \"compile_output\": null,\n            \"expected_output\": \"output\"\n        }\n    }\n    ```')
-
-/**
  * Retrieve questions for a contest, ordered by sequence order,
 with attempted/solved status flags.
  * @summary Get questions for a contest
@@ -1553,6 +1510,69 @@ export const SaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorks
   "status": zod.number().default(saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseStatusDefault),
   "message": zod.string().default(saveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutResponseMessageDefault),
   "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Run student code against public (non-hidden) test cases for immediate feedback.
+ * @summary Run student code against sample test cases
+ */
+export const RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostBodyLanguageIdExclusiveMin = 0;
+
+
+
+export const RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostBody = zod.object({
+  "code": zod.string().min(1).describe('Source code to execute'),
+  "language_id": zod.number().gt(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostBodyLanguageIdExclusiveMin).describe('Judge0 language ID (54=Python, 71=Java, 50=C++, etc)')
+}).describe('Request to test\/run code against a test case.\n\nStudent submits code and specifies which test case to run against.\nThis is for quick testing before official submission.\n\nExample:\n    ```json\n    {\n        \"code\": \"print(\'hello\')\",\n        \"language_id\": 54,\n        \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440000\"\n    }\n    ```')
+
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseSuccessDefault = true;
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseStatusDefault = 200;
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseMessageDefault = `Success`;
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseDataOneResultsItemTimeMin = 0;
+
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseDataOneResultsItemMemoryMin = 0;
+
+
+
+export const RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponse = zod.object({
+  "success": zod.boolean().default(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseSuccessDefault),
+  "status": zod.number().default(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseStatusDefault),
+  "message": zod.string().default(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "passed": zod.boolean(),
+  "message": zod.string(),
+  "question_id": zod.uuid(),
+  "results": zod.array(zod.object({
+  "testcase_id": zod.uuid(),
+  "passed": zod.boolean(),
+  "status_description": zod.string().describe('Accepted, Wrong Answer, etc'),
+  "time": zod.number().min(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseDataOneResultsItemTimeMin).describe('Execution time in seconds'),
+  "memory": zod.number().min(runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostResponseDataOneResultsItemMemoryMin).describe('Memory used in MB'),
+  "stdout": zod.union([zod.string(),zod.null()]).optional().describe('Program output'),
+  "stderr": zod.union([zod.string(),zod.null()]).optional().describe('Error output if any'),
+  "compile_output": zod.union([zod.string(),zod.null()]).optional().describe('Compilation error if any'),
+  "expected_output": zod.union([zod.string(),zod.null()]).optional().describe('What output was expected'),
+  "input": zod.union([zod.string(),zod.null()]).optional().describe('Program input')
+}).describe('Response with execution result for a test case.\n\nContains all execution details: status, output, time, memory.\n\nExample:\n    ```json\n    {\n        \"testcase_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n        \"passed\": true,\n        \"status_description\": \"Accepted\",\n        \"time\": 0.125,\n        \"memory\": 12.5,\n        \"stdout\": \"output line 1\\noutput line 2\",\n        \"stderr\": null,\n        \"compile_output\": null,\n        \"expected_output\": \"output line 1\\noutput line 2\"\n    }\n    ```'))
+}).describe('Response to student code run request.\n\nContains execution results for the public test cases.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

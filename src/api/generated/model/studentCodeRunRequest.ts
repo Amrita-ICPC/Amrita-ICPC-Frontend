@@ -32,6 +32,4 @@ export interface StudentCodeRunRequest {
      * @exclusiveMinimum 0
      */
   language_id: number;
-  /** Specific test case to run. If null, runs first test case. */
-  testcase_id?: string | null;
 }

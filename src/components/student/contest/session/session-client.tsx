@@ -9,9 +9,10 @@ import {
     useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
     useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
     useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
+    useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
 } from "@/api/generated/students/students";
 import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { WorkspaceRole } from "@/api/generated/model";
+import { WorkspaceRole, StudentCodeRunResponse } from "@/api/generated/model";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -49,6 +50,15 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [timeLeft, setTimeLeft] = useState<string>("00:00:00");
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
+
+    // Run Code State
+    const [runResult, setRunResult] = useState<StudentCodeRunResponse | null>(null);
+    const [isRunning, setIsRunning] = useState<boolean>(false);
+
+    // Reset runResult when active question changes
+    useEffect(() => {
+        setRunResult(null);
+    }, [activeQuestionId]);
 
     // Dynamic width and height limits sizing state
     const [leftWidth, setLeftWidth] = useState<number>(50); // initial percentage (50% left, 50% right)
@@ -248,6 +258,41 @@ export function SessionClient({ contestId }: SessionClientProps) {
         );
     };
 
+    // 4.5 Run Code Mutation Handler
+    const runCodeMutation =
+        useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost();
+
+    const handleRun = () => {
+        if (!activeQuestionId) return;
+        setIsRunning(true);
+        setRunResult(null);
+        setIsConsoleCollapsed(false);
+
+        runCodeMutation.mutate(
+            {
+                contestId,
+                questionId: activeQuestionId,
+                data: {
+                    code: editorCode,
+                    language_id: selectedLanguageId,
+                },
+            },
+            {
+                onSuccess: (res) => {
+                    if (res?.data) {
+                        setRunResult(res.data);
+                    }
+                },
+                onError: (err) => {
+                    console.error("Run error:", err);
+                },
+                onSettled: () => {
+                    setIsRunning(false);
+                },
+            },
+        );
+    };
+
     // 5. Timer Ticking
     useEffect(() => {
         const endTimeStr = runtimeSession?.runtime?.effective_end_time;
@@ -395,6 +440,9 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         prevConsoleHeight={prevConsoleHeight}
                         setConsoleHeight={setConsoleHeight}
                         setPrevConsoleHeight={setPrevConsoleHeight}
+                        onRun={handleRun}
+                        isRunning={isRunning}
+                        runResult={runResult}
                     />
                 </div>
 

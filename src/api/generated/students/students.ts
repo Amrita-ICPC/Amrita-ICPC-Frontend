@@ -28,6 +28,7 @@ import type {
   APIResponseContestTeamProgressResponse,
   APIResponseListTeamMemberDetailResponse,
   APIResponseNoneType,
+  APIResponseStudentCodeRunResponse,
   APIResponseStudentContestDetailsResponse,
   APIResponseStudentContestListResponse,
   APIResponseStudentContestQuestionsListResponse,
@@ -56,7 +57,6 @@ import type {
   InviteToTeamApiV1StudentsTeamsTeamIdInvitationPostParams,
   SearchTeamsByNameApiV1StudentsTeamsSearchGetParams,
   StudentCodeRunRequest,
-  StudentCodeRunResponse,
   StudentTeamCreateRequest,
   StudentTeamInvitationUpdateRequest,
   StudentTeamTransferLeaderRequest,
@@ -2148,72 +2148,6 @@ export function useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet<TData = Awai
 
 
 /**
- * Run student code against a single test case for immediate feedback
- * @summary Test code against a test case
- */
-export const runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost = (
-    contestId: string,
-    questionId: string,
-    studentCodeRunRequest: StudentCodeRunRequest,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<StudentCodeRunResponse>(
-      {url: `/api/v1/students/run/contests/${contestId}/questions/${questionId}/run`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: studentCodeRunRequest, signal
-    },
-      );
-    }
-
-
-
-export const getRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationOptions = <TError = ExceptionResponse | void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext> => {
-
-const mutationKey = ['runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, {contestId: string;questionId: string;data: StudentCodeRunRequest}> = (props) => {
-          const {contestId,questionId,data} = props ?? {};
-
-          return  runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost(contestId,questionId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationResult = NonNullable<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>>
-    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationBody = StudentCodeRunRequest
-    export type RunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationError = ExceptionResponse | void
-
-    /**
- * @summary Test code against a test case
- */
-export const useRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost = <TError = ExceptionResponse | void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof runStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPost>>,
-        TError,
-        {contestId: string;questionId: string;data: StudentCodeRunRequest},
-        TContext
-      > => {
-      return useMutation(getRunStudentCodeApiV1StudentsRunContestsContestIdQuestionsQuestionIdRunPostMutationOptions(options), queryClient);
-    }
-    /**
  * Retrieve questions for a contest, ordered by sequence order,
 with attempted/solved status flags.
  * @summary Get questions for a contest
@@ -2573,4 +2507,70 @@ export const useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWo
         TContext
       > => {
       return useMutation(getSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePutMutationOptions(options), queryClient);
+    }
+    /**
+ * Run student code against public (non-hidden) test cases for immediate feedback.
+ * @summary Run student code against sample test cases
+ */
+export const runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost = (
+    contestId: string,
+    questionId: string,
+    studentCodeRunRequest: StudentCodeRunRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentCodeRunResponse>(
+      {url: `/api/v1/students/contests/${contestId}/questions/${questionId}/run`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentCodeRunRequest, signal
+    },
+      );
+    }
+
+
+
+export const getRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext> => {
+
+const mutationKey = ['runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>, {contestId: string;questionId: string;data: StudentCodeRunRequest}> = (props) => {
+          const {contestId,questionId,data} = props ?? {};
+
+          return  runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost(contestId,questionId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostMutationResult = NonNullable<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>>
+    export type RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostMutationBody = StudentCodeRunRequest
+    export type RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Run student code against sample test cases
+ */
+export const useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>, TError,{contestId: string;questionId: string;data: StudentCodeRunRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof runStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost>>,
+        TError,
+        {contestId: string;questionId: string;data: StudentCodeRunRequest},
+        TContext
+      > => {
+      return useMutation(getRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPostMutationOptions(options), queryClient);
     }
