@@ -4,6 +4,12 @@
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
+    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
+} from "@/api/generated/students/students";
 import {
     Dialog,
     DialogContent,
@@ -43,6 +49,7 @@ export function SessionHeader({
     setIsLeaderboardOpen,
 }: SessionHeaderProps) {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -59,7 +66,27 @@ export function SessionHeader({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-                    onClick={() => router.push(`/student/contest/${contestId}`)}
+                    onClick={() => {
+                        void queryClient.invalidateQueries({
+                            queryKey:
+                                getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(
+                                    contestId,
+                                ),
+                        });
+                        void queryClient.invalidateQueries({
+                            queryKey:
+                                getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                                    contestId,
+                                ),
+                        });
+                        void queryClient.invalidateQueries({
+                            queryKey:
+                                getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(
+                                    contestId,
+                                ),
+                        });
+                        router.push(`/student/contest/${contestId}`);
+                    }}
                 >
                     <ArrowLeft className="h-4 w-4" />
                 </Button>

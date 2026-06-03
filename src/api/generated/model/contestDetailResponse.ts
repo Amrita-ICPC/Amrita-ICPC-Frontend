@@ -7,6 +7,7 @@
  */
 import type { ContestMode } from './contestMode';
 import type { ContestRunStatus } from './contestRunStatus';
+import type { ContestRuntimeStatus } from './contestRuntimeStatus';
 import type { ContestStatus } from './contestStatus';
 import type { ContestTeamParticpationType } from './contestTeamParticpationType';
 import type { InstructorResponse } from './instructorResponse';
@@ -97,4 +98,6 @@ export interface ContestDetailResponse {
   published_at?: string | null;
   /** User ID who published the contest */
   published_by?: string | null;
+  /** Current runtime status of the contest (only set for published contests) */
+  contest_runtime_status?: ContestRuntimeStatus | null;
 }

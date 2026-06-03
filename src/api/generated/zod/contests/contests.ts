@@ -326,7 +326,8 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "contest_runtime_status": zod.union([zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('Enumeration of contest runtime status.\n\nAttributes:\n    SCHEDULED: Contest is scheduled but not started.\n    RUNNING: Contest is currently running.\n    PAUSED: Contest is paused.\n    FINISHED: Contest has finished.\n    CANCELLED: Contest has been cancelled.'),zod.null()]).optional().describe('Current runtime status of the contest (only set for published contests)')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -470,7 +471,8 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "contest_runtime_status": zod.union([zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('Enumeration of contest runtime status.\n\nAttributes:\n    SCHEDULED: Contest is scheduled but not started.\n    RUNNING: Contest is currently running.\n    PAUSED: Contest is paused.\n    FINISHED: Contest has finished.\n    CANCELLED: Contest has been cancelled.'),zod.null()]).optional().describe('Current runtime status of the contest (only set for published contests)')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1138,7 +1140,8 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "contest_runtime_status": zod.union([zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('Enumeration of contest runtime status.\n\nAttributes:\n    SCHEDULED: Contest is scheduled but not started.\n    RUNNING: Contest is currently running.\n    PAUSED: Contest is paused.\n    FINISHED: Contest has finished.\n    CANCELLED: Contest has been cancelled.'),zod.null()]).optional().describe('Current runtime status of the contest (only set for published contests)')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1551,6 +1554,99 @@ export const GetContestAudiencesApiV1ContestsContestIdAudiencesGetResponse = zod
   "name": zod.string().describe('Audience name'),
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
 }).describe('Schema for audience information within a contest.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Pause a running contest.
+ * @summary Pause a running contest
+ */
+export const PauseContestApiV1ContestsContestIdPausePostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const pauseContestApiV1ContestsContestIdPausePostResponseSuccessDefault = true;
+export const pauseContestApiV1ContestsContestIdPausePostResponseStatusDefault = 200;
+export const pauseContestApiV1ContestsContestIdPausePostResponseMessageDefault = `Success`;
+
+export const PauseContestApiV1ContestsContestIdPausePostResponse = zod.object({
+  "success": zod.boolean().default(pauseContestApiV1ContestsContestIdPausePostResponseSuccessDefault),
+  "status": zod.number().default(pauseContestApiV1ContestsContestIdPausePostResponseStatusDefault),
+  "message": zod.string().default(pauseContestApiV1ContestsContestIdPausePostResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Resume a paused contest.
+ * @summary Resume a paused contest
+ */
+export const ResumeContestApiV1ContestsContestIdResumePostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const resumeContestApiV1ContestsContestIdResumePostResponseSuccessDefault = true;
+export const resumeContestApiV1ContestsContestIdResumePostResponseStatusDefault = 200;
+export const resumeContestApiV1ContestsContestIdResumePostResponseMessageDefault = `Success`;
+
+export const ResumeContestApiV1ContestsContestIdResumePostResponse = zod.object({
+  "success": zod.boolean().default(resumeContestApiV1ContestsContestIdResumePostResponseSuccessDefault),
+  "status": zod.number().default(resumeContestApiV1ContestsContestIdResumePostResponseStatusDefault),
+  "message": zod.string().default(resumeContestApiV1ContestsContestIdResumePostResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Cancel a contest.
+ * @summary Cancel a contest
+ */
+export const CancelContestApiV1ContestsContestIdCancelPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const cancelContestApiV1ContestsContestIdCancelPostResponseSuccessDefault = true;
+export const cancelContestApiV1ContestsContestIdCancelPostResponseStatusDefault = 200;
+export const cancelContestApiV1ContestsContestIdCancelPostResponseMessageDefault = `Success`;
+
+export const CancelContestApiV1ContestsContestIdCancelPostResponse = zod.object({
+  "success": zod.boolean().default(cancelContestApiV1ContestsContestIdCancelPostResponseSuccessDefault),
+  "status": zod.number().default(cancelContestApiV1ContestsContestIdCancelPostResponseStatusDefault),
+  "message": zod.string().default(cancelContestApiV1ContestsContestIdCancelPostResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

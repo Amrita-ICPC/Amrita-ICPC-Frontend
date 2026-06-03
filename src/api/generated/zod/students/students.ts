@@ -622,6 +622,16 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
 })
 
 /**
+ * Establish a Server-Sent Events (SSE) stream for contest lifecycle events on the student side.
+ * @summary Get contest events stream (SSE) for students
+ */
+export const GetContestEventsStreamApiV1StudentsContestsContestIdEventsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const GetContestEventsStreamApiV1StudentsContestsContestIdEventsGetResponse = zod.unknown()
+
+/**
  * Retrieve paginated and filtered list of teams that the student belongs to.
 
 Args:

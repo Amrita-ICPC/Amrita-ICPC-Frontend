@@ -1,15 +1,22 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { getSession } from "next-auth/react";
+import { useContest } from "@/lib/providers/contest-provider";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-    useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
     useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet,
     useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
     useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
     useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
     useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
     useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
+    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
+    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
 } from "@/api/generated/students/students";
 import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { WorkspaceRole, StudentCodeRunResponse } from "@/api/generated/model";
@@ -26,11 +33,12 @@ interface SessionClientProps {
 }
 
 export function SessionClient({ contestId }: SessionClientProps) {
-    // 1. Core Queries
-    const { data: contestRes, isLoading: isContestLoading } =
-        useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
-    const contest = contestRes?.data;
+    const router = useRouter();
+    const controllerRef = useRef<AbortController | null>(null);
+    const queryClient = useQueryClient();
+    const { contest, isContestLoading, isPaused, isCancelled, isFinished } = useContest();
 
+    // 1. Core Queries
     const { data: runtimeRes, isLoading: isRuntimeLoading } =
         useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet(contestId);
     const runtimeSession = runtimeRes?.data;
@@ -38,6 +46,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const { data: questionsRes, isLoading: isQuestionsLoading } =
         useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet(contestId);
     const questionsList = useMemo(() => questionsRes?.data?.questions || [], [questionsRes]);
+    const isGlobalLoading = isContestLoading || isRuntimeLoading || isQuestionsLoading;
 
     // 2. State Management
     const [activeQuestionIdState, setActiveQuestionIdState] = useState<string | null>(null);
@@ -227,7 +236,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     onSettled: () => setIsSaving(false),
                 },
             );
-        }, 1500);
+        }, 2000);
 
         return () => clearTimeout(delayDebounce);
     }, [
@@ -293,7 +302,62 @@ export function SessionClient({ contestId }: SessionClientProps) {
         );
     };
 
-    // 5. Timer Ticking
+    // 5. Watch for real-time contest lifecycle events from context
+    useEffect(() => {
+        if (isPaused || isCancelled || isFinished) {
+            const statusLabel = isPaused ? "paused" : isCancelled ? "cancelled" : "finished";
+            toast.error(`Contest session has been ${statusLabel}. Redirecting...`);
+            router.push(`/student/contest/${contestId}`);
+        }
+    }, [isPaused, isCancelled, isFinished, contestId, router]);
+
+    // 5.5 Check runtime status on load
+    useEffect(() => {
+        if (isGlobalLoading) return;
+
+        if (
+            runtimeSession?.runtime?.status !== "RUNNING" ||
+            isPaused ||
+            isCancelled ||
+            isFinished
+        ) {
+            const statusLabel = (
+                runtimeSession?.runtime?.status ||
+                (isPaused ? "paused" : isCancelled ? "cancelled" : isFinished ? "finished" : "")
+            ).toLowerCase();
+            toast.error(
+                statusLabel
+                    ? `Cannot enter session page. The contest status is ${statusLabel}.`
+                    : "The contest is not currently running.",
+            );
+            void queryClient.invalidateQueries({
+                queryKey:
+                    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(contestId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey:
+                    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                        contestId,
+                    ),
+            });
+            void queryClient.invalidateQueries({
+                queryKey:
+                    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(contestId),
+            });
+            router.push(`/student/contest/${contestId}`);
+        }
+    }, [
+        isGlobalLoading,
+        runtimeSession?.runtime?.status,
+        isPaused,
+        isCancelled,
+        isFinished,
+        contestId,
+        router,
+        queryClient,
+    ]);
+
+    // 6. Timer Ticking
     useEffect(() => {
         const endTimeStr = runtimeSession?.runtime?.effective_end_time;
         if (!endTimeStr) return;
@@ -320,8 +384,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
         const interval = setInterval(updateTimer, 1000);
         return () => clearInterval(interval);
     }, [runtimeSession?.runtime?.effective_end_time]);
-
-    const isGlobalLoading = isContestLoading || isRuntimeLoading || isQuestionsLoading;
 
     if (isGlobalLoading) {
         return (
