@@ -5,22 +5,15 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { WorkspaceMode } from './workspaceMode';
 import type { WorkspaceParticipant } from './workspaceParticipant';
 
 /**
  * Schema representing the team's shared workspace state.
 
 Attributes:
-    mode: The editor workspace mode.
-    current_editor_user_id: The user ID of the current active editor, if applicable.
     participants: List of participants in the workspace.
  */
 export interface WorkspaceDetails {
-  /** The editor workspace mode */
-  mode: WorkspaceMode;
-  /** The user ID of the current active editor, if applicable */
-  current_editor_user_id?: string | null;
   /** List of participants in the workspace */
   participants: WorkspaceParticipant[];
 }

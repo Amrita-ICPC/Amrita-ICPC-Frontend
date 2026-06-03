@@ -69,7 +69,7 @@ export const GetStudentContestsApiV1StudentsContestsGetResponse = zod.object({
   "max_team_size": zod.number().describe('Maximum team size'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests')
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests')
 }).describe('Schema for contest available for students (List view).')),
   "total": zod.number(),
   "page": zod.number(),
@@ -133,7 +133,7 @@ export const GetStudentContestByIdApiV1StudentsContestsContestIdGetResponse = zo
   "max_team_size": zod.number().describe('Maximum team size'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules')
 }).describe('Placeholder for contest details response.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
@@ -500,8 +500,6 @@ export const StartContestSessionApiV1StudentsContestsContestIdStartPostResponse 
   "remaining_seconds": zod.number().describe('Remaining seconds in the contest')
 }).describe('Current runtime and timer state'),
   "workspace": zod.object({
-  "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
-  "current_editor_user_id": zod.union([zod.uuid(),zod.null()]).optional().describe('The user ID of the current active editor, if applicable'),
   "participants": zod.array(zod.object({
   "user_id": zod.uuid().describe('The UUID of the participant'),
   "name": zod.string().describe('Name of the participant'),
@@ -514,10 +512,6 @@ export const StartContestSessionApiV1StudentsContestsContestIdStartPostResponse 
 }).describe('Schema representing a participant in the team\'s shared workspace.\n\nAttributes:\n    user_id: The UUID of the participant.\n    name: Name of the participant.\n    avatar_url: URL to the participant\'s avatar image.\n    role: The workspace role of the participant.\n    team_role: The team role of the participant (LEADER or MEMBER).\n    workspace_role: The workspace role of the participant (EDITOR or VIEWER).\n    is_self: Indicates if this participant is the current requesting user.\n    is_online: Indicates if the participant is currently online.')).describe('List of participants in the workspace')
 }).describe('Workspace collaboration state'),
   "team_progress": zod.object({
-  "score": zod.number().describe('The team\'s current score in the contest'),
-  "penalty": zod.number().describe('The team\'s penalty points'),
-  "solved_count": zod.number().describe('Number of questions solved by the team'),
-  "last_submission_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp of the team\'s last code submission'),
   "extra_time_seconds": zod.number().describe('Amount of extra time granted to the team in seconds'),
   "has_extra_time": zod.boolean().describe('Indicates if the team has extra time')
 }).describe('Current performance metrics'),
@@ -571,8 +565,6 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
   "remaining_seconds": zod.number().describe('Remaining seconds in the contest')
 }).describe('Current runtime and timer state'),
   "workspace": zod.object({
-  "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
-  "current_editor_user_id": zod.union([zod.uuid(),zod.null()]).optional().describe('The user ID of the current active editor, if applicable'),
   "participants": zod.array(zod.object({
   "user_id": zod.uuid().describe('The UUID of the participant'),
   "name": zod.string().describe('Name of the participant'),
@@ -585,10 +577,6 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
 }).describe('Schema representing a participant in the team\'s shared workspace.\n\nAttributes:\n    user_id: The UUID of the participant.\n    name: Name of the participant.\n    avatar_url: URL to the participant\'s avatar image.\n    role: The workspace role of the participant.\n    team_role: The team role of the participant (LEADER or MEMBER).\n    workspace_role: The workspace role of the participant (EDITOR or VIEWER).\n    is_self: Indicates if this participant is the current requesting user.\n    is_online: Indicates if the participant is currently online.')).describe('List of participants in the workspace')
 }).describe('Workspace collaboration state'),
   "team_progress": zod.object({
-  "score": zod.number().describe('The team\'s current score in the contest'),
-  "penalty": zod.number().describe('The team\'s penalty points'),
-  "solved_count": zod.number().describe('Number of questions solved by the team'),
-  "last_submission_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp of the team\'s last code submission'),
   "extra_time_seconds": zod.number().describe('Amount of extra time granted to the team in seconds'),
   "has_extra_time": zod.boolean().describe('Indicates if the team has extra time')
 }).describe('Current performance metrics'),

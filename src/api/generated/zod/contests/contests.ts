@@ -60,7 +60,7 @@ export const CreateContestApiV1ContestsPostBody = zod.object({
   "contest_mode": zod.enum(['individual', 'team']).default(createContestApiV1ContestsPostBodyContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(createContestApiV1ContestsPostBodyShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).default(createContestApiV1ContestsPostBodyParticipationTypeDefault).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(createContestApiV1ContestsPostBodyParticipationTypeDefault).describe('Participation type for team contests'),
   "audience_ids": zod.array(zod.uuid()).optional().describe('List of audience IDs to link to this contest')
 }).describe('Schema for creating a contest.')
 
@@ -127,7 +127,7 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "contest_mode": zod.enum(['individual', 'team']).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
   "audiences": zod.array(zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
@@ -207,7 +207,7 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "contest_mode": zod.enum(['individual', 'team']).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
   "audiences": zod.array(zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
@@ -302,7 +302,7 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "contest_mode": zod.enum(['individual', 'team']).default(getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).default(getContestApiV1ContestsContestIdGetResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(getContestApiV1ContestsContestIdGetResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -392,7 +392,7 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "team_approval_mode": zod.union([zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).describe('Enumeration of contest-level team approval modes.\n\nAttributes:\n    AUTO_APPROVE: Teams are approved automatically when created.\n    INSTRUCTOR_REVIEW: Teams are kept waiting until an instructor approves.'),zod.null()]).optional().describe('How teams are approved in this contest'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.union([zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).describe('Enumeration of contest team participation types.\n\nAttributes:\n    LEADER_ONLY: Only leader can code\n    SHARED_SINGLE_EDITOR_WORKSPACE: All team members can code but only one can edit\n    INDIVIDUAL_WORKSPACE: Each team member has their own workspace'),zod.null()]).optional().describe('Participation type for team contests')
+  "participation_type": zod.union([zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Enumeration of contest team participation types.\n\nAttributes:\n    LEADER_ONLY: Only leader can code\n    INDIVIDUAL_WORKSPACE: Each team member has their own workspace'),zod.null()]).optional().describe('Participation type for team contests')
 }).describe('Schema for updating a contest.')
 
 export const updateContestApiV1ContestsContestIdPatchResponseSuccessDefault = true;
@@ -446,7 +446,7 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "contest_mode": zod.enum(['individual', 'team']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -1114,7 +1114,7 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "contest_mode": zod.enum(['individual', 'team']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.enum(['LEADER_ONLY', 'SHARED_SINGLE_EDITOR_WORKSPACE', 'INDIVIDUAL_WORKSPACE']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),

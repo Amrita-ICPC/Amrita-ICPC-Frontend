@@ -20,14 +20,13 @@ import {
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
 } from "@/api/generated/students/students";
 import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { WorkspaceRole, StudentCodeRunResponse } from "@/api/generated/model";
+import { StudentCodeRunResponse } from "@/api/generated/model";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import { SessionHeader } from "./session-header";
 import { ProblemView } from "./problem-view";
 import { EditorPanel } from "./editor-panel";
-import { TeamWorkspaceSidebar } from "./team-workspace-sidebar";
 
 interface SessionClientProps {
     contestId: string;
@@ -63,7 +62,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [selectedLanguageIdState, setSelectedLanguageIdState] = useState<number>(71);
     const [editorCode, setEditorCode] = useState<string>("");
     const [loadedKey, setLoadedKey] = useState<string>("");
-    const [showTeamSidebar, setShowTeamSidebar] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [timeLeft, setTimeLeft] = useState<string>("00:00:00");
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
@@ -169,9 +167,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const currentKey = `${activeQuestionId}_${selectedLanguageId}`;
 
     // Update active editor and role details
-    const currentUserParticipant = runtimeSession?.workspace?.participants?.find((p) => p.is_self);
     const isTeamMode = contest?.contest_mode?.toUpperCase() === "TEAM";
-    const isCurrentEditor = !isTeamMode || currentUserParticipant?.role === WorkspaceRole.EDITOR;
+    const isCurrentEditor = true;
 
     // Sync workspace or starter code in Monaco
     useEffect(() => {
@@ -467,10 +464,10 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 contestId={contestId}
                 contestName={contest?.name || "Contest"}
                 timeLeft={timeLeft}
-                solvedCount={runtimeSession?.team_progress?.solved_count || 0}
+                solvedCount={questionsList.filter((q) => q.solved).length}
                 totalQuestions={questionsList.length}
-                score={runtimeSession?.team_progress?.score || 0}
-                penalty={runtimeSession?.team_progress?.penalty || 0}
+                score={0}
+                penalty={0}
                 hasExtraTime={!!runtimeSession?.team_progress?.has_extra_time}
                 showLeaderboardDuringContest={!!contest?.show_leaderboard_during_contest}
                 isLeaderboardOpen={isLeaderboardOpen}
@@ -553,7 +550,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         isSaving={isSaving}
                         handleManualSave={handleManualSave}
                         isTeamMode={isTeamMode}
-                        isCurrentEditor={isCurrentEditor}
                         editorCode={editorCode}
                         setEditorCode={setEditorCode}
                         consoleHeight={consoleHeight}
@@ -571,16 +567,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         runResult={runResult}
                     />
                 </div>
-
-                {/* Team Sidebar */}
-                <TeamWorkspaceSidebar
-                    isTeamMode={isTeamMode}
-                    showTeamSidebar={showTeamSidebar}
-                    setShowTeamSidebar={setShowTeamSidebar}
-                    solvedCount={runtimeSession?.team_progress?.solved_count || 0}
-                    score={runtimeSession?.team_progress?.score || 0}
-                    participants={runtimeSession?.workspace?.participants || []}
-                />
             </div>
         </div>
     );

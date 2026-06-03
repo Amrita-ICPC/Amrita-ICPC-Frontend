@@ -40,7 +40,6 @@ interface EditorPanelProps {
     isSaving: boolean;
     handleManualSave: () => void;
     isTeamMode: boolean;
-    isCurrentEditor: boolean;
     editorCode: string;
     setEditorCode: (code: string) => void;
     consoleHeight: number;
@@ -66,7 +65,6 @@ export function EditorPanel({
     isSaving,
     handleManualSave,
     isTeamMode,
-    isCurrentEditor,
     editorCode,
     setEditorCode,
     consoleHeight,
@@ -187,7 +185,7 @@ export function EditorPanel({
                         size="sm"
                         variant="ghost"
                         onClick={onRun}
-                        disabled={isRunning || !isCurrentEditor}
+                        disabled={isRunning}
                         className={cn(
                             "h-7 gap-1 border text-xs font-semibold px-2.5 transition-all",
                             isRunning
@@ -217,15 +215,6 @@ export function EditorPanel({
                         <Send className="h-3.5 w-3.5" />
                         Submit
                     </Button>
-
-                    {isTeamMode && !isCurrentEditor && (
-                        <div className="flex items-center gap-2">
-                            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-transparent text-[9px] uppercase font-bold tracking-widest">
-                                <Lock className="h-2.5 w-2.5 mr-1" />
-                                Read Only Workspace
-                            </Badge>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -252,7 +241,7 @@ export function EditorPanel({
                         cursorBlinking: "smooth",
                         bracketPairColorization: { enabled: true },
                         guides: { bracketPairs: true },
-                        readOnly: isTeamMode && !isCurrentEditor,
+                        readOnly: false,
                         scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
                     }}
                 />

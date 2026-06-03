@@ -98,7 +98,6 @@ const formSchema = z
         participation_type: z
             .enum([
                 ContestTeamParticpationType.LEADER_ONLY,
-                ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE,
                 ContestTeamParticpationType.INDIVIDUAL_WORKSPACE,
             ])
             .optional()
@@ -464,7 +463,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                             control={control}
                                             name="participation_type"
                                             render={({ field }) => (
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -486,29 +485,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                                             Only the team leader is allowed to write
                                                             and submit code. Other members have
                                                             read-only access.
-                                                        </span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            field.onChange(
-                                                                ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE,
-                                                            )
-                                                        }
-                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
-                                                            field.value ===
-                                                            ContestTeamParticpationType.SHARED_SINGLE_EDITOR_WORKSPACE
-                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                                                : "border-border/60 bg-card text-card-foreground"
-                                                        }`}
-                                                    >
-                                                        <span className="font-semibold text-sm mb-1">
-                                                            Shared Editor
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground leading-normal">
-                                                            All team members share a single
-                                                            workspace. Anyone can code, but only one
-                                                            member can edit at a time.
                                                         </span>
                                                     </button>
                                                     <button

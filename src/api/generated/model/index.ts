@@ -220,7 +220,6 @@ export * from './validationError';
 export * from './validationErrorCtx';
 export * from './workspaceData';
 export * from './workspaceDetails';
-export * from './workspaceMode';
 export * from './workspaceParticipant';
 export * from './workspacePutRequest';
 export * from './workspaceRole';

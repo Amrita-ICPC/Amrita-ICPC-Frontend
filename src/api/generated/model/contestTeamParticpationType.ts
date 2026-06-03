@@ -11,7 +11,6 @@
 
 Attributes:
     LEADER_ONLY: Only leader can code
-    SHARED_SINGLE_EDITOR_WORKSPACE: All team members can code but only one can edit
     INDIVIDUAL_WORKSPACE: Each team member has their own workspace
  */
 export type ContestTeamParticpationType = typeof ContestTeamParticpationType[keyof typeof ContestTeamParticpationType];
@@ -19,6 +18,5 @@ export type ContestTeamParticpationType = typeof ContestTeamParticpationType[key
 
 export const ContestTeamParticpationType = {
   LEADER_ONLY: 'LEADER_ONLY',
-  SHARED_SINGLE_EDITOR_WORKSPACE: 'SHARED_SINGLE_EDITOR_WORKSPACE',
   INDIVIDUAL_WORKSPACE: 'INDIVIDUAL_WORKSPACE',
 } as const;
