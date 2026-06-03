@@ -18,9 +18,10 @@ import {
     ChevronUp,
     Loader2,
     Save,
-    Unlock,
     Lock,
     TerminalSquare,
+    Play,
+    Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StudentCodeRunResponse } from "@/api/generated/model";
@@ -182,19 +183,47 @@ export function EditorPanel({
                         Save
                     </Button>
 
-                    {isTeamMode && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={onRun}
+                        disabled={isRunning || !isCurrentEditor}
+                        className={cn(
+                            "h-7 gap-1 border text-xs font-semibold px-2.5 transition-all",
+                            isRunning
+                                ? "bg-muted/40 border-border text-muted-foreground"
+                                : "bg-emerald-500/10 border-emerald-500/25 dark:border-emerald-500/20 hover:border-emerald-500/40 text-emerald-650 dark:text-emerald-450 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/15",
+                        )}
+                    >
+                        {isRunning ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                                Running
+                            </>
+                        ) : (
+                            <>
+                                <Play className="h-3.5 w-3.5" />
+                                Run
+                            </>
+                        )}
+                    </Button>
+
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled
+                        className="h-7 gap-1 border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 text-slate-450 dark:text-slate-500 text-xs font-semibold px-2.5 cursor-not-allowed"
+                    >
+                        <Send className="h-3.5 w-3.5" />
+                        Submit
+                    </Button>
+
+                    {isTeamMode && !isCurrentEditor && (
                         <div className="flex items-center gap-2">
-                            {isCurrentEditor ? (
-                                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-transparent text-[9px] uppercase font-bold tracking-widest">
-                                    <Unlock className="h-2.5 w-2.5 mr-1" />
-                                    Editor Lock Active
-                                </Badge>
-                            ) : (
-                                <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-transparent text-[9px] uppercase font-bold tracking-widest">
-                                    <Lock className="h-2.5 w-2.5 mr-1" />
-                                    Read Only Workspace
-                                </Badge>
-                            )}
+                            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-transparent text-[9px] uppercase font-bold tracking-widest">
+                                <Lock className="h-2.5 w-2.5 mr-1" />
+                                Read Only Workspace
+                            </Badge>
                         </div>
                     )}
                 </div>
@@ -248,35 +277,6 @@ export function EditorPanel({
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={onRun}
-                                disabled={isRunning || !isCurrentEditor}
-                                className={cn(
-                                    "h-6 text-[10px] uppercase font-bold border px-3 transition-all",
-                                    isRunning
-                                        ? "bg-muted/40 border-border text-muted-foreground"
-                                        : "bg-indigo-500/10 border-indigo-500/25 dark:border-indigo-500/20 hover:border-indigo-500/40 text-indigo-650 dark:text-indigo-400 hover:bg-indigo-500/20 dark:hover:bg-indigo-500/15",
-                                )}
-                            >
-                                {isRunning ? (
-                                    <>
-                                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                        Running
-                                    </>
-                                ) : (
-                                    "Run"
-                                )}
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                disabled
-                                className="h-6 text-[10px] uppercase font-bold border border-border bg-muted/40 text-muted-foreground"
-                            >
-                                Submit
-                            </Button>
                             {/* Collapse console button */}
                             <Button
                                 size="icon"

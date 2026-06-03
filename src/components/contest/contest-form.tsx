@@ -84,6 +84,7 @@ const formSchema = z
         end_time: z.string().min(1, "End time is required"),
         registration_start: z.string().optional(),
         registration_end: z.string().optional(),
+        duration: z.number().int().min(1).optional().nullable(),
         max_teams: z.number().int().min(1).optional(),
         min_team_size: z.number().int().min(1).optional(),
         max_team_size: z.number().int().min(1).optional(),
@@ -159,6 +160,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 : toDateTimeLocalValue(now.end),
             registration_start: toLocalValue(initialData?.registration_start),
             registration_end: toLocalValue(initialData?.registration_end),
+            duration: initialData?.duration ? Math.round(initialData.duration / 60) : undefined,
             max_teams: initialData?.max_teams ?? undefined,
             min_team_size: initialData?.min_team_size ?? 1,
             max_team_size: initialData?.max_team_size ?? 3,
@@ -230,6 +232,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 registration_end: values.registration_end?.trim()
                     ? toUtcIsoString(values.registration_end)
                     : null,
+                duration: Number.isFinite(values.duration ?? NaN) ? values.duration! * 60 : null,
                 max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
                 min_team_size:
                     values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
@@ -262,6 +265,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 registration_end: values.registration_end?.trim()
                     ? toUtcIsoString(values.registration_end)
                     : null,
+                duration: Number.isFinite(values.duration ?? NaN) ? values.duration! * 60 : null,
                 max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
                 min_team_size:
                     values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
@@ -384,6 +388,34 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                         type="datetime-local"
                                         {...register("registration_end")}
                                     />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="duration">Session Duration (Minutes)</Label>
+                                    <Input
+                                        id="duration"
+                                        type="number"
+                                        min={1}
+                                        placeholder="No limit (runs until end time)"
+                                        {...register("duration", {
+                                            setValueAs: (value) => {
+                                                if (value === "") return undefined;
+                                                const parsed = Number(value);
+                                                return Number.isFinite(parsed) ? parsed : undefined;
+                                            },
+                                        })}
+                                    />
+                                    {errors.duration && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.duration.message}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">
+                                        Optional limit on each participant&apos;s coding session
+                                        length.
+                                    </p>
                                 </div>
                             </div>
                         </div>

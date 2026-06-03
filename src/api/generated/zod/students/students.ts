@@ -50,7 +50,7 @@ export const GetStudentContestsApiV1StudentsContestsGetResponse = zod.object({
   "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).describe('Contest end time (UTC)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('Contest lifecycle status'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
   "registration_start": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration start time (UTC)'),
   "registration_end": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration end time (UTC)'),
@@ -114,7 +114,7 @@ export const GetStudentContestByIdApiV1StudentsContestsContestIdGetResponse = zo
   "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).describe('Contest end time (UTC)'),
-  "status": zod.enum(['DRAFT', 'PUBLISHED']).describe('Contest lifecycle status'),
+  "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
   "registration_start": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration start time (UTC)'),
   "registration_end": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Registration end time (UTC)'),
@@ -175,7 +175,7 @@ export const GetStudentContestStatusApiV1StudentsContestsContestIdParticipationM
   "session": zod.object({
   "can_start": zod.boolean().describe('Whether the student\/team can start the contest'),
   "reason": zod.union([zod.string(),zod.null()]).optional().describe('Reason if the student\/team cannot start'),
-  "contest_runtime_status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The runtime status of the contest'),
+  "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('The temporal run state of the contest'),
   "already_started": zod.boolean().describe('Whether the student\/team has already started the session')
 }).describe('Contest session status for the student'),
   "team": zod.union([zod.object({
@@ -496,12 +496,8 @@ export const StartContestSessionApiV1StudentsContestsContestIdStartPostResponse 
   "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was ended')
 }).describe('Active session details'),
   "runtime": zod.object({
-  "status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The current status of the contest runtime'),
   "effective_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('The effective end time of the contest for the team'),
-  "remaining_seconds": zod.number().describe('Remaining seconds in the contest'),
-  "is_paused": zod.boolean().describe('Indicates if the contest is currently paused'),
-  "paused_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the contest was paused'),
-  "scoreboard_frozen": zod.boolean().describe('Indicates if the scoreboard is currently frozen')
+  "remaining_seconds": zod.number().describe('Remaining seconds in the contest')
 }).describe('Current runtime and timer state'),
   "workspace": zod.object({
   "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
@@ -571,12 +567,8 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
   "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was ended')
 }).describe('Active session details'),
   "runtime": zod.object({
-  "status": zod.enum(['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED']).describe('The current status of the contest runtime'),
   "effective_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('The effective end time of the contest for the team'),
-  "remaining_seconds": zod.number().describe('Remaining seconds in the contest'),
-  "is_paused": zod.boolean().describe('Indicates if the contest is currently paused'),
-  "paused_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the contest was paused'),
-  "scoreboard_frozen": zod.boolean().describe('Indicates if the scoreboard is currently frozen')
+  "remaining_seconds": zod.number().describe('Remaining seconds in the contest')
 }).describe('Current runtime and timer state'),
   "workspace": zod.object({
   "mode": zod.enum(['INDIVIDUAL', 'LEADER_ONLY', 'SHARED_SINGLE_EDITOR']).describe('The editor workspace mode'),
@@ -620,16 +612,6 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
   "timestamp": zod.iso.datetime({"offset":true})
 })
 })
-
-/**
- * Establish a Server-Sent Events (SSE) stream for contest lifecycle events on the student side.
- * @summary Get contest events stream (SSE) for students
- */
-export const GetContestEventsStreamApiV1StudentsContestsContestIdEventsGetParams = zod.object({
-  "contest_id": zod.uuid()
-})
-
-export const GetContestEventsStreamApiV1StudentsContestsContestIdEventsGetResponse = zod.unknown()
 
 /**
  * Retrieve paginated and filtered list of teams that the student belongs to.

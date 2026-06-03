@@ -32,6 +32,6 @@ Raises:
  * @summary Upload an image
  */
 export const UploadImageApiV1UploadPostBody = zod.object({
-  "file": zod.instanceof(File).describe('Image file to upload')
+  "file": zod.instanceof(File)
 })
 

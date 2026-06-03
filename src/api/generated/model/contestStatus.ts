@@ -15,6 +15,8 @@ controlling participant access and available operations.
 Attributes:
     DRAFT: Contest is being configured and not visible to participants.
     PUBLISHED: Contest is published and visible to participants.
+    CANCELLED: Contest has been cancelled.
+    DELETED: Contest has been soft-deleted.
  */
 export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
 
@@ -22,4 +24,6 @@ export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
 export const ContestStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+  CANCELLED: 'CANCELLED',
+  DELETED: 'DELETED',
 } as const;

@@ -1,15 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
-    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
-    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
-} from "@/api/generated/students/students";
 import {
     Dialog,
     DialogContent,
@@ -19,7 +12,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Trophy, Lock, Activity, Sun, Moon } from "lucide-react";
+import { Clock, Trophy, Lock, Activity, Sun, Moon } from "lucide-react";
 
 interface SessionHeaderProps {
     contestId: string;
@@ -48,8 +41,6 @@ export function SessionHeader({
     isLeaderboardOpen,
     setIsLeaderboardOpen,
 }: SessionHeaderProps) {
-    const router = useRouter();
-    const queryClient = useQueryClient();
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -62,34 +53,6 @@ export function SessionHeader({
     return (
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-6 text-slate-800 dark:text-white">
             <div className="flex items-center gap-3">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-                    onClick={() => {
-                        void queryClient.invalidateQueries({
-                            queryKey:
-                                getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(
-                                    contestId,
-                                ),
-                        });
-                        void queryClient.invalidateQueries({
-                            queryKey:
-                                getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
-                                    contestId,
-                                ),
-                        });
-                        void queryClient.invalidateQueries({
-                            queryKey:
-                                getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(
-                                    contestId,
-                                ),
-                        });
-                        router.push(`/student/contest/${contestId}`);
-                    }}
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
                 <div>
                     <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                         {contestName || "Contest"}

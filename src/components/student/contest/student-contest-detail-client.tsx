@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useStartContestSessionApiV1StudentsContestsContestIdStartPost } from "@/api/generated/students/students";
+import {
+    useStartContestSessionApiV1StudentsContestsContestIdStartPost,
+    useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
+    useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
+} from "@/api/generated/students/students";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +30,6 @@ import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { cn } from "@/lib/utils";
 import { StudentContestDetailSkeleton } from "./student-contest-skeleton";
 import { OverallRegistrationProgressCard, ContestTeamCards } from "./contest-team-cards";
-import { useContest } from "@/lib/providers/contest-provider";
 
 const BANNERS = [
     { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue
@@ -341,15 +344,26 @@ interface StudentContestDetailClientProps {
 export function StudentContestDetailClient({ contestId }: StudentContestDetailClientProps) {
     const router = useRouter();
     const {
-        contest,
-        participation,
-        isLoading,
-        isStatusLoading,
-        isError,
-        error,
-        refetchContest,
-        refetchStatus,
-    } = useContest();
+        data: contestRes,
+        isLoading: isContestLoading,
+        isError: isContestError,
+        error: contestError,
+        refetch: refetchContest,
+    } = useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
+
+    const {
+        data: statusRes,
+        isLoading: isStatusLoading,
+        isError: isStatusError,
+        error: statusError,
+        refetch: refetchStatus,
+    } = useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet(contestId);
+
+    const contest = contestRes?.data;
+    const participation = statusRes?.data;
+    const isLoading = isContestLoading || isStatusLoading;
+    const isError = isContestError || isStatusError;
+    const error = contestError || statusError;
 
     const startMutation = useStartContestSessionApiV1StudentsContestsContestIdStartPost({
         mutation: {
@@ -502,6 +516,24 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         color="amber"
                                         value={duration}
                                     />
+
+                                    {contest.duration !== null &&
+                                        contest.duration !== undefined && (
+                                            <QuickInfoCard
+                                                icon={Clock}
+                                                label="Session Limit"
+                                                color="indigo"
+                                                value={(() => {
+                                                    const h = Math.floor(contest.duration / 3600);
+                                                    const m = Math.floor(
+                                                        (contest.duration % 3600) / 60,
+                                                    );
+                                                    return h > 0
+                                                        ? `${h}h ${m > 0 ? m + "m" : ""}`.trim()
+                                                        : `${m}m`;
+                                                })()}
+                                            />
+                                        )}
 
                                     <QuickInfoCard
                                         icon={Shield}

@@ -5,7 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ContestRuntimeStatus } from './contestRuntimeStatus';
+import type { ContestRunStatus } from './contestRunStatus';
 
 /**
  * Schema for student contest session status.
@@ -15,8 +15,8 @@ export interface StudentContestSessionStatus {
   can_start: boolean;
   /** Reason if the student/team cannot start */
   reason?: string | null;
-  /** The runtime status of the contest */
-  contest_runtime_status: ContestRuntimeStatus;
+  /** The temporal run state of the contest */
+  run_status: ContestRunStatus;
   /** Whether the student/team has already started the session */
   already_started: boolean;
 }

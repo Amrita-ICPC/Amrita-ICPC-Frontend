@@ -4,7 +4,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
-import { useContest } from "@/lib/providers/contest-provider";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +13,8 @@ import {
     useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
     useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
     useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
+    useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
+    useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
@@ -34,11 +35,17 @@ interface SessionClientProps {
 
 export function SessionClient({ contestId }: SessionClientProps) {
     const router = useRouter();
-    const controllerRef = useRef<AbortController | null>(null);
     const queryClient = useQueryClient();
-    const { contest, isContestLoading, isPaused, isCancelled, isFinished } = useContest();
 
     // 1. Core Queries
+    const { data: contestRes, isLoading: isContestLoading } =
+        useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
+    const contest = contestRes?.data;
+
+    const { data: statusRes, isLoading: isStatusLoading } =
+        useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet(contestId);
+    const participation = statusRes?.data;
+
     const { data: runtimeRes, isLoading: isRuntimeLoading } =
         useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet(contestId);
     const runtimeSession = runtimeRes?.data;
@@ -46,7 +53,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const { data: questionsRes, isLoading: isQuestionsLoading } =
         useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet(contestId);
     const questionsList = useMemo(() => questionsRes?.data?.questions || [], [questionsRes]);
-    const isGlobalLoading = isContestLoading || isRuntimeLoading || isQuestionsLoading;
+    const isGlobalLoading =
+        isContestLoading || isStatusLoading || isRuntimeLoading || isQuestionsLoading;
 
     // 2. State Management
     const [activeQuestionIdState, setActiveQuestionIdState] = useState<string | null>(null);
@@ -167,17 +175,41 @@ export function SessionClient({ contestId }: SessionClientProps) {
 
     // Sync workspace or starter code in Monaco
     useEffect(() => {
-        if (!activeQuestionId || !isWorkspaceLoaded) return;
+        if (!activeQuestionId || !isWorkspaceLoaded || !questionDetails) return;
 
         // Check if we need to load the question workspace for the first time
         const hasLoadedQuestion = loadedKey.startsWith(`${activeQuestionId}_`);
 
+        // Check local backup first
+        const key = `contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
+        let localBackupCode: string | null = null;
+        try {
+            const localBackup = localStorage.getItem(key);
+            if (localBackup) {
+                const parsed = JSON.parse(localBackup);
+                if (parsed && typeof parsed.code === "string") {
+                    const dbTime = workspaceData?.updated_at
+                        ? new Date(workspaceData.updated_at).getTime()
+                        : 0;
+                    if (parsed.savedAt > dbTime) {
+                        localBackupCode = parsed.code;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Failed to parse local backup", e);
+        }
+
         if (!hasLoadedQuestion) {
-            // First time loading this question: check if workspace has saved code
-            if (
+            // First time loading this question: check if workspace has saved code or local backup
+            if (localBackupCode !== null && localBackupCode.trim() !== "") {
+                setEditorCode(localBackupCode);
+                setLoadedKey(currentKey);
+            } else if (
                 workspaceData &&
                 workspaceData.source_code !== null &&
-                workspaceData.source_code !== undefined
+                workspaceData.source_code !== undefined &&
+                workspaceData.source_code.trim() !== ""
             ) {
                 // If saved workspace exists, use it and update selected language
                 if (workspaceData.language_id) {
@@ -188,7 +220,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     `${activeQuestionId}_${workspaceData.language_id || selectedLanguageId}`,
                 );
             } else {
-                // Workspace is None/null: fall back to the starter code template for the currently selected language
+                // Workspace has no code or local backup has no data: fall back to the starter code template for the currently selected language
                 setEditorCode(starterCode);
                 setLoadedKey(currentKey);
             }
@@ -196,9 +228,14 @@ export function SessionClient({ contestId }: SessionClientProps) {
             // Question has already loaded at least once. If user switched the language, update the editor code
             if (loadedKey !== currentKey) {
                 const codeToSet =
-                    workspaceData && workspaceData.language_id === selectedLanguageId
-                        ? workspaceData.source_code
-                        : starterCode;
+                    localBackupCode !== null && localBackupCode.trim() !== ""
+                        ? localBackupCode
+                        : workspaceData &&
+                            workspaceData.language_id === selectedLanguageId &&
+                            workspaceData.source_code !== null &&
+                            workspaceData.source_code.trim() !== ""
+                          ? workspaceData.source_code
+                          : starterCode;
                 setEditorCode(codeToSet);
                 setLoadedKey(currentKey);
             }
@@ -211,6 +248,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
         loadedKey,
         activeQuestionId,
         selectedLanguageId,
+        contestId,
+        questionDetails,
     ]);
 
     // 4. Save Code Mutation & Debounce Auto-Save
@@ -248,6 +287,26 @@ export function SessionClient({ contestId }: SessionClientProps) {
         contestId,
         saveWorkspaceMutation,
     ]);
+
+    // Backup to localStorage on change
+    useEffect(() => {
+        if (
+            editorCode === undefined ||
+            editorCode === null ||
+            !activeQuestionId ||
+            loadedKey !== currentKey
+        )
+            return;
+
+        const key = `contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
+        localStorage.setItem(
+            key,
+            JSON.stringify({
+                code: editorCode,
+                savedAt: Date.now(),
+            }),
+        );
+    }, [editorCode, contestId, activeQuestionId, selectedLanguageId, loadedKey, currentKey]);
 
     const handleManualSave = () => {
         if (!activeQuestionId) return;
@@ -302,34 +361,26 @@ export function SessionClient({ contestId }: SessionClientProps) {
         );
     };
 
-    // 5. Watch for real-time contest lifecycle events from context
-    useEffect(() => {
-        if (isPaused || isCancelled || isFinished) {
-            const statusLabel = isPaused ? "paused" : isCancelled ? "cancelled" : "finished";
-            toast.error(`Contest session has been ${statusLabel}. Redirecting...`);
-            router.push(`/student/contest/${contestId}`);
-        }
-    }, [isPaused, isCancelled, isFinished, contestId, router]);
-
-    // 5.5 Check runtime status on load
+    // 5. Check runtime status / eligibility on load
     useEffect(() => {
         if (isGlobalLoading) return;
 
-        if (
-            runtimeSession?.runtime?.status !== "RUNNING" ||
-            isPaused ||
-            isCancelled ||
-            isFinished
-        ) {
-            const statusLabel = (
-                runtimeSession?.runtime?.status ||
-                (isPaused ? "paused" : isCancelled ? "cancelled" : isFinished ? "finished" : "")
-            ).toLowerCase();
-            toast.error(
-                statusLabel
-                    ? `Cannot enter session page. The contest status is ${statusLabel}.`
-                    : "The contest is not currently running.",
-            );
+        const alreadyStarted = participation?.session?.already_started;
+        const canStart = participation?.session?.can_start;
+        const runStatus = contest?.run_status;
+
+        const isNotEligible = !alreadyStarted && !canStart;
+        const isNotActive = runStatus === "ENDED" || contest?.status === "DRAFT";
+
+        if (isNotEligible || isNotActive) {
+            const reason = isNotActive
+                ? "The contest is not currently active."
+                : participation?.session?.reason ||
+                  "Cannot enter session page. You do not have access.";
+
+            toast.error(reason);
+
+            // Invalidate queries in parallel to ensure details page gets fresh status
             void queryClient.invalidateQueries({
                 queryKey:
                     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(contestId),
@@ -344,18 +395,10 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 queryKey:
                     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(contestId),
             });
+
             router.push(`/student/contest/${contestId}`);
         }
-    }, [
-        isGlobalLoading,
-        runtimeSession?.runtime?.status,
-        isPaused,
-        isCancelled,
-        isFinished,
-        contestId,
-        router,
-        queryClient,
-    ]);
+    }, [isGlobalLoading, participation, contest, contestId, router, queryClient]);
 
     // 6. Timer Ticking
     useEffect(() => {
@@ -369,6 +412,27 @@ export function SessionClient({ contestId }: SessionClientProps) {
 
             if (diff <= 0) {
                 setTimeLeft("00:00:00");
+                toast.info("The contest session has ended.");
+                // Invalidate queries in parallel to ensure details page gets fresh status
+                void queryClient.invalidateQueries({
+                    queryKey:
+                        getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(
+                            contestId,
+                        ),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey:
+                        getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                            contestId,
+                        ),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey:
+                        getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(
+                            contestId,
+                        ),
+                });
+                router.push(`/student/contest/${contestId}`);
                 return;
             }
 
@@ -383,7 +447,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
         return () => clearInterval(interval);
-    }, [runtimeSession?.runtime?.effective_end_time]);
+    }, [runtimeSession?.runtime?.effective_end_time, contestId, router, queryClient]);
 
     if (isGlobalLoading) {
         return (

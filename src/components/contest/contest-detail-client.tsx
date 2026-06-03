@@ -19,7 +19,6 @@ import {
     MoreVertical,
     Trash2,
     UserPlus,
-    Pause,
     Ban,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,9 +27,6 @@ import { useRouter } from "next/navigation";
 
 import {
     useGetContestApiV1ContestsContestIdGet,
-    usePauseContestApiV1ContestsContestIdPausePost,
-    useResumeContestApiV1ContestsContestIdResumePost,
-    useCancelContestApiV1ContestsContestIdCancelPost,
     useSoftDeleteContestApiV1ContestsContestIdSoftDeleteDelete,
 } from "@/api/generated/contests/contests";
 import {
@@ -63,20 +59,10 @@ const STATUS_CONFIG: Record<string, { label: string; className: string; icon: Re
             className: "bg-emerald-500/10 text-emerald-500 border-transparent",
             icon: Zap,
         },
-        PAUSED: {
-            label: "Paused",
-            className: "bg-blue-500/10 text-blue-500 border-transparent",
-            icon: Pause,
-        },
         CANCELLED: {
             label: "Cancelled",
             className: "bg-zinc-500/10 text-zinc-400 border-transparent",
             icon: Ban,
-        },
-        FINISHED: {
-            label: "Finished",
-            className: "bg-zinc-500/10 text-zinc-400 border-transparent",
-            icon: Clock,
         },
         DRAFT: {
             label: "Draft",
@@ -212,45 +198,13 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
         },
     });
 
-    const pauseMutation = usePauseContestApiV1ContestsContestIdPausePost({
-        mutation: {
-            meta: {
-                successMessage: "Contest paused successfully",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
-    const resumeMutation = useResumeContestApiV1ContestsContestIdResumePost({
-        mutation: {
-            meta: {
-                successMessage: "Contest resumed successfully",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
-    const cancelMutation = useCancelContestApiV1ContestsContestIdCancelPost({
-        mutation: {
-            meta: {
-                successMessage: "Contest cancelled successfully",
-                invalidateKeys: [contestKeys(), contestDetailKey(contestId)],
-            },
-        },
-    });
-
     const handleDeleteContest = () => deleteMutation.mutate({ contestId });
     const handlePublish = () => publishMutation.mutate({ contestId });
-    const handlePause = () => pauseMutation.mutate({ contestId });
-    const handleResume = () => resumeMutation.mutate({ contestId });
-    const handleCancel = () => cancelMutation.mutate({ contestId });
 
     const statusCfg = (() => {
         if (!contest) return STATUS_CONFIG.DRAFT;
         if (contest.status === "DRAFT") return STATUS_CONFIG.DRAFT;
-        if (contest.contest_runtime_status === "PAUSED") return STATUS_CONFIG.PAUSED;
-        if (contest.contest_runtime_status === "CANCELLED") return STATUS_CONFIG.CANCELLED;
-        if (contest.contest_runtime_status === "FINISHED") return STATUS_CONFIG.FINISHED;
+        if (contest.status === "CANCELLED") return STATUS_CONFIG.CANCELLED;
         return STATUS_CONFIG.PUBLISHED;
     })();
     const StatusIcon = statusCfg.icon;
@@ -355,63 +309,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                             )}
                                             Publish
                                         </Button>
-                                    )}
-
-                                    {contest.status === "PUBLISHED" && (
-                                        <>
-                                            {(!contest.contest_runtime_status ||
-                                                contest.contest_runtime_status === "RUNNING" ||
-                                                contest.contest_runtime_status === "SCHEDULED") && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="shadow-sm border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20"
-                                                    onClick={handlePause}
-                                                    disabled={pauseMutation.isPending}
-                                                >
-                                                    {pauseMutation.isPending ? (
-                                                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Pause className="mr-1.5 h-3.5 w-3.5" />
-                                                    )}
-                                                    Pause
-                                                </Button>
-                                            )}
-
-                                            {contest.contest_runtime_status === "PAUSED" && (
-                                                <Button
-                                                    size="sm"
-                                                    className="shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                    onClick={handleResume}
-                                                    disabled={resumeMutation.isPending}
-                                                >
-                                                    {resumeMutation.isPending ? (
-                                                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Play className="mr-1.5 h-3.5 w-3.5" />
-                                                    )}
-                                                    Resume
-                                                </Button>
-                                            )}
-
-                                            {contest.contest_runtime_status !== "FINISHED" &&
-                                                contest.contest_runtime_status !== "CANCELLED" && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        className="shadow-sm"
-                                                        onClick={handleCancel}
-                                                        disabled={cancelMutation.isPending}
-                                                    >
-                                                        {cancelMutation.isPending ? (
-                                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                                        ) : (
-                                                            <Ban className="mr-1.5 h-3.5 w-3.5" />
-                                                        )}
-                                                        Cancel
-                                                    </Button>
-                                                )}
-                                        </>
                                     )}
 
                                     <DropdownMenu>
@@ -542,6 +439,23 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 )}
                                 <Separator className="my-0.5 bg-border/40" />
                                 <InfoRow label="Duration" value={duration} />
+                                {contest.duration !== null && contest.duration !== undefined && (
+                                    <>
+                                        <Separator className="my-0.5 bg-border/40" />
+                                        <InfoRow
+                                            label="Session duration"
+                                            value={(() => {
+                                                const h = Math.floor(contest.duration / 3600);
+                                                const m = Math.floor(
+                                                    (contest.duration % 3600) / 60,
+                                                );
+                                                return h > 0
+                                                    ? `${h}h ${m > 0 ? m + "m" : ""}`.trim()
+                                                    : `${m}m`;
+                                            })()}
+                                        />
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 
