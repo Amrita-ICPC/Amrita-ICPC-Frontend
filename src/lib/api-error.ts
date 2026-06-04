@@ -19,6 +19,10 @@ export interface ApiErrorResponse {
     };
 }
 
+export interface Meta {
+    request_id: string;
+    timestamp: string;
+}
 export class ApiError extends Error {
     public status: number;
     public code: string;
@@ -26,15 +30,14 @@ export class ApiError extends Error {
     public requestId?: string;
     public raw: any;
 
-    constructor(response: Partial<ApiErrorResponse> & { message: string; status: number }) {
+    constructor(
+        response: Partial<ApiErrorResponse> & { message: string; status: number; meta: Meta },
+    ) {
         super(response.message);
         this.name = "ApiError";
         this.status = response.status;
         this.code = response.error?.code || "UNKNOWN_ERROR";
-        this.requestId =
-            response.meta?.request_id ||
-            (response as any).request_id ||
-            (response as any).requestId;
+        this.requestId = response.meta.request_id;
         this.raw = response;
 
         // Process details into flattened errors

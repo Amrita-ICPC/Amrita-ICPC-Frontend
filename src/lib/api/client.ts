@@ -43,11 +43,6 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
         headers.set("Authorization", `Bearer ${accessToken}`);
     }
 
-    // Add a unique request ID if not already present
-    if (!headers.get("X-Request-ID")) {
-        headers.set("X-Request-ID", crypto.randomUUID());
-    }
-
     config.headers = headers;
 
     return config;
