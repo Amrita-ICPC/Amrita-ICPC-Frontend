@@ -1,6 +1,15 @@
 "use client";
 
-import { Edit, Share2, Trash2, BookOpen, MoreVertical } from "lucide-react";
+import {
+    Edit,
+    Share2,
+    Trash2,
+    BookOpen,
+    MoreVertical,
+    Globe,
+    HelpCircle,
+    Users,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -15,13 +24,6 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { BankResponse } from "@/api/generated/model/bankResponse";
@@ -73,58 +75,67 @@ export function BankRowItem({ bank }: BankRowItemProps) {
         <>
             <TableRow
                 onClick={handleRowClick}
-                className="group cursor-pointer hover:bg-muted/40 transition-colors"
+                className="group cursor-pointer border-border/40 hover:bg-background/40 transition-colors"
             >
-                <TableCell>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <BookOpen className="size-4" />
+                <TableCell className="py-4 px-5 w-2/5">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/10 text-blue-500 shadow-sm group-hover:bg-blue-500/20 transition-colors">
+                            <BookOpen className="size-5" />
                         </div>
                         <div className="min-w-0">
-                            <p className="font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
+                            <p className="font-bold text-base text-foreground group-hover:text-primary transition-colors leading-tight">
                                 {bank.name}
                             </p>
-                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-1.5 font-medium">
                                 {bank.description || "No description"}
                             </p>
                         </div>
                     </div>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formattedDate}</TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-8 text-muted-foreground hover:text-foreground"
-                            >
-                                <MoreVertical className="size-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                                onClick={() => setUpdateOpen(true)}
-                                className="gap-2 cursor-pointer"
-                            >
-                                <Edit className="h-4 w-4" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setShareOpen(true)}
-                                className="gap-2 cursor-pointer"
-                            >
-                                <Share2 className="h-4 w-4" /> Manage Access
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => setDeleteOpen(true)}
-                                className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-                                disabled={isDeleting}
-                            >
-                                <Trash2 className="h-4 w-4" /> Delete Bank
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                <TableCell className="text-sm font-medium py-4 px-5">
+                    <div className="flex items-center gap-2 text-foreground/80">
+                        <Globe className="size-4 text-muted-foreground" /> Public
+                    </div>
+                </TableCell>
+                <TableCell className="text-sm font-medium py-4 px-5">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <HelpCircle className="size-4" /> 1 Question
+                    </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground font-medium py-4 px-5">
+                    {formattedDate}
+                </TableCell>
+                <TableCell className="text-right py-4 px-5">
+                    <div
+                        className="flex items-center justify-end gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
+                            onClick={() => setShareOpen(true)}
+                        >
+                            <Users className="mr-2 size-3.5 shrink-0" /> Manage Access
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
+                            onClick={() => setUpdateOpen(true)}
+                        >
+                            <Edit className="mr-2 size-3.5 shrink-0" /> Edit Details
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1"
+                            onClick={() => setDeleteOpen(true)}
+                            disabled={isDeleting}
+                        >
+                            <Trash2 className="size-4" />
+                        </Button>
+                    </div>
                 </TableCell>
             </TableRow>
 
@@ -135,9 +146,10 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                     bankName={bank.name}
                     open={shareOpen}
                     onOpenChange={setShareOpen}
+                    trigger={null}
                 />
                 <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="rounded-2xl border-border/60">
                         <AlertDialogHeader>
                             <AlertDialogTitle>Delete {bank.name}?</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -146,13 +158,15 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel disabled={isDeleting} className="rounded-lg">
+                                Cancel
+                            </AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={(event) => {
                                     event.preventDefault();
                                     handleDelete();
                                 }}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg shadow-sm"
                                 disabled={isDeleting}
                             >
                                 {isDeleting ? "Deleting..." : "Delete Bank"}
