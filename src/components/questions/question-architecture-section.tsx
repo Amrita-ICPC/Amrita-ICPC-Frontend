@@ -17,14 +17,14 @@ export function QuestionArchitectureSection({
     editor,
 }: QuestionArchitectureSectionProps) {
     return (
-        <motion.div className="space-y-6 pt-4">
-            <div className="flex items-center justify-between px-2 pb-1 border-b border-border/40">
+        <motion.div className="flex flex-col h-full w-full">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/40 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <FileText className="h-5 w-5" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Problem Architecture</h2>
+                        <h2 className="text-xl font-bold tracking-tight">Problem Architecture</h2>
                         <p className="text-xs text-muted-foreground">
                             Design the structure and details of the challenge
                         </p>
@@ -32,8 +32,12 @@ export function QuestionArchitectureSection({
                 </div>
             </div>
 
-            <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-                <TabsList className="w-full justify-start overflow-x-auto bg-muted/30 border border-border/40 p-1 mb-8 shadow-inner rounded-xl">
+            <Tabs
+                value={activeTab}
+                onValueChange={onTabChange}
+                className="flex-1 flex flex-col min-h-0 p-6"
+            >
+                <TabsList className="w-full justify-start overflow-x-auto bg-muted/30 border border-border/40 p-1 mb-4 shadow-inner rounded-xl shrink-0">
                     <TabsTrigger
                         value="description"
                         className="flex-1 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all py-2.5"
@@ -66,12 +70,10 @@ export function QuestionArchitectureSection({
                     </TabsTrigger>
                 </TabsList>
 
-                <div className="mt-6">
-                    <div className="flex flex-col border border-border/60 rounded-xl overflow-hidden bg-card/20 shadow-sm transition-all duration-200 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
-                        <TiptapToolbar />
-                        <div className="h-[400px] overflow-y-auto bg-background/50 custom-scrollbar">
-                            <EditorContent editor={editor} className="h-full" />
-                        </div>
+                <div className="flex-1 flex flex-col min-h-0 border border-border/60 rounded-xl overflow-hidden bg-card/20 shadow-sm transition-all duration-200 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
+                    <TiptapToolbar />
+                    <div className="flex-1 overflow-y-auto bg-background/50 custom-scrollbar">
+                        <EditorContent editor={editor} />
                     </div>
                 </div>
             </Tabs>

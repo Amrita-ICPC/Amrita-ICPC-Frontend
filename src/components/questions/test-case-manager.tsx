@@ -1,18 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, Reorder, AnimatePresence } from "framer-motion";
-import {
-    Plus,
-    Trash2,
-    GripVertical,
-    Eye,
-    EyeOff,
-    Hash,
-    Weight,
-    ChevronDown,
-    ChevronUp,
-} from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus, Trash2, Upload, Play, MoreVertical, Info, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,219 +11,12 @@ import { cn } from "@/lib/utils";
 
 export interface TestCase {
     id: string;
+    name?: string;
     input: string;
     output: string;
     is_hidden: boolean;
     weight: number;
     order: number;
-}
-
-interface TestCaseCardProps {
-    testCase: TestCase;
-    index: number;
-    totalCount: number;
-    onUpdate: (id: string, updates: Partial<TestCase>) => void;
-    onDelete: (id: string) => void;
-    onMove: (id: string, direction: "up" | "down") => void;
-}
-
-function TestCaseCard({
-    testCase,
-    index,
-    totalCount,
-    onUpdate,
-    onDelete,
-    onMove,
-}: TestCaseCardProps) {
-    const [isExpanded, setIsExpanded] = useState(true);
-
-    return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className={cn(
-                "group relative bg-card/30 backdrop-blur-md border border-border/40 rounded-2xl overflow-hidden mb-4 transition-all duration-300",
-                isExpanded ? "shadow-2xl" : "shadow-md hover:shadow-lg",
-            )}
-        >
-            {/* Header / Summary */}
-            <div className="flex items-center gap-4 p-4 bg-muted/20">
-                <div className="flex flex-col gap-1 pr-2 border-r border-border/40">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-primary disabled:opacity-20"
-                        disabled={index === 0}
-                        onClick={() => onMove(testCase.id, "up")}
-                    >
-                        <ChevronUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-primary disabled:opacity-20"
-                        disabled={index === totalCount - 1}
-                        onClick={() => onMove(testCase.id, "down")}
-                    >
-                        <ChevronDown className="h-4 w-4" />
-                    </Button>
-                </div>
-
-                <div className="flex-1 flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs">
-                            {index + 1}
-                        </div>
-                        <span className="text-sm font-bold tracking-tight">Test Case</span>
-                    </div>
-
-                    <div className="flex items-center gap-6 ml-auto mr-4">
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                            <Weight className="h-3 w-3" />
-                            Weight: <span className="text-primary">{testCase.weight}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                            {testCase.is_hidden ? (
-                                <EyeOff className="h-3 w-3 text-amber-500" />
-                            ) : (
-                                <Eye className="h-3 w-3 text-emerald-500" />
-                            )}
-                            {testCase.is_hidden ? "Hidden" : "Public"}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2 border-l border-border/40 pl-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all"
-                        onClick={() => onDelete(testCase.id)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground"
-                        onClick={() => setIsExpanded(!isExpanded)}
-                    >
-                        {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                        ) : (
-                            <ChevronDown className="h-4 w-4" />
-                        )}
-                    </Button>
-                </div>
-            </div>
-
-            {/* Detailed Editor */}
-            <AnimatePresence>
-                {isExpanded && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                        <div className="p-6 grid grid-cols-2 gap-6 border-t border-border/20">
-                            <div className="space-y-3 col-span-2 md:col-span-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                    Input Data
-                                </Label>
-                                <Textarea
-                                    value={testCase.input}
-                                    onChange={(e) =>
-                                        onUpdate(testCase.id, { input: e.target.value })
-                                    }
-                                    placeholder="Enter test input..."
-                                    className="min-h-[120px] font-mono text-sm bg-background/50 border-border/40 focus:border-primary/50 transition-all resize-none"
-                                />
-                            </div>
-                            <div className="space-y-3 col-span-2 md:col-span-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                    Expected Output
-                                </Label>
-                                <Textarea
-                                    value={testCase.output}
-                                    onChange={(e) =>
-                                        onUpdate(testCase.id, { output: e.target.value })
-                                    }
-                                    placeholder="Enter expected output..."
-                                    className="min-h-[120px] font-mono text-sm bg-background/50 border-border/40 focus:border-primary/50 transition-all resize-none"
-                                />
-                            </div>
-
-                            <div className="col-span-2 flex items-center justify-between pt-4 border-t border-border/10">
-                                <div className="flex items-center gap-8">
-                                    <div className="flex flex-col gap-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                            Weight (Points)
-                                        </Label>
-                                        <div className="flex items-center gap-3">
-                                            <Input
-                                                type="number"
-                                                value={testCase.weight}
-                                                onChange={(e) =>
-                                                    onUpdate(testCase.id, {
-                                                        weight: Number(e.target.value),
-                                                    })
-                                                }
-                                                className="w-24 h-9 bg-background/50 border-border/40 font-bold"
-                                            />
-                                            <span className="text-xs text-muted-foreground/60 italic">
-                                                Score multiplier
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                            Visibility
-                                        </Label>
-                                        <div className="flex items-center gap-3 h-9">
-                                            <span
-                                                className={cn(
-                                                    "text-xs font-medium transition-colors",
-                                                    !testCase.is_hidden
-                                                        ? "text-emerald-500"
-                                                        : "text-muted-foreground/40",
-                                                )}
-                                            >
-                                                Public
-                                            </span>
-                                            <Switch
-                                                checked={testCase.is_hidden}
-                                                onCheckedChange={(val) =>
-                                                    onUpdate(testCase.id, { is_hidden: val })
-                                                }
-                                            />
-                                            <span
-                                                className={cn(
-                                                    "text-xs font-medium transition-colors",
-                                                    testCase.is_hidden
-                                                        ? "text-amber-500"
-                                                        : "text-muted-foreground/40",
-                                                )}
-                                            >
-                                                Hidden
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/20 italic">
-                                    Order Index: {testCase.order}
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
-    );
 }
 
 interface TestCaseManagerProps {
@@ -243,16 +25,42 @@ interface TestCaseManagerProps {
 }
 
 export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProps) {
-    const addTestCase = () => {
+    const [activeTab, setActiveTab] = useState<"visible" | "hidden">("visible");
+    const [activeId, setActiveId] = useState<string | null>(
+        testCases.find((tc) => !tc.is_hidden)?.id || null,
+    );
+
+    const visibleCases = testCases.filter((tc) => !tc.is_hidden);
+    const hiddenCases = testCases.filter((tc) => tc.is_hidden);
+
+    const filteredTestCases = useMemo(() => {
+        return testCases
+            .map((tc, index) => ({ ...tc, originalIndex: index }))
+            .filter((tc) => (activeTab === "visible" ? !tc.is_hidden : tc.is_hidden));
+    }, [testCases, activeTab]);
+
+    const handleTabChange = (tab: "visible" | "hidden") => {
+        setActiveTab(tab);
+        const newFiltered = testCases.filter((tc) =>
+            tab === "visible" ? !tc.is_hidden : tc.is_hidden,
+        );
+        if (!newFiltered.find((tc) => tc.id === activeId)) {
+            setActiveId(newFiltered.length > 0 ? newFiltered[0].id : null);
+        }
+    };
+
+    const addTestCase = (isHidden: boolean = false) => {
         const newTestCase: TestCase = {
             id: Math.random().toString(36).substr(2, 9),
             input: "",
             output: "",
-            is_hidden: false,
+            is_hidden: isHidden,
             weight: 1,
             order: testCases.length,
         };
         setTestCases([...testCases, newTestCase]);
+        setActiveTab(isHidden ? "hidden" : "visible");
+        setActiveId(newTestCase.id);
     };
 
     const updateTestCase = (id: string, updates: Partial<TestCase>) => {
@@ -260,90 +68,264 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
     };
 
     const deleteTestCase = (id: string) => {
-        setTestCases(
-            testCases.filter((tc) => tc.id !== id).map((tc, idx) => ({ ...tc, order: idx })),
-        );
+        const newTestCases = testCases
+            .filter((tc) => tc.id !== id)
+            .map((tc, idx) => ({ ...tc, order: idx }));
+        setTestCases(newTestCases);
+        if (activeId === id) {
+            const currentTabCases = newTestCases.filter((tc) =>
+                activeTab === "visible" ? !tc.is_hidden : tc.is_hidden,
+            );
+            setActiveId(currentTabCases.length > 0 ? currentTabCases[0].id : null);
+        }
     };
 
-    const moveTestCase = (id: string, direction: "up" | "down") => {
-        const index = testCases.findIndex((tc) => tc.id === id);
-        if (index === -1) return;
-
-        const newIndex = direction === "up" ? index - 1 : index + 1;
-        if (newIndex < 0 || newIndex >= testCases.length) return;
-
-        const newTestCases = [...testCases];
-        const temp = newTestCases[index];
-        newTestCases[index] = newTestCases[newIndex];
-        newTestCases[newIndex] = temp;
-
-        // Update order properties
-        setTestCases(newTestCases.map((tc, idx) => ({ ...tc, order: idx })));
-    };
+    const activeTestCase = testCases.find((tc) => tc.id === activeId);
+    const activeOriginalIndex = testCases.findIndex((tc) => tc.id === activeId);
 
     return (
-        <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex items-center justify-between mb-8">
+        <div className="w-full flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-3">
-                        Test Case Management
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">
-                            {testCases.length}
-                        </div>
-                    </h3>
-                    <p className="text-muted-foreground text-xs mt-1">
-                        Configure input/output pairs and visibility for evaluation.
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                        Test Cases
+                    </h2>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        Create input and expected output pairs to test solutions.
                     </p>
                 </div>
-                <Button
-                    onClick={addTestCase}
-                    className="shadow-lg shadow-primary/20 gap-2 h-10 px-6 transition-all hover:scale-105 active:scale-95"
-                >
-                    <Plus className="h-4 w-4" />
-                    Add Test Case
-                </Button>
-            </div>
-
-            <div className="space-y-4">
-                <AnimatePresence initial={false} mode="popLayout">
-                    {testCases.map((tc, index) => (
-                        <TestCaseCard
-                            key={tc.id}
-                            testCase={tc}
-                            index={index}
-                            totalCount={testCases.length}
-                            onUpdate={updateTestCase}
-                            onDelete={deleteTestCase}
-                            onMove={moveTestCase}
-                        />
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            {testCases.length === 0 && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-border/40 rounded-3xl bg-muted/5"
-                >
-                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/20 text-muted-foreground/30 mb-6">
-                        <Plus className="h-10 w-10" />
-                    </div>
-                    <h4 className="text-lg font-semibold text-muted-foreground/60">
-                        No test cases yet
-                    </h4>
-                    <p className="text-sm text-muted-foreground/40 mt-1 max-w-xs text-center">
-                        Add at least one test case to validate participant submissions.
-                    </p>
+                <div className="flex items-center gap-3">
                     <Button
+                        type="button"
                         variant="outline"
-                        className="mt-8 border-primary/20 hover:bg-primary/5"
-                        onClick={addTestCase}
+                        className="h-9 px-4 gap-2 border-border/60 font-medium"
                     >
-                        Create First Test Case
+                        <Upload className="h-4 w-4 text-primary" /> Import
                     </Button>
-                </motion.div>
-            )}
+                    <Button
+                        type="button"
+                        onClick={() => addTestCase(false)}
+                        className="shadow-sm gap-2 h-9 px-4 font-medium"
+                    >
+                        <Plus className="h-4 w-4" /> Add Test Case
+                    </Button>
+                </div>
+            </div>
+
+            {/* Split View Container */}
+            <div className="flex flex-col border border-border/60 rounded-xl bg-card overflow-hidden shadow-sm flex-1 min-h-[600px]">
+                {/* Tabs Row */}
+                <div className="flex items-center border-b border-border/60 px-2 bg-background/50">
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange("visible")}
+                        className={cn(
+                            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
+                            activeTab === "visible"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-muted-foreground hover:text-foreground",
+                        )}
+                    >
+                        Visible ({visibleCases.length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange("hidden")}
+                        className={cn(
+                            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
+                            activeTab === "hidden"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-muted-foreground hover:text-foreground",
+                        )}
+                    >
+                        Hidden ({hiddenCases.length})
+                    </button>
+                </div>
+
+                {/* Inner Split Layout */}
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Left Sidebar List */}
+                    <div className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/10">
+                        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                            {filteredTestCases.map((tc) => {
+                                const isActive = activeId === tc.id;
+                                return (
+                                    <div
+                                        key={tc.id}
+                                        onClick={() => setActiveId(tc.id)}
+                                        className={cn(
+                                            "flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors group",
+                                            isActive
+                                                ? "bg-primary/10 text-primary font-semibold"
+                                                : "hover:bg-muted/50 text-foreground font-medium",
+                                        )}
+                                    >
+                                        <span className="text-sm truncate">
+                                            {tc.name || `Sample Test Case ${tc.originalIndex + 1}`}
+                                        </span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn(
+                                                "h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity",
+                                                isActive && "opacity-100",
+                                            )}
+                                        >
+                                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="p-4 border-t border-border/60 bg-muted/5">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full gap-2 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary border-dashed font-semibold"
+                                onClick={() => addTestCase(activeTab === "hidden")}
+                            >
+                                <Plus className="h-4 w-4" /> Add{" "}
+                                {activeTab === "hidden" ? "Hidden" : "Visible"} Test Case
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Right Content Editor */}
+                    <div className="flex-1 flex flex-col p-6 bg-background overflow-y-auto">
+                        {activeTestCase ? (
+                            <div className="flex-1 flex flex-col h-full space-y-6 max-w-4xl">
+                                {/* Top Row: Name & Switch */}
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1.5 flex-1 max-w-sm">
+                                        <Label className="text-xs font-semibold text-muted-foreground">
+                                            Test Case Name
+                                        </Label>
+                                        <Input
+                                            value={activeTestCase.name || ""}
+                                            placeholder={`Sample Test Case ${activeOriginalIndex + 1}`}
+                                            onChange={(e) =>
+                                                updateTestCase(activeTestCase.id, {
+                                                    name: e.target.value,
+                                                })
+                                            }
+                                            className="bg-card border-border/60 h-10 font-medium focus-visible:ring-primary/50"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Switch
+                                            checked={activeTestCase.is_hidden}
+                                            onCheckedChange={(val) =>
+                                                updateTestCase(activeTestCase.id, {
+                                                    is_hidden: val,
+                                                })
+                                            }
+                                        />
+                                        <Label className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
+                                            Hidden Test Case <Info className="h-4 w-4 opacity-50" />
+                                        </Label>
+                                    </div>
+                                </div>
+
+                                {/* Textareas */}
+                                <div className="grid grid-cols-2 gap-6 flex-1 min-h-[300px]">
+                                    <div className="flex flex-col space-y-2 h-full">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                                Input <Info className="h-3 w-3 opacity-50" />
+                                            </Label>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 text-xs border-border/60 text-muted-foreground px-2"
+                                            >
+                                                Format <ChevronDownIcon className="ml-1 h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                        <Textarea
+                                            value={activeTestCase.input}
+                                            onChange={(e) =>
+                                                updateTestCase(activeTestCase.id, {
+                                                    input: e.target.value,
+                                                })
+                                            }
+                                            className="flex-1 resize-none font-mono text-sm bg-background border-border/60 focus-visible:ring-primary/50 rounded-xl p-4 shadow-sm"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col space-y-2 h-full">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                                Expected Output{" "}
+                                                <Info className="h-3 w-3 opacity-50" />
+                                            </Label>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 text-xs border-border/60 text-muted-foreground px-2"
+                                            >
+                                                Format <ChevronDownIcon className="ml-1 h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                        <Textarea
+                                            value={activeTestCase.output}
+                                            onChange={(e) =>
+                                                updateTestCase(activeTestCase.id, {
+                                                    output: e.target.value,
+                                                })
+                                            }
+                                            className="flex-1 resize-none font-mono text-sm bg-background border-border/60 focus-visible:ring-primary/50 rounded-xl p-4 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Bottom Row Buttons */}
+                                <div className="flex items-center justify-between pt-6 mt-auto">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="text-red-500 border-red-500/20 hover:bg-red-500/10 gap-2 h-9 font-medium"
+                                        onClick={() => deleteTestCase(activeTestCase.id)}
+                                    >
+                                        <Trash2 className="h-4 w-4" /> Delete Test Case
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="gap-2 h-9 border-border/60 hover:bg-muted font-medium text-primary hover:text-primary"
+                                    >
+                                        <Play className="h-4 w-4" /> Run Test Case
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/60 space-y-4">
+                                <Database className="h-12 w-12 opacity-20" />
+                                <p>Select or create a test case to configure it.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
+    );
+}
+
+function ChevronDownIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="m6 9 6 6 6-6" />
+        </svg>
     );
 }
