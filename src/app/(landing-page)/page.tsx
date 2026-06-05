@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import { Code2, Trophy, Users, FileCode2 } from "lucide-react";
+import { Code2 } from "lucide-react";
 
 import { getDefaultRoute } from "@/lib/auth/utils";
+import { FeatureCards } from "@/components/landing/feature-cards";
 
 export default async function LandingPage() {
     const session = await auth();
@@ -13,84 +14,120 @@ export default async function LandingPage() {
 
     return (
         <main className="relative flex min-h-screen flex-col overflow-hidden bg-sidebar text-sidebar-foreground">
-            {/* Background */}
+            {/* Subtle Radial Gradients */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute left-1/2 top-[-10rem] h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-sidebar-primary/15 blur-[130px]" />
-                <div className="absolute bottom-[-10rem] right-[-5rem] h-[400px] w-[400px] rounded-full bg-sidebar-primary/10 blur-[120px]" />
+                <div className="absolute left-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-sidebar-primary opacity-5 blur-[150px]" />
+                <div className="absolute right-1/4 bottom-1/4 h-[500px] w-[500px] rounded-full bg-sidebar-primary opacity-4 blur-[140px]" />
             </div>
 
-            {/* Header */}
-            <header className="relative flex items-center justify-between border-b border-sidebar-border px-8 py-4">
+            {/* Subtle Dot Pattern */}
+            <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    backgroundImage:
+                        "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+                    backgroundSize: "60px 60px",
+                    opacity: 0.3,
+                }}
+            />
+
+            {/* Header/Navbar */}
+            <header className="relative z-10 flex items-center justify-between border-b border-sidebar-border px-8 py-4">
                 <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-primary/20 text-sidebar-primary">
                         <Code2 className="h-4 w-4" />
                     </div>
                     <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+                        <span className="block text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
                             Amrita
                         </span>
-                        <span className="ml-2 text-sm font-bold text-sidebar-foreground">
+                        <span className="text-sm font-bold text-sidebar-foreground">
                             ICPC Platform
                         </span>
                     </div>
                 </div>
                 <Link
                     href="/auth/login"
-                    className="rounded-lg bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground transition-opacity hover:opacity-90"
+                    className="rounded-lg bg-sidebar-primary px-6 py-2 text-sm font-semibold text-sidebar-primary-foreground transition-all duration-300 hover:shadow-lg hover:shadow-sidebar-primary/30"
                 >
-                    Sign in
+                    Sign In
                 </Link>
             </header>
 
-            {/* Hero */}
-            <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sidebar-border bg-sidebar-accent/40 px-4 py-1.5 text-xs font-medium text-sidebar-foreground/60">
-                    <span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
-                    Competitive Programming Infrastructure
-                </div>
+            {/* Hero Section */}
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
+                <div className="mx-auto w-full max-w-[900px]">
+                    {/* Badge */}
+                    <div className="mb-6 inline-flex items-center rounded-full border border-sidebar-border bg-sidebar-accent/40 px-4 py-2 text-xs font-medium text-sidebar-foreground/80">
+                        Competitive Programming Infrastructure
+                    </div>
 
-                <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-sidebar-foreground sm:text-6xl">
-                    Amrita <span className="text-sidebar-primary">ICPC</span>
-                </h1>
-
-                <p className="mt-5 max-w-lg text-base text-sidebar-foreground/60">
-                    Manage contests, questions, teams, and submissions in one place. Built for
-                    instructors, students, and contest managers.
-                </p>
-
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <Link
-                        href="/auth/login"
-                        className="rounded-lg bg-sidebar-primary px-6 py-3 text-sm font-semibold text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/20 transition-opacity hover:opacity-90"
+                    {/* Heading */}
+                    <h1
+                        className="mt-4 text-center font-extrabold tracking-tight text-sidebar-foreground"
+                        style={{
+                            fontSize: "clamp(2rem, 6vw, 4.5rem)",
+                            letterSpacing: "-0.04em",
+                            lineHeight: 1.1,
+                        }}
                     >
-                        Enter Platform
-                    </Link>
-                    <Link
-                        href="/auth/login"
-                        className="rounded-lg border border-sidebar-border px-6 py-3 text-sm font-semibold text-sidebar-foreground/70 transition-colors hover:border-sidebar-foreground/40 hover:text-sidebar-foreground"
-                    >
-                        Learn More
-                    </Link>
-                </div>
+                        <span>Amrita </span>
+                        <span className="text-sidebar-primary">ICPC</span>
+                    </h1>
 
-                {/* Feature pills */}
-                <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
-                    {[
-                        { icon: Trophy, label: "Live Contests" },
-                        { icon: FileCode2, label: "Question Banks" },
-                        { icon: Users, label: "Team Management" },
-                        { icon: Code2, label: "Multi-language Execution" },
-                    ].map(({ icon: Icon, label }) => (
-                        <div
-                            key={label}
-                            className="flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-4 py-2 text-xs font-medium text-sidebar-foreground/60"
+                    {/* Description */}
+                    <p
+                        className="mx-auto mt-5 max-w-[700px] text-center leading-relaxed text-sidebar-foreground/75"
+                        style={{
+                            fontSize: "1rem",
+                        }}
+                    >
+                        Manage contests, questions, teams, and submissions in one place. Built for
+                        instructors, students, and contest managers.
+                    </p>
+
+                    {/* CTA Buttons */}
+                    <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-4">
+                        <Link
+                            href="/auth/login"
+                            className="rounded-[14px] px-8 font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-sidebar-primary/30"
+                            style={{
+                                height: "48px",
+                                display: "flex",
+                                alignItems: "center",
+                                background: "var(--sidebar-primary)",
+                                color: "var(--sidebar-primary-foreground)",
+                                fontSize: "0.95rem",
+                            }}
                         >
-                            <Icon className="h-3.5 w-3.5 text-sidebar-primary" />
-                            {label}
-                        </div>
-                    ))}
+                            Enter Platform
+                        </Link>
+                        <Link
+                            href="/auth/login"
+                            className="rounded-[14px] border border-sidebar-border px-8 font-semibold text-sidebar-foreground/70 transition-all duration-300 hover:border-sidebar-foreground/40 hover:text-sidebar-foreground"
+                            style={{
+                                height: "48px",
+                                display: "flex",
+                                alignItems: "center",
+                                background: "transparent",
+                                fontSize: "0.95rem",
+                            }}
+                        >
+                            Learn More
+                        </Link>
+                    </div>
                 </div>
             </div>
+
+            {/* Features Section */}
+            <div className="relative z-10 w-full px-6 py-12 sm:px-8">
+                <div className="mx-auto max-w-[1400px]">
+                    <FeatureCards />
+                </div>
+            </div>
+
+            {/* Footer Spacing */}
+            <div className="relative z-10 h-6" />
         </main>
     );
 }
