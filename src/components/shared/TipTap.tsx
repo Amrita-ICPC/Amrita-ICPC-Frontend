@@ -58,7 +58,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         ],
         editorProps: {
             attributes: {
-                class: "prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-bold prose-a:text-primary focus:outline-none max-w-none p-6 [&_ul]:list-disc [&_ol]:list-decimal prose-p:my-4 prose-p:leading-relaxed whitespace-pre-wrap min-h-[400px]",
+                class: "prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-bold prose-a:text-primary focus:outline-none max-w-none p-6 [&_ul]:list-disc [&_ol]:list-decimal prose-p:my-4 prose-p:leading-relaxed whitespace-pre-wrap min-h-[650px]",
             },
         },
         immediatelyRender: false,

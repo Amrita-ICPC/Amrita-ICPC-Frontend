@@ -4,11 +4,10 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useEditorContext } from "../shared/TipTap";
 import { ProblemMetadataCard } from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
-import { QuestionWorkflowSection } from "../questions/question-workflow-section";
 import { QuestionCreateHero } from "../questions/question-create-hero";
-import { LANGUAGES, MonacoLanguage } from "../questions/question-code-editor";
+import { QuestionCodeEditor, LANGUAGES, MonacoLanguage } from "../questions/question-code-editor";
 import { QuestionArchitectureSection } from "../questions/question-architecture-section";
-import { useQuestionWorkflow, type WorkflowStep } from "@/hooks/use-question-workflow";
+import { TestCaseManager } from "../questions/test-case-manager";
 import { useQuestionEditorSync } from "@/hooks/use-question-editor-sync";
 import { Skeleton } from "../ui/skeleton";
 import type { useQuestionForm } from "@/hooks/use-question-form";
@@ -20,11 +19,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const MAIN_STEPS = [
-    { id: "details", label: "Details" },
-    { id: "statement", label: "Statement" },
-    { id: "judge_config", label: "Judge Configuration" },
-];
+const ALL_STEPS = ["details", "statement", "starter", "solution", "testcases", "driver"] as const;
+type EditorStep = (typeof ALL_STEPS)[number];
+
+const STEP_GROUPS = [
+    {
+        title: "Problem",
+        steps: [
+            { id: "details", label: "Details" },
+            { id: "statement", label: "Statement" },
+        ],
+    },
+    {
+        title: "Judge Configuration",
+        steps: [
+            { id: "starter", label: "Starter Code" },
+            { id: "solution", label: "Solution" },
+            { id: "testcases", label: "Test Cases" },
+            { id: "driver", label: "Driver Code" },
+        ],
+    },
+] as const;
 
 export interface QuestionEditorShellProps {
     mode: "create" | "update";
@@ -83,21 +98,21 @@ export function QuestionEditorShell({
         error: langError,
         refetch: refetchLangs,
     } = usePlatformLanguages();
-    const languages = useMemo(() => languagesData?.data?.languages || [], [languagesData]);
 
     const [workflowEditorLang, setWorkflowEditorLang] = useState<MonacoLanguage>(LANGUAGES[0]);
+    const [activeStep, setActiveStep] = useState<EditorStep>("details");
 
-    const { activeStep, steps, isStepValid, canGoNext, goToStep } = useQuestionWorkflow({
-        starterCodes: code.starterCodes,
-        solutionCodes: code.solutionCodes,
-        driverCodes: code.driverCodes,
-        testCases: testCases.testCases,
-        activeLanguageId: workflowEditorLang.id,
-    });
+    const [visitedSteps, setVisitedSteps] = useState<Record<EditorStep, boolean>>(() => ({
+        details: true,
+        statement: mode === "update",
+        starter: mode === "update",
+        solution: mode === "update",
+        testcases: mode === "update",
+        driver: mode === "update",
+    }));
 
     // View State
     const [isPreviewMode, setIsPreviewMode] = useState(false);
-    const [currentMainStep, setCurrentMainStep] = useState(0);
 
     const editor = useEditorContext();
     const [activeTab, setActiveTab] = useState("description");
@@ -141,13 +156,50 @@ export function QuestionEditorShell({
           ? `/banks/${bankId}`
           : "/";
 
-    // Navigation logic
-    const handleNextMainStep = () => {
-        setCurrentMainStep((prev) => Math.min(prev + 1, MAIN_STEPS.length - 1));
+    // Step validity checks
+    const isStepValid = (stepId: EditorStep): boolean => {
+        // For starter, solution, and driver code, we require that the step has been visited (if in create mode)
+        // to ensure the user actually reviewed the default templates.
+        if (["starter", "solution", "driver"].includes(stepId) && !visitedSteps[stepId]) {
+            return false;
+        }
+
+        switch (stepId) {
+            case "details":
+                return !!metadata.title?.trim();
+            case "statement":
+                return !!content.description?.trim();
+            case "starter":
+                return !!code.starterCodes[workflowEditorLang.id]?.trim();
+            case "solution":
+                return !!code.solutionCodes[workflowEditorLang.id]?.trim();
+            case "testcases":
+                return testCases.testCases.length > 0;
+            case "driver":
+                return !!code.driverCodes[workflowEditorLang.id]?.trim();
+            default:
+                return false;
+        }
     };
 
-    const handlePrevMainStep = () => {
-        setCurrentMainStep((prev) => Math.max(prev - 1, 0));
+    const currentIdx = ALL_STEPS.indexOf(activeStep);
+
+    const handlePrev = () => {
+        if (currentIdx > 0) {
+            const prevStep = ALL_STEPS[currentIdx - 1];
+            setActiveStep(prevStep);
+            setVisitedSteps((prev) => ({ ...prev, [prevStep]: true }));
+        }
+    };
+
+    const handleNext = () => {
+        if (currentIdx < ALL_STEPS.length - 1) {
+            const nextStep = ALL_STEPS[currentIdx + 1];
+            setActiveStep(nextStep);
+            setVisitedSteps((prev) => ({ ...prev, [nextStep]: true }));
+        } else {
+            onSave();
+        }
     };
 
     return (
@@ -169,17 +221,17 @@ export function QuestionEditorShell({
             }
         >
             <div
-                className="flex flex-col bg-background relative overflow-hidden -mx-6 -mt-5 -mb-[44px]"
+                className="flex flex-col bg-background relative overflow-hidden w-full h-full"
                 style={{ height: "calc(100vh - 56px)" }}
             >
                 {/* 1. Sticky Header */}
-                <div className="sticky top-0 z-30 flex min-h-[72px] items-center justify-between border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-md">
+                <div className="sticky top-0 z-30 flex min-h-[72px] items-center justify-between border-b border-border/60 bg-card px-6 py-3">
                     <QuestionCreateHero
                         title={mode === "update" ? "Update Question" : "Create Question"}
                         description={
                             mode === "update"
                                 ? "Edit the metadata and requirements for this programming challenge."
-                                : "Configure the metadata and requirements for your new programming challenge."
+                                : "Configure the requirements for your new programming challenge."
                         }
                         backUrl={backUrl}
                         onPreview={() => setIsPreviewMode(!isPreviewMode)}
@@ -190,7 +242,7 @@ export function QuestionEditorShell({
                 </div>
 
                 {isPreviewMode ? (
-                    <div className="flex-1 overflow-y-auto p-6">
+                    <div className="flex-1 overflow-y-auto p-6 bg-background">
                         <ProblemPreview
                             title={metadata.title}
                             difficulty={metadata.difficulty}
@@ -207,174 +259,219 @@ export function QuestionEditorShell({
                         />
                     </div>
                 ) : (
-                    <>
-                        {/* 2. Main Horizontal Stepper */}
-                        <div className="flex items-center justify-center border-b border-border/60 bg-card/30 px-6 py-4">
-                            <div className="flex items-center gap-2 max-w-3xl w-full">
-                                {MAIN_STEPS.map((step, idx) => {
-                                    const active = currentMainStep === idx;
-                                    const completed = currentMainStep > idx;
-                                    return (
-                                        <div
-                                            key={step.id}
-                                            className="flex items-center flex-1 last:flex-none"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${completed ? "bg-emerald-500 text-white" : active ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.3)]" : "bg-muted text-muted-foreground border border-border/60"}`}
-                                                >
-                                                    {completed ? (
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                    ) : (
-                                                        idx + 1
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span
-                                                        className={`text-sm font-bold ${active || completed ? "text-foreground" : "text-muted-foreground"}`}
+                    <div className="flex-1 flex overflow-hidden bg-background p-6 gap-6">
+                        {/* 2. Unified Sidebar Stepper (Floating Card) */}
+                        <div className="w-72 shrink-0 rounded-xl border border-border/60 bg-card px-5 py-4 space-y-6 overflow-y-auto flex flex-col justify-between shadow-sm min-h-[460px] self-start">
+                            <div className="space-y-6">
+                                {STEP_GROUPS.map((group) => (
+                                    <div key={group.title} className="space-y-2">
+                                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3">
+                                            {group.title}
+                                        </h3>
+                                        <div className="space-y-1">
+                                            {group.steps.map((step) => {
+                                                const isActive = activeStep === step.id;
+                                                const isValid = isStepValid(step.id);
+                                                return (
+                                                    <button
+                                                        key={step.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setActiveStep(step.id);
+                                                            setVisitedSteps((prev) => ({
+                                                                ...prev,
+                                                                [step.id]: true,
+                                                            }));
+                                                        }}
+                                                        className={cn(
+                                                            "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer outline-none",
+                                                            isActive
+                                                                ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
+                                                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                                                        )}
                                                     >
-                                                        {step.label}
-                                                    </span>
-                                                    <span className="text-[11px] text-muted-foreground font-medium">
-                                                        {completed
-                                                            ? "Completed"
-                                                            : active
-                                                              ? "In Progress"
-                                                              : "Pending"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {idx < MAIN_STEPS.length - 1 && (
-                                                <div className="h-px flex-1 bg-border/60 mx-6" />
-                                            )}
+                                                        <span className="text-left py-1.5">
+                                                            {step.label}
+                                                        </span>
+                                                        {isValid && !isActive && (
+                                                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                                                        )}
+                                                        {!isValid && !isActive && (
+                                                            <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
+                                                        )}
+                                                        {isActive && (
+                                                            <div className="h-2 w-2 rounded-full bg-primary shrink-0 animate-pulse" />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-                        {/* 3. Main Content Area */}
-                        <div className="flex-1 overflow-hidden flex bg-background relative">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={currentMainStep}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex-1 w-full h-full overflow-y-auto"
-                                >
-                                    {/* STEP 0: DETAILS */}
-                                    {currentMainStep === 0 && (
-                                        <div className="max-w-5xl mx-auto p-6 md:p-12">
-                                            <ProblemMetadataCard
-                                                title={metadata.title}
-                                                setTitle={metadata.setTitle}
-                                                difficulty={metadata.difficulty}
-                                                setDifficulty={metadata.setDifficulty}
-                                                timeLimit={metadata.timeLimit}
-                                                setTimeLimit={metadata.setTimeLimit}
-                                                memoryLimit={metadata.memoryLimit}
-                                                setMemoryLimit={metadata.setMemoryLimit}
-                                                score={metadata.score}
-                                                setScore={metadata.setScore}
-                                                duration={metadata.duration}
-                                                setDuration={metadata.setDuration}
-                                                allowedLanguages={metadata.allowedLanguages}
-                                                setAllowedLanguages={metadata.setAllowedLanguages}
-                                                tags={metadata.tags}
-                                                setTags={metadata.setTags}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* STEP 1: STATEMENT */}
-                                    {currentMainStep === 1 && (
-                                        <div className="max-w-5xl mx-auto p-6 md:p-12 h-full flex flex-col">
-                                            <div className="space-y-1 mb-6 shrink-0">
-                                                <h2 className="text-2xl font-bold text-foreground">
-                                                    Problem Statement
-                                                </h2>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Write a clear description using Markdown.
-                                                    Include constraints and examples.
-                                                </p>
-                                            </div>
-                                            <div className="flex-1 min-h-0 bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden flex flex-col">
-                                                <QuestionArchitectureSection
-                                                    activeTab={activeTab}
-                                                    onTabChange={setActiveTab}
-                                                    editor={editor}
+                        {/* 3. Main Workspace Area */}
+                        <div className="flex-1 flex flex-col min-h-0 bg-background overflow-hidden relative">
+                            {/* Scrollable Step Content */}
+                            <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={activeStep}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="flex flex-col w-full h-fit"
+                                    >
+                                        {/* STEP: DETAILS */}
+                                        {activeStep === "details" && (
+                                            <div className="max-w-4xl w-full pb-4">
+                                                <ProblemMetadataCard
+                                                    title={metadata.title}
+                                                    setTitle={metadata.setTitle}
+                                                    difficulty={metadata.difficulty}
+                                                    setDifficulty={metadata.setDifficulty}
+                                                    timeLimit={metadata.timeLimit}
+                                                    setTimeLimit={metadata.setTimeLimit}
+                                                    memoryLimit={metadata.memoryLimit}
+                                                    setMemoryLimit={metadata.setMemoryLimit}
+                                                    score={metadata.score}
+                                                    setScore={metadata.setScore}
+                                                    duration={metadata.duration}
+                                                    setDuration={metadata.setDuration}
+                                                    allowedLanguages={metadata.allowedLanguages}
+                                                    setAllowedLanguages={
+                                                        metadata.setAllowedLanguages
+                                                    }
+                                                    tags={metadata.tags}
+                                                    setTags={metadata.setTags}
                                                 />
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* STEP 2: JUDGE CONFIGURATION */}
-                                    {currentMainStep === 2 && (
-                                        <div className="h-full w-full">
-                                            <QuestionWorkflowSection
-                                                activeWorkflowStep={activeStep}
-                                                setActiveWorkflowStep={(val) =>
-                                                    goToStep(val as WorkflowStep)
+                                        {/* STEP: STATEMENT */}
+                                        {activeStep === "statement" && (
+                                            <div className="w-full pb-4 flex flex-col h-[800px]">
+                                                <div className="flex-1 min-h-0 bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden flex flex-col">
+                                                    <QuestionArchitectureSection
+                                                        activeTab={activeTab}
+                                                        onTabChange={setActiveTab}
+                                                        editor={editor}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* STEPS: CODE EDITORS */}
+                                        {["starter", "solution", "driver"].includes(activeStep) && (
+                                            <div className="w-full pb-4">
+                                                <QuestionCodeEditor
+                                                    title={activeStep}
+                                                    language={workflowEditorLang}
+                                                    onLanguageChange={setWorkflowEditorLang}
+                                                    showExecution={activeStep === "driver"}
+                                                    testCases={testCases.testCases}
+                                                    starterCode={
+                                                        code.starterCodes[workflowEditorLang.id]
+                                                    }
+                                                    solutionCode={
+                                                        code.solutionCodes[workflowEditorLang.id]
+                                                    }
+                                                    driverCode={
+                                                        code.driverCodes[workflowEditorLang.id]
+                                                    }
+                                                    allowedLanguages={metadata.allowedLanguages}
+                                                    value={
+                                                        (activeStep === "starter"
+                                                            ? code.starterCodes[
+                                                                  workflowEditorLang.id
+                                                              ]
+                                                            : activeStep === "solution"
+                                                              ? code.solutionCodes[
+                                                                    workflowEditorLang.id
+                                                                ]
+                                                              : code.driverCodes[
+                                                                    workflowEditorLang.id
+                                                                ]) ?? ""
+                                                    }
+                                                    onChange={(val) => {
+                                                        if (activeStep === "starter")
+                                                            code.setStarterCodes({
+                                                                ...code.starterCodes,
+                                                                [workflowEditorLang.id]: val,
+                                                            });
+                                                        else if (activeStep === "solution")
+                                                            code.setSolutionCodes({
+                                                                ...code.solutionCodes,
+                                                                [workflowEditorLang.id]: val,
+                                                            });
+                                                        else
+                                                            code.setDriverCodes({
+                                                                ...code.driverCodes,
+                                                                [workflowEditorLang.id]: val,
+                                                            });
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* STEP: TEST CASES */}
+                                        {activeStep === "testcases" && (
+                                            <div className="w-full pb-4 flex flex-col">
+                                                <TestCaseManager
+                                                    testCases={testCases.testCases}
+                                                    setTestCases={testCases.setTestCases}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Dynamic Footer Area inside motion.div (closely below card, transparent, no borders) */}
+                                        <div
+                                            className={cn(
+                                                "flex items-center justify-between bg-transparent px-0 py-4 shrink-0 w-full border-none shadow-none mt-2",
+                                                activeStep === "details"
+                                                    ? "max-w-4xl"
+                                                    : "max-w-none",
+                                            )}
+                                        >
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={handlePrev}
+                                                disabled={currentIdx === 0}
+                                                className="gap-1.5 border-border/60 h-9 text-xs px-4 rounded-lg font-semibold cursor-pointer"
+                                            >
+                                                <ChevronLeft className="h-3.5 w-3.5" /> Previous
+                                            </Button>
+
+                                            <Button
+                                                type="button"
+                                                onClick={handleNext}
+                                                disabled={
+                                                    currentIdx === ALL_STEPS.length - 1 && isSaving
                                                 }
-                                                steps={steps}
-                                                isStepValid={(val) =>
-                                                    isStepValid(val as WorkflowStep)
-                                                }
-                                                canGoNext={canGoNext}
-                                                workflowEditorLang={workflowEditorLang}
-                                                setWorkflowEditorLang={setWorkflowEditorLang}
-                                                allowedLanguages={metadata.allowedLanguages}
-                                                starterCodes={code.starterCodes}
-                                                setStarterCodes={code.setStarterCodes}
-                                                solutionCodes={code.solutionCodes}
-                                                setSolutionCodes={code.setSolutionCodes}
-                                                driverCodes={code.driverCodes}
-                                                setDriverCodes={code.setDriverCodes}
-                                                testCases={testCases.testCases}
-                                                setTestCases={testCases.setTestCases}
-                                                onSave={onSave}
-                                                isSaving={isSaving}
-                                            />
+                                                className="gap-1.5 h-9 text-xs px-5 rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm"
+                                            >
+                                                {currentIdx === ALL_STEPS.length - 1 ? (
+                                                    isSaving ? (
+                                                        "Saving..."
+                                                    ) : (
+                                                        "Save Question"
+                                                    )
+                                                ) : (
+                                                    <>
+                                                        Save & Continue{" "}
+                                                        <ChevronRight className="h-3.5 w-3.5" />
+                                                    </>
+                                                )}
+                                            </Button>
                                         </div>
-                                    )}
-                                </motion.div>
-                            </AnimatePresence>
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
                         </div>
-
-                        {/* 4. Sticky Footer */}
-                        <div className="sticky bottom-0 z-30 flex items-center justify-between border-t border-border/60 bg-background/80 px-6 py-4 backdrop-blur-md">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handlePrevMainStep}
-                                disabled={currentMainStep === 0}
-                                className="gap-2 border-border/60 h-10 px-5"
-                            >
-                                <ChevronLeft className="h-4 w-4" /> Previous
-                            </Button>
-
-                            {currentMainStep < MAIN_STEPS.length - 1 ? (
-                                <Button
-                                    type="button"
-                                    onClick={handleNextMainStep}
-                                    className="gap-2 h-10 px-6 shadow-md shadow-primary/10"
-                                >
-                                    Next Step <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            ) : (
-                                <Button
-                                    type="button"
-                                    onClick={onSave}
-                                    disabled={isSaving}
-                                    className="gap-2 h-10 px-6 shadow-lg shadow-primary/20"
-                                >
-                                    Finalize & Save Question
-                                </Button>
-                            )}
-                        </div>
-                    </>
+                    </div>
                 )}
             </div>
         </AsyncStateHandler>
