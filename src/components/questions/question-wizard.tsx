@@ -806,14 +806,6 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                                         <Trash2 className="h-4 w-4" />{" "}
                                                                         Delete Test Case
                                                                     </Button>
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        className="gap-2 h-9 border-border/60 hover:bg-muted text-foreground"
-                                                                    >
-                                                                        <Play className="h-4 w-4" />{" "}
-                                                                        Run Test Case
-                                                                    </Button>
                                                                 </div>
                                                             </div>
                                                         ) : (

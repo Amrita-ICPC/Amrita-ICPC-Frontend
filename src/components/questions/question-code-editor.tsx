@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
+import { useTheme } from "next-themes";
 import {
     TerminalSquare,
     ChevronDown,
@@ -70,6 +71,8 @@ export function QuestionCodeEditor({
     driverCode = "",
     allowedLanguages = [],
 }: QuestionCodeEditorProps) {
+    const { resolvedTheme } = useTheme();
+    const monacoTheme = resolvedTheme === "dark" ? "vs-dark" : "vs";
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const { mutateAsync: runDraft, isPending: running } =
         useTestDraftCodeApiV1QuestionsTestDraftPost();
@@ -134,22 +137,30 @@ export function QuestionCodeEditor({
     return (
         <div
             className={cn(
-                "flex flex-col gap-0 rounded-2xl overflow-hidden shadow-2xl border border-border/40 bg-card/30 backdrop-blur-md",
-                showExecution ? "h-[700px]" : "h-[500px]",
+                "flex flex-col gap-0 rounded-xl overflow-hidden shadow-sm border border-border/60 bg-card",
+                showExecution ? "h-[650px]" : "h-[450px]",
             )}
         >
             {/* Toolbar */}
-            <div className="flex items-center justify-between gap-3 bg-muted/30 px-6 py-4 border-b border-border/40">
+            <div className="flex items-center justify-between gap-3 bg-muted/15 px-6 py-3 border-b border-border/40 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <TerminalSquare className="h-4 w-4" />
                     </div>
                     <div>
-                        <span className="text-sm font-bold tracking-tight text-foreground uppercase">
-                            {title}
+                        <span className="text-xs font-bold tracking-tight text-foreground capitalize">
+                            {title === "solution"
+                                ? "Solution"
+                                : title === "starter"
+                                  ? "Starter Code"
+                                  : "Driver Code"}
                         </span>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider leading-none mt-0.5">
-                            Editor Instance
+                        <p className="text-[9px] text-muted-foreground font-semibold leading-none mt-0.5">
+                            {title === "solution"
+                                ? "Configure solution code for validation."
+                                : title === "starter"
+                                  ? "Configure starter template code for participants."
+                                  : "Configure driver execution code to run tests."}
                         </p>
                     </div>
                 </div>
@@ -160,15 +171,15 @@ export function QuestionCodeEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 gap-2 border-border/40 bg-background/50 hover:bg-background/80 transition-colors"
+                                className="h-8 gap-1.5 border-border/40 bg-background/50 hover:bg-background/80 transition-colors rounded-lg text-xs font-semibold px-2.5 cursor-pointer"
                             >
-                                <span className="text-xs font-bold">{language.label}</span>
+                                <span>{language.label}</span>
                                 <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="w-48 p-1 border-border/40 backdrop-blur-xl bg-background/95 shadow-2xl"
+                            className="w-48 p-1 border-border/40 backdrop-blur-xl bg-background/95 shadow-lg"
                         >
                             {availableLanguages.map((lang) => (
                                 <DropdownMenuItem
@@ -177,7 +188,7 @@ export function QuestionCodeEditor({
                                     className={cn(
                                         "flex items-center justify-between gap-2 px-3 py-2 text-xs cursor-pointer transition-colors",
                                         language.id === lang.id
-                                            ? "bg-primary/10 text-primary font-bold"
+                                            ? "bg-primary/10 text-primary font-semibold"
                                             : "text-muted-foreground hover:bg-muted/50",
                                     )}
                                 >
@@ -193,7 +204,7 @@ export function QuestionCodeEditor({
                     {showExecution && (
                         <Button
                             size="sm"
-                            className="h-9 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 shadow-lg shadow-primary/20 transition-all active:scale-95"
+                            className="h-8 gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 rounded-lg text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
                             onClick={handleRun}
                             disabled={running}
                         >
@@ -223,16 +234,16 @@ export function QuestionCodeEditor({
                         onMount={(editor) => {
                             editorRef.current = editor;
                         }}
-                        theme="vs-dark"
+                        theme={monacoTheme}
                         options={{
-                            fontSize: 14,
+                            fontSize: 13,
                             fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
                             fontLigatures: true,
                             minimap: { enabled: false },
                             scrollBeyondLastLine: false,
                             lineNumbers: "on",
                             renderLineHighlight: "line",
-                            padding: { top: 20, bottom: 20 },
+                            padding: { top: 12, bottom: 12 },
                             tabSize: 4,
                             wordWrap: "on",
                             smoothScrolling: true,
@@ -245,17 +256,17 @@ export function QuestionCodeEditor({
                 </div>
 
                 {showExecution && (
-                    <div className="flex w-[400px] shrink-0 flex-col border-l border-border/40 bg-muted/10 backdrop-blur-sm overflow-y-auto">
+                    <div className="flex w-[360px] shrink-0 flex-col border-l border-border/40 bg-muted/5 overflow-y-auto">
                         {/* Results Summary */}
-                        <div className="p-6 border-b border-border/20 space-y-4">
+                        <div className="p-4 border-b border-border/20 space-y-3 shrink-0">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                    Test Execution Summary
+                                    Execution Summary
                                 </Label>
                                 {totalCount > 0 && (
                                     <span
                                         className={cn(
-                                            "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                            "text-[9px] font-bold px-2 py-0.5 rounded-full",
                                             passedCount === totalCount
                                                 ? "bg-emerald-500/10 text-emerald-500"
                                                 : "bg-amber-500/10 text-amber-500",
@@ -267,14 +278,14 @@ export function QuestionCodeEditor({
                             </div>
 
                             {execError && (
-                                <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">
-                                    <AlertCircle className="h-4 w-4 shrink-0" />
+                                <div className="flex items-start gap-2.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs">
+                                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                                     <span>{execError}</span>
                                 </div>
                             )}
 
                             {totalCount === 0 && !execError && (
-                                <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl text-amber-500/80 text-[10px] flex items-center gap-2">
+                                <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-lg text-amber-500/80 text-[10px] flex items-center gap-1.5">
                                     <Info className="h-3.5 w-3.5" />
                                     <span>Add test cases to verify your code.</span>
                                 </div>
@@ -282,17 +293,17 @@ export function QuestionCodeEditor({
                         </div>
 
                         {/* Result Section */}
-                        <div className="p-6 flex-1 space-y-6">
+                        <div className="p-4 flex-1 space-y-4">
                             {results.length > 0
                                 ? results.map((res: any, idx: number) => (
-                                      <div key={idx} className="space-y-3">
+                                      <div key={idx} className="space-y-2">
                                           <div className="flex items-center justify-between">
                                               <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
                                                   Test Case #{idx + 1}
                                               </span>
                                               <div
                                                   className={cn(
-                                                      "flex items-center gap-1.5 text-[10px] font-bold uppercase",
+                                                      "flex items-center gap-1 text-[10px] font-bold uppercase",
                                                       res.passed
                                                           ? "text-emerald-500"
                                                           : "text-amber-500",
@@ -309,37 +320,37 @@ export function QuestionCodeEditor({
 
                                           <div className="grid grid-cols-1 gap-2">
                                               <div className="space-y-1">
-                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-1">
+                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-0.5">
                                                       Input
                                                   </span>
-                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[11px] text-slate-300 leading-tight border border-border/10">
+                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[10px] text-slate-300 leading-tight border border-border/10">
                                                       {testCases[idx]?.input?.trim() || "No input"}
                                                   </pre>
                                               </div>
                                               <div className="space-y-1">
-                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-1">
+                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-0.5">
                                                       Output
                                                   </span>
-                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[11px] text-slate-300 leading-tight border border-border/10">
+                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[10px] text-slate-300 leading-tight border border-border/10">
                                                       {res.stdout?.trim() || "No output"}
                                                   </pre>
                                               </div>
                                               {!res.passed && (
                                                   <div className="space-y-1">
-                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-amber-500/40 ml-1">
+                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-amber-500/40 ml-0.5">
                                                           Expected
                                                       </span>
-                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-amber-500/5 px-3 py-2 font-mono text-[11px] text-amber-200/60 leading-tight border border-amber-500/10">
+                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-amber-500/5 px-3 py-2 font-mono text-[10px] text-amber-200/60 leading-tight border border-amber-500/10">
                                                           {res.expected_output?.trim() || "None"}
                                                       </pre>
                                                   </div>
                                               )}
                                               {res.stderr && (
                                                   <div className="space-y-1">
-                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-red-500/40 ml-1">
+                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-red-500/40 ml-0.5">
                                                           Error
                                                       </span>
-                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-red-500/5 px-3 py-2 font-mono text-[11px] text-red-400/80 leading-tight border border-red-500/10">
+                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-red-500/5 px-3 py-2 font-mono text-[10px] text-red-400/80 leading-tight border border-red-500/10">
                                                           {res.stderr}
                                                       </pre>
                                                   </div>
@@ -349,10 +360,10 @@ export function QuestionCodeEditor({
                                   ))
                                 : !execError && (
                                       <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
-                                          <div className="h-12 w-12 rounded-2xl bg-muted/20 flex items-center justify-center mb-4">
-                                              <Play className="h-6 w-6" />
+                                          <div className="h-10 w-10 rounded-xl bg-muted/20 flex items-center justify-center mb-3">
+                                              <Play className="h-5 w-5" />
                                           </div>
-                                          <p className="text-[10px] font-medium uppercase tracking-widest">
+                                          <p className="text-[9px] font-semibold uppercase tracking-widest">
                                               Awaiting execution
                                           </p>
                                       </div>

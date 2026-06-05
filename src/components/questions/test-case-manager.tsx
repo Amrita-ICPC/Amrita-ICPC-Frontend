@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Plus, Trash2, Upload, Play, MoreVertical, Info, Database } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Trash2, Play, ChevronUp, ChevronDown, Info, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,26 +26,40 @@ interface TestCaseManagerProps {
 
 export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProps) {
     const [activeTab, setActiveTab] = useState<"visible" | "hidden">("visible");
-    const [activeId, setActiveId] = useState<string | null>(
-        testCases.find((tc) => !tc.is_hidden)?.id || null,
-    );
 
-    const visibleCases = testCases.filter((tc) => !tc.is_hidden);
-    const hiddenCases = testCases.filter((tc) => tc.is_hidden);
+    // Sort test cases by order value
+    const sortedTestCases = useMemo(() => {
+        return [...testCases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    }, [testCases]);
+
+    // Active test case ID
+    const [activeId, setActiveId] = useState<string | null>(() => {
+        const initial = sortedTestCases.find((tc) => !tc.is_hidden);
+        return initial ? initial.id : null;
+    });
+
+    const visibleCases = sortedTestCases.filter((tc) => !tc.is_hidden);
+    const hiddenCases = sortedTestCases.filter((tc) => tc.is_hidden);
 
     const filteredTestCases = useMemo(() => {
-        return testCases
-            .map((tc, index) => ({ ...tc, originalIndex: index }))
+        return sortedTestCases
+            .map((tc, index) => ({ ...tc, filteredIndex: index }))
             .filter((tc) => (activeTab === "visible" ? !tc.is_hidden : tc.is_hidden));
-    }, [testCases, activeTab]);
+    }, [sortedTestCases, activeTab]);
 
     const handleTabChange = (tab: "visible" | "hidden") => {
         setActiveTab(tab);
-        const newFiltered = testCases.filter((tc) =>
+        const newFiltered = sortedTestCases.filter((tc) =>
             tab === "visible" ? !tc.is_hidden : tc.is_hidden,
         );
-        if (!newFiltered.find((tc) => tc.id === activeId)) {
-            setActiveId(newFiltered.length > 0 ? newFiltered[0].id : null);
+        if (newFiltered.length > 0) {
+            // Find if there's already an active ID within the new list
+            const currentActiveInTab = newFiltered.find((tc) => tc.id === activeId);
+            if (!currentActiveInTab) {
+                setActiveId(newFiltered[0].id);
+            }
+        } else {
+            setActiveId(null);
         }
     };
 
@@ -80,124 +94,155 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
         }
     };
 
-    const activeTestCase = testCases.find((tc) => tc.id === activeId);
-    const activeOriginalIndex = testCases.findIndex((tc) => tc.id === activeId);
+    const moveTestCase = (filteredIndex: number, direction: "up" | "down") => {
+        const newFilteredIndex = direction === "up" ? filteredIndex - 1 : filteredIndex + 1;
+        if (newFilteredIndex < 0 || newFilteredIndex >= filteredTestCases.length) return;
+
+        // Find corresponding items in the main testCases list
+        const item1 = filteredTestCases[filteredIndex];
+        const item2 = filteredTestCases[newFilteredIndex];
+
+        const updated = testCases.map((tc) => {
+            if (tc.id === item1.id) {
+                return { ...tc, order: item2.order };
+            }
+            if (tc.id === item2.id) {
+                return { ...tc, order: item1.order };
+            }
+            return tc;
+        });
+
+        setTestCases(updated);
+    };
+
+    const activeTestCase = sortedTestCases.find((tc) => tc.id === activeId);
+    const activeOriginalIndex = sortedTestCases.findIndex((tc) => tc.id === activeId);
 
     return (
-        <div className="w-full flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                        Test Cases
-                    </h2>
-                    <p className="text-muted-foreground text-sm mt-1">
-                        Create input and expected output pairs to test solutions.
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
+        <div className="w-full flex flex-col h-full">
+            {/* Single White Card Wrapping the whole Test Case manager */}
+            <div className="flex flex-col border border-border/60 rounded-xl bg-card overflow-hidden shadow-sm flex-1 min-h-[550px]">
+                {/* 1. Header Inside the Card */}
+                <div className="flex items-center justify-between border-b border-border/40 px-6 py-5 shrink-0 bg-card">
+                    <div>
+                        <h2 className="text-base font-bold text-foreground">Test Cases</h2>
+                        <p className="text-[10px] text-muted-foreground">
+                            Create input and expected output pairs to test solutions.
+                        </p>
+                    </div>
                     <Button
                         type="button"
-                        variant="outline"
-                        className="h-9 px-4 gap-2 border-border/60 font-medium"
+                        onClick={() => addTestCase(activeTab === "hidden")}
+                        size="sm"
+                        className="h-8 text-xs font-semibold px-4 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm"
                     >
-                        <Upload className="h-4 w-4 text-primary" /> Import
-                    </Button>
-                    <Button
-                        type="button"
-                        onClick={() => addTestCase(false)}
-                        className="shadow-sm gap-2 h-9 px-4 font-medium"
-                    >
-                        <Plus className="h-4 w-4" /> Add Test Case
+                        <Plus className="h-3.5 w-3.5 mr-1" /> Add Test Case
                     </Button>
                 </div>
-            </div>
 
-            {/* Split View Container */}
-            <div className="flex flex-col border border-border/60 rounded-xl bg-card overflow-hidden shadow-sm flex-1 min-h-[600px]">
-                {/* Tabs Row */}
-                <div className="flex items-center border-b border-border/60 px-2 bg-background/50">
-                    <button
-                        type="button"
-                        onClick={() => handleTabChange("visible")}
-                        className={cn(
-                            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
-                            activeTab === "visible"
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground",
-                        )}
-                    >
-                        Visible ({visibleCases.length})
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleTabChange("hidden")}
-                        className={cn(
-                            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
-                            activeTab === "hidden"
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground",
-                        )}
-                    >
-                        Hidden ({hiddenCases.length})
-                    </button>
+                {/* 2. Tabs Row with Underline Border Indicator */}
+                <div className="flex items-end border-b border-border/40 px-6 bg-card shrink-0 pt-6">
+                    <div className="flex gap-6 -mb-[1px]">
+                        <button
+                            type="button"
+                            onClick={() => handleTabChange("visible")}
+                            className={cn(
+                                "bg-transparent rounded-none border-t-0 border-x-0 border-b-2 border-transparent pt-2 pb-2.5 px-1 font-bold text-xs cursor-pointer focus:outline-none transition-all",
+                                activeTab === "visible"
+                                    ? "border-[#2563eb] text-[#2563eb] dark:border-primary dark:text-primary"
+                                    : "text-muted-foreground hover:text-foreground hover:border-border/60",
+                            )}
+                        >
+                            Visible ({visibleCases.length})
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleTabChange("hidden")}
+                            className={cn(
+                                "bg-transparent rounded-none border-t-0 border-x-0 border-b-2 border-transparent pt-2 pb-2.5 px-1 font-bold text-xs cursor-pointer focus:outline-none transition-all",
+                                activeTab === "hidden"
+                                    ? "border-[#2563eb] text-[#2563eb] dark:border-primary dark:text-primary"
+                                    : "text-muted-foreground hover:text-foreground hover:border-border/60",
+                            )}
+                        >
+                            Hidden ({hiddenCases.length})
+                        </button>
+                    </div>
                 </div>
 
-                {/* Inner Split Layout */}
-                <div className="flex flex-1 overflow-hidden">
+                {/* 3. Inner Split Layout */}
+                <div className="flex flex-1 overflow-hidden min-h-0 bg-card">
                     {/* Left Sidebar List */}
-                    <div className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/10">
+                    <div className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/5">
                         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                            {filteredTestCases.map((tc) => {
+                            {filteredTestCases.map((tc, index) => {
                                 const isActive = activeId === tc.id;
                                 return (
                                     <div
                                         key={tc.id}
                                         onClick={() => setActiveId(tc.id)}
                                         className={cn(
-                                            "flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors group",
+                                            "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors group",
                                             isActive
                                                 ? "bg-primary/10 text-primary font-semibold"
                                                 : "hover:bg-muted/50 text-foreground font-medium",
                                         )}
                                     >
-                                        <span className="text-sm truncate">
-                                            {tc.name || `Sample Test Case ${tc.originalIndex + 1}`}
+                                        <span className="text-xs truncate">
+                                            {tc.name || `Sample Test Case ${index + 1}`}
                                         </span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className={cn(
-                                                "h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity",
-                                                isActive && "opacity-100",
-                                            )}
-                                        >
-                                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
+                                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                disabled={index === 0}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    moveTestCase(index, "up");
+                                                }}
+                                                className="h-5 w-5 hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                                            >
+                                                <ChevronUp className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                disabled={index === filteredTestCases.length - 1}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    moveTestCase(index, "down");
+                                                }}
+                                                className="h-5 w-5 hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                                            >
+                                                <ChevronDown className="h-3 w-3" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className="p-4 border-t border-border/60 bg-muted/5">
+                        <div className="p-3 border-t border-border/40 bg-muted/10">
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="w-full gap-2 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary border-dashed font-semibold"
+                                className="w-full h-8 text-[11px] gap-1.5 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary border-dashed font-semibold rounded-lg cursor-pointer"
                                 onClick={() => addTestCase(activeTab === "hidden")}
                             >
-                                <Plus className="h-4 w-4" /> Add{" "}
+                                <Plus className="h-3 w-3" /> Add{" "}
                                 {activeTab === "hidden" ? "Hidden" : "Visible"} Test Case
                             </Button>
                         </div>
                     </div>
 
                     {/* Right Content Editor */}
-                    <div className="flex-1 flex flex-col p-6 bg-background overflow-y-auto">
+                    <div className="flex-1 flex flex-col p-6 bg-card overflow-y-auto">
                         {activeTestCase ? (
-                            <div className="flex-1 flex flex-col h-full space-y-6 max-w-4xl">
-                                {/* Top Row: Name & Switch */}
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-1.5 flex-1 max-w-sm">
+                            <div className="flex-1 flex flex-col h-full space-y-6 max-w-4xl min-h-0">
+                                {/* Top Row: Name, Weight/Points & Hidden Switch */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                    <div className="space-y-1.5 md:col-span-1">
                                         <Label className="text-xs font-semibold text-muted-foreground">
                                             Test Case Name
                                         </Label>
@@ -209,10 +254,29 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                     name: e.target.value,
                                                 })
                                             }
-                                            className="bg-card border-border/60 h-10 font-medium focus-visible:ring-primary/50"
+                                            className="bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-3">
+
+                                    {/* Weight Field (Required field requested by User) */}
+                                    <div className="space-y-1.5 md:col-span-1">
+                                        <Label className="text-xs font-semibold text-muted-foreground">
+                                            Weight / Points
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            value={activeTestCase.weight ?? 1}
+                                            placeholder="1"
+                                            onChange={(e) =>
+                                                updateTestCase(activeTestCase.id, {
+                                                    weight: Number(e.target.value),
+                                                })
+                                            }
+                                            className="bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pb-2 justify-end md:col-span-1">
                                         <Switch
                                             checked={activeTestCase.is_hidden}
                                             onCheckedChange={(val) =>
@@ -220,27 +284,21 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                     is_hidden: val,
                                                 })
                                             }
+                                            className="scale-90"
                                         />
-                                        <Label className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
-                                            Hidden Test Case <Info className="h-4 w-4 opacity-50" />
+                                        <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                            Hidden Test Case
                                         </Label>
                                     </div>
                                 </div>
 
-                                {/* Textareas */}
-                                <div className="grid grid-cols-2 gap-6 flex-1 min-h-[300px]">
-                                    <div className="flex flex-col space-y-2 h-full">
+                                {/* Textareas inputs */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1 min-h-[280px]">
+                                    <div className="flex flex-col space-y-1.5 h-full">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                                                Input <Info className="h-3 w-3 opacity-50" />
+                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                                                Input <Info className="h-3.5 w-3.5 opacity-55" />
                                             </Label>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-7 text-xs border-border/60 text-muted-foreground px-2"
-                                            >
-                                                Format <ChevronDownIcon className="ml-1 h-3 w-3" />
-                                            </Button>
                                         </div>
                                         <Textarea
                                             value={activeTestCase.input}
@@ -249,23 +307,17 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                     input: e.target.value,
                                                 })
                                             }
-                                            className="flex-1 resize-none font-mono text-sm bg-background border-border/60 focus-visible:ring-primary/50 rounded-xl p-4 shadow-sm"
+                                            className="flex-1 resize-none font-mono text-xs bg-background border-border/60 focus-visible:ring-primary/50 rounded-lg p-3 shadow-inner min-h-[150px]"
+                                            placeholder="Enter input here..."
                                         />
                                     </div>
 
-                                    <div className="flex flex-col space-y-2 h-full">
+                                    <div className="flex flex-col space-y-1.5 h-full">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                                                 Expected Output{" "}
-                                                <Info className="h-3 w-3 opacity-50" />
+                                                <Info className="h-3.5 w-3.5 opacity-55" />
                                             </Label>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-7 text-xs border-border/60 text-muted-foreground px-2"
-                                            >
-                                                Format <ChevronDownIcon className="ml-1 h-3 w-3" />
-                                            </Button>
                                         </div>
                                         <Textarea
                                             value={activeTestCase.output}
@@ -274,58 +326,35 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                     output: e.target.value,
                                                 })
                                             }
-                                            className="flex-1 resize-none font-mono text-sm bg-background border-border/60 focus-visible:ring-primary/50 rounded-xl p-4 shadow-sm"
+                                            className="flex-1 resize-none font-mono text-xs bg-background border-border/60 focus-visible:ring-primary/50 rounded-lg p-3 shadow-inner min-h-[150px]"
+                                            placeholder="Enter expected output here..."
                                         />
                                     </div>
                                 </div>
 
                                 {/* Bottom Row Buttons */}
-                                <div className="flex items-center justify-between pt-6 mt-auto">
+                                <div className="flex items-center justify-between pt-4 mt-auto shrink-0 border-t border-border/40">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="text-red-500 border-red-500/20 hover:bg-red-500/10 gap-2 h-9 font-medium"
+                                        className="text-red-500 border-red-500/20 hover:bg-red-500/10 gap-1.5 h-8 text-xs font-semibold rounded-lg cursor-pointer"
                                         onClick={() => deleteTestCase(activeTestCase.id)}
                                     >
-                                        <Trash2 className="h-4 w-4" /> Delete Test Case
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="gap-2 h-9 border-border/60 hover:bg-muted font-medium text-primary hover:text-primary"
-                                    >
-                                        <Play className="h-4 w-4" /> Run Test Case
+                                        <Trash2 className="h-3.5 w-3.5" /> Delete Test Case
                                     </Button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/60 space-y-4">
-                                <Database className="h-12 w-12 opacity-20" />
-                                <p>Select or create a test case to configure it.</p>
+                            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/50 space-y-3">
+                                <Database className="h-10 w-10 opacity-30" />
+                                <p className="text-xs">
+                                    Select or create a test case to configure it.
+                                </p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
         </div>
-    );
-}
-
-function ChevronDownIcon(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m6 9 6 6 6-6" />
-        </svg>
     );
 }

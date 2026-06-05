@@ -150,3 +150,10 @@
         @apply bg-background text-foreground antialiased;
     }
 }
+
+/* Expand editor page container to cover full content pane width */
+body.hide-layout main > div {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
