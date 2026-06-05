@@ -8,7 +8,6 @@ import {
 import { keepPreviousData } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContestQuestionsHero } from "./contest-questions-hero";
-import { ContestQuestionsStats } from "./contest-questions-stats";
 import { ContestQuestionsTable } from "./contest-questions-table";
 import { AsyncStateHandler } from "../shared/async-state-handler";
 
@@ -112,14 +111,16 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                 </div>
             }
         >
-            <div className="space-y-8">
-                <ContestQuestionsHero contestId={contestId} contestName={contest?.name} />
-
-                <ContestQuestionsStats
-                    total={questionsResponse?.total_count ?? 0}
-                    easy={questionsResponse?.easy_count ?? 0}
-                    medium={questionsResponse?.medium_count ?? 0}
-                    hard={questionsResponse?.hard_count ?? 0}
+            <div className="flex flex-col min-h-screen bg-background">
+                <ContestQuestionsHero
+                    contestId={contestId}
+                    contestName={contest?.name}
+                    stats={{
+                        total: questionsResponse?.total_count ?? 0,
+                        easy: questionsResponse?.easy_count ?? 0,
+                        medium: questionsResponse?.medium_count ?? 0,
+                        hard: questionsResponse?.hard_count ?? 0,
+                    }}
                 />
 
                 <ContestQuestionsTable
