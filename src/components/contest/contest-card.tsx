@@ -131,13 +131,10 @@ export function ContestCard({ contest }: ContestCardProps) {
         : "";
 
     return (
-        <div className="group relative flex flex-col overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
-            <Link
-                href={`/contest/${contest.id}`}
-                className="absolute inset-0 z-0"
-                aria-label={`View contest ${contest.name}`}
-            />
-
+        <Link
+            href={`/contest/${contest.id}`}
+            className="group relative flex flex-col overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-md block"
+        >
             {/* Header Block (Waves + Badges) */}
             <div className="relative h-[96px] w-full bg-primary/5 dark:bg-primary/10">
                 <WaveBackground />
@@ -254,6 +251,6 @@ export function ContestCard({ contest }: ContestCardProps) {
                     <ArrowRight className="h-3.5 w-3.5" />
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
