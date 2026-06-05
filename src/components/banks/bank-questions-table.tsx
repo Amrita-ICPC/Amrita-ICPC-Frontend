@@ -336,29 +336,42 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                             {questions.map((question) => (
                                 <Card
                                     key={question.id}
-                                    className="border-border/60 py-0 transition-all hover:border-primary/40 hover:shadow-md"
+                                    className="group cursor-pointer border-border/60 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md rounded-[16px] overflow-hidden flex flex-col p-0 gap-0"
                                 >
-                                    <CardContent className="flex h-full flex-col gap-3 p-4">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <Checkbox
-                                                checked={selectedIds.includes(question.id)}
-                                                onCheckedChange={() => toggleSelection(question.id)}
-                                            />
-                                            {questionActions(question)}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <Link
-                                                href={`/banks/${bankId}/questions/${question.id}`}
-                                                className="line-clamp-2 font-semibold leading-snug transition-colors hover:text-primary"
-                                            >
-                                                {question.title}
-                                            </Link>
-                                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    {/* Top Section */}
+                                    <div className="relative flex flex-col p-5 bg-blue-500/5 dark:bg-blue-500/10 border-b border-border/40 flex-1">
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-start gap-3">
+                                                    <Checkbox
+                                                        className="mt-0.5"
+                                                        checked={selectedIds.includes(question.id)}
+                                                        onCheckedChange={() =>
+                                                            toggleSelection(question.id)
+                                                        }
+                                                    />
+                                                    <Link
+                                                        href={`/banks/${bankId}/questions/${question.id}`}
+                                                        className="text-[15px] font-bold leading-tight text-foreground transition-colors group-hover:text-primary line-clamp-2"
+                                                    >
+                                                        {question.title}
+                                                    </Link>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 flex flex-wrap items-center gap-2">
                                                 <DifficultyBadge difficulty={question.difficulty} />
                                                 <TagsPreview tags={question.tags} />
                                             </div>
                                         </div>
-                                    </CardContent>
+                                    </div>
+
+                                    {/* Bottom Section (Actions) */}
+                                    <div className="flex flex-col px-4 py-2.5 bg-card">
+                                        <div className="flex items-center justify-end">
+                                            {questionActions(question)}
+                                        </div>
+                                    </div>
                                 </Card>
                             ))}
                         </div>
