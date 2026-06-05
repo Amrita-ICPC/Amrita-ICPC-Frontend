@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Users, Trophy } from "lucide-react";
+import { ArrowRight, Trophy, Calendar, Clock, FileQuestion, Users } from "lucide-react";
 import Link from "next/link";
 
 import { useGetAllContestsApiV1ContestsGet } from "@/api/generated/contests/contests";
@@ -18,32 +18,51 @@ import { ContestSkeleton } from "./contest-skeleton";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { AsyncStateHandler } from "../shared/async-state-handler";
+import { cn } from "@/lib/utils";
 
-const STATUS_CLASSES: Record<string, string> = {
-    PUBLISHED: "bg-emerald-500/10 text-emerald-500 border-transparent",
-    DRAFT: "bg-orange-500/10 text-orange-500 border-transparent",
-    PAUSED: "bg-blue-500/10 text-blue-500 border-transparent",
-    CANCELLED: "bg-red-500/10 text-red-500 border-transparent",
+const CONTEST_STATUS_STYLES: Record<
+    string,
+    { bg: string; dot: string; label: string; text: string }
+> = {
+    PUBLISHED: {
+        bg: "bg-emerald-500/10",
+        dot: "bg-emerald-500",
+        label: "Published",
+        text: "text-emerald-700 dark:text-emerald-400",
+    },
+    DRAFT: {
+        bg: "bg-amber-500/10",
+        dot: "bg-amber-500",
+        label: "Draft",
+        text: "text-amber-700 dark:text-amber-400",
+    },
+    PAUSED: {
+        bg: "bg-sky-500/10",
+        dot: "bg-sky-600",
+        label: "Paused",
+        text: "text-sky-700 dark:text-sky-400",
+    },
+    CANCELLED: {
+        bg: "bg-red-500/10",
+        dot: "bg-red-500",
+        label: "Cancelled",
+        text: "text-red-700 dark:text-red-400",
+    },
 };
 
 const RUN_STATUS_CLASSES: Record<string, string> = {
-    LIVE: "bg-emerald-500/10 text-emerald-500 border-transparent",
-    UPCOMING: "bg-blue-500/10 text-blue-500 border-transparent",
-    ENDED: "bg-zinc-500/10 text-zinc-500 border-transparent",
+    LIVE: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    UPCOMING: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+    ENDED: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
 };
 
-function ContestTableRow({ contest }: { contest: ContestSummaryResponse }) {
+function ContestListRow({ contest }: { contest: ContestSummaryResponse }) {
+    const cStatus = CONTEST_STATUS_STYLES[contest.status] ?? CONTEST_STATUS_STYLES.DRAFT;
+    const rStatus = RUN_STATUS_CLASSES[contest.run_status] ?? RUN_STATUS_CLASSES.UPCOMING;
+    const contestCode = contest.id.split("-")[0].toUpperCase();
+
     const start = contest.start_time
         ? new Date(contest.start_time).toLocaleDateString(undefined, {
               month: "short",
@@ -51,116 +70,128 @@ function ContestTableRow({ contest }: { contest: ContestSummaryResponse }) {
               year: "numeric",
           })
         : "Not Scheduled";
-    const end = contest.end_time
-        ? new Date(contest.end_time).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
+
+    const startTimeStr = contest.start_time
+        ? new Date(contest.start_time).toLocaleTimeString(undefined, {
+              hour: "2-digit",
+              minute: "2-digit",
           })
-        : "Not Scheduled";
+        : "";
+
+    const runStatusLabel = contest.run_status === "ENDED" ? "COMPLETED" : contest.run_status;
 
     return (
-        <TableRow className="group cursor-pointer hover:bg-muted/40 transition-colors">
-            <TableCell>
-                <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <Trophy className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                        <p className="font-medium text-foreground leading-tight group-hover:text-primary transition-colors">
-                            {contest.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                            {contest.description || "No description"}
-                        </p>
-                    </div>
+        <div className="group relative flex min-h-[72px] flex-col gap-3 rounded-[16px] border border-border/60 bg-card p-3 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-4">
+            <Link
+                href={`/contest/${contest.id}`}
+                className="absolute inset-0 z-0"
+                aria-label={`View contest ${contest.name}`}
+            />
+
+            {/* Left: Big Icon Container */}
+            <div className="hidden h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[16px] bg-primary/10 dark:bg-primary/15 md:flex">
+                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border-[2px] border-primary/50 text-primary">
+                    <Trophy className="h-[18px] w-[18px]" />
                 </div>
-            </TableCell>
-            <TableCell>
-                <div className="flex flex-col items-start gap-1">
+            </div>
+
+            {/* Middle: Content */}
+            <div className="flex flex-1 min-w-0 flex-col justify-center py-1">
+                <div className="mb-1.5 flex items-center gap-1.5">
                     <Badge
                         variant="outline"
-                        className={
-                            RUN_STATUS_CLASSES[contest.run_status] ?? RUN_STATUS_CLASSES.UPCOMING
-                        }
+                        className={cn(
+                            "text-[9px] uppercase font-bold tracking-wider rounded h-5 px-1.5",
+                            rStatus,
+                        )}
                     >
-                        {contest.run_status}
+                        {runStatusLabel}
                     </Badge>
-                    <Badge
-                        variant="outline"
-                        className={`text-[10px] h-5 ${STATUS_CLASSES[contest.status] ?? STATUS_CLASSES.DRAFT}`}
-                    >
-                        {contest.status}
-                    </Badge>
+                    <div className={cn("flex items-center rounded px-1.5 py-0.5", cStatus.bg)}>
+                        <span
+                            className={cn(
+                                "text-[9px] font-bold uppercase tracking-wide",
+                                cStatus.text,
+                            )}
+                        >
+                            {cStatus.label}
+                        </span>
+                    </div>
                 </div>
-            </TableCell>
-            <TableCell className="text-sm text-muted-foreground capitalize">
-                {contest.contest_mode.toLowerCase()}
-            </TableCell>
-            <TableCell>
-                <div className="text-sm text-muted-foreground">
-                    <p>{start}</p>
-                    <p className="text-xs opacity-70">→ {end}</p>
-                </div>
-            </TableCell>
-            <TableCell>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Users className="h-3.5 w-3.5" />
-                    <span className="capitalize">
-                        {contest.team_approval_mode.replace("_", " ").toLowerCase()}
+                <h3 className="line-clamp-1 text-[15px] font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
+                    {contest.name}
+                </h3>
+                <div className="mt-1 flex items-center gap-1.5 text-[12px] text-muted-foreground truncate">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">
+                        {start} {startTimeStr && `at ${startTimeStr}`}
                     </span>
                 </div>
-            </TableCell>
-            <TableCell className="text-right">
-                <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/contest/${contest.id}`}>
-                        View <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                    </Link>
-                </Button>
-            </TableCell>
-        </TableRow>
+            </div>
+
+            {/* Right: Stats & Actions */}
+            <div className="mt-2 flex shrink-0 items-center justify-between gap-4 pt-3 md:mt-0 md:justify-end md:pt-0">
+                <div className="flex gap-6">
+                    <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                            <Clock className="h-3 w-3 shrink-0" />
+                            <span className="text-[11px] font-medium">Duration</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-foreground pl-4">
+                            {contest.duration ? `${Math.floor(contest.duration / 60)}h` : "—"}
+                        </span>
+                    </div>
+                    <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                            <FileQuestion className="h-3 w-3 shrink-0" />
+                            <span className="text-[11px] font-medium">Questions</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-foreground pl-4">—</span>
+                    </div>
+                    <div className="hidden md:flex flex-col items-start gap-0.5">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                            <Users className="h-3 w-3 shrink-0" />
+                            <span className="text-[11px] font-medium">Teams</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-foreground pl-4">—</span>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 pl-3 border-l border-border/40 ml-1">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card shadow-sm text-[11px] font-bold text-muted-foreground">
+                        {contestCode.charAt(0)}
+                    </div>
+                    <div className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-primary-foreground shadow-sm transition-transform group-hover:scale-105 group-hover:shadow-md">
+                        <span className="text-[12px] font-semibold">View</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
-function TableSkeleton() {
+function ListSkeleton() {
     return (
-        <div className="rounded-lg border">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Contest</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Mode</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Approval</TableHead>
-                        <TableHead />
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <TableRow key={i}>
-                            <TableCell>
-                                <Skeleton className="h-9 w-48" />
-                            </TableCell>
-                            <TableCell>
-                                <Skeleton className="h-5 w-20" />
-                            </TableCell>
-                            <TableCell>
-                                <Skeleton className="h-4 w-16" />
-                            </TableCell>
-                            <TableCell>
-                                <Skeleton className="h-8 w-28" />
-                            </TableCell>
-                            <TableCell>
-                                <Skeleton className="h-4 w-20" />
-                            </TableCell>
-                            <TableCell>
-                                <Skeleton className="h-8 w-16" />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className="flex flex-col gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                    key={i}
+                    className="flex min-h-[72px] items-center gap-4 rounded-[16px] border border-border/60 p-3"
+                >
+                    <Skeleton className="hidden md:block h-[64px] w-[64px] rounded-[14px]" />
+                    <div className="flex flex-1 min-w-0 flex-col gap-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-5 w-64" />
+                        <Skeleton className="h-4 w-32" />
+                    </div>
+                    <div className="hidden md:flex items-center gap-6">
+                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-8 w-24" />
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }
@@ -214,18 +245,18 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                 onRetry={refetch}
                 loadingComponent={
                     view === "grid" ? (
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <ContestSkeleton key={i} />
                             ))}
                         </div>
                     ) : (
-                        <TableSkeleton />
+                        <ListSkeleton />
                     )
                 }
             >
                 {view === "grid" ? (
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {data?.data && data.data.length > 0 ? (
                             data.data.map((contest) => (
                                 <ContestCard key={contest.id} contest={contest} />
@@ -239,24 +270,10 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                 ) : (
                     <>
                         {data?.data && data.data.length > 0 ? (
-                            <div className="rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Contest</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Mode</TableHead>
-                                            <TableHead>Dates</TableHead>
-                                            <TableHead>Approval</TableHead>
-                                            <TableHead />
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {data.data.map((contest) => (
-                                            <ContestTableRow key={contest.id} contest={contest} />
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                            <div className="flex flex-col gap-4">
+                                {data.data.map((contest) => (
+                                    <ContestListRow key={contest.id} contest={contest} />
+                                ))}
                             </div>
                         ) : (
                             <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
