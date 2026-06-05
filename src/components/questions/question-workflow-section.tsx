@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
+import { Plus, CheckCircle2, Code, FileText, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QuestionWorkflow } from "./question-workflow";
 import { QuestionCodeEditor, type MonacoLanguage } from "./question-code-editor";
 import { TestCaseManager, type TestCase } from "./test-case-manager";
 import { cn } from "@/lib/utils";
@@ -29,6 +28,13 @@ interface QuestionWorkflowSectionProps {
     isSaving?: boolean;
 }
 
+const CONFIG_TABS = [
+    { id: "starter", label: "Starter Code", icon: Code },
+    { id: "solution", label: "Reference Solution", icon: FileText },
+    { id: "testcases", label: "Test Cases", icon: Database },
+    { id: "driver", label: "Driver Code", icon: FileText },
+];
+
 export function QuestionWorkflowSection({
     activeWorkflowStep,
     setActiveWorkflowStep,
@@ -50,154 +56,130 @@ export function QuestionWorkflowSection({
     isSaving = false,
 }: QuestionWorkflowSectionProps) {
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="pt-12 border-t border-border/40 mt-12"
-        >
-            <div className="flex flex-col items-start mb-8 text-left">
-                <h2 className="text-2xl font-bold tracking-tight">Code</h2>
-                <p className="text-muted-foreground text-sm mt-1">
-                    Configure the core logic, test cases, and driver environment for this challenge.
-                </p>
+        <div className="flex h-full w-full">
+            {/* Left Sidebar */}
+            <div className="w-64 shrink-0 border-r border-border/60 bg-muted/20 p-4 space-y-6 overflow-y-auto">
+                <div className="space-y-1">
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 mb-2">
+                        Problem
+                    </h3>
+                    <div className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground cursor-not-allowed">
+                        <span>Details</span>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground cursor-not-allowed">
+                        <span>Statement</span>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    </div>
+                </div>
+
+                <div className="space-y-1">
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 mb-2">
+                        Judge Configuration
+                    </h3>
+                    {CONFIG_TABS.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeWorkflowStep === tab.id;
+                        const isValid = isStepValid(tab.id);
+
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setActiveWorkflowStep(tab.id)}
+                                className={cn(
+                                    "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                                    isActive
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                                )}
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <Icon className="h-4 w-4" />
+                                    {tab.label}
+                                </div>
+                                {isValid && !isActive && (
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/70" />
+                                )}
+                                {isActive && (
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
-            <QuestionWorkflow
-                currentStep={activeWorkflowStep}
-                onStepClick={(id) => {
-                    const targetIdx = steps.indexOf(id);
-                    const currentIdx = steps.indexOf(activeWorkflowStep);
-
-                    // Allow going back freely, but going forward requires validation of all previous steps
-                    if (targetIdx <= currentIdx) {
-                        setActiveWorkflowStep(id);
-                    } else {
-                        // Check if all steps between current and target are valid
-                        let allValid = true;
-                        for (let i = currentIdx; i < targetIdx; i++) {
-                            if (!isStepValid(steps[i])) {
-                                allValid = false;
-                                break;
-                            }
-                        }
-                        if (allValid) setActiveWorkflowStep(id);
-                    }
-                }}
-            />
-
-            <div className="mt-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Right Content Area */}
+            <div className="flex-1 bg-background overflow-y-auto p-8 relative">
                 {["starter", "solution", "driver"].includes(activeWorkflowStep) ? (
-                    <QuestionCodeEditor
-                        title={activeWorkflowStep}
-                        language={workflowEditorLang}
-                        onLanguageChange={setWorkflowEditorLang}
-                        showExecution={activeWorkflowStep === "driver"}
-                        testCases={testCases}
-                        starterCode={starterCodes[workflowEditorLang.id]}
-                        solutionCode={solutionCodes[workflowEditorLang.id]}
-                        driverCode={driverCodes[workflowEditorLang.id]}
-                        allowedLanguages={allowedLanguages}
-                        value={
-                            (activeWorkflowStep === "starter"
-                                ? starterCodes[workflowEditorLang.id]
-                                : activeWorkflowStep === "solution"
-                                  ? solutionCodes[workflowEditorLang.id]
-                                  : driverCodes[workflowEditorLang.id]) ?? ""
-                        }
-                        onChange={(val) => {
-                            if (activeWorkflowStep === "starter")
-                                setStarterCodes({ ...starterCodes, [workflowEditorLang.id]: val });
-                            else if (activeWorkflowStep === "solution")
-                                setSolutionCodes({
-                                    ...solutionCodes,
-                                    [workflowEditorLang.id]: val,
-                                });
-                            else setDriverCodes({ ...driverCodes, [workflowEditorLang.id]: val });
-                        }}
-                    />
+                    <div className="h-full flex flex-col space-y-6 max-w-6xl mx-auto">
+                        <div>
+                            <h2 className="text-2xl font-bold text-foreground capitalize">
+                                {activeWorkflowStep === "solution"
+                                    ? "Reference Solution"
+                                    : activeWorkflowStep + " Code"}
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Configure language specific code for this section.
+                            </p>
+                        </div>
+                        <div className="flex-1 min-h-0">
+                            <QuestionCodeEditor
+                                title=""
+                                language={workflowEditorLang}
+                                onLanguageChange={setWorkflowEditorLang}
+                                showExecution={activeWorkflowStep === "driver"}
+                                testCases={testCases}
+                                starterCode={starterCodes[workflowEditorLang.id]}
+                                solutionCode={solutionCodes[workflowEditorLang.id]}
+                                driverCode={driverCodes[workflowEditorLang.id]}
+                                allowedLanguages={allowedLanguages}
+                                value={
+                                    (activeWorkflowStep === "starter"
+                                        ? starterCodes[workflowEditorLang.id]
+                                        : activeWorkflowStep === "solution"
+                                          ? solutionCodes[workflowEditorLang.id]
+                                          : driverCodes[workflowEditorLang.id]) ?? ""
+                                }
+                                onChange={(val) => {
+                                    if (activeWorkflowStep === "starter")
+                                        setStarterCodes({
+                                            ...starterCodes,
+                                            [workflowEditorLang.id]: val,
+                                        });
+                                    else if (activeWorkflowStep === "solution")
+                                        setSolutionCodes({
+                                            ...solutionCodes,
+                                            [workflowEditorLang.id]: val,
+                                        });
+                                    else
+                                        setDriverCodes({
+                                            ...driverCodes,
+                                            [workflowEditorLang.id]: val,
+                                        });
+                                }}
+                            />
+                        </div>
+                    </div>
                 ) : activeWorkflowStep === "testcases" ? (
-                    <TestCaseManager testCases={testCases} setTestCases={setTestCases} />
+                    <div className="max-w-6xl mx-auto">
+                        <TestCaseManager testCases={testCases} setTestCases={setTestCases} />
+                    </div>
                 ) : (
-                    <div className="bg-card/10 border border-border/40 rounded-2xl p-12 text-center backdrop-blur-sm">
+                    <div className="bg-card/10 border border-border/40 rounded-2xl p-12 text-center backdrop-blur-sm max-w-2xl mx-auto mt-20">
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mx-auto mb-6">
                             <Plus className="h-8 w-8 text-muted-foreground/40" />
                         </div>
                         <h3 className="text-lg font-semibold text-foreground capitalize">
                             Configure {activeWorkflowStep.replace("-", " ")}
                         </h3>
-                        <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
-                            This section will allow you to manage the {activeWorkflowStep} details.
-                            Select a step from the workflow above to begin.
+                        <p className="text-muted-foreground text-sm mt-2">
+                            Select a section from the left sidebar to begin.
                         </p>
-                        <Button
-                            variant="outline"
-                            className="mt-8 border-primary/20 hover:bg-primary/5"
-                        >
-                            Add {activeWorkflowStep}
-                        </Button>
                     </div>
                 )}
             </div>
-
-            {/* Workflow Navigation */}
-            <div className="mt-12 flex items-center justify-between pt-8 border-t border-border/20 min-h-[80px]">
-                {activeWorkflowStep !== "starter" ? (
-                    <Button
-                        variant="ghost"
-                        onClick={() => {
-                            const idx = steps.indexOf(activeWorkflowStep);
-                            if (idx > 0) setActiveWorkflowStep(steps[idx - 1]);
-                        }}
-                        className="gap-2 text-muted-foreground hover:text-foreground transition-all"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to{" "}
-                        {activeWorkflowStep === "solution"
-                            ? "Starter"
-                            : activeWorkflowStep === "testcases"
-                              ? "Solution"
-                              : "Test Cases"}
-                    </Button>
-                ) : (
-                    <div />
-                )}
-
-                <Button
-                    onClick={() => {
-                        const idx = steps.indexOf(activeWorkflowStep);
-                        if (idx < steps.length - 1) {
-                            if (canGoNext) setActiveWorkflowStep(steps[idx + 1]);
-                        } else {
-                            onSave();
-                        }
-                    }}
-                    disabled={!canGoNext || isSaving}
-                    className={cn(
-                        "gap-2 px-8 h-12 shadow-xl transition-all active:scale-95",
-                        activeWorkflowStep === "driver"
-                            ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20"
-                            : "shadow-primary/20",
-                    )}
-                >
-                    {activeWorkflowStep === "driver" ? (
-                        <>
-                            <CheckCircle className="h-4 w-4" />
-                            Finalize & Save Question
-                        </>
-                    ) : (
-                        <>
-                            Continue to{" "}
-                            {activeWorkflowStep === "starter"
-                                ? "Solution"
-                                : activeWorkflowStep === "solution"
-                                  ? "Test Cases"
-                                  : "Driver Code"}
-                            <ArrowRight className="h-4 w-4" />
-                        </>
-                    )}
-                </Button>
-            </div>
-        </motion.div>
+        </div>
     );
 }
