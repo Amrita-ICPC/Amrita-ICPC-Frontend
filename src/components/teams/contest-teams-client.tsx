@@ -62,62 +62,23 @@ interface ContestTeamsClientProps {
     contestId: string;
 }
 
-function StatCard({
-    icon: Icon,
-    label,
-    value,
-    color = "primary",
-}: {
-    icon: React.ElementType;
-    label: string;
-    value: number;
-    color?: "primary" | "emerald" | "amber" | "red" | "violet";
-}) {
-    const colorMap: Record<string, string> = {
-        primary: "bg-primary/10 text-primary",
-        emerald: "bg-emerald-500/10 text-emerald-500",
-        amber: "bg-amber-500/10 text-amber-500",
-        red: "bg-red-500/10 text-red-500",
-        violet: "bg-violet-500/10 text-violet-500",
-    };
-
-    return (
-        <Card className="border-border/60 bg-gradient-to-br from-card via-card to-primary/5">
-            <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                    <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colorMap[color] ?? colorMap.primary}`}
-                    >
-                        <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                        <p className="text-2xl font-bold text-foreground tabular-nums">{value}</p>
-                        <p className="text-xs text-muted-foreground">{label}</p>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
 function ApprovalBadge({ status }: { status: string }) {
     if (status === TeamApprovalStatus.APPROVED) {
         return (
-            <Badge className="border-transparent bg-emerald-500/12 text-emerald-500 hover:bg-emerald-500/20 dark:bg-emerald-500/22 dark:text-emerald-400">
+            <Badge className="border-transparent bg-emerald-500/12 text-emerald-600 hover:bg-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full">
                 Approved
             </Badge>
         );
     }
     if (status === TeamApprovalStatus.REJECTED) {
         return (
-            <Badge className="border-transparent bg-red-500/12 text-red-500 hover:bg-red-500/20 dark:bg-red-500/22 dark:text-red-400">
+            <Badge className="border-transparent bg-red-500/12 text-red-600 hover:bg-red-500/20 dark:bg-red-500/15 dark:text-red-400 font-semibold px-2.5 py-0.5 rounded-full">
                 Rejected
             </Badge>
         );
     }
-
     return (
-        <Badge className="border-transparent bg-amber-500/12 text-amber-500 hover:bg-amber-500/20 dark:bg-amber-500/22 dark:text-amber-400">
+        <Badge className="border-transparent bg-amber-500/12 text-amber-600 hover:bg-amber-500/20 dark:bg-amber-500/15 dark:text-amber-400 font-semibold px-2.5 py-0.5 rounded-full">
             Pending
         </Badge>
     );
@@ -126,20 +87,29 @@ function ApprovalBadge({ status }: { status: string }) {
 function TeamStatusBadge({ status }: { status: string }) {
     if (status === TeamStatus.CONFIRMED) {
         return (
-            <Badge variant="outline" className="border-transparent bg-blue-500/10 text-blue-500">
+            <Badge
+                variant="outline"
+                className="border-transparent bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold px-2.5 py-0.5 rounded-full"
+            >
                 Confirmed
             </Badge>
         );
     }
     if (status === TeamStatus.DISQUALIFIED) {
         return (
-            <Badge variant="outline" className="border-transparent bg-zinc-500/10 text-zinc-400">
+            <Badge
+                variant="outline"
+                className="border-transparent bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 font-semibold px-2.5 py-0.5 rounded-full"
+            >
                 Disqualified
             </Badge>
         );
     }
     return (
-        <Badge variant="outline" className="border-transparent bg-orange-500/10 text-orange-500">
+        <Badge
+            variant="outline"
+            className="border-transparent bg-orange-500/10 text-orange-600 dark:text-orange-400 font-semibold px-2.5 py-0.5 rounded-full"
+        >
             Draft
         </Badge>
     );
@@ -174,7 +144,7 @@ function MembersPreview({
                     return (
                         <Avatar
                             key={m.id}
-                            className={`h-8 w-8 border border-border/40 ring-1 ring-border/20 ${c}`}
+                            className={`h-9 w-9 border-2 border-background ring-1 ring-border/20 ${c}`}
                         >
                             {m.avatar ? <AvatarImage src={m.avatar} alt={m.name} /> : null}
                             <AvatarFallback className="bg-transparent text-[11px] font-bold">
@@ -185,7 +155,9 @@ function MembersPreview({
                 })}
             </div>
             {(extraCount ?? 0) > 0 && (
-                <div className="ml-2 text-xs text-muted-foreground">+{extraCount}</div>
+                <div className="ml-2 text-[12px] font-medium text-muted-foreground">
+                    +{extraCount}
+                </div>
             )}
         </div>
     );
@@ -277,8 +249,13 @@ function TeamActionsDropdown({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9" disabled={busy}>
-                    <MoreVertical className="h-4 w-4" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full hover:bg-muted/40 transition-colors"
+                    disabled={busy}
+                >
+                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -427,196 +404,219 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="flex flex-col min-h-screen bg-background">
             {/* Hero */}
-            <div className="relative overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm">
-                <div className="relative space-y-5">
+            <div className="relative overflow-hidden rounded-[12px] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm m-4 md:m-6 mb-2">
+                <div className="relative space-y-6">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Contest teams</h1>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
+                            Contest teams
+                        </h1>
+                        <p className="text-[13px] text-muted-foreground mt-1">
                             Review registrations and track approval status for this contest.
                         </p>
                     </div>
 
                     {/* Counts */}
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                        <StatCard icon={Users} label="Total" value={stats.total} color="primary" />
-                        <StatCard
-                            icon={CheckCircle2}
-                            label="Approved"
-                            value={stats.approved}
-                            color="emerald"
-                        />
-                        <StatCard
-                            icon={Clock}
-                            label="Pending"
-                            value={stats.pending}
-                            color="amber"
-                        />
-                        <StatCard
-                            icon={XCircle}
-                            label="Rejected"
-                            value={stats.rejected}
-                            color="red"
-                        />
-                        <StatCard
-                            icon={Ban}
-                            label="Disqualified"
-                            value={stats.disqualified}
-                            color="violet"
-                        />
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Users className="h-5 w-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold leading-none text-foreground">
+                                    {stats.total}
+                                </span>
+                                <span className="text-[12px] text-muted-foreground mt-1">
+                                    Total
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+                                <CheckCircle2 className="h-5 w-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold leading-none text-foreground">
+                                    {stats.approved}
+                                </span>
+                                <span className="text-[12px] text-muted-foreground mt-1">
+                                    Approved
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                                <Clock className="h-5 w-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold leading-none text-foreground">
+                                    {stats.pending}
+                                </span>
+                                <span className="text-[12px] text-muted-foreground mt-1">
+                                    Pending
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+                                <XCircle className="h-5 w-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold leading-none text-foreground">
+                                    {stats.rejected}
+                                </span>
+                                <span className="text-[12px] text-muted-foreground mt-1">
+                                    Rejected
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
+                                <Ban className="h-5 w-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold leading-none text-foreground">
+                                    {stats.disqualified}
+                                </span>
+                                <span className="text-[12px] text-muted-foreground mt-1">
+                                    Disqualified
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Teams management */}
-            <Card className="overflow-hidden border-border/60 bg-card/60 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/50">
-                <CardHeader className="pb-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex flex-col gap-1">
-                            <h2 className="text-lg font-semibold tracking-tight">
-                                Teams management
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                                Search teams, filter by status, and manage approvals.
-                            </p>
-                        </div>
-                        <Button variant="outline" size="sm" className="h-9 self-start shadow-xs">
-                            <FileText className="mr-2 h-4 w-4" />
-                            Reports
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {/* Filters row */}
-                    <div className="grid grid-cols-1 gap-4 rounded-xl border border-border/60 bg-background/40 p-4 shadow-xs sm:grid-cols-2 lg:grid-cols-3">
-                        <div className="flex flex-col gap-1">
-                            <p className="text-xs font-medium text-muted-foreground">Search</p>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Team name or member…"
-                                    className="h-10 pl-9 shadow-xs"
-                                    value={search}
-                                    onChange={(e) => {
-                                        setSearch(e.target.value);
-                                        setPage(1);
-                                        setSelectedTeamIds(new Set());
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                            <p className="text-xs font-medium text-muted-foreground">
-                                Approval status
-                            </p>
-                            <Select
-                                value={approvalStatus}
-                                onValueChange={(v) => {
-                                    setApprovalStatus(v as TeamApprovalStatus | "ALL");
+            {/* Filter & Actions Bar */}
+            <div className="sticky top-0 z-20 flex min-h-[72px] flex-col justify-center border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-md transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <div className="relative w-full sm:w-[280px]">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                placeholder="Search team or member..."
+                                className="h-10 w-full pl-9 bg-card shadow-sm border-border/60"
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
                                     setPage(1);
                                     setSelectedTeamIds(new Set());
                                 }}
-                            >
-                                <SelectTrigger className="h-10 w-full shadow-xs">
-                                    <SelectValue placeholder="All" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ALL">All</SelectItem>
-                                    <SelectItem value={TeamApprovalStatus.APPROVED}>
-                                        Approved
-                                    </SelectItem>
-                                    <SelectItem value={TeamApprovalStatus.WAITING}>
-                                        Pending
-                                    </SelectItem>
-                                    <SelectItem value={TeamApprovalStatus.REJECTED}>
-                                        Rejected
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+                            />
                         </div>
+                        <Select
+                            value={approvalStatus}
+                            onValueChange={(v) => {
+                                setApprovalStatus(v as TeamApprovalStatus | "ALL");
+                                setPage(1);
+                                setSelectedTeamIds(new Set());
+                            }}
+                        >
+                            <SelectTrigger className="h-10 w-full sm:w-[160px] bg-card shadow-sm border-border/60">
+                                <SelectValue placeholder="Approval Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">All Approvals</SelectItem>
+                                <SelectItem value={TeamApprovalStatus.APPROVED}>
+                                    Approved
+                                </SelectItem>
+                                <SelectItem value={TeamApprovalStatus.WAITING}>Pending</SelectItem>
+                                <SelectItem value={TeamApprovalStatus.REJECTED}>
+                                    Rejected
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={teamStatus}
+                            onValueChange={(v) => {
+                                setTeamStatus(v as TeamStatus | "ALL");
+                                setPage(1);
+                                setSelectedTeamIds(new Set());
+                            }}
+                        >
+                            <SelectTrigger className="h-10 w-full sm:w-[160px] bg-card shadow-sm border-border/60">
+                                <SelectValue placeholder="Team Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">All Statuses</SelectItem>
+                                <SelectItem value={TeamStatus.DRAFT}>Draft</SelectItem>
+                                <SelectItem value={TeamStatus.CONFIRMED}>Confirmed</SelectItem>
+                                <SelectItem value={TeamStatus.DISQUALIFIED}>
+                                    Disqualified
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button
+                        variant="outline"
+                        className="h-10 shadow-sm w-full sm:w-auto bg-card border-border/60"
+                    >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Reports
+                    </Button>
+                </div>
 
-                        <div className="flex flex-col gap-1">
-                            <p className="text-xs font-medium text-muted-foreground">Team status</p>
-                            <Select
-                                value={teamStatus}
-                                onValueChange={(v) => {
-                                    setTeamStatus(v as TeamStatus | "ALL");
-                                    setPage(1);
-                                    setSelectedTeamIds(new Set());
-                                }}
+                {/* Bulk actions */}
+                {selectedTeamIds.size > 0 && (
+                    <div className="flex flex-col sm:flex-row sm:h-[52px] items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 sm:py-0 mt-3 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-[14px] text-muted-foreground">
+                            <span className="font-semibold text-foreground">
+                                {selectedTeamIds.size}
+                            </span>{" "}
+                            teams selected
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={bulkBusy !== null}
+                                onClick={() => runBulk("approve")}
+                                className="h-8 shadow-sm"
                             >
-                                <SelectTrigger className="h-10 w-full shadow-xs">
-                                    <SelectValue placeholder="All" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ALL">All</SelectItem>
-                                    <SelectItem value={TeamStatus.DRAFT}>Draft</SelectItem>
-                                    <SelectItem value={TeamStatus.CONFIRMED}>Confirmed</SelectItem>
-                                    <SelectItem value={TeamStatus.DISQUALIFIED}>
-                                        Disqualified
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+                                <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-emerald-500" />{" "}
+                                Approve
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={bulkBusy !== null}
+                                onClick={() => runBulk("reject")}
+                                className="h-8 shadow-sm"
+                            >
+                                <XCircle className="mr-2 h-3.5 w-3.5 text-red-500" /> Reject
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={bulkBusy !== null}
+                                onClick={() => runBulk("disqualify")}
+                                className="h-8 shadow-sm"
+                            >
+                                <Ban className="mr-2 h-3.5 w-3.5 text-violet-500" /> Disqualify
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={bulkBusy !== null}
+                                onClick={() => setSelectedTeamIds(new Set())}
+                                className="h-8"
+                            >
+                                Clear
+                            </Button>
                         </div>
                     </div>
+                )}
+            </div>
 
-                    {/* Bulk actions */}
-                    {selectedTeamIds.size > 0 ? (
-                        <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                <span className="font-semibold text-foreground">
-                                    {selectedTeamIds.size}
-                                </span>{" "}
-                                selected
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={bulkBusy !== null}
-                                    onClick={() => runBulk("approve")}
-                                >
-                                    <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" />
-                                    Bulk approve
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={bulkBusy !== null}
-                                    onClick={() => runBulk("reject")}
-                                >
-                                    <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                                    Bulk reject
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={bulkBusy !== null}
-                                    onClick={() => runBulk("disqualify")}
-                                >
-                                    <Ban className="mr-2 h-4 w-4 text-violet-500" />
-                                    Bulk disqualify
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    disabled={bulkBusy !== null}
-                                    onClick={() => setSelectedTeamIds(new Set())}
-                                >
-                                    Clear
-                                </Button>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    {/* Table */}
-                    <div className="overflow-hidden rounded-xl border border-border/60 bg-background/30 shadow-xs">
-                        <Table>
+            {/* Main Content Area */}
+            <div className="flex-1 p-4 md:p-6">
+                <div className="overflow-hidden rounded-[12px] border border-border/60 bg-card shadow-sm">
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[1000px]">
                             <TableHeader>
-                                <TableRow className="bg-muted/40 hover:bg-muted/40">
-                                    <TableHead className="w-[44px]">
+                                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border/60">
+                                    <TableHead className="w-[48px] px-4">
                                         <Checkbox
                                             checked={
                                                 allOnPageSelected
@@ -629,64 +629,87 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                             aria-label="Select all teams on this page"
                                         />
                                     </TableHead>
-                                    <TableHead className="w-[240px]">Team Name</TableHead>
-                                    <TableHead>Members</TableHead>
-                                    <TableHead>Approval</TableHead>
-                                    <TableHead>Contest Status</TableHead>
-                                    <TableHead>Parent Team</TableHead>
-                                    <TableHead className="w-[160px]">Enrolled At</TableHead>
-                                    <TableHead className="text-right w-[100px]">Actions</TableHead>
+                                    <TableHead className="w-[300px] text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Team
+                                    </TableHead>
+                                    <TableHead className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Members
+                                    </TableHead>
+                                    <TableHead className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Approval
+                                    </TableHead>
+                                    <TableHead className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Contest Status
+                                    </TableHead>
+                                    <TableHead className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Parent Team
+                                    </TableHead>
+                                    <TableHead className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Enrolled At
+                                    </TableHead>
+                                    <TableHead className="text-right w-[120px] text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {isLoading ? (
                                     Array.from({ length: 8 }).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell>
+                                        <TableRow key={i} className="h-[72px]">
+                                            <TableCell className="px-4">
                                                 <Skeleton className="h-4 w-4 rounded" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-5 w-40" />
+                                                <div className="flex items-center gap-3">
+                                                    <Skeleton className="h-9 w-9 rounded-full" />
+                                                    <div className="space-y-1.5">
+                                                        <Skeleton className="h-4 w-32" />
+                                                        <Skeleton className="h-3 w-24" />
+                                                    </div>
+                                                </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-9 w-32" />
+                                                <Skeleton className="h-9 w-24 rounded-full" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-6 w-24 rounded-full" />
+                                                <Skeleton className="h-6 w-20 rounded-full" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-6 w-24 rounded-full" />
+                                                <Skeleton className="h-6 w-20 rounded-full" />
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-5 w-28" />
+                                                <div className="space-y-1.5">
+                                                    <Skeleton className="h-3 w-28" />
+                                                    <Skeleton className="h-2 w-16" />
+                                                </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Skeleton className="h-5 w-32" />
+                                                <Skeleton className="h-4 w-28 rounded-full" />
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Skeleton className="h-9 w-16 ml-auto" />
+                                                <Skeleton className="h-10 w-20 ml-auto rounded-full" />
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : isError ? (
                                     <TableRow>
-                                        <TableCell colSpan={8}>
-                                            <div className="flex min-h-[140px] items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 text-sm text-destructive">
+                                        <TableCell colSpan={8} className="h-64">
+                                            <div className="flex items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
                                                 Failed to load teams.
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : teams.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={8}>
-                                            <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                                                <Users className="h-9 w-9 opacity-30" />
-                                                <p className="text-sm">
+                                        <TableCell colSpan={8} className="h-64">
+                                            <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                                                <Users className="h-10 w-10 opacity-30" />
+                                                <p className="text-[14px]">
                                                     {search
                                                         ? "No teams match your search."
                                                         : "No teams registered for this contest."}
                                                 </p>
-                                                {search ? (
+                                                {search && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
@@ -694,154 +717,169 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                                     >
                                                         Clear search
                                                     </Button>
-                                                ) : null}
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    teams.map((team: any) => (
-                                        <TableRow
-                                            key={team.id}
-                                            className="hover:bg-muted/25 transition-colors"
-                                        >
-                                            <TableCell>
-                                                <Checkbox
-                                                    checked={selectedTeamIds.has(team.id)}
-                                                    onCheckedChange={(v) =>
-                                                        toggleTeam(team.id, Boolean(v))
-                                                    }
-                                                    aria-label={`Select team ${team.name}`}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="space-y-0.5">
-                                                    <p className="font-semibold leading-tight">
-                                                        {team.name}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground line-clamp-1">
-                                                        {team.description || "—"}
-                                                    </p>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <TeamMembersDropdown
-                                                    contestId={contestId}
-                                                    team={team}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <ApprovalBadge status={team.approval_status} />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TeamStatusBadge status={team.status} />
-                                            </TableCell>
-                                            <TableCell>
-                                                {team.parent_team ? (
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-xs font-medium truncate max-w-[140px]">
-                                                            {team.parent_team.name}
-                                                        </span>
-                                                        <span className="text-[10px] text-muted-foreground">
-                                                            Global team
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                                                {new Date(team.enrolled_at).toLocaleString(
-                                                    undefined,
-                                                    {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        year: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    },
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="h-9 w-9 shadow-xs"
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                    <TeamActionsDropdown
-                                                        busy={
-                                                            approveMutation.isPending ||
-                                                            rejectMutation.isPending ||
-                                                            disqualifyMutation.isPending
+                                    teams.map((team: any) => {
+                                        const initials =
+                                            team.name?.substring(0, 2).toUpperCase() || "T";
+                                        const c = initialsColor(initials);
+                                        return (
+                                            <TableRow
+                                                key={team.id}
+                                                className="h-[72px] hover:bg-muted/30 hover:-translate-y-[1px] transition-all border-border/40 group"
+                                            >
+                                                <TableCell className="px-4">
+                                                    <Checkbox
+                                                        checked={selectedTeamIds.has(team.id)}
+                                                        onCheckedChange={(v) =>
+                                                            toggleTeam(team.id, Boolean(v))
                                                         }
-                                                        onApprove={() => approveTeam(team)}
-                                                        onReject={() => rejectTeam(team)}
-                                                        onDisqualify={() => disqualifyTeam(team)}
+                                                        aria-label={`Select team ${team.name}`}
                                                     />
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className={`h-10 w-10 border ${c}`}>
+                                                            <AvatarFallback className="bg-transparent text-[13px] font-bold">
+                                                                {initials}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[14px] font-semibold text-foreground group-hover:text-primary transition-colors">
+                                                                {team.name}
+                                                            </span>
+                                                            <span className="text-[12px] text-muted-foreground opacity-75 line-clamp-1 max-w-[220px]">
+                                                                {team.description || "Contest Team"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TeamMembersDropdown
+                                                        contestId={contestId}
+                                                        team={team}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <ApprovalBadge status={team.approval_status} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TeamStatusBadge status={team.status} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {team.parent_team ? (
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[12px] font-medium text-foreground opacity-80 truncate max-w-[160px]">
+                                                                {team.parent_team.name}
+                                                            </span>
+                                                            <span className="text-[11px] text-muted-foreground opacity-70">
+                                                                Global Team
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[12px] text-muted-foreground opacity-50">
+                                                            —
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="text-[13px] text-muted-foreground font-medium">
+                                                        {team.enrolled_at
+                                                            ? new Date(
+                                                                  team.enrolled_at,
+                                                              ).toLocaleString("en-GB", {
+                                                                  day: "numeric",
+                                                                  month: "short",
+                                                                  year: "numeric",
+                                                                  hour: "2-digit",
+                                                                  minute: "2-digit",
+                                                              })
+                                                            : "—"}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-10 w-10 rounded-full hover:bg-muted/40 transition-colors"
+                                                        >
+                                                            <Eye className="h-4 w-4 text-muted-foreground" />
+                                                        </Button>
+                                                        <TeamActionsDropdown
+                                                            busy={
+                                                                approveMutation.isPending ||
+                                                                rejectMutation.isPending ||
+                                                                disqualifyMutation.isPending
+                                                            }
+                                                            onApprove={() => approveTeam(team)}
+                                                            onReject={() => rejectTeam(team)}
+                                                            onDisqualify={() =>
+                                                                disqualifyTeam(team)
+                                                            }
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
                                 )}
                             </TableBody>
                         </Table>
                     </div>
+                </div>
 
-                    {/* Footer */}
-                    {pagination ? (
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-xs text-muted-foreground">
-                                Showing{" "}
-                                <span className="font-medium text-foreground">
-                                    {(pagination.page - 1) * pagination.page_size +
-                                        (teams.length ? 1 : 0)}
-                                </span>{" "}
-                                to{" "}
-                                <span className="font-medium text-foreground">
-                                    {(pagination.page - 1) * pagination.page_size + teams.length}
-                                </span>{" "}
-                                of{" "}
-                                <span className="font-medium text-foreground">
-                                    {pagination.total}
-                                </span>{" "}
-                                teams
-                            </p>
-                            <div className="flex items-center gap-3 justify-between sm:justify-end">
-                                <AppPagination
-                                    currentPage={page}
-                                    totalPages={pagination.total_pages}
-                                    hasNext={pagination.has_next}
-                                    hasPrevious={pagination.has_previous}
-                                    onPageChange={(p) => {
-                                        setPage(p);
-                                        setSelectedTeamIds(new Set());
-                                    }}
-                                />
-                                <Select
-                                    value={String(pageSize)}
-                                    onValueChange={(v) => {
-                                        setPageSize(parseInt(v, 10));
-                                        setPage(1);
-                                    }}
-                                >
-                                    <SelectTrigger className="w-32">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="10">10 / page</SelectItem>
-                                        <SelectItem value="20">20 / page</SelectItem>
-                                        <SelectItem value="50">50 / page</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                {/* Pagination */}
+                {pagination && (
+                    <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
+                        <p className="text-[13px] text-muted-foreground">
+                            Showing{" "}
+                            <span className="font-medium text-foreground">
+                                {(pagination.page - 1) * pagination.page_size +
+                                    (teams.length ? 1 : 0)}
+                            </span>{" "}
+                            to{" "}
+                            <span className="font-medium text-foreground">
+                                {(pagination.page - 1) * pagination.page_size + teams.length}
+                            </span>{" "}
+                            of{" "}
+                            <span className="font-medium text-foreground">{pagination.total}</span>{" "}
+                            teams
+                        </p>
+                        <div className="flex flex-wrap items-center gap-4 justify-between sm:justify-end">
+                            <AppPagination
+                                currentPage={page}
+                                totalPages={pagination.total_pages}
+                                hasNext={pagination.has_next}
+                                hasPrevious={pagination.has_previous}
+                                onPageChange={(p) => {
+                                    setPage(p);
+                                    setSelectedTeamIds(new Set());
+                                }}
+                            />
+                            <Select
+                                value={String(pageSize)}
+                                onValueChange={(v) => {
+                                    setPageSize(parseInt(v, 10));
+                                    setPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[110px] h-9 shadow-sm bg-card text-[13px] border-border/60">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="10">10 / page</SelectItem>
+                                    <SelectItem value="20">20 / page</SelectItem>
+                                    <SelectItem value="50">50 / page</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                    ) : null}
-                </CardContent>
-            </Card>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
