@@ -46,24 +46,68 @@ interface BankHeroProps {
     bank: BankDetailResponse;
 }
 
+const WaveBackground = () => (
+    <div className="absolute inset-0 z-0 opacity-40 dark:opacity-30 pointer-events-none">
+        <svg
+            className="absolute h-full w-full object-cover"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 200"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M0,80 C320,160 560,-40 1440,100 L1440,200 L0,200 Z"
+                fill="currentColor"
+                className="text-blue-500"
+                opacity="0.15"
+            />
+            <path
+                d="M0,120 C400,200 800,0 1440,120 L1440,200 L0,200 Z"
+                fill="currentColor"
+                className="text-blue-500"
+                opacity="0.1"
+            />
+            <path
+                d="M0,160 C500,40 900,180 1440,140 L1440,200 L0,200 Z"
+                fill="currentColor"
+                className="text-blue-500"
+                opacity="0.05"
+            />
+        </svg>
+    </div>
+);
+
 function CompactStat({
     icon: Icon,
     label,
     value,
+    colorClass,
+    bgClass,
+    solidBgClass,
 }: {
     icon: React.ElementType;
     label: string;
     value: number;
+    colorClass: string;
+    bgClass: string;
+    solidBgClass: string;
 }) {
     return (
-        <Card className="border-border/60 py-0">
-            <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Card className="border-border/60 shadow-sm relative overflow-hidden rounded-xl p-0 gap-0">
+            <div
+                className={`absolute bottom-0 left-0 right-0 h-1 ${solidBgClass} opacity-80`}
+            ></div>
+            <CardContent className="flex items-center gap-3 p-5">
+                <div
+                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bgClass} ${colorClass}`}
+                >
                     <Icon className="size-5" />
                 </div>
                 <div className="min-w-0">
                     <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">{label}</p>
+                    <p className="mt-1 truncate text-[13px] font-semibold text-muted-foreground">
+                        {label}
+                    </p>
                 </div>
             </CardContent>
         </Card>
@@ -97,43 +141,51 @@ export function BankHero({ bank }: BankHeroProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <Card className="border-border/60 py-0">
-                <CardContent className="p-5">
+            <Card className="border-border/60 p-0 gap-0 relative overflow-hidden rounded-[16px]">
+                <div className="absolute top-0 inset-x-0 h-full bg-blue-500/5 dark:bg-blue-500/10 overflow-hidden pointer-events-none border-b border-border/40">
+                    <WaveBackground />
+                    <div className="absolute inset-0 bg-[radial-gradient(theme(colors.blue.500)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
+                </div>
+                <CardContent className="relative z-10 p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0 flex-1">
-                            <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
                                 <Badge
                                     variant="outline"
-                                    className="border-transparent bg-primary/10 text-primary"
+                                    className="border-transparent bg-primary/10 text-primary px-2.5 py-0.5 rounded-lg"
                                 >
                                     Question Bank
                                 </Badge>
-                                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
                                     <Calendar className="size-3.5" />
                                     Created {formattedDate}
                                 </span>
                             </div>
-                            <div className="flex items-start gap-3">
-                                <div className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
+                            <div className="flex items-start gap-4">
+                                <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/20 sm:flex">
                                     <Database className="size-5" />
                                 </div>
                                 <div className="min-w-0">
-                                    <h1 className="truncate text-2xl font-bold tracking-tight">
+                                    <h1 className="truncate text-[22px] font-bold tracking-tight">
                                         {bank.name}
                                     </h1>
-                                    <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+                                    <p className="mt-1.5 max-w-3xl text-[14px] text-muted-foreground leading-relaxed">
                                         {bank.description || "No description added."}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 bg-card/60 backdrop-blur-sm p-1.5 rounded-xl border border-border/40 shadow-sm">
                             <BankUpdateDialog
                                 bank={bank as any}
                                 trigger={
-                                    <Button variant="outline" size="sm">
-                                        <Settings data-icon="inline-start" />
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 rounded-lg hover:bg-muted"
+                                    >
+                                        <Settings className="mr-1.5 size-3.5" />
                                         Edit
                                     </Button>
                                 }
@@ -142,28 +194,40 @@ export function BankHero({ bank }: BankHeroProps) {
                                 bankId={bank.id}
                                 bankName={bank.name}
                                 trigger={
-                                    <Button variant="outline" size="sm">
-                                        <Share2 data-icon="inline-start" />
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 rounded-lg hover:bg-muted"
+                                    >
+                                        <Share2 className="mr-1.5 size-3.5" />
                                         Access
                                     </Button>
                                 }
                             />
                             <BankCloneDialog targetId={bank.id}>
-                                <Button size="sm">
-                                    <Copy data-icon="inline-start" />
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="h-8 rounded-lg shadow-sm"
+                                >
+                                    <Copy className="mr-1.5 size-3.5" />
                                     Clone
                                 </Button>
                             </BankCloneDialog>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="size-8">
-                                        <MoreVertical className="size-4" />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-8 rounded-lg hover:bg-muted"
+                                    >
+                                        <MoreVertical className="size-4 text-muted-foreground" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuContent align="end" className="w-44 rounded-xl">
                                     <DropdownMenuItem
                                         onClick={() => setIsDeleteDialogOpen(true)}
-                                        className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+                                        className="cursor-pointer gap-2 text-destructive focus:text-destructive rounded-lg"
                                     >
                                         <Trash2 className="size-4" />
                                         Delete Bank
@@ -175,26 +239,38 @@ export function BankHero({ bank }: BankHeroProps) {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <CompactStat
                     icon={FileCode2}
                     label="Easy questions"
                     value={bank.easy_questions_count ?? 0}
+                    colorClass="text-emerald-500"
+                    bgClass="bg-emerald-500/10"
+                    solidBgClass="bg-emerald-500"
                 />
                 <CompactStat
                     icon={BarChart3}
                     label="Medium questions"
                     value={bank.medium_questions_count ?? 0}
+                    colorClass="text-amber-500"
+                    bgClass="bg-amber-500/10"
+                    solidBgClass="bg-amber-500"
                 />
                 <CompactStat
                     icon={Trophy}
                     label="Hard questions"
                     value={bank.hard_questions_count ?? 0}
+                    colorClass="text-rose-500"
+                    bgClass="bg-rose-500/10"
+                    solidBgClass="bg-rose-500"
                 />
                 <CompactStat
                     icon={Share2}
                     label="Active shares"
                     value={bank.shared_users_count ?? 0}
+                    colorClass="text-blue-500"
+                    bgClass="bg-blue-500/10"
+                    solidBgClass="bg-blue-500"
                 />
             </div>
 
