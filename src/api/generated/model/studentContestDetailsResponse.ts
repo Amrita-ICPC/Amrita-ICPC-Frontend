@@ -9,7 +9,7 @@ import type { ContestAudienceResponse } from './contestAudienceResponse';
 import type { ContestMode } from './contestMode';
 import type { ContestRunStatus } from './contestRunStatus';
 import type { ContestStatus } from './contestStatus';
-import type { ContestTeamParticpationType } from './contestTeamParticpationType';
+import type { ContestTeamParticipationType } from './contestTeamParticipationType';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
 /**
@@ -59,7 +59,7 @@ export interface StudentContestDetailsResponse {
   /** Whether to show leaderboard during the contest */
   show_leaderboard_during_contest: boolean;
   /** Participation type for team contests */
-  participation_type: ContestTeamParticpationType;
+  participation_type: ContestTeamParticipationType;
   /** Contest rules */
   rules?: string | null;
 }

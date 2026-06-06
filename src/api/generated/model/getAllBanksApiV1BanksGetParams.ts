@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { BankSortBy } from './bankSortBy';
 
 export type GetAllBanksApiV1BanksGetParams = {
 /**
@@ -18,4 +19,12 @@ page?: number;
  * @maximum 100
  */
 page_size?: number;
+/**
+ * Search by name
+ */
+search?: string | null;
+/**
+ * Sort by field
+ */
+sort_by?: BankSortBy;
 };

@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ContestMode } from './contestMode';
-import type { ContestTeamParticpationType } from './contestTeamParticpationType';
+import type { ContestTeamParticipationType } from './contestTeamParticipationType';
 import type { ScoringType } from './scoringType';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
@@ -53,7 +53,7 @@ export interface ContestCreate {
   /** Whether to show leaderboard during the contest */
   show_leaderboard_during_contest?: boolean;
   /** Participation type for team contests */
-  participation_type?: ContestTeamParticpationType;
+  participation_type?: ContestTeamParticipationType;
   /** List of audience IDs to link to this contest */
   audience_ids?: string[];
 }
