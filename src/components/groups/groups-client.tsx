@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -26,7 +26,7 @@ import {
     useListAudiencesApiV1AudiencesGet,
     useUpdateAudienceApiV1AudiencesAudienceIdPatch,
 } from "@/api/generated/audiences/audiences";
-import { AudienceType, type AudienceResponse } from "@/api/generated/model";
+import { type AudienceResponse, AudienceType } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

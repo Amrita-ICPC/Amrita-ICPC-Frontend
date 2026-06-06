@@ -1,33 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-    useGetContestAudiences,
-    useAssignAudiences,
-    useRemoveAudiences,
-    useMyAudiences,
-    contestAudiencesKeys,
-} from "@/query/contest-query";
-import { useDebounce } from "@/hooks/use-debounce";
-import { AsyncStateHandler } from "../shared/async-state-handler";
+    CheckCircle2,
+    Layers,
+    Loader2,
+    Plus,
+    School,
+    Search,
+    ShieldAlert,
+    Trash2,
+    Users,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
-    Search,
-    Plus,
-    Trash2,
-    Loader2,
-    Users,
-    School,
-    Layers,
-    CheckCircle2,
-    ShieldAlert,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+    contestAudiencesKeys,
+    useAssignAudiences,
+    useGetContestAudiences,
+    useMyAudiences,
+    useRemoveAudiences,
+} from "@/query/contest-query";
+
+import { AsyncStateHandler } from "../shared/async-state-handler";
 
 interface AudiencesSectionProps {
     contestId: string;

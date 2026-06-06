@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, FileCode2, Users, Code2, LucideIcon } from "lucide-react";
+import { Code2, FileCode2, LucideIcon, Trophy, Users } from "lucide-react";
 import { useState } from "react";
 
 interface FeatureCard {

@@ -2,6 +2,7 @@
 // Orval expects a concrete named export (not just a re-export).
 
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
+
 import { api } from "./api/client";
 
 export const axiosWithAuth = <T>(config: AxiosRequestConfig): Promise<T> => {

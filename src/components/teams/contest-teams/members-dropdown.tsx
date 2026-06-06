@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
 import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
 import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
 import { useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet } from "@/api/generated/teams/teams";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +15,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function initialsColor(initials: string) {
     const palette = [

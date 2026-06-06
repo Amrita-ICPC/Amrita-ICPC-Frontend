@@ -1,17 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Plus, X, Check, ChevronsUpDown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { usePlatformLanguages, useTags, useCreateTag, tagKeys } from "@/query/contest-query";
+import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+
 import { QuestionDifficulty } from "@/api/generated/model/questionDifficulty";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Command,
     CommandEmpty,
@@ -20,7 +17,11 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { tagKeys, useCreateTag, usePlatformLanguages, useTags } from "@/query/contest-query";
 
 interface ProblemMetadataCardProps {
     title: string;

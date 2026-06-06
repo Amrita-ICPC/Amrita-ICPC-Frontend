@@ -1,8 +1,9 @@
 "use client";
 
-import { Users, Shield, ArrowRight, Clock, Trophy, Calendar } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Shield, Trophy, Users } from "lucide-react";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+
 import type { StudentContestAvailableResponse } from "@/api/generated/model";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";

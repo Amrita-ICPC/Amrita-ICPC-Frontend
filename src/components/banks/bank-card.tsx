@@ -1,11 +1,11 @@
 "use client";
 
-import { Edit, Share2, Trash2, BookOpen, Clock, Globe, HelpCircle, Users } from "lucide-react";
+import { BookOpen, Edit, Globe, HelpCircle, Trash2, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { BankResponse } from "@/api/generated/model/bankResponse";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,12 +16,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
-import { BankResponse } from "@/api/generated/model/bankResponse";
-import { useDeleteBank, allBanksKey, bankDetailKey } from "@/query/bank-query";
-import { BankUpdateDialog } from "./bank-update-dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useDeleteBank } from "@/query/bank-query";
+
 import { BankShareDialog } from "./bank-share-dialog";
+import { BankUpdateDialog } from "./bank-update-dialog";
 
 interface BankCardProps {
     bank: BankResponse;

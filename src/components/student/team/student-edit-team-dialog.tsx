@@ -1,11 +1,17 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Settings2, Save } from "lucide-react";
-import * as zod from "zod";
+import { Loader2, Save, Settings2 } from "lucide-react";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import * as zod from "zod";
 
+import type { StudentTeamCardResponse } from "@/api/generated/model";
+import {
+    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
+    useEditTeamApiV1StudentsTeamsTeamIdPatch,
+} from "@/api/generated/students/students";
+import { EditTeamApiV1StudentsTeamsTeamIdPatchBody } from "@/api/generated/zod/students/students";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -18,21 +24,15 @@ import {
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    useEditTeamApiV1StudentsTeamsTeamIdPatch,
-    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
-} from "@/api/generated/students/students";
-import { EditTeamApiV1StudentsTeamsTeamIdPatchBody } from "@/api/generated/zod/students/students";
-import type { StudentTeamCardResponse } from "@/api/generated/model";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 type EditTeamFormValues = zod.infer<typeof EditTeamApiV1StudentsTeamsTeamIdPatchBody>;
 

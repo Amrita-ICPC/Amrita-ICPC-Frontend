@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
-import { useTheme } from "next-themes";
 import {
-    TerminalSquare,
-    ChevronDown,
-    Play,
-    Loader2,
     AlertCircle,
     CheckCircle2,
-    Clock,
+    ChevronDown,
     Info,
+    Loader2,
+    Play,
+    TerminalSquare,
 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
+
+import { useTestDraftCodeApiV1QuestionsTestDraftPost } from "@/api/generated/questions/questions";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -21,8 +22,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+
 import { Label } from "../ui/label";
-import { useTestDraftCodeApiV1QuestionsTestDraftPost } from "@/api/generated/questions/questions";
 import { type TestCase } from "./test-case-manager";
 
 const LANGUAGES = [

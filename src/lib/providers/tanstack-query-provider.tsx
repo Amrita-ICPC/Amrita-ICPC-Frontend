@@ -1,10 +1,11 @@
 "use client";
 
-import { QueryClient, QueryClientProvider, MutationCache, QueryKey } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider, QueryKey } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
+
 import { handleApiError } from "@/lib/handle-api-error";
-import { useState, type ReactNode } from "react";
 
 interface TanstackQueryProviderProps {
     children: ReactNode;

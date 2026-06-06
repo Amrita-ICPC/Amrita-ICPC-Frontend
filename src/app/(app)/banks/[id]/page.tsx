@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+
 import { BankDetailClient } from "@/components/banks/bank-detail-client";
 
 interface BankPageProps {

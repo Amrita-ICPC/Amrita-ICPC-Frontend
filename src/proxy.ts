@@ -1,7 +1,8 @@
-import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { UserType, hasAccess } from "@/lib/auth/utils";
+import { getToken } from "next-auth/jwt";
+
+import { hasAccess, UserType } from "@/lib/auth/utils";
 
 export default async function proxy(req: NextRequest) {
     const { nextUrl } = req;

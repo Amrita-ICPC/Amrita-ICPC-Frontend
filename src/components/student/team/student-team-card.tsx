@@ -1,16 +1,17 @@
 "use client";
 
-import { MoreVertical, Users, Trash2, LogOut, Loader2, Pencil, UserPlus, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Copy, Loader2, LogOut, MoreVertical, Pencil, Trash2, UserPlus, Users } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import type { StudentTeamCardResponse } from "@/api/generated/model";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
+    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
+    useDeleteTeamApiV1StudentsTeamsTeamIdDelete,
+    useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
+    useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete,
+} from "@/api/generated/students/students";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,15 +22,16 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-    useDeleteTeamApiV1StudentsTeamsTeamIdDelete,
-    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
-    useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
-    useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete,
-    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
-} from "@/api/generated/students/students";
-import { useState } from "react";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { StudentEditTeamDialog } from "./student-edit-team-dialog";
 import { StudentInviteDialog } from "./student-invite-dialog";
 import { StudentTeamRequestsDialog } from "./student-team-requests-dialog";

@@ -1,9 +1,10 @@
 "use client";
 
-import { X, Check, Hash, Plus } from "lucide-react";
+import { Check, Hash, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Command,
     CommandEmpty,
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 // Mock tags since API is missing
 const MOCK_TAGS = [

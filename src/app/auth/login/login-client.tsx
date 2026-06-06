@@ -1,9 +1,9 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
 import { Code2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Suspense, useEffect, useState } from "react";
 
 function LoginContent() {
     const searchParams = useSearchParams();

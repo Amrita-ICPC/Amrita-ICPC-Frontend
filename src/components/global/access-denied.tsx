@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 
 export default function AccessDenied() {
     const router = useRouter();

@@ -1,56 +1,50 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
-    Calendar,
-    Users,
-    FileCode2,
-    Send,
-    UserCircle2,
-    Clock,
-    Globe,
-    Lock,
-    BarChart3,
     AlertCircle,
-    Loader2,
-    Zap,
-    ClipboardList,
-    Edit,
-    Play,
-    MoreVertical,
-    Trash2,
-    UserPlus,
     Ban,
+    BarChart3,
+    Calendar,
+    ClipboardList,
+    Clock,
+    Edit,
+    FileCode2,
+    Globe,
+    Loader2,
+    Lock,
+    MoreVertical,
+    Play,
+    Send,
+    Trash2,
+    UserCircle2,
+    UserPlus,
+    Users,
+    Zap,
 } from "lucide-react";
 import Link from "next/link";
-
 import { useRouter } from "next/navigation";
 
 import {
     useGetContestApiV1ContestsContestIdGet,
     useSoftDeleteContestApiV1ContestsContestIdSoftDeleteDelete,
 } from "@/api/generated/contests/contests";
-import {
-    useDeleteContest,
-    contestKeys,
-    usePublishContest,
-    contestDetailKey,
-} from "@/query/contest-query";
-import { useQueryClient } from "@tanstack/react-query";
-
 import type { ContestDetailResponse } from "@/api/generated/model";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ManagementHub } from "./management-hub";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { contestDetailKey, contestKeys, usePublishContest } from "@/query/contest-query";
+
 import { AsyncStateHandler } from "../shared/async-state-handler";
+import { ManagementHub } from "./management-hub";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ElementType }> =
     {

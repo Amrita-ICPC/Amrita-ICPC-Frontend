@@ -1,32 +1,32 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { getSession } from "next-auth/react";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, ChevronLeft, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
+import { StudentCodeRunResponse } from "@/api/generated/model";
 import {
-    useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet,
-    useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
-    useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
-    useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
-    useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
-    useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
-    useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
-    useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
+    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
-    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
+    useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
+    useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
+    useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet,
+    useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
+    useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
+    useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
+    useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
+    useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
 } from "@/api/generated/students/students";
-import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { StudentCodeRunResponse } from "@/api/generated/model";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import { SessionHeader } from "./session-header";
-import { ProblemView } from "./problem-view";
 import { EditorPanel } from "./editor-panel";
+import { ProblemView } from "./problem-view";
+import { SessionHeader } from "./session-header";
 
 interface SessionClientProps {
     contestId: string;

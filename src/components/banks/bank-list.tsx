@@ -1,22 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Search, AlertCircle, Database, LayoutGrid, List } from "lucide-react";
+import { AlertCircle, Database, Search } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BankCard } from "./bank-card";
-import { BankRowItem } from "./bank-row-item";
 import { useGetAllBanksApiV1BanksGet } from "@/api/generated/banks/banks";
 import { BankSortBy } from "@/api/generated/model/bankSortBy";
 import { AppPagination } from "@/components/shared/app-pagination";
-import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
-import { toApiError } from "@/lib/api/error";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -24,6 +19,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toApiError } from "@/lib/api/error";
+
+import { BankCard } from "./bank-card";
+import { BankRowItem } from "./bank-row-item";
 
 export function BankList() {
     const router = useRouter();

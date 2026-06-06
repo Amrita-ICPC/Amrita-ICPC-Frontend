@@ -1,15 +1,17 @@
 "use client";
 
-import Loading from "@/app/loading";
-import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
+
+import Loading from "@/app/loading";
 import {
-    UserType,
-    type Role,
     belongsToRequiredGroup,
     hasRequiredPermission,
+    type Role,
+    UserType,
 } from "@/lib/auth/utils";
+
 import AccessDenied from "./access-denied";
 
 interface AuthGuardProps {

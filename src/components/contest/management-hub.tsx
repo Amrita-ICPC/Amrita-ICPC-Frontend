@@ -1,9 +1,10 @@
 "use client";
 
-import { Users, FileText, Send, Activity, ShieldCheck, BarChart2, ArrowRight } from "lucide-react";
+import { Activity, ArrowRight, BarChart2, FileText, Send, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
+
 import type { ContestDetailResponse } from "@/api/generated/model";
+import { Card } from "@/components/ui/card";
 
 interface ManagementHubProps {
     contest: ContestDetailResponse;

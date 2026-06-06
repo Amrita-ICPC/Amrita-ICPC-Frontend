@@ -1,6 +1,14 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { Copy, Loader2, Timer, Trophy } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import { BankResponse } from "@/api/generated/model";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
@@ -10,8 +18,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -20,14 +27,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Copy, Loader2, Search, Timer, Trophy } from "lucide-react";
-import { useGetAllBanks, useCloneBankQuestions, bankQuestionsKey } from "@/query/bank-query";
-import { useCloneQuestionsFromBank, contestQuestionsKey } from "@/query/contest-query";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { BankResponse } from "@/api/generated/model";
+import { bankQuestionsKey, useCloneBankQuestions, useGetAllBanks } from "@/query/bank-query";
+import { contestQuestionsKey, useCloneQuestionsFromBank } from "@/query/contest-query";
 
 interface BankCloneDialogProps {
     targetId: string;

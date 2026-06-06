@@ -1,10 +1,11 @@
 "use client";
 
+import { LogOut, Moon, Settings, Sun } from "lucide-react";
+import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { LogOut, Moon, Settings, Sun } from "lucide-react";
-import Link from "next/link";
+
 import {
     DropdownMenu,
     DropdownMenuContent,

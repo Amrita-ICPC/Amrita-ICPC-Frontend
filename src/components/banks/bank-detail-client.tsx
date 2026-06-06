@@ -1,14 +1,15 @@
 "use client";
 
-import { useGetBankDetail } from "@/query/bank-query";
-import { AsyncStateHandler } from "@/components/shared/async-state-handler";
-import { BankHero } from "./bank-hero";
-import { BankQuestionsTable } from "./bank-questions-table";
-import { BankCloneDialog } from "./bank-clone-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetBankDetail } from "@/query/bank-query";
+
+import { BankHero } from "./bank-hero";
+import { BankQuestionsTable } from "./bank-questions-table";
 
 interface BankDetailClientProps {
     bankId: string;

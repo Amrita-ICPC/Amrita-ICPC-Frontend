@@ -1,27 +1,29 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
-import { Button } from "@/components/ui/button";
+
 import {
     ChevronLeft,
-    FileText,
-    Info,
-    ListChecks,
-    Hash,
     Clock,
     Database,
+    FileText,
+    Hash,
+    Info,
+    ListChecks,
     Trophy,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { type TestCase } from "./test-case-manager";
 import { Label } from "../ui/label";
+import { type TestCase } from "./test-case-manager";
 
 interface ProblemPreviewProps {
     title: string;

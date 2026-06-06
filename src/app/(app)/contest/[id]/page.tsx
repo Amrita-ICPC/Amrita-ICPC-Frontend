@@ -3,6 +3,7 @@ import { ContestForm } from "@/components/contest/contest-form";
 import AccessDenied from "@/components/global/access-denied";
 import AuthGuard from "@/components/global/auth-guard";
 import { Roles } from "@/lib/auth/utils";
+
 import { EditContestClient } from "./edit/edit-contest-client";
 
 type SearchParams = Record<string, string | string[] | undefined>;

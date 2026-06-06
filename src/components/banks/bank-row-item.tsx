@@ -1,18 +1,12 @@
 "use client";
 
-import {
-    Edit,
-    Share2,
-    Trash2,
-    BookOpen,
-    MoreVertical,
-    Globe,
-    HelpCircle,
-    Users,
-} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { BookOpen, Edit, Globe, HelpCircle, Trash2, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { BankResponse } from "@/api/generated/model/bankResponse";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,13 +18,11 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { BankResponse } from "@/api/generated/model/bankResponse";
-import { useDeleteBank, allBanksKey, bankDetailKey } from "@/query/bank-query";
-import { BankUpdateDialog } from "./bank-update-dialog";
+import { allBanksKey, bankDetailKey, useDeleteBank } from "@/query/bank-query";
+
 import { BankShareDialog } from "./bank-share-dialog";
-import { useQueryClient } from "@tanstack/react-query";
+import { BankUpdateDialog } from "./bank-update-dialog";
 
 interface BankRowItemProps {
     bank: BankResponse;

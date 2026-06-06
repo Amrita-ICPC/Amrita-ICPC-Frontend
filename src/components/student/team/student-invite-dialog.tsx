@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Loader2, UserPlus, UserCheck, Mail, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, Search, UserCheck, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import type { StudentTeamCardResponse } from "@/api/generated/model";
+import { useInviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost } from "@/api/generated/students/students";
+import { useListStudentsApiV1UsersStudentsGet } from "@/api/generated/users/users";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -12,11 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { useListStudentsApiV1UsersStudentsGet } from "@/api/generated/users/users";
-import { useInviteToTeamApiV1StudentsTeamsTeamIdInvitationInviteUserIdPost } from "@/api/generated/students/students";
-import type { StudentTeamCardResponse } from "@/api/generated/model";
 
 interface StudentInviteDialogProps {
     team: StudentTeamCardResponse;

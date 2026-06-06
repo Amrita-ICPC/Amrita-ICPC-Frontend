@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+
 import { StudentCreateTeamDialog } from "./student-create-team-dialog";
 import { StudentInvitationsDrawer } from "./student-invitations-drawer";
 import { StudentSearchTeamDialog } from "./student-search-team-dialog";

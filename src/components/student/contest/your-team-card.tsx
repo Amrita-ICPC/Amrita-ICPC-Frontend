@@ -1,9 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+    AlertCircle,
+    CheckCircle2,
+    Clock,
+    Crown,
+    Hourglass,
+    Loader2,
+    Lock,
+    LogOut,
+    Mail,
+    MoreVertical,
+    Pencil,
+    Plus,
+    Search,
+    ShieldCheck,
+    ShieldX,
+    Trash2,
+    UserCheck,
+    UserPlus,
+    Users,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import type { TeamMemberStatus, TeamParticipationStatus } from "@/api/generated/model";
+import { ContestTeamMemberStatus, TeamStatus } from "@/api/generated/model";
+import {
+    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
+    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
+    useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
+    useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch,
+    useTransferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatch,
+    useUpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatch,
+} from "@/api/generated/students/students";
+import { useListStudentsApiV1UsersStudentsGet } from "@/api/generated/users/users";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,67 +48,31 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-    DialogClose,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Users,
-    Crown,
-    Clock,
-    Lock,
-    ShieldCheck,
-    ShieldX,
-    Hourglass,
-    LogOut,
-    Trash2,
-    Pencil,
-    MoreVertical,
-    UserPlus,
-    Search,
-    Loader2,
-    Mail,
-    CheckCircle2,
-    UserCheck,
-    Plus,
-    AlertCircle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { TeamStatus, ContestTeamMemberStatus } from "@/api/generated/model";
-import type { TeamMemberStatus, TeamParticipationStatus } from "@/api/generated/model";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-    useTransferContestTeamLeaderApiV1StudentsContestsContestIdTeamsContestTeamIdLeaderPatch,
-    useUpdateContestTeamMemberStatusApiV1StudentsContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdStatusPatch,
-    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
-    useLeaveTeamMeApiV1StudentsTeamsTeamIdMembersMeDelete,
-    useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
-    useInviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatch,
-    useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
-    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
-} from "@/api/generated/students/students";
-import {
-    getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey,
-    useListStudentsApiV1UsersStudentsGet,
-} from "@/api/generated/users/users";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 // ─── Team-Status Badge ────────────────────────────────────────────────────────
 function TeamStatusBadge({ status }: { status: string }) {

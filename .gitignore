@@ -44,3 +44,6 @@ package-lock.json
 CLAUDE.md
 skills-lock.json
 .claude/
+
+#vs code configuration
+.vscode

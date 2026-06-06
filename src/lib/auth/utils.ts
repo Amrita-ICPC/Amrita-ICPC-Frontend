@@ -105,8 +105,9 @@ export function getDefaultRoute(user: AuthUserClaims | null | undefined): string
     return "/dashboard";
 }
 import { decodeJwt } from "jose";
-import { DecodedJWT, KeycloakToken } from "./types";
+
 import { logger } from "../logger";
+import { DecodedJWT, KeycloakToken } from "./types";
 
 export function processDecodedToken(decoded: DecodedJWT | null): {
     groups: string[];

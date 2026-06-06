@@ -1,13 +1,14 @@
 "use client";
 
+import { ShieldAlert, UserCog, Users } from "lucide-react";
 import { useState } from "react";
-import { useGetContest } from "@/query/contest-query";
-import { AsyncStateHandler } from "../shared/async-state-handler";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserCog, Users, ShieldAlert } from "lucide-react";
 
 import AuthGuard from "@/components/global/auth-guard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserType } from "@/lib/auth/utils";
+import { useGetContest } from "@/query/contest-query";
+
+import { AsyncStateHandler } from "../shared/async-state-handler";
 import { AudiencesSection } from "./audiences-section";
 import { InstructorsSection } from "./instructors-section";
 

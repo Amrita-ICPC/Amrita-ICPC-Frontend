@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Loader2, Users, UserPlus, Check, Sparkles } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Search, Sparkles, UserPlus, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import {
+    getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
+    useInviteToTeamApiV1StudentsTeamsTeamIdInvitationPost,
+    useSearchTeamsByNameApiV1StudentsTeamsSearchGet,
+} from "@/api/generated/students/students";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -14,12 +20,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-    useSearchTeamsByNameApiV1StudentsTeamsSearchGet,
-    useInviteToTeamApiV1StudentsTeamsTeamIdInvitationPost,
-    getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
-} from "@/api/generated/students/students";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function StudentSearchTeamDialog() {
     const [open, setOpen] = useState(false);
