@@ -73,7 +73,7 @@ export function BankCloneDialog({ targetId, targetType = "bank", children }: Ban
 
     const isPending = bankCloneMutation.isPending || contestCloneMutation.isPending;
 
-    const handleProceed = async () => {
+    const handleProceed = () => {
         if (!sourceBankId) {
             toast.error("Please select a source bank");
             return;
@@ -90,28 +90,24 @@ export function BankCloneDialog({ targetId, targetType = "bank", children }: Ban
             }
             setOpen(false);
         } else {
-            try {
-                if (targetType === "contest") {
-                    await contestCloneMutation.mutateAsync({
-                        contestId: targetId,
-                        data: {
-                            bank_id: sourceBankId,
-                            copy_all: true,
-                            score: defaultScore,
-                            duration: defaultDuration ? parseInt(defaultDuration) : null,
-                        },
-                    });
-                } else {
-                    await bankCloneMutation.mutateAsync({
-                        sourceBankId,
-                        data: {
-                            target_bank_id: targetId,
-                            copy_all: true,
-                        },
-                    });
-                }
-            } catch (error) {
-                // Error handled by global handler
+            if (targetType === "contest") {
+                contestCloneMutation.mutate({
+                    contestId: targetId,
+                    data: {
+                        bank_id: sourceBankId,
+                        copy_all: true,
+                        score: defaultScore,
+                        duration: defaultDuration ? parseInt(defaultDuration) : null,
+                    },
+                });
+            } else {
+                bankCloneMutation.mutate({
+                    sourceBankId,
+                    data: {
+                        target_bank_id: targetId,
+                        copy_all: true,
+                    },
+                });
             }
         }
     };

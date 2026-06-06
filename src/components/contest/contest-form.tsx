@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -119,7 +118,6 @@ export interface ContestFormProps {
 
 export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const router = useRouter();
-    const queryClient = useQueryClient();
 
     const now = useMemo(() => {
         const start = new Date();

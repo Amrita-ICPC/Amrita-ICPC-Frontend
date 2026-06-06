@@ -51,7 +51,6 @@ export interface QuestionEditorShellProps {
     form: ReturnType<typeof useQuestionForm>;
     onSave: () => void;
     isSaving: boolean;
-    compact?: boolean;
 }
 
 export function QuestionEditorShell({
@@ -62,7 +61,6 @@ export function QuestionEditorShell({
     form,
     onSave,
     isSaving,
-    compact = false,
 }: QuestionEditorShellProps) {
     const { metadata, content, code, testCases, initializeForm } = form;
 

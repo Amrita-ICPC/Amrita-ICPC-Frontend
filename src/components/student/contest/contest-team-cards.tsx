@@ -270,7 +270,7 @@ interface IndividualRegistrationStatusCardProps {
 
 function IndividualRegistrationStatusCard({
     team,
-    contest,
+    contest: _contest,
     onCancelRegistration,
     isCancelling,
 }: IndividualRegistrationStatusCardProps) {
@@ -661,10 +661,6 @@ export function ContestTeamCards({
         editTeam({ contestId, contestTeamId: team.id, data: { name: newName } });
     };
 
-    const handleLeaveTeam = () => {
-        toast.info("Leave Team endpoint not yet available.");
-    };
-
     const handleCancelTeam = () => {
         if (!contestId || !team?.id) return;
         toast.promise(
@@ -720,7 +716,6 @@ export function ContestTeamCards({
                     currentUserId={currentUserId}
                     onConfirmTeam={handleConfirmTeam}
                     isConfirming={isUpdatingStatus}
-                    onLeaveTeam={handleLeaveTeam}
                     onCancelTeam={handleCancelTeam}
                     isCancelling={isUpdatingStatus}
                     onEditTeam={(newName) => handleEditTeam(newName)}

@@ -122,7 +122,7 @@ export function ProblemMetadataCard({
                 setTagOpen(false);
                 toast.success(`Tag "${newTag.name}" created`);
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to create tag");
         }
     };

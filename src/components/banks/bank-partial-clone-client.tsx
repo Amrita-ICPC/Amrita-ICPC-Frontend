@@ -154,9 +154,9 @@ export function BankPartialCloneClient({
         setPage(1);
     };
 
-    const handleCloneSelected = async () => {
+    const handleCloneSelected = () => {
         if (selectedIds.length === 0) return;
-        await cloneMutation.mutateAsync({
+        cloneMutation.mutate({
             sourceBankId,
             data: {
                 target_bank_id: targetBankId,

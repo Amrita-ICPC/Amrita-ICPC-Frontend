@@ -162,21 +162,21 @@ export function ContestQuestionsTable({
         }
     };
 
-    const handleSaveOrder = async () => {
+    const handleSaveOrder = () => {
         const reorders = orderedQuestions.map((q, i) => ({
             question_id: q.id,
             order: (pagination?.page ? (pagination.page - 1) * pagination.page_size : 0) + i + 1,
         }));
 
-        await reorderMutation.mutateAsync({
+        reorderMutation.mutate({
             contestId,
             data: { reorders },
         });
     };
 
-    const handleRemoveSelected = async () => {
+    const handleRemoveSelected = () => {
         if (selectedIds.length === 0) return;
-        await removeMutation.mutateAsync({
+        removeMutation.mutate({
             contestId,
             data: { question_ids: selectedIds },
         });

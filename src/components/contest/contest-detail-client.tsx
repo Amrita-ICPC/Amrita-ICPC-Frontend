@@ -1,6 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertCircle,
     Ban,
@@ -168,7 +167,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
     const { data, isLoading, isError, error, refetch } =
         useGetContestApiV1ContestsContestIdGet(contestId);
     const contest: ContestDetailResponse | undefined = data?.data ?? undefined;
-    const queryClient = useQueryClient();
     const router = useRouter();
 
     const deleteMutation = useSoftDeleteContestApiV1ContestsContestIdSoftDeleteDelete({

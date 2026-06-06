@@ -160,9 +160,9 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
         );
     };
 
-    const removeQuestionIds = async (ids: string[]) => {
+    const removeQuestionIds = (ids: string[]) => {
         if (ids.length === 0) return;
-        await removeMutation.mutateAsync({
+        removeMutation.mutate({
             bankId,
             data: { question_ids: ids },
         });

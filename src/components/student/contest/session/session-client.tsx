@@ -168,7 +168,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
 
     // Update active editor and role details
     const isTeamMode = contest?.contest_mode?.toUpperCase() === "TEAM";
-    const isCurrentEditor = true;
 
     // Sync workspace or starter code in Monaco
     useEffect(() => {
@@ -461,7 +460,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
         <div className="fixed inset-0 z-50 bg-background text-foreground flex flex-col font-sans select-none">
             {/* Header */}
             <SessionHeader
-                contestId={contestId}
                 contestName={contest?.name || "Contest"}
                 timeLeft={timeLeft}
                 solvedCount={questionsList.filter((q) => q.solved).length}

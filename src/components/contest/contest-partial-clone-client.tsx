@@ -126,27 +126,23 @@ export function ContestPartialCloneClient({
         setPage(1);
     };
 
-    const handleCloneSelected = async () => {
+    const handleCloneSelected = () => {
         if (selectedIds.length === 0) return;
 
-        try {
-            await cloneMutation.mutateAsync({
-                contestId,
-                data: {
-                    bank_id: sourceBankId,
-                    copy_all: false,
-                    questions: selectedIds.map((id) => ({
-                        question_id: id,
-                        score: scores[id] ? parseInt(scores[id]) : null,
-                        duration: durations[id] ? parseInt(durations[id]) : null,
-                    })),
-                    score: defaultScore,
-                    duration: defaultDuration ? parseInt(defaultDuration) : null,
-                },
-            });
-        } catch (err) {
-            // Error handled globally
-        }
+        cloneMutation.mutate({
+            contestId,
+            data: {
+                bank_id: sourceBankId,
+                copy_all: false,
+                questions: selectedIds.map((id) => ({
+                    question_id: id,
+                    score: scores[id] ? parseInt(scores[id]) : null,
+                    duration: durations[id] ? parseInt(durations[id]) : null,
+                })),
+                score: defaultScore,
+                duration: defaultDuration ? parseInt(defaultDuration) : null,
+            },
+        });
     };
 
     const toggleSelection = (id: string) => {

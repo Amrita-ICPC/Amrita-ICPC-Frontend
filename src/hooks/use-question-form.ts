@@ -50,7 +50,7 @@ export function useQuestionForm() {
             setOutputFormat(parsedText.output ?? "");
             setConstraints(parsedText.constraints ?? "");
             setNotes(parsedText.notes ?? "");
-        } catch (e) {
+        } catch {
             setDescription(data.question_text ?? "");
         }
 

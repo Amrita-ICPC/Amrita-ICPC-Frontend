@@ -7,11 +7,10 @@ import { StudentInvitationsDrawer } from "./student-invitations-drawer";
 import { StudentSearchTeamDialog } from "./student-search-team-dialog";
 
 interface StudentTeamHeroProps {
-    onJoinTeam?: () => void;
     pendingInvitations?: number;
 }
 
-export function StudentTeamHero({ onJoinTeam, pendingInvitations = 0 }: StudentTeamHeroProps) {
+export function StudentTeamHero({ pendingInvitations = 0 }: StudentTeamHeroProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}

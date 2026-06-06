@@ -35,16 +35,6 @@ const LANGUAGES = [
 
 export type MonacoLanguage = (typeof LANGUAGES)[number];
 
-interface ExecutionResult {
-    stdout?: string | null;
-    stderr?: string | null;
-    compile_output?: string | null;
-    message?: string | null;
-    status?: { id: number; description: string };
-    time?: string | null;
-    memory?: number | null;
-}
-
 interface QuestionCodeEditorProps {
     value: string;
     onChange: (value: string) => void;
