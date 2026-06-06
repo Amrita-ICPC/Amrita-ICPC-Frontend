@@ -106,7 +106,7 @@ export function ProblemView({ questionDetails, isLoading }: ProblemViewProps) {
         if (questionDetails?.question_text) {
             parsedQuestion = JSON.parse(questionDetails.question_text);
         }
-    } catch (e) {
+    } catch {
         // Fallback to treating it as raw text
     }
 

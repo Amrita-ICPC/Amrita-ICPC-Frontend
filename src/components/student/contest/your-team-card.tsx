@@ -163,7 +163,6 @@ export interface YourTeamCardProps {
     /** Callbacks — wired by the parent where mutations live */
     onConfirmTeam?: () => void;
     isConfirming?: boolean;
-    onLeaveTeam?: () => void;
     onCancelTeam?: () => void;
     isCancelling?: boolean;
     onEditTeam?: (newName: string) => void;
@@ -177,7 +176,6 @@ export function YourTeamCard({
     contestId,
     onConfirmTeam,
     isConfirming = false,
-    onLeaveTeam,
     onCancelTeam,
     isCancelling = false,
     onEditTeam,
@@ -191,7 +189,6 @@ export function YourTeamCard({
     const myMember = team.members.find((m) => m.is_current_user === true);
     const isLeader = myMember?.role === "LEADER";
 
-    const queryClient = useQueryClient();
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
@@ -452,7 +449,6 @@ export function CreateContestTeamDialog({
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
     const [error, setError] = useState("");
-    const queryClient = useQueryClient();
 
     const { mutate: createContestTeam, isPending } =
         useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost({

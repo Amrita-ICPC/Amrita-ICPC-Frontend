@@ -46,7 +46,7 @@ function isUUID(s: string) {
     );
 }
 
-function segmentLabel(seg: string, prev?: string): string {
+function segmentLabel(seg: string): string {
     if (isUUID(seg)) {
         return "Details";
     }
@@ -87,7 +87,7 @@ export function Header() {
     } else {
         crumbs = filteredSegments.map(({ seg, originalIndex }, i) => {
             const href = "/" + segments.slice(0, originalIndex + 1).join("/");
-            const label = segmentLabel(seg, segments[originalIndex - 1]);
+            const label = segmentLabel(seg);
             const isLast = i === filteredSegments.length - 1;
             return { href, label, isLast };
         });

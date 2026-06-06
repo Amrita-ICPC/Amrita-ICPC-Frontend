@@ -98,8 +98,6 @@ export function StudentTeamCard({ team, onViewDetails }: StudentTeamCardProps) {
     );
     const pendingRequestsCount = requestsData?.data?.invitations?.length || 0;
 
-    const isReady = team.member_count >= 3;
-    const statusText = isReady ? "Ready" : "Incomplete";
     const firstLetter = team.title ? team.title.charAt(0).toUpperCase() : "?";
     const logoBg = getDecoratedBg(team.title);
 
@@ -510,8 +508,6 @@ export function StudentTeamRowItem({ team, onViewDetails }: StudentTeamCardProps
     );
     const pendingRequestsCount = requestsData?.data?.invitations?.length || 0;
 
-    const isReady = team.member_count >= 3;
-    const statusText = isReady ? "Ready" : "Incomplete";
     const firstLetter = team.title ? team.title.charAt(0).toUpperCase() : "?";
     const logoBg = getDecoratedBg(team.title);
 

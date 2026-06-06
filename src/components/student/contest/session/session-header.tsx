@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 
 interface SessionHeaderProps {
-    contestId: string;
     contestName: string;
     timeLeft: string;
     solvedCount: number;
@@ -30,7 +29,6 @@ interface SessionHeaderProps {
 }
 
 export function SessionHeader({
-    contestId,
     contestName,
     timeLeft,
     solvedCount,

@@ -38,9 +38,9 @@ const CONFIG_TABS = [
 export function QuestionWorkflowSection({
     activeWorkflowStep,
     setActiveWorkflowStep,
-    steps,
+    steps: _steps,
     isStepValid,
-    canGoNext,
+    canGoNext: _canGoNext,
     workflowEditorLang,
     setWorkflowEditorLang,
     allowedLanguages,
@@ -52,8 +52,8 @@ export function QuestionWorkflowSection({
     setDriverCodes,
     testCases,
     setTestCases,
-    onSave,
-    isSaving = false,
+    onSave: _onSave,
+    isSaving: _isSaving = false,
 }: QuestionWorkflowSectionProps) {
     return (
         <div className="flex h-full w-full">

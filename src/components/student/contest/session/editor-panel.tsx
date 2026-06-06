@@ -63,7 +63,7 @@ export function EditorPanel({
     currentTemplates,
     isSaving,
     handleManualSave,
-    isTeamMode,
+    isTeamMode: _isTeamMode,
     editorCode,
     setEditorCode,
     consoleHeight,

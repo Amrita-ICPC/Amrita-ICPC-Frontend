@@ -1,5 +1,4 @@
 "use client";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { useQuestionForm } from "@/hooks/use-question-form";
@@ -19,7 +18,6 @@ export default function BankQuestionEditorClient({
     isEdit: boolean;
 }) {
     const router = useRouter();
-    const queryClient = useQueryClient();
     const form = useQuestionForm();
     const payload = useQuestionPayload(form);
 
@@ -75,7 +73,7 @@ export default function BankQuestionEditorClient({
             });
 
             router.push(`/banks/${bankId}`);
-        } catch (error) {
+        } catch {
             // Error is handled globally by TanstackQueryProvider
         }
     };
@@ -111,7 +109,6 @@ export default function BankQuestionEditorClient({
                 form={form}
                 onSave={handleCreate}
                 isSaving={isSavingCreateQuestion}
-                compact
             />
         );
     }
@@ -124,7 +121,6 @@ export default function BankQuestionEditorClient({
             form={form}
             onSave={onUpdate}
             isSaving={isSavingUpdateQuestion}
-            compact
         />
     );
 }
