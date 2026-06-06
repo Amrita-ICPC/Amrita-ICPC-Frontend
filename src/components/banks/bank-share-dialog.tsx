@@ -1,17 +1,21 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { Check, Loader2, Mail, Search, ShieldAlert, Trash2, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import {
-    Users,
-    Search,
-    UserPlus,
-    Trash2,
-    ShieldAlert,
-    Loader2,
-    X,
-    Check,
-    Mail,
-} from "lucide-react";
+    APIResponseListUserResponse,
+    BankPermission,
+    BankShareItem,
+    BankSharesResponse,
+    BankShareUserResponse,
+} from "@/api/generated/model";
+import { useListUsersApiV1UsersGet as useListUsers } from "@/api/generated/users/users";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -20,19 +24,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-    useGetBankShares,
-    useShareBank,
-    useUnshareBank,
-    useUpdateBankShares,
-    bankSharesKey,
-    bankDetailKey,
-} from "@/query/bank-query";
-import { useListUsersApiV1UsersGet as useListUsers } from "@/api/generated/users/users";
-import { useDebounce } from "@/hooks/use-debounce";
-import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -40,20 +33,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
-    APIResponseListUserResponse,
-    BankPermission,
-    BankShareItem,
-    BankSharesResponse,
-    BankShareUserResponse,
-    UserBasicInfo,
-} from "@/api/generated/model";
+    bankDetailKey,
+    bankSharesKey,
+    useGetBankShares,
+    useShareBank,
+    useUnshareBank,
+    useUpdateBankShares,
+} from "@/query/bank-query";
+
 import { AsyncStateHandler } from "../shared/async-state-handler";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
 
 interface BankShareDialogProps {
     bankId: string;

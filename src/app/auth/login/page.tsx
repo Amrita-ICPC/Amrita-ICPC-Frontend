@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth/auth";
-import LoginClient from "./login-client";
 
+import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute } from "@/lib/auth/utils";
+
+import LoginClient from "./login-client";
 
 export default async function LoginPage() {
     const session = await auth();

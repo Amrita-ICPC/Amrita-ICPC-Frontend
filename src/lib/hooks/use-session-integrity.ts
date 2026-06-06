@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export function useSessionIntegrity() {
     const { data: session, status } = useSession();

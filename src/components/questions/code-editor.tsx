@@ -1,25 +1,52 @@
 "use client";
 
-import { useState, useRef } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
-import { Play, Loader2, ChevronDown, TerminalSquare, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import {
+    AlertCircle,
+    CheckCircle2,
+    ChevronDown,
+    Clock,
+    Loader2,
+    Play,
+    TerminalSquare,
+} from "lucide-react";
+import { useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 
 const LANGUAGES = [
-    { id: 71,  label: "Python 3",   monaco: "python",  placeholder: 'print("Hello, World!")' },
-    { id: 54,  label: "C++ (GCC)",  monaco: "cpp",     placeholder: '#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}' },
-    { id: 50,  label: "C (GCC)",    monaco: "c",       placeholder: '#include <stdio.h>\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}' },
-    { id: 62,  label: "Java",       monaco: "java",    placeholder: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}' },
+    { id: 71, label: "Python 3", monaco: "python", placeholder: 'print("Hello, World!")' },
+    {
+        id: 54,
+        label: "C++ (GCC)",
+        monaco: "cpp",
+        placeholder:
+            '#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}',
+    },
+    {
+        id: 50,
+        label: "C (GCC)",
+        monaco: "c",
+        placeholder:
+            '#include <stdio.h>\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
+    },
+    {
+        id: 62,
+        label: "Java",
+        monaco: "java",
+        placeholder:
+            'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+    },
 ] as const;
 
-type Language = typeof LANGUAGES[number];
+type Language = (typeof LANGUAGES)[number];
 
 interface ExecutionResult {
     stdout?: string | null;
@@ -32,12 +59,12 @@ interface ExecutionResult {
 }
 
 const STATUS_COLORS: Record<number, string> = {
-    3: "text-emerald-400",   // Accepted
-    4: "text-red-400",       // Wrong Answer
-    5: "text-amber-400",     // Time Limit Exceeded
-    6: "text-red-400",       // Compilation Error
-    11: "text-red-400",      // Runtime Error
-    13: "text-red-400",      // Internal Error
+    3: "text-emerald-400", // Accepted
+    4: "text-red-400", // Wrong Answer
+    5: "text-amber-400", // Time Limit Exceeded
+    6: "text-red-400", // Compilation Error
+    11: "text-red-400", // Runtime Error
+    13: "text-red-400", // Internal Error
 };
 
 function statusColor(id?: number) {
@@ -72,10 +99,14 @@ function OutputPanel({ result, error }: { result: ExecutionResult | null; error:
         <div className="flex flex-col gap-3 p-4">
             {/* Status bar */}
             <div className="flex items-center justify-between">
-                <div className={`flex items-center gap-2 text-sm font-medium ${statusColor(statusId)}`}>
-                    {isAccepted
-                        ? <CheckCircle2 className="h-4 w-4" />
-                        : <AlertCircle className="h-4 w-4" />}
+                <div
+                    className={`flex items-center gap-2 text-sm font-medium ${statusColor(statusId)}`}
+                >
+                    {isAccepted ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                        <AlertCircle className="h-4 w-4" />
+                    )}
                     {result.status?.description ?? "Unknown"}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -84,9 +115,7 @@ function OutputPanel({ result, error }: { result: ExecutionResult | null; error:
                             <Clock className="h-3 w-3" /> {result.time}s
                         </span>
                     )}
-                    {result.memory && (
-                        <span>{(result.memory / 1024).toFixed(1)} MB</span>
-                    )}
+                    {result.memory && <span>{(result.memory / 1024).toFixed(1)} MB</span>}
                 </div>
             </div>
 
@@ -167,7 +196,10 @@ export function CodeEditor() {
                                 <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44 bg-[#0f1e35] border-white/10">
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-44 bg-[#0f1e35] border-white/10"
+                        >
                             {LANGUAGES.map((l) => (
                                 <DropdownMenuItem
                                     key={l.id}
@@ -187,9 +219,15 @@ export function CodeEditor() {
                         onClick={handleRun}
                         disabled={running}
                     >
-                        {running
-                            ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Running…</>
-                            : <><Play className="h-3.5 w-3.5 fill-white" /> Run</>}
+                        {running ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Running…
+                            </>
+                        ) : (
+                            <>
+                                <Play className="h-3.5 w-3.5 fill-white" /> Run
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
@@ -203,7 +241,9 @@ export function CodeEditor() {
                         language={lang.monaco}
                         value={code}
                         onChange={(v) => setCode(v ?? "")}
-                        onMount={(editor) => { editorRef.current = editor; }}
+                        onMount={(editor) => {
+                            editorRef.current = editor;
+                        }}
                         theme="vs-dark"
                         options={{
                             fontSize: 14,

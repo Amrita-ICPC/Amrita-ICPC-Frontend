@@ -1,18 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import {
-    LayoutDashboard,
-    Trophy,
-    Users,
     Database,
     FileCode2,
-    UsersRound,
+    LayoutDashboard,
     Settings,
+    Trophy,
     UserRoundCog,
+    Users,
+    UsersRound,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

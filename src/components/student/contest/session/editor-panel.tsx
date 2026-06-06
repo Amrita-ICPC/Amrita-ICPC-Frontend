@@ -2,29 +2,28 @@
 "use client";
 
 import Editor from "@monaco-editor/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
     ChevronDown,
     ChevronRight,
     ChevronUp,
     Loader2,
-    Save,
-    Lock,
-    TerminalSquare,
     Play,
+    Save,
     Send,
+    TerminalSquare,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
 import { StudentCodeRunResponse } from "@/api/generated/model";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export const LANGUAGES = [
     { id: 71, label: "Python 3", monaco: "python" },

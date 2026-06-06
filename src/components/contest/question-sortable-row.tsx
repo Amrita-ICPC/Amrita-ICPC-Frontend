@@ -2,7 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { QuestionListSummaryResponse, PaginationResponse } from "@/api/generated/model";
+
+import type { PaginationResponse, QuestionListSummaryResponse } from "@/api/generated/model";
+
 import { QuestionRow } from "./question-row";
 
 interface QuestionSortableRowProps {

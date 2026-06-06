@@ -1,10 +1,12 @@
 "use client";
 
-import { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { ErrorState } from "./error-state";
-import { motion, AnimatePresence } from "framer-motion";
+import { ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
+
+import { ErrorState } from "./error-state";
 
 interface AsyncStateHandlerProps {
     isLoading: boolean;

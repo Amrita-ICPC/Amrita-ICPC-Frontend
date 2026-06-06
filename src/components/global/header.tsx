@@ -1,11 +1,11 @@
 "use client";
 
-import { Fragment } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Bell, Mail } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { getDefaultRoute } from "@/lib/auth/utils";
+import { Fragment } from "react";
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -23,6 +23,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getDefaultRoute } from "@/lib/auth/utils";
 
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard: "Dashboard",

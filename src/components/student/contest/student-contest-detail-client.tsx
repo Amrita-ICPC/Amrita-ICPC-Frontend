@@ -1,35 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
-    useStartContestSessionApiV1StudentsContestsContestIdStartPost,
+    Activity,
+    AlertCircle,
+    ArrowRight,
+    Bookmark,
+    Calendar,
+    CheckCircle2,
+    Clock,
+    Laptop,
+    Share2,
+    Shield,
+    Sparkles,
+    Trophy,
+    Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import {
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
     useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
+    useStartContestSessionApiV1StudentsContestsContestIdStartPost,
 } from "@/api/generated/students/students";
-import { useRouter } from "next/navigation";
-import { toast } from "@/lib/hooks/use-toast";
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Share2,
-    Bookmark,
-    Clock,
-    Users,
-    Shield,
-    Laptop,
-    AlertCircle,
-    ArrowRight,
-    Sparkles,
-    CheckCircle2,
-    Activity,
-    Calendar,
-    Trophy,
-} from "lucide-react";
-import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { toast } from "@/lib/hooks/use-toast";
 import { cn } from "@/lib/utils";
+
+import { ContestTeamCards, OverallRegistrationProgressCard } from "./contest-team-cards";
 import { StudentContestDetailSkeleton } from "./student-contest-skeleton";
-import { OverallRegistrationProgressCard, ContestTeamCards } from "./contest-team-cards";
 
 const BANNERS = [
     { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue

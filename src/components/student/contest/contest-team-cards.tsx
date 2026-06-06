@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Sparkles, CheckCircle2, AlertCircle, Clock, Trophy, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Plus, Download } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AlertCircle, CheckCircle2, Clock, Loader2, Sparkles, Trophy, Users } from "lucide-react";
+import { Download, Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { TeamApprovalStatus, TeamStatus } from "@/api/generated/model";
+import {
+    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
+    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
+    useUpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatch,
+    useUpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatch,
+} from "@/api/generated/students/students";
+import { useGetMeApiV1UsersMeGet } from "@/api/generated/users/users";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,6 +26,9 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -29,19 +38,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
-    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
-    useUpdateContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdPatch,
-    useUpdateContestTeamStatusApiV1StudentsContestsContestIdTeamsContestTeamIdStatusPatch,
-    useCreateContestTeamApiV1StudentsContestsContestIdTeamsPost,
-} from "@/api/generated/students/students";
-import { TeamStatus, TeamApprovalStatus } from "@/api/generated/model";
-import { toast } from "sonner";
-import { useSession } from "next-auth/react";
-import { useGetMeApiV1UsersMeGet } from "@/api/generated/users/users";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+
 import { StudentImportTeamDialog } from "./student-import-team-dialog";
-import { YourTeamCard, CreateContestTeamDialog } from "./your-team-card";
+import { CreateContestTeamDialog, YourTeamCard } from "./your-team-card";
 
 interface ContestTeamCardsProps {
     participation: any;

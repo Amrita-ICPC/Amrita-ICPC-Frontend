@@ -1,12 +1,18 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { Loader2, Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as zod from "zod";
 
+import {
+    getGetAllBanksApiV1BanksGetQueryKey,
+    useCreateBankApiV1BanksPost,
+} from "@/api/generated/banks/banks";
+import { CreateBankApiV1BanksPostBody } from "@/api/generated/zod/banks/banks";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -27,13 +33,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    useCreateBankApiV1BanksPost,
-    getGetAllBanksApiV1BanksGetQueryKey,
-} from "@/api/generated/banks/banks";
-import { CreateBankApiV1BanksPostBody } from "@/api/generated/zod/banks/banks";
 import { toApiError } from "@/lib/api/error";
-import * as zod from "zod";
 
 type BankFormValues = zod.infer<typeof CreateBankApiV1BanksPostBody>;
 

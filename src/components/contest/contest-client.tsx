@@ -1,26 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Trophy, Calendar, Clock, FileQuestion, Users } from "lucide-react";
+import { ArrowRight, Calendar, Clock, FileQuestion, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import { useGetAllContestsApiV1ContestsGet } from "@/api/generated/contests/contests";
 import type {
-    ContestStatus,
     ContestRunStatus,
-    GetAllContestsApiV1ContestsGetParams,
+    ContestStatus,
     ContestSummaryResponse,
+    GetAllContestsApiV1ContestsGetParams,
 } from "@/api/generated/model";
-import { ContestFilters } from "./contest-filters";
-import { ContestCard } from "./contest-card";
-import { ContestSkeleton } from "./contest-skeleton";
 import { AppPagination } from "@/components/shared/app-pagination";
-import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
+import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AsyncStateHandler } from "../shared/async-state-handler";
 import { cn } from "@/lib/utils";
+
+import { AsyncStateHandler } from "../shared/async-state-handler";
+import { ContestCard } from "./contest-card";
+import { ContestFilters } from "./contest-filters";
+import { ContestSkeleton } from "./contest-skeleton";
 
 const CONTEST_STATUS_STYLES: Record<
     string,
@@ -81,13 +82,11 @@ function ContestListRow({ contest }: { contest: ContestSummaryResponse }) {
     const runStatusLabel = contest.run_status === "ENDED" ? "COMPLETED" : contest.run_status;
 
     return (
-        <div className="group relative flex min-h-[72px] flex-col gap-3 rounded-[16px] border border-border/60 bg-card p-3 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-4">
-            <Link
-                href={`/contest/${contest.id}`}
-                className="absolute inset-0 z-0"
-                aria-label={`View contest ${contest.name}`}
-            />
-
+        <Link
+            href={`/contest/${contest.id}`}
+            aria-label={`View contest ${contest.name}`}
+            className="group relative flex min-h-[72px] flex-col gap-3 rounded-[16px] border border-border/60 bg-card p-3 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-4 block"
+        >
             {/* Left: Big Icon Container */}
             <div className="hidden h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[16px] bg-primary/10 dark:bg-primary/15 md:flex">
                 <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border-[2px] border-primary/50 text-primary">
@@ -167,7 +166,7 @@ function ContestListRow({ contest }: { contest: ContestSummaryResponse }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 

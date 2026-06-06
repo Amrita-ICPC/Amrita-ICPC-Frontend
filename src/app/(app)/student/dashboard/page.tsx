@@ -1,5 +1,6 @@
+import { Trophy, Users } from "lucide-react";
+
 import { auth } from "@/lib/auth/auth";
-import { Trophy, FileCode2, Users } from "lucide-react";
 
 export default async function StudentDashboardPage() {
     const session = await auth();

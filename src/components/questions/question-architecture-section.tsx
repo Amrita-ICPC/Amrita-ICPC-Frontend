@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TiptapToolbar, EditorContent } from "../shared/TipTap";
+
+import { EditorContent, TiptapToolbar } from "../shared/TipTap";
 
 interface QuestionArchitectureSectionProps {
     activeTab: string;

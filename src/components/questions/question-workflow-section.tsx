@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Plus, CheckCircle2, Code, FileText, Database } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { QuestionCodeEditor, type MonacoLanguage } from "./question-code-editor";
-import { TestCaseManager, type TestCase } from "./test-case-manager";
+import { CheckCircle2, Code, Database, FileText, Plus } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
+import { type MonacoLanguage, QuestionCodeEditor } from "./question-code-editor";
+import { type TestCase, TestCaseManager } from "./test-case-manager";
 
 interface QuestionWorkflowSectionProps {
     activeWorkflowStep: string;

@@ -1,10 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { AlertCircle, RefreshCcw, ShieldAlert } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { handleApiError } from "@/lib/handle-api-error";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 interface ErrorStateProps {
     error: unknown;

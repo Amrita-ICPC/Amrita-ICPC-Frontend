@@ -2,8 +2,9 @@
 "use client";
 
 import { EventSourceMessage, fetchEventSource } from "@microsoft/fetch-event-source";
-import { env } from "@/lib/env";
 import { getSession } from "next-auth/react";
+
+import { env } from "@/lib/env";
 
 type SSEOptions = {
     url: string;

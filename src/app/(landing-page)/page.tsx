@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { auth } from "@/lib/auth/auth";
-import { redirect } from "next/navigation";
 import { Code2 } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { getDefaultRoute } from "@/lib/auth/utils";
 import { FeatureCards } from "@/components/landing/feature-cards";
+import { auth } from "@/lib/auth/auth";
+import { getDefaultRoute } from "@/lib/auth/utils";
 
 export default async function LandingPage() {
     const session = await auth();

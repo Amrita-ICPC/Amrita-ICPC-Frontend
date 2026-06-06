@@ -1,6 +1,7 @@
 "use client";
 
 import { LayoutGrid, List } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 export type ViewMode = "grid" | "table";

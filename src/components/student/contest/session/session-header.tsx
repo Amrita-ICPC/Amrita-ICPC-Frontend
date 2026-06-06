@@ -1,8 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
+import { Activity, Clock, Lock, Moon, Sun, Trophy } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -11,8 +14,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Clock, Trophy, Lock, Activity, Sun, Moon } from "lucide-react";
 
 interface SessionHeaderProps {
     contestId: string;

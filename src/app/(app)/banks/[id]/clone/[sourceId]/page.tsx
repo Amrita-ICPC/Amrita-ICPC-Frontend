@@ -1,5 +1,6 @@
-import { BankPartialCloneClient } from "@/components/banks/bank-partial-clone-client";
 import { Metadata } from "next";
+
+import { BankPartialCloneClient } from "@/components/banks/bank-partial-clone-client";
 
 interface PartialClonePageProps {
     params: Promise<{

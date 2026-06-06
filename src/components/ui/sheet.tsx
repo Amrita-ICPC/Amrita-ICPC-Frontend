@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -128,11 +128,11 @@ function SheetDescription({
 
 export {
     Sheet,
-    SheetTrigger,
     SheetClose,
     SheetContent,
-    SheetHeader,
-    SheetFooter,
-    SheetTitle,
     SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
 };

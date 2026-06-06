@@ -1,7 +1,8 @@
 "use client";
 
+import { CheckCircle, Database, FileQuestion, Lock } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { Database, CheckCircle, Lock, FileQuestion } from "lucide-react";
 
 export function BankStats() {
     // These stats are currently mocked to match the provided design.

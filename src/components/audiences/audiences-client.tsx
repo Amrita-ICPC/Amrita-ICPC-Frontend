@@ -1,27 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Users, Mail, ChevronRight } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { ChevronRight, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import {
-    useListAudiencesApiV1AudiencesGet,
-    useCreateAudienceApiV1AudiencesPost,
-    useUpdateAudienceApiV1AudiencesAudienceIdPatch,
-    useDeleteAudienceApiV1AudiencesAudienceIdDelete,
-    useAddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost,
-    useListAudienceUsersApiV1AudiencesAudienceIdUsersGet,
-    useRemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete,
     getListAudiencesApiV1AudiencesGetQueryKey,
     getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey,
+    useAddUsersToAudienceByEmailApiV1AudiencesAudienceIdUsersEmailPost,
+    useCreateAudienceApiV1AudiencesPost,
+    useDeleteAudienceApiV1AudiencesAudienceIdDelete,
+    useListAudiencesApiV1AudiencesGet,
+    useListAudienceUsersApiV1AudiencesAudienceIdUsersGet,
+    useRemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete,
+    useUpdateAudienceApiV1AudiencesAudienceIdPatch,
 } from "@/api/generated/audiences/audiences";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { AudienceResponse } from "@/api/generated/model";
 import { AudienceType } from "@/api/generated/model/audienceType";
+import { AppPagination } from "@/components/shared/app-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +41,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -56,8 +57,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AppPagination } from "@/components/shared/app-pagination";
+import { Textarea } from "@/components/ui/textarea";
 
 // ─── Zod schemas ─────────────────────────────────────────────────────────────
 

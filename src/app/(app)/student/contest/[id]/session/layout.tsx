@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet } from "@/api/generated/students/students";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
+import { toast } from "sonner";
+
+import { useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet } from "@/api/generated/students/students";
 
 interface LayoutProps {
     children: React.ReactNode;

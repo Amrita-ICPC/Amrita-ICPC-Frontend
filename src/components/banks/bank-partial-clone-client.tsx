@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
     ArrowUpDown,
     ChevronLeft,
@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
-import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
+import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

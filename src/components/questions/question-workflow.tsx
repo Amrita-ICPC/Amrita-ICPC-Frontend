@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Code2, Beaker, Zap, ShieldCheck, Terminal } from "lucide-react";
+import { Beaker, Check, Code2, Terminal, Zap } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 const STEPS = [

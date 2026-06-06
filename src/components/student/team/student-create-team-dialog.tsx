@@ -1,10 +1,15 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Loader2, Users } from "lucide-react";
+import { Loader2, Plus, Users } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
+import {
+    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
+    useCreateTeamApiV1StudentsTeamsPost,
+} from "@/api/generated/students/students";
+import { CreateTeamApiV1StudentsTeamsPostBody } from "@/api/generated/zod/students/students";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -18,21 +23,15 @@ import {
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    useCreateTeamApiV1StudentsTeamsPost,
-    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
-} from "@/api/generated/students/students";
-import { CreateTeamApiV1StudentsTeamsPostBody } from "@/api/generated/zod/students/students";
-import * as zod from "zod";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateTeamInput {
     name: string;

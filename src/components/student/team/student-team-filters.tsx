@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Search, Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
-import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
 import {
     Select,
     SelectContent,
@@ -14,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface StudentTeamFiltersProps {
     view: ViewMode;

@@ -1,8 +1,9 @@
-import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import { getDefaultRoute } from "@/lib/auth/utils";
-import ContestTeamInvitationClient from "@/components/student/invitation/invitation-client";
+
 import AccessDenied from "@/components/global/access-denied";
+import ContestTeamInvitationClient from "@/components/student/invitation/invitation-client";
+import { auth } from "@/lib/auth/auth";
+import { getDefaultRoute } from "@/lib/auth/utils";
 
 export default async function InvitationPage() {
     const session = await auth();

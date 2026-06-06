@@ -1,6 +1,7 @@
-import { auth } from "@/lib/auth/auth";
-import { Trophy, FileCode2, Users, ShieldCheck } from "lucide-react";
+import { FileCode2, ShieldCheck, Trophy, Users } from "lucide-react";
 import { redirect } from "next/navigation";
+
+import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute } from "@/lib/auth/utils";
 
 export default async function DashboardPage() {

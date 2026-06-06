@@ -1,11 +1,19 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as zod from "zod";
 
+import {
+    getGetAllBanksApiV1BanksGetQueryKey,
+    getGetBankApiV1BanksBankIdGetQueryKey,
+    useUpdateBankApiV1BanksBankIdPatch,
+} from "@/api/generated/banks/banks";
+import { BankResponse } from "@/api/generated/model/bankResponse";
+import { UpdateBankApiV1BanksBankIdPatchBody } from "@/api/generated/zod/banks/banks";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -26,15 +34,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    useUpdateBankApiV1BanksBankIdPatch,
-    getGetBankApiV1BanksBankIdGetQueryKey,
-    getGetAllBanksApiV1BanksGetQueryKey,
-} from "@/api/generated/banks/banks";
-import { UpdateBankApiV1BanksBankIdPatchBody } from "@/api/generated/zod/banks/banks";
-import { BankResponse } from "@/api/generated/model/bankResponse";
 import { toApiError } from "@/lib/api/error";
-import * as zod from "zod";
 
 type BankUpdateFormValues = zod.infer<typeof UpdateBankApiV1BanksBankIdPatchBody>;
 

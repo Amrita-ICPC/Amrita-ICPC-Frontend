@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Users, Download, Loader2, Trophy, ArrowRight, ArrowLeft, Search } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { ArrowLeft, ArrowRight, Download, Loader2, Search, Trophy, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+    useGetMyTeamsApiV1StudentsTeamsGet,
+    useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
+} from "@/api/generated/students/students";
+import { useImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPost } from "@/api/generated/students/students";
+import { getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey } from "@/api/generated/students/students";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
@@ -14,16 +21,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    useGetMyTeamsApiV1StudentsTeamsGet,
-    useGetTeamMembersApiV1StudentsTeamsTeamIdMembersGet,
-} from "@/api/generated/students/students";
-import { useImportStudentTeamApiV1StudentsContestsContestIdTeamsImportPost } from "@/api/generated/students/students";
-import { getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey } from "@/api/generated/students/students";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 interface StudentImportTeamDialogProps {
     contestId: string;

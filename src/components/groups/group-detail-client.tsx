@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertCircle,
@@ -15,24 +14,25 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
-    getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey,
-    getListAudiencesApiV1AudiencesGetQueryKey,
     getGetAudienceApiV1AudiencesAudienceIdGetQueryKey,
+    getListAudiencesApiV1AudiencesGetQueryKey,
+    getListAudienceUsersApiV1AudiencesAudienceIdUsersGetQueryKey,
     useAddUsersToAudienceApiV1AudiencesAudienceIdUsersPost,
     useGetAudienceApiV1AudiencesAudienceIdGet,
     useListAudienceUsersApiV1AudiencesAudienceIdUsersGet,
     useRemoveUsersFromAudienceApiV1AudiencesAudienceIdUsersDelete,
 } from "@/api/generated/audiences/audiences";
-import { useListUsersApiV1UsersGet } from "@/api/generated/users/users";
 import {
-    AudienceType,
-    UserRole,
     type AudienceResponse,
+    AudienceType,
     type UserResponse,
+    UserRole,
 } from "@/api/generated/model";
+import { useListUsersApiV1UsersGet } from "@/api/generated/users/users";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

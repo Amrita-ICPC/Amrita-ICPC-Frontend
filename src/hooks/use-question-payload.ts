@@ -1,10 +1,7 @@
 import { useMemo } from "react";
-import type {
-    QuestionCreate,
-    QuestionUpdate,
-    QuestionTemplateCreate,
-    QuestionTestCaseCreate,
-} from "@/api/generated/model";
+
+import type { QuestionTemplateCreate, QuestionTestCaseCreate } from "@/api/generated/model";
+
 import type { useQuestionForm } from "./use-question-form";
 
 export function useQuestionPayload(form: ReturnType<typeof useQuestionForm>) {

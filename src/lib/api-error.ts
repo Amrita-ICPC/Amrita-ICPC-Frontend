@@ -37,7 +37,7 @@ export class ApiError extends Error {
         this.name = "ApiError";
         this.status = response.status;
         this.code = response.error?.code || "UNKNOWN_ERROR";
-        this.requestId = response.meta.request_id;
+        this.requestId = response.meta?.request_id;
         this.raw = response;
 
         // Process details into flattened errors

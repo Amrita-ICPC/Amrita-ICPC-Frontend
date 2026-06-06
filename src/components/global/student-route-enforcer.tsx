@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, redirect } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
+
 import AccessDenied from "./access-denied";
 
 export default function StudentRouteEnforcer({

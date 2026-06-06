@@ -1,6 +1,18 @@
 "use client";
 
+import { AlertCircle, Check, Inbox, Loader2, Users, X } from "lucide-react";
 import { useState } from "react";
+
+import type { StudentTeamCardResponse, StudentTeamInvitationResponse } from "@/api/generated/model";
+import {
+    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
+    getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
+    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
+    useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
+    useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch,
+} from "@/api/generated/students/students";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -8,18 +20,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-    useGetTeamInvitationsApiV1StudentsTeamsInvitationsGet,
-    useUpdateTeamInvitationStatusApiV1StudentsTeamsInvitationsIdPatch,
-    getGetMyTeamsApiV1StudentsTeamsGetQueryKey,
-    getGetTeamInvitationsApiV1StudentsTeamsInvitationsGetQueryKey,
-    getSearchTeamsByNameApiV1StudentsTeamsSearchGetQueryKey,
-} from "@/api/generated/students/students";
-import type { StudentTeamCardResponse, StudentTeamInvitationResponse } from "@/api/generated/model";
-import { Check, X, Loader2, Users, Inbox, AlertCircle } from "lucide-react";
 
 interface StudentTeamRequestsDialogProps {
     team: StudentTeamCardResponse;

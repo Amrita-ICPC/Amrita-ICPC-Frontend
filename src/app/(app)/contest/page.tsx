@@ -2,14 +2,14 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import type {
-    GetAllContestsApiV1ContestsGetParams,
-    ContestStatus,
     ContestRunStatus,
+    ContestStatus,
+    GetAllContestsApiV1ContestsGetParams,
 } from "@/api/generated/model";
-import { hasPermission } from "@/lib/auth/utils";
-import { auth } from "@/lib/auth/auth";
-import { Button } from "@/components/ui/button";
 import { ContestClient } from "@/components/contest/contest-client";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth/auth";
+import { hasPermission } from "@/lib/auth/utils";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

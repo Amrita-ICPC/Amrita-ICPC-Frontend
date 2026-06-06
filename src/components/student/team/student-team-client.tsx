@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Users } from "lucide-react";
-import { useGetMyTeamsApiV1StudentsTeamsGet } from "@/api/generated/students/students";
-import type { GetMyTeamsApiV1StudentsTeamsGetParams } from "@/api/generated/model";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-import { StudentTeamFilters } from "./student-team-filters";
+import type { GetMyTeamsApiV1StudentsTeamsGetParams } from "@/api/generated/model";
+import { useGetMyTeamsApiV1StudentsTeamsGet } from "@/api/generated/students/students";
+import { AppPagination } from "@/components/shared/app-pagination";
+import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import type { ViewMode } from "@/components/shared/view-toggle";
+
 import { StudentTeamCard, StudentTeamRowItem } from "./student-team-card";
+import { StudentTeamFilters } from "./student-team-filters";
 import { StudentTeamHero } from "./student-team-hero";
 import { StudentTeamCardSkeleton, StudentTeamRowSkeleton } from "./student-team-skeleton";
-import { AppPagination } from "@/components/shared/app-pagination";
-import type { ViewMode } from "@/components/shared/view-toggle";
-import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 
 interface StudentTeamClientProps {
     initialParams: GetMyTeamsApiV1StudentsTeamsGetParams;

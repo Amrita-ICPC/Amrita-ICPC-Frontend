@@ -1,28 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-    ChevronRight,
+    ArrowLeft,
+    CheckCircle2,
     ChevronLeft,
+    ChevronRight,
+    Code,
+    Database,
+    FileText,
+    Languages,
+    Loader2,
     Plus,
     Trash2,
-    Loader2,
-    Code,
-    FileText,
-    Database,
-    Languages,
-    CheckCircle2,
-    Hash,
-    ArrowLeft,
     Upload,
-    Play,
 } from "lucide-react";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as zod from "zod";
 
+import { useAddQuestionsToBankApiV1BanksBankIdQuestionsPost } from "@/api/generated/bank-questions/bank-questions";
+import {
+    useCreateQuestionApiV1QuestionsPost,
+    useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet,
+} from "@/api/generated/questions/questions";
+import { CreateQuestionApiV1QuestionsPostBody } from "@/api/generated/zod/questions/questions";
+import { TagSelector } from "@/components/shared/tags/tag-selector";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -31,10 +37,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
@@ -42,17 +46,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-
-import {
-    useCreateQuestionApiV1QuestionsPost,
-    useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet,
-} from "@/api/generated/questions/questions";
-import { useAddQuestionsToBankApiV1BanksBankIdQuestionsPost } from "@/api/generated/bank-questions/bank-questions";
-import { CreateQuestionApiV1QuestionsPostBody } from "@/api/generated/zod/questions/questions";
-import { TagSelector } from "@/components/shared/tags/tag-selector";
-import * as zod from "zod";
+import { Textarea } from "@/components/ui/textarea";
 
 type QuestionFormValues = zod.infer<typeof CreateQuestionApiV1QuestionsPostBody>;
 

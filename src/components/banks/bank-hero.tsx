@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
     BarChart3,
     Calendar,
@@ -12,10 +13,9 @@ import {
     Trash2,
     Trophy,
 } from "lucide-react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
 import type { BankDetailResponse } from "@/api/generated/model";
 import {
@@ -38,6 +38,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { allBanksKey, bankDetailKey, useSoftDeleteBank } from "@/query/bank-query";
+
 import { BankCloneDialog } from "./bank-clone-dialog";
 import { BankShareDialog } from "./bank-share-dialog";
 import { BankUpdateDialog } from "./bank-update-dialog";

@@ -1,23 +1,25 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
-import { useEditorContext } from "../shared/TipTap";
-import { ProblemMetadataCard } from "../questions/question-metadata-card";
-import { ProblemPreview } from "../questions/question-preview";
-import { QuestionCreateHero } from "../questions/question-create-hero";
-import { QuestionCodeEditor, LANGUAGES, MonacoLanguage } from "../questions/question-code-editor";
-import { QuestionArchitectureSection } from "../questions/question-architecture-section";
-import { TestCaseManager } from "../questions/test-case-manager";
+import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { useQuestionEditorSync } from "@/hooks/use-question-editor-sync";
-import { Skeleton } from "../ui/skeleton";
 import type { useQuestionForm } from "@/hooks/use-question-form";
+import { cn } from "@/lib/utils";
 import { useContestQuestion, usePlatformLanguages } from "@/query/contest-query";
 import { useGetQuestion } from "@/query/question-query";
+
+import { QuestionArchitectureSection } from "../questions/question-architecture-section";
+import { LANGUAGES, MonacoLanguage, QuestionCodeEditor } from "../questions/question-code-editor";
+import { QuestionCreateHero } from "../questions/question-create-hero";
+import { ProblemMetadataCard } from "../questions/question-metadata-card";
+import { ProblemPreview } from "../questions/question-preview";
+import { TestCaseManager } from "../questions/test-case-manager";
 import { AsyncStateHandler } from "../shared/async-state-handler";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEditorContext } from "../shared/TipTap";
+import { Skeleton } from "../ui/skeleton";
 
 const ALL_STEPS = ["details", "statement", "starter", "solution", "testcases", "driver"] as const;
 type EditorStep = (typeof ALL_STEPS)[number];
@@ -352,7 +354,7 @@ export function QuestionEditorShell({
 
                                         {/* STEP: STATEMENT */}
                                         {activeStep === "statement" && (
-                                            <div className="w-full pb-4 flex flex-col h-[800px]">
+                                            <div className="w-full pb-4 flex flex-col h-[550px]">
                                                 <div className="flex-1 min-h-0 bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden flex flex-col">
                                                     <QuestionArchitectureSection
                                                         activeTab={activeTab}

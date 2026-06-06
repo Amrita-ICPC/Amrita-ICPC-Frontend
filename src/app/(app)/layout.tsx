@@ -1,12 +1,13 @@
-import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import Sidenavbar from "@/components/global/sidenavbar";
-import { Header } from "@/components/global/header";
-import { UserType, getDefaultRoute } from "@/lib/auth/utils";
-import AuthGuard from "@/components/global/auth-guard";
+
 import AccessDenied from "@/components/global/access-denied";
-import { logger } from "@/lib/logger";
+import AuthGuard from "@/components/global/auth-guard";
+import { Header } from "@/components/global/header";
+import Sidenavbar from "@/components/global/sidenavbar";
 import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
+import { auth } from "@/lib/auth/auth";
+import { getDefaultRoute, UserType } from "@/lib/auth/utils";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 

@@ -1,11 +1,13 @@
 "use client";
 
+import "katex/dist/katex.min.css";
+
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
-import "katex/dist/katex.min.css";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";

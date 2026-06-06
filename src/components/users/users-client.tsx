@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertCircle,
     Loader2,
@@ -12,20 +12,20 @@ import {
     Users,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
+import { useListAudiencesApiV1AudiencesGet } from "@/api/generated/audiences/audiences";
+import {
+    type ListUsersApiV1UsersGetParams,
+    type UserResponse,
+    UserRole,
+} from "@/api/generated/model";
 import {
     getListUsersApiV1UsersGetQueryKey,
     useListUsersApiV1UsersGet,
     useSyncKeycloakUsersApiV1UsersSyncKeycloakUsersPost,
 } from "@/api/generated/users/users";
-import { useListAudiencesApiV1AudiencesGet } from "@/api/generated/audiences/audiences";
-import {
-    UserRole,
-    type ListUsersApiV1UsersGetParams,
-    type UserResponse,
-} from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

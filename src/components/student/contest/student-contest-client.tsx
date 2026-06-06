@@ -2,16 +2,17 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { useGetStudentContestsApiV1StudentsContestsGet } from "@/api/generated/students/students";
 import type {
     ContestRunStatus,
     GetStudentContestsApiV1StudentsContestsGetParams,
 } from "@/api/generated/model";
-import { StudentContestFilters } from "./student-contest-filters";
-import { StudentContestCard, StudentContestCardData } from "./student-contest-card";
-import { StudentContestSkeleton } from "./student-contest-skeleton";
+import { useGetStudentContestsApiV1StudentsContestsGet } from "@/api/generated/students/students";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+
+import { StudentContestCard } from "./student-contest-card";
+import { StudentContestFilters } from "./student-contest-filters";
+import { StudentContestSkeleton } from "./student-contest-skeleton";
 
 interface StudentContestClientProps {
     initialParams: GetStudentContestsApiV1StudentsContestsGetParams;

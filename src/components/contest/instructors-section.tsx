@@ -1,24 +1,26 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { Loader2, Mail, Search, ShieldCheck, Trash2, UserCog, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
-import {
-    useGetContestInstructors,
-    useAssignInstructors,
-    useRemoveInstructors,
-    useListUsers,
-    instructorKeys,
-} from "@/query/contest-query";
-import { useDebounce } from "@/hooks/use-debounce";
-import { AsyncStateHandler } from "../shared/async-state-handler";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, UserPlus, Trash2, Loader2, ShieldCheck, Mail, Users, UserCog } from "lucide-react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/use-debounce";
+import {
+    instructorKeys,
+    useAssignInstructors,
+    useGetContestInstructors,
+    useListUsers,
+    useRemoveInstructors,
+} from "@/query/contest-query";
+
+import { AsyncStateHandler } from "../shared/async-state-handler";
 
 interface InstructorsSectionProps {
     contestId: string;

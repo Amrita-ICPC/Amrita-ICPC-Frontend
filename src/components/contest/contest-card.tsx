@@ -1,15 +1,8 @@
 "use client";
 
-import {
-    ArrowRight,
-    Trophy,
-    Users,
-    FileQuestion,
-    Calendar,
-    Clock,
-    MoreVertical,
-} from "lucide-react";
+import { ArrowRight, Clock, FileQuestion, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+
 import type { ContestSummaryResponse } from "@/api/generated/model";
 import { cn } from "@/lib/utils";
 
@@ -203,9 +196,11 @@ export function ContestCard({ contest }: ContestCardProps) {
 
                 <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
                     {contest.description ||
-                        (contest.start_time
+                        (contest.start_time && contest.end_time
                             ? `Starts at ${startTimeStr} and ends ${endDateStr}.`
-                            : "No description provided.")}
+                            : contest.start_time
+                              ? `Starts at ${startTimeStr}.`
+                              : "No description provided.")}
                 </p>
             </div>
 

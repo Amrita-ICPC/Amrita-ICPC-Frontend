@@ -1,33 +1,36 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { useEditor, Editor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { Markdown } from "tiptap-markdown";
-import Link from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import CodeBlock from "@tiptap/extension-code-block";
-import Mathematics from "@tiptap/extension-mathematics";
 import "katex/dist/katex.min.css";
+
+import CodeBlock from "@tiptap/extension-code-block";
+import Link from "@tiptap/extension-link";
+import Mathematics from "@tiptap/extension-mathematics";
+import Placeholder from "@tiptap/extension-placeholder";
+import { Editor, EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import {
     Bold,
-    Italic,
-    Strikethrough,
     Code,
     Heading1,
     Heading2,
+    Italic,
+    Link as LinkIcon,
     List,
     ListOrdered,
-    Link as LinkIcon,
-    Terminal,
-    Undo,
     Redo,
     Sigma,
+    Strikethrough,
+    Terminal,
+    Undo,
 } from "lucide-react";
+import { createContext, ReactNode, useContext } from "react";
+import { Markdown } from "tiptap-markdown";
+
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Kbd } from "@/components/ui/kbd";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
 import { MathSymbolPicker } from "../questions/math-symbol-picker";
 
 const EditorContext = createContext<Editor | null | undefined>(undefined);

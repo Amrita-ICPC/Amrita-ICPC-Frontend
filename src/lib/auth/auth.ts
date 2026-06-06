@@ -1,12 +1,14 @@
-import NextAuth, { type NextAuthOptions, type Account, type User } from "next-auth";
-import { getServerSession } from "next-auth/next";
-import type { JWT } from "next-auth/jwt";
-import Keycloak from "next-auth/providers/keycloak";
 import { decodeJwt } from "jose";
-import type { KeycloakToken, DecodedJWT } from "./types";
-import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
-import { logger } from "../logger";
+import NextAuth, { type Account, type NextAuthOptions, type User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import { getServerSession } from "next-auth/next";
+import Keycloak from "next-auth/providers/keycloak";
+
 import { env } from "@/lib/env";
+
+import { logger } from "../logger";
+import type { DecodedJWT, KeycloakToken } from "./types";
+import { processDecodedToken, refreshKeycloakAccessToken } from "./utils";
 
 export const authOptions: NextAuthOptions = {
     providers: [

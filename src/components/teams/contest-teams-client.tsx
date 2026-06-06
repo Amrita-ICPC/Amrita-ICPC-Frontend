@@ -1,33 +1,54 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-    Users,
-    CheckCircle2,
-    Clock,
-    XCircle,
-    Ban,
-    Search,
-    MoreVertical,
-    Eye,
-    FileText,
-} from "lucide-react";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+    Ban,
+    CheckCircle2,
+    Clock,
+    Eye,
+    FileText,
+    MoreVertical,
+    Search,
+    Users,
+    XCircle,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+
+import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
+import { TeamApprovalStatus } from "@/api/generated/model/teamApprovalStatus";
+import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
+import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
+import { TeamStatus } from "@/api/generated/model/teamStatus";
+import {
+    getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey,
+    useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch,
+    useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
     useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet,
-    useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch,
     useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch,
-    useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
-    getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey,
 } from "@/api/generated/teams/teams";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { AppPagination } from "@/components/shared/app-pagination";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AppPagination } from "@/components/shared/app-pagination";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -36,27 +57,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { TeamApprovalStatus } from "@/api/generated/model/teamApprovalStatus";
-import { TeamStatus } from "@/api/generated/model/teamStatus";
-import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
-import type { TeamMemberPreview } from "@/api/generated/model/teamMemberPreview";
-import type { TeamMemberResponse } from "@/api/generated/model/teamMemberResponse";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 interface ContestTeamsClientProps {
     contestId: string;

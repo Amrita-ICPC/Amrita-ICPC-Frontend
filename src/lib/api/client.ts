@@ -8,6 +8,7 @@ import axios, {
     type InternalAxiosRequestConfig,
 } from "axios";
 import { getSession, signOut } from "next-auth/react";
+
 import { env } from "@/lib/env";
 
 const getBaseUrl = (url: string) => {

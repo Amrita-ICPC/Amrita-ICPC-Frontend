@@ -1,19 +1,23 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import type { ContestCreate, ContestDetailResponse, ContestUpdate } from "@/api/generated/model";
+import type { ImageUploadResponse } from "@/api/generated/model";
+import {
+    ContestMode,
+    ContestTeamParticipationType,
+    ScoringType,
+    TeamApprovalMode,
+} from "@/api/generated/model";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -22,7 +26,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -30,23 +35,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
-import type { ContestCreate, ContestUpdate, ContestDetailResponse } from "@/api/generated/model";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import {
-    ScoringType,
-    TeamApprovalMode,
-    ContestMode,
-    ContestTeamParticipationType,
-} from "@/api/generated/model";
-import type { ImageUploadResponse } from "@/api/generated/model";
-import {
+    contestDetailKey,
+    contestKeys,
     useCreateContest,
     useUpdateContest,
     useUploadContestImage,
-    contestKeys,
-    contestDetailKey,
 } from "@/query/contest-query";
-import { toast } from "@/lib/hooks/use-toast";
 
 function pad2(value: number) {
     return String(value).padStart(2, "0");

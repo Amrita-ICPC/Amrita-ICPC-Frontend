@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
-import { UserType, getDefaultRoute } from "@/lib/auth/utils";
+import { getDefaultRoute, UserType } from "@/lib/auth/utils";
+
 import { NavLinks } from "./nav-links";
 import { UserMenu } from "./user-menu";
 

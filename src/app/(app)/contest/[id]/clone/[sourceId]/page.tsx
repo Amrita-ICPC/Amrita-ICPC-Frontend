@@ -1,5 +1,6 @@
-import { ContestPartialCloneClient } from "@/components/contest/contest-partial-clone-client";
 import { Metadata } from "next";
+
+import { ContestPartialCloneClient } from "@/components/contest/contest-partial-clone-client";
 
 interface PartialClonePageProps {
     params: Promise<{
