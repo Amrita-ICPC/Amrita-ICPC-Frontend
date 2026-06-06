@@ -41,6 +41,8 @@ Args:
     request (Request): Framework context.
     page (int): Page number (starts from 1).
     page_size (int): Number of banks per page.
+    search (str): Search term.
+    sort_by (BankSortBy): Sort by field.
     user_id (UUID): Authenticated user ID.
     service (BankService): Injected domain service.
 
@@ -57,7 +59,9 @@ export const getAllBanksApiV1BanksGetQueryPageSizeMax = 100;
 
 export const GetAllBanksApiV1BanksGetQueryParams = zod.object({
   "page": zod.number().min(1).default(getAllBanksApiV1BanksGetQueryPageDefault).describe('Page number (starts from 1)'),
-  "page_size": zod.number().min(1).max(getAllBanksApiV1BanksGetQueryPageSizeMax).default(getAllBanksApiV1BanksGetQueryPageSizeDefault).describe('Number of banks per page')
+  "page_size": zod.number().min(1).max(getAllBanksApiV1BanksGetQueryPageSizeMax).default(getAllBanksApiV1BanksGetQueryPageSizeDefault).describe('Number of banks per page'),
+  "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by name'),
+  "sort_by": zod.enum(['name', 'updated_new', 'updated_old', 'created_at']).optional().describe('Sort by field')
 })
 
 export const getAllBanksApiV1BanksGetResponseSuccessDefault = true;

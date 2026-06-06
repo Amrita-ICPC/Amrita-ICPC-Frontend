@@ -128,6 +128,8 @@ Args:
     request (Request): Framework context.
     page (int): Page number (starts from 1).
     page_size (int): Number of banks per page.
+    search (str): Search term.
+    sort_by (BankSortBy): Sort by field.
     user_id (UUID): Authenticated user ID.
     service (BankService): Injected domain service.
 

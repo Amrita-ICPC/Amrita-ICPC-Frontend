@@ -93,14 +93,44 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                     </div>
                 </TableCell>
                 <TableCell className="text-sm font-medium py-4 px-5">
-                    <div className="flex items-center gap-2 text-foreground/80">
-                        <Globe className="size-4 text-muted-foreground" /> Public
-                    </div>
+                    {(() => {
+                        const rawVisibility =
+                            (bank as any).is_public ??
+                            (bank as any).public ??
+                            (bank as any).visibility;
+                        const isPublic =
+                            rawVisibility === true || rawVisibility === "public"
+                                ? true
+                                : rawVisibility === false || rawVisibility === "private"
+                                  ? false
+                                  : undefined;
+
+                        if (isPublic === undefined) return null;
+                        return (
+                            <div className="flex items-center gap-2 text-foreground/80">
+                                <Globe className="size-4 text-muted-foreground" />{" "}
+                                {isPublic ? "Public" : "Private"}
+                            </div>
+                        );
+                    })()}
                 </TableCell>
                 <TableCell className="text-sm font-medium py-4 px-5">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <HelpCircle className="size-4" /> 1 Question
-                    </div>
+                    {(() => {
+                        const questionsCount =
+                            (bank as any).questions_count ??
+                            (bank as any).questions?.length ??
+                            (bank as any).questionCount;
+
+                        if (questionsCount === undefined) return null;
+                        return (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <HelpCircle className="size-4" />{" "}
+                                {questionsCount === 1
+                                    ? "1 Question"
+                                    : `${questionsCount} Questions`}
+                            </div>
+                        );
+                    })()}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground font-medium py-4 px-5">
                     {formattedDate}

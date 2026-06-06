@@ -71,9 +71,6 @@ export function BankCard({ bank }: BankCardProps) {
                 setDeleteOpen(false);
                 router.refresh();
             },
-            onError: () => {
-                toast.error("Failed to delete bank");
-            },
         },
     });
 

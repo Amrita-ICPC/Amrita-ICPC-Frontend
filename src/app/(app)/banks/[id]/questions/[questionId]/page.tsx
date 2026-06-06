@@ -19,13 +19,11 @@ export default async function BankQuestionPage({
 
     if (questionId === "new" || isEdit) {
         return (
-            <div className="mx-auto w-full max-w-6xl">
-                <BankQuestionEditorClient
-                    bankId={id}
-                    questionId={questionId === "new" ? undefined : questionId}
-                    isEdit={isEdit}
-                />
-            </div>
+            <BankQuestionEditorClient
+                bankId={id}
+                questionId={questionId === "new" ? undefined : questionId}
+                isEdit={isEdit}
+            />
         );
     }
 

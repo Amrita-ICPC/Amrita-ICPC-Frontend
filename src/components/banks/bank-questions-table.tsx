@@ -336,7 +336,7 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                             {questions.map((question) => (
                                 <Card
                                     key={question.id}
-                                    className="group cursor-pointer border-border/60 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md rounded-[16px] overflow-hidden flex flex-col p-0 gap-0"
+                                    className="group border-border/60 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md rounded-[16px] overflow-hidden flex flex-col p-0 gap-0"
                                 >
                                     {/* Top Section */}
                                     <div className="relative flex flex-col p-5 bg-blue-500/5 dark:bg-blue-500/10 border-b border-border/40 flex-1">

@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BankCard } from "./bank-card";
 import { BankRowItem } from "./bank-row-item";
 import { useGetAllBanksApiV1BanksGet } from "@/api/generated/banks/banks";
+import { BankSortBy } from "@/api/generated/model/bankSortBy";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { ViewToggle, type ViewMode } from "@/components/shared/view-toggle";
 import { toApiError } from "@/lib/api/error";
@@ -32,10 +33,13 @@ export function BankList() {
 
     const currentPage = parseInt(searchParams.get("page") || "1");
     const searchQuery = searchParams.get("search") || "";
+    const sortBy = (searchParams.get("sort_by") as BankSortBy) || "updated_new";
 
     const { data, isLoading, isError, error } = useGetAllBanksApiV1BanksGet({
         page: currentPage,
         page_size: 12,
+        search: searchQuery || undefined,
+        sort_by: sortBy,
     });
 
     const setPage = (newPage: number) => {
@@ -52,14 +56,18 @@ export function BankList() {
         router.push(`${pathname}?${newParams.toString()}`);
     };
 
+    const handleSort = (value: BankSortBy) => {
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.set("sort_by", value);
+        newParams.set("page", "1");
+        router.push(`${pathname}?${newParams.toString()}`);
+    };
+
     const pagination = data?.pagination;
     const totalPages = pagination?.total_pages || 1;
     const apiError = error ? toApiError(error) : null;
 
-    const banks = data?.data ?? [];
-    const filtered = searchQuery
-        ? banks.filter((b) => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : banks;
+    const filtered = data?.data ?? [];
 
     return (
         <Card className="border-border/60 bg-card/20 shadow-sm backdrop-blur-md rounded-2xl overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -91,19 +99,24 @@ export function BankList() {
                         />
                     </div>
                     <div className="w-full sm:w-auto">
-                        <Select defaultValue="updated_desc">
+                        <Select
+                            value={sortBy}
+                            onValueChange={(value) => handleSort(value as BankSortBy)}
+                        >
                             <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-lg bg-background/50 border-border/60 shadow-sm text-sm font-medium">
                                 <SelectValue placeholder="Sort by: Updated (Newest)" />
                             </SelectTrigger>
                             <SelectContent className="rounded-lg">
-                                <SelectItem value="updated_desc">
+                                <SelectItem value="updated_new">
                                     Sort by: Updated (Newest)
                                 </SelectItem>
-                                <SelectItem value="updated_asc">
+                                <SelectItem value="updated_old">
                                     Sort by: Updated (Oldest)
                                 </SelectItem>
-                                <SelectItem value="name_asc">Sort by: Name (A-Z)</SelectItem>
-                                <SelectItem value="name_desc">Sort by: Name (Z-A)</SelectItem>
+                                <SelectItem value="name">Sort by: Name (A-Z)</SelectItem>
+                                <SelectItem value="created_at">
+                                    Sort by: Created (Newest)
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

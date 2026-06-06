@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -37,7 +36,7 @@ import {
     ScoringType,
     TeamApprovalMode,
     ContestMode,
-    ContestTeamParticpationType,
+    ContestTeamParticipationType,
 } from "@/api/generated/model";
 import type { ImageUploadResponse } from "@/api/generated/model";
 import {
@@ -97,8 +96,8 @@ const formSchema = z
         show_leaderboard_during_contest: z.boolean().optional(),
         participation_type: z
             .enum([
-                ContestTeamParticpationType.LEADER_ONLY,
-                ContestTeamParticpationType.INDIVIDUAL_WORKSPACE,
+                ContestTeamParticipationType.LEADER_ONLY,
+                ContestTeamParticipationType.INDIVIDUAL_WORKSPACE,
             ])
             .optional()
             .nullable(),
@@ -169,7 +168,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             contest_mode: initialData?.contest_mode ?? ContestMode.individual,
             show_leaderboard_during_contest: initialData?.show_leaderboard_during_contest ?? true,
             participation_type:
-                initialData?.participation_type ?? ContestTeamParticpationType.LEADER_ONLY,
+                initialData?.participation_type ?? ContestTeamParticipationType.LEADER_ONLY,
         },
         mode: "onTouched",
     });
@@ -211,9 +210,11 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const isPending = createContestMutation.isPending || updateContestMutation.isPending;
 
     async function onPickImage(file: File) {
-        const result = await uploadImageMutation.mutateAsync(file);
-        setUploadedImage(result);
-        setValue("image", result.url, { shouldDirty: true, shouldTouch: true });
+        const result = await uploadImageMutation.mutateAsync({ data: { file } });
+        if (result.data) {
+            setUploadedImage(result.data);
+            setValue("image", result.data.url, { shouldDirty: true, shouldTouch: true });
+        }
     }
 
     const onSubmit = handleSubmit(async (values) => {
@@ -241,7 +242,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 scoring_type: values.scoring_type,
                 team_approval_mode: values.team_approval_mode,
                 contest_mode: values.contest_mode,
-                show_leaderboard: values.show_leaderboard_during_contest,
                 show_leaderboard_during_contest: values.show_leaderboard_during_contest,
                 participation_type:
                     values.contest_mode === ContestMode.team ? values.participation_type : null,
@@ -468,12 +468,12 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                                         type="button"
                                                         onClick={() =>
                                                             field.onChange(
-                                                                ContestTeamParticpationType.LEADER_ONLY,
+                                                                ContestTeamParticipationType.LEADER_ONLY,
                                                             )
                                                         }
                                                         className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
                                                             field.value ===
-                                                            ContestTeamParticpationType.LEADER_ONLY
+                                                            ContestTeamParticipationType.LEADER_ONLY
                                                                 ? "border-primary bg-primary/5 ring-1 ring-primary"
                                                                 : "border-border/60 bg-card text-card-foreground"
                                                         }`}
@@ -491,12 +491,12 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                                         type="button"
                                                         onClick={() =>
                                                             field.onChange(
-                                                                ContestTeamParticpationType.INDIVIDUAL_WORKSPACE,
+                                                                ContestTeamParticipationType.INDIVIDUAL_WORKSPACE,
                                                             )
                                                         }
                                                         className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
                                                             field.value ===
-                                                            ContestTeamParticpationType.INDIVIDUAL_WORKSPACE
+                                                            ContestTeamParticipationType.INDIVIDUAL_WORKSPACE
                                                                 ? "border-primary bg-primary/5 ring-1 ring-primary"
                                                                 : "border-border/60 bg-card text-card-foreground"
                                                         }`}
