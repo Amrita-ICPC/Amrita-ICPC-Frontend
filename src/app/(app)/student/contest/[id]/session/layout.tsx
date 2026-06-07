@@ -6,6 +6,7 @@ import { use, useEffect } from "react";
 import { toast } from "sonner";
 
 import { useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet } from "@/api/generated/students/students";
+import { ContestSessionProvider } from "@/components/student/contest/session/contest-session-provider";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -55,5 +56,5 @@ export default function SessionLayout({ children, params }: LayoutProps) {
         );
     }
 
-    return <>{children}</>;
+    return <ContestSessionProvider contestId={id}>{children}</ContestSessionProvider>;
 }

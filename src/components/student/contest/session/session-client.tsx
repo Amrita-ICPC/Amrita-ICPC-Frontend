@@ -9,21 +9,25 @@ import { toast } from "sonner";
 
 import { StudentCodeRunResponse } from "@/api/generated/model";
 import {
+    getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryKey,
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
     useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
     useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
+    useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGet,
     useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet,
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
     useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
     useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
     useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
     useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
+    useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost,
 } from "@/api/generated/students/students";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { useContestSession } from "./contest-session-provider";
 import { EditorPanel } from "./editor-panel";
 import { ProblemView } from "./problem-view";
 import { SessionHeader } from "./session-header";
@@ -56,8 +60,14 @@ export function SessionClient({ contestId }: SessionClientProps) {
         isContestLoading || isStatusLoading || isRuntimeLoading || isQuestionsLoading;
 
     // 2. State Management
-    const [activeQuestionIdState, setActiveQuestionIdState] = useState<string | null>(null);
-    const activeQuestionId = activeQuestionIdState || questionsList[0]?.id || null;
+    const { activeQuestionId, setActiveQuestionId } = useContestSession();
+
+    // Set initial active question once questions list is loaded
+    useEffect(() => {
+        if (!activeQuestionId && questionsList.length > 0) {
+            setActiveQuestionId(questionsList[0].id);
+        }
+    }, [activeQuestionId, questionsList, setActiveQuestionId]);
 
     const [selectedLanguageIdState, setSelectedLanguageIdState] = useState<number>(71);
     const [editorCode, setEditorCode] = useState<string>("");
@@ -65,6 +75,9 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [timeLeft, setTimeLeft] = useState<string>("00:00:00");
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
+
+    // Console tab state
+    const [consoleTab, setConsoleTab] = useState<"output" | "submissions">("output");
 
     // Run Code State
     const [runResult, setRunResult] = useState<StudentCodeRunResponse | null>(null);
@@ -151,6 +164,14 @@ export function SessionClient({ contestId }: SessionClientProps) {
             { query: { enabled: !!activeQuestionId } },
         );
     const workspaceData = workspaceRes?.data;
+
+    const { data: submissionsRes, isLoading: isSubmissionsLoading } =
+        useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGet(
+            contestId,
+            activeQuestionId || "",
+            { query: { enabled: !!activeQuestionId } },
+        );
+    const submissions = submissionsRes?.data || [];
 
     // Determine starter templates
     const currentTemplates = useMemo(() => questionDetails?.templates || [], [questionDetails]);
@@ -326,11 +347,15 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const runCodeMutation =
         useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost();
 
+    const submitMutation =
+        useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost();
+
     const handleRun = () => {
         if (!activeQuestionId) return;
         setIsRunning(true);
         setRunResult(null);
         setIsConsoleCollapsed(false);
+        setConsoleTab("output");
 
         runCodeMutation.mutate(
             {
@@ -352,6 +377,41 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 },
                 onSettled: () => {
                     setIsRunning(false);
+                },
+            },
+        );
+    };
+
+    const handleSubmit = () => {
+        if (!activeQuestionId) return;
+        setIsConsoleCollapsed(false);
+        setConsoleTab("submissions");
+
+        submitMutation.mutate(
+            {
+                contestId,
+                questionId: activeQuestionId,
+                data: {
+                    code: editorCode,
+                    language_id: selectedLanguageId,
+                },
+            },
+            {
+                onSuccess: () => {
+                    toast.success("Submission successfully queued!");
+                    void queryClient.invalidateQueries({
+                        queryKey:
+                            getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryKey(
+                                contestId,
+                                activeQuestionId,
+                            ),
+                    });
+                },
+                onError: (err: any) => {
+                    console.error("Submit error:", err);
+                    toast.error(
+                        err?.response?.data?.message || err?.message || "Failed to submit code",
+                    );
                 },
             },
         );
@@ -479,7 +539,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     return (
                         <button
                             key={q.id}
-                            onClick={() => setActiveQuestionIdState(q.id)}
+                            onClick={() => setActiveQuestionId(q.id)}
                             className={cn(
                                 "flex h-full items-center px-4 text-xs font-bold transition-all relative outline-none",
                                 isSelected
@@ -561,8 +621,14 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         setConsoleHeight={setConsoleHeight}
                         setPrevConsoleHeight={setPrevConsoleHeight}
                         onRun={handleRun}
+                        onSubmit={handleSubmit}
                         isRunning={isRunning}
+                        isSubmitting={submitMutation.isPending}
                         runResult={runResult}
+                        consoleTab={consoleTab}
+                        setConsoleTab={setConsoleTab}
+                        submissions={submissions}
+                        isSubmissionsLoading={isSubmissionsLoading}
                     />
                 </div>
             </div>
