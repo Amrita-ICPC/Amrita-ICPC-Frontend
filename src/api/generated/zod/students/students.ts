@@ -1567,3 +1567,66 @@ export const RunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunP
 })
 })
 
+/**
+ * Submit code for a specific contest question.
+
+Verifies the student's eligibility (session must be started and not ended)
+and logs the submission status as QUEUED.
+ * @summary Submit student code to a contest question
+ */
+export const SubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPostParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+
+export const submitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPostBodyLanguageIdExclusiveMin = 0;
+
+
+
+export const SubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPostBody = zod.object({
+  "code": zod.string().min(1).describe('Source code to submit'),
+  "language_id": zod.number().gt(submitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPostBodyLanguageIdExclusiveMin).describe('Judge0 language ID (54=Python, 71=Java, 50=C++, etc)')
+}).describe('Request schema for submitting code to a contest question.')
+
+/**
+ * Retrieve all past submissions made by the student/team for a specific question.
+ * @summary Get all submissions for a question
+ */
+export const GetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault = true;
+export const getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault = 200;
+export const getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault = `Success`;
+
+export const GetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponse = zod.object({
+  "success": zod.boolean().default(getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault),
+  "status": zod.number().default(getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault),
+  "message": zod.string().default(getQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "id": zod.uuid().describe('The unique ID of the submission'),
+  "question_id": zod.uuid().describe('The ID of the question submitted for'),
+  "language_id": zod.number().describe('Judge0 language ID used'),
+  "status": zod.enum(['QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('The current status of the submission'),
+  "score": zod.number().describe('Score achieved on this submission'),
+  "passed_testcases": zod.number().describe('Number of passed test cases'),
+  "total_testcases": zod.number().describe('Total number of test cases for the question'),
+  "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp when the submission was created')
+}).describe('Response schema for a contest question submission.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
