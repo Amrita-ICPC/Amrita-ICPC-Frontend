@@ -602,6 +602,71 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
 })
 
 /**
+ * Finish a contest session for a team.
+ * @summary Finish a contest session for a team
+ */
+export const FinishContestSessionApiV1StudentsContestsContestIdFinishPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseSuccessDefault = true;
+export const finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseStatusDefault = 200;
+export const finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseMessageDefault = `Success`;
+
+export const FinishContestSessionApiV1StudentsContestsContestIdFinishPostResponse = zod.object({
+  "success": zod.boolean().default(finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseSuccessDefault),
+  "status": zod.number().default(finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseStatusDefault),
+  "message": zod.string().default(finishContestSessionApiV1StudentsContestsContestIdFinishPostResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_id": zod.uuid().describe('The UUID of the contest'),
+  "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "session": zod.object({
+  "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was ended')
+}).describe('Active session details'),
+  "runtime": zod.object({
+  "effective_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('The effective end time of the contest for the team'),
+  "remaining_seconds": zod.number().describe('Remaining seconds in the contest')
+}).describe('Current runtime and timer state'),
+  "workspace": zod.object({
+  "participants": zod.array(zod.object({
+  "user_id": zod.uuid().describe('The UUID of the participant'),
+  "name": zod.string().describe('Name of the participant'),
+  "avatar_url": zod.union([zod.string(),zod.null()]).optional().describe('URL to the participant\'s avatar image'),
+  "role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant'),
+  "team_role": zod.enum(['LEADER', 'MEMBER']).describe('The team role of the participant (LEADER or MEMBER)'),
+  "workspace_role": zod.enum(['EDITOR', 'VIEWER']).describe('The workspace role of the participant (EDITOR or VIEWER)'),
+  "is_self": zod.boolean().describe('Indicates if this participant is the current user'),
+  "is_online": zod.union([zod.boolean(),zod.null()]).optional().describe('Indicates if the participant is currently online')
+}).describe('Schema representing a participant in the team\'s shared workspace.\n\nAttributes:\n    user_id: The UUID of the participant.\n    name: Name of the participant.\n    avatar_url: URL to the participant\'s avatar image.\n    role: The workspace role of the participant.\n    team_role: The team role of the participant (LEADER or MEMBER).\n    workspace_role: The workspace role of the participant (EDITOR or VIEWER).\n    is_self: Indicates if this participant is the current requesting user.\n    is_online: Indicates if the participant is currently online.')).describe('List of participants in the workspace')
+}).describe('Workspace collaboration state'),
+  "team_progress": zod.object({
+  "extra_time_seconds": zod.number().describe('Amount of extra time granted to the team in seconds'),
+  "has_extra_time": zod.boolean().describe('Indicates if the team has extra time')
+}).describe('Current performance metrics'),
+  "permissions": zod.object({
+  "can_view": zod.boolean().describe('Indicates if the user can view the workspace'),
+  "can_edit": zod.boolean().describe('Indicates if the user can edit code'),
+  "can_submit": zod.boolean().describe('Indicates if the user can submit code'),
+  "can_switch_editor": zod.boolean().describe('Indicates if the user can request or become the active editor')
+}).describe('Permissions for the requesting user')
+}).describe('Schema representing the complete contest progress and workspace status of a team.\n\nAttributes:\n    contest_id: The UUID of the contest.\n    contest_team_id: The UUID of the contest team.\n    session: Active session details.\n    runtime: Current runtime and timer state.\n    workspace: Workspace participant and collaboration state.\n    team_progress: Current performance metrics.\n    permissions: Permissions for the requesting user.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Retrieve paginated and filtered list of teams that the student belongs to.
 
 Args:

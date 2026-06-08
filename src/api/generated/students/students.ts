@@ -978,6 +978,68 @@ export function useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet<TDa
 
 
 /**
+ * Finish a contest session for a team.
+ * @summary Finish a contest session for a team
+ */
+export const finishContestSessionApiV1StudentsContestsContestIdFinishPost = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseContestTeamProgressResponse>(
+      {url: `/api/v1/students/contests/${contestId}/finish`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getFinishContestSessionApiV1StudentsContestsContestIdFinishPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>, TError,{contestId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>, TError,{contestId: string}, TContext> => {
+
+const mutationKey = ['finishContestSessionApiV1StudentsContestsContestIdFinishPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>, {contestId: string}> = (props) => {
+          const {contestId} = props ?? {};
+
+          return  finishContestSessionApiV1StudentsContestsContestIdFinishPost(contestId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinishContestSessionApiV1StudentsContestsContestIdFinishPostMutationResult = NonNullable<Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>>
+
+    export type FinishContestSessionApiV1StudentsContestsContestIdFinishPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Finish a contest session for a team
+ */
+export const useFinishContestSessionApiV1StudentsContestsContestIdFinishPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>, TError,{contestId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof finishContestSessionApiV1StudentsContestsContestIdFinishPost>>,
+        TError,
+        {contestId: string},
+        TContext
+      > => {
+      return useMutation(getFinishContestSessionApiV1StudentsContestsContestIdFinishPostMutationOptions(options), queryClient);
+    }
+    /**
  * Retrieve paginated and filtered list of teams that the student belongs to.
 
 Args:
