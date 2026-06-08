@@ -16,7 +16,7 @@ If compilation fails, use CompilationErrorResponse instead.
 export interface TestCaseRunResult {
   /** Test case UUID */
   testcase_id: string;
-  /** Execution status from Judge0 (ACCEPTED, WRONG_ANSWER, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, SYSTEM_ERROR, etc.) */
+  /** Execution status from Judge0 (ACCEPTED, WRONG_ANSWER, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, INTERNAL_ERROR, etc.) */
   status: ExecutionStatus;
   /** Whether this test case passed (output matches expected) */
   passed: boolean;

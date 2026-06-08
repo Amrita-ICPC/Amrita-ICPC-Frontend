@@ -599,7 +599,7 @@ export const TestDraftCodeApiV1QuestionsTestDraftPostResponse = zod.object({
   "data": zod.union([zod.object({
   "testcases": zod.array(zod.object({
   "testcase_id": zod.string().describe('Test case UUID'),
-  "status": zod.enum(['ACCEPTED', 'WRONG_ANSWER', 'TIME_LIMIT_EXCEEDED', 'RUNTIME_ERROR', 'MEMORY_LIMIT_EXCEEDED', 'CPU_TIME_LIMIT_EXCEEDED', 'SYSTEM_ERROR', 'INTERNAL_ERROR']).describe('Execution status from Judge0 (ACCEPTED, WRONG_ANSWER, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, SYSTEM_ERROR, etc.)'),
+  "status": zod.enum(['ACCEPTED', 'WRONG_ANSWER', 'TIME_LIMIT_EXCEEDED', 'RUNTIME_ERROR', 'MEMORY_LIMIT_EXCEEDED', 'CPU_TIME_LIMIT_EXCEEDED', 'SYSTEM_ERROR', 'INTERNAL_ERROR']).describe('Execution status from Judge0 (ACCEPTED, WRONG_ANSWER, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, INTERNAL_ERROR, etc.)'),
   "passed": zod.boolean().describe('Whether this test case passed (output matches expected)'),
   "stdout": zod.union([zod.string(),zod.null()]).optional().describe('Actual output from user\'s code'),
   "stderr": zod.union([zod.string(),zod.null()]).optional().describe('Runtime error output (e.g., ZeroDivisionError, IndexError)'),

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { Activity, Clock, Lock, Moon, Sun, Trophy } from "lucide-react";
+import { Activity, Clock, Loader2, Lock, Moon, Sun, Trophy } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -26,6 +26,8 @@ interface SessionHeaderProps {
     showLeaderboardDuringContest: boolean;
     isLeaderboardOpen: boolean;
     setIsLeaderboardOpen: (open: boolean) => void;
+    onFinish?: () => void;
+    isFinishing?: boolean;
 }
 
 export function SessionHeader({
@@ -39,9 +41,12 @@ export function SessionHeader({
     showLeaderboardDuringContest,
     isLeaderboardOpen,
     setIsLeaderboardOpen,
+    onFinish,
+    isFinishing,
 }: SessionHeaderProps) {
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -158,6 +163,62 @@ export function SessionHeader({
                                     </p>
                                 </div>
                             )}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Finish Session Confirmation Dialog */}
+                <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            className="h-8 font-semibold text-xs"
+                            disabled={isFinishing}
+                        >
+                            {isFinishing ? (
+                                <>
+                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                    Finishing...
+                                </>
+                            ) : (
+                                "Finish Contest"
+                            )}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1220] text-slate-850 dark:text-slate-200 max-w-sm rounded-xl">
+                        <DialogHeader>
+                            <DialogTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-base font-bold">
+                                Finish Coding Session?
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                This action is permanent. Once you finish the contest session, your
+                                submissions will be finalized, and you will not be able to write or
+                                submit any further code.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsFinishDialogOpen(false)}
+                                className="h-8 border-slate-200 dark:border-slate-800 text-xs"
+                                disabled={isFinishing}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                    setIsFinishDialogOpen(false);
+                                    onFinish?.();
+                                }}
+                                className="h-8 text-xs font-semibold"
+                                disabled={isFinishing}
+                            >
+                                Yes, Finish Contest
+                            </Button>
                         </div>
                     </DialogContent>
                 </Dialog>

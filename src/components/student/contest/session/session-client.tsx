@@ -13,6 +13,7 @@ import {
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
+    useFinishContestSessionApiV1StudentsContestsContestIdFinishPost,
     useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
     useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
     useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGet,
@@ -350,6 +351,40 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const submitMutation =
         useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost();
 
+    const finishSessionMutation = useFinishContestSessionApiV1StudentsContestsContestIdFinishPost();
+
+    const handleFinishSession = () => {
+        finishSessionMutation.mutate(
+            { contestId },
+            {
+                onSuccess: () => {
+                    toast.success("Contest session finished successfully!");
+                    void queryClient.invalidateQueries({
+                        queryKey:
+                            getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
+                                contestId,
+                            ),
+                    });
+                    void queryClient.invalidateQueries({
+                        queryKey:
+                            getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(
+                                contestId,
+                            ),
+                    });
+                    router.push(`/student/contest/${contestId}`);
+                },
+                onError: (err: any) => {
+                    console.error("Finish session error:", err);
+                    toast.error(
+                        err?.response?.data?.message ||
+                            err?.message ||
+                            "Failed to finish contest session",
+                    );
+                },
+            },
+        );
+    };
+
     const handleRun = () => {
         if (!activeQuestionId) return;
         setIsRunning(true);
@@ -530,6 +565,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 showLeaderboardDuringContest={!!contest?.show_leaderboard_during_contest}
                 isLeaderboardOpen={isLeaderboardOpen}
                 setIsLeaderboardOpen={setIsLeaderboardOpen}
+                onFinish={handleFinishSession}
+                isFinishing={finishSessionMutation.isPending}
             />
 
             {/* Questions Tab Selector */}
