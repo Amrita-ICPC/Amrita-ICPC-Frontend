@@ -26,6 +26,14 @@ import {
     useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost,
 } from "@/api/generated/students/students";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 import { useContestSession } from "./contest-session-provider";
@@ -76,6 +84,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [timeLeft, setTimeLeft] = useState<string>("00:00:00");
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
+    const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState<boolean>(false);
 
     // Console tab state
     const [consoleTab, setConsoleTab] = useState<"output" | "submissions">("output");
@@ -417,7 +426,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
         );
     };
 
-    const handleSubmit = () => {
+    const executeSubmit = () => {
         if (!activeQuestionId) return;
         setIsConsoleCollapsed(false);
         setConsoleTab("submissions");
@@ -433,7 +442,12 @@ export function SessionClient({ contestId }: SessionClientProps) {
             },
             {
                 onSuccess: () => {
-                    toast.success("Submission successfully queued!");
+                    const isImmediate = runtimeSession?.evaluate_on_submit ?? true;
+                    if (isImmediate) {
+                        toast.success("Submission successfully queued!");
+                    } else {
+                        toast.success("Submission saved successfully (pending evaluation)!");
+                    }
                     void queryClient.invalidateQueries({
                         queryKey:
                             getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryKey(
@@ -450,6 +464,17 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 },
             },
         );
+    };
+
+    const handleSubmit = () => {
+        if (!activeQuestionId) return;
+
+        const isImmediate = runtimeSession?.evaluate_on_submit ?? true;
+        if (!isImmediate) {
+            setIsSubmitConfirmOpen(true);
+        } else {
+            executeSubmit();
+        }
     };
 
     // 5. Check runtime status / eligibility on load
@@ -550,6 +575,10 @@ export function SessionClient({ contestId }: SessionClientProps) {
             </div>
         );
     }
+
+    const isImmediate = runtimeSession?.evaluate_on_submit ?? true;
+    const hasAlreadySubmitted = submissions.length > 0;
+    const isSubmitDisabled = !isImmediate && hasAlreadySubmitted;
 
     return (
         <div className="fixed inset-0 z-50 bg-background text-foreground flex flex-col font-sans select-none">
@@ -661,6 +690,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         onSubmit={handleSubmit}
                         isRunning={isRunning}
                         isSubmitting={submitMutation.isPending}
+                        isSubmitDisabled={isSubmitDisabled}
                         runResult={runResult}
                         consoleTab={consoleTab}
                         setConsoleTab={setConsoleTab}
@@ -669,6 +699,54 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     />
                 </div>
             </div>
+
+            <Dialog open={isSubmitConfirmOpen} onOpenChange={setIsSubmitConfirmOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-destructive font-semibold">
+                            Confirm Final Submission
+                        </DialogTitle>
+                        <DialogDescription className="pt-2 text-sm text-muted-foreground leading-normal">
+                            This contest has immediate evaluation turned off.{" "}
+                            <strong>Only one submission is allowed</strong> for this question. Once
+                            submitted:
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 py-3">
+                        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                            <li>
+                                You will not be able to re-submit or modify your code for this
+                                question.
+                            </li>
+                            <li>
+                                Your submission will remain in a pending state and will be evaluated
+                                once the contest session finishes.
+                            </li>
+                        </ul>
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsSubmitConfirmOpen(false)}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => {
+                                setIsSubmitConfirmOpen(false);
+                                executeSubmit();
+                            }}
+                            className="w-full sm:w-auto"
+                        >
+                            Confirm & Submit
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

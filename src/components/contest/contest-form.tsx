@@ -90,6 +90,7 @@ const formSchema = z
             .optional(),
         contest_mode: z.enum([ContestMode.individual, ContestMode.team]).optional(),
         show_leaderboard_during_contest: z.boolean().optional(),
+        evaluate_on_submit: z.boolean().optional(),
         participation_type: z
             .enum([
                 ContestTeamParticipationType.LEADER_ONLY,
@@ -162,6 +163,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             team_approval_mode: initialData?.team_approval_mode ?? TeamApprovalMode.AUTO_APPROVE,
             contest_mode: initialData?.contest_mode ?? ContestMode.individual,
             show_leaderboard_during_contest: initialData?.show_leaderboard_during_contest ?? true,
+            evaluate_on_submit: initialData?.evaluate_on_submit ?? true,
             participation_type:
                 initialData?.participation_type ?? ContestTeamParticipationType.LEADER_ONLY,
         },
@@ -238,6 +240,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 team_approval_mode: values.team_approval_mode,
                 contest_mode: values.contest_mode,
                 show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                evaluate_on_submit: values.evaluate_on_submit,
                 participation_type:
                     values.contest_mode === ContestMode.team ? values.participation_type : null,
             };
@@ -270,6 +273,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 team_approval_mode: values.team_approval_mode,
                 contest_mode: values.contest_mode,
                 show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                evaluate_on_submit: values.evaluate_on_submit ?? true,
                 participation_type:
                     values.contest_mode === ContestMode.team
                         ? (values.participation_type ?? undefined)
@@ -645,9 +649,9 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 <div className="flex flex-col gap-6">
                     <Card>
                         <CardHeader className="space-y-1">
-                            <CardTitle>Visibility & Leaderboard</CardTitle>
+                            <CardTitle>Visibility & Evaluation Settings</CardTitle>
                             <CardDescription>
-                                Control visibility and leaderboard settings.
+                                Control visibility, leaderboard, and evaluation rules.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -704,6 +708,39 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                 <p className="text-xs text-muted-foreground">
                                     Control whether the real-time leaderboard is visible to students
                                     during the active contest.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Evaluation Mode</Label>
+                                <Controller
+                                    control={control}
+                                    name="evaluate_on_submit"
+                                    render={({ field }) => (
+                                        <Select
+                                            value={String(field.value ?? true)}
+                                            onValueChange={(value) =>
+                                                field.onChange(value === "true")
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">
+                                                    Evaluate on Submit
+                                                </SelectItem>
+                                                <SelectItem value="false">
+                                                    Evaluate on Session Finish
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Control when coding submissions are evaluated. Immediate
+                                    evaluates on every submission. Session Finish evaluates once
+                                    coding time runs out.
                                 </p>
                             </div>
 

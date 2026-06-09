@@ -28,6 +28,8 @@ export interface ContestTeamProgressResponse {
   contest_id: string;
   /** The UUID of the contest team */
   contest_team_id: string;
+  /** Whether to evaluate submissions immediately on submit */
+  evaluate_on_submit: boolean;
   /** Active session details */
   session: ContestSessionStatus;
   /** Current runtime and timer state */

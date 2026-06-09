@@ -50,4 +50,6 @@ export interface ContestUpdate {
   show_leaderboard_during_contest?: boolean | null;
   /** Participation type for team contests */
   participation_type?: ContestTeamParticipationType | null;
+  /** Whether to evaluate submissions immediately on submit */
+  evaluate_on_submit?: boolean | null;
 }

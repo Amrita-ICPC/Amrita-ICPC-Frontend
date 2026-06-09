@@ -57,6 +57,8 @@ export interface ContestDetailResponse {
   show_leaderboard_during_contest?: boolean;
   /** Participation type for team contests */
   participation_type?: ContestTeamParticipationType;
+  /** Whether to evaluate submissions immediately on submit */
+  evaluate_on_submit?: boolean;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */

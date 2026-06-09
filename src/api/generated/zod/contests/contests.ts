@@ -41,6 +41,7 @@ export const createContestApiV1ContestsPostBodyTeamApprovalModeDefault = `AUTO_A
 export const createContestApiV1ContestsPostBodyContestModeDefault = `individual`;
 export const createContestApiV1ContestsPostBodyShowLeaderboardDuringContestDefault = false;
 export const createContestApiV1ContestsPostBodyParticipationTypeDefault = `LEADER_ONLY`;
+export const createContestApiV1ContestsPostBodyEvaluateOnSubmitDefault = true;
 
 export const CreateContestApiV1ContestsPostBody = zod.object({
   "name": zod.string().min(1).max(createContestApiV1ContestsPostBodyNameMax).describe('Contest name'),
@@ -61,6 +62,7 @@ export const CreateContestApiV1ContestsPostBody = zod.object({
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(createContestApiV1ContestsPostBodyShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(createContestApiV1ContestsPostBodyParticipationTypeDefault).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().default(createContestApiV1ContestsPostBodyEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "audience_ids": zod.array(zod.uuid()).optional().describe('List of audience IDs to link to this contest')
 }).describe('Schema for creating a contest.')
 
@@ -128,6 +130,7 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().describe('Whether to evaluate submissions immediately on submit'),
   "audiences": zod.array(zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
@@ -208,6 +211,7 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().describe('Whether to evaluate submissions immediately on submit'),
   "audiences": zod.array(zod.object({
   "id": zod.uuid().describe('Audience ID'),
   "name": zod.string().describe('Audience name'),
@@ -266,6 +270,7 @@ export const getContestApiV1ContestsContestIdGetResponseDataOneTeamApprovalModeD
 export const getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault = `individual`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDuringContestDefault = false;
 export const getContestApiV1ContestsContestIdGetResponseDataOneParticipationTypeDefault = `LEADER_ONLY`;
+export const getContestApiV1ContestsContestIdGetResponseDataOneEvaluateOnSubmitDefault = true;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountDefault = 0;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountMin = 0;
 
@@ -303,6 +308,7 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(getContestApiV1ContestsContestIdGetResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -392,7 +398,8 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "team_approval_mode": zod.union([zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).describe('Enumeration of contest-level team approval modes.\n\nAttributes:\n    AUTO_APPROVE: Teams are approved automatically when created.\n    INSTRUCTOR_REVIEW: Teams are kept waiting until an instructor approves.'),zod.null()]).optional().describe('How teams are approved in this contest'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to show leaderboard during the contest'),
-  "participation_type": zod.union([zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Enumeration of contest team participation types.\n\nAttributes:\n    LEADER_ONLY: Only leader can code\n    INDIVIDUAL_WORKSPACE: Each team member has their own workspace'),zod.null()]).optional().describe('Participation type for team contests')
+  "participation_type": zod.union([zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Enumeration of contest team participation types.\n\nAttributes:\n    LEADER_ONLY: Only leader can code\n    INDIVIDUAL_WORKSPACE: Each team member has their own workspace'),zod.null()]).optional().describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to evaluate submissions immediately on submit')
 }).describe('Schema for updating a contest.')
 
 export const updateContestApiV1ContestsContestIdPatchResponseSuccessDefault = true;
@@ -410,6 +417,7 @@ export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamApproval
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault = `individual`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDuringContestDefault = false;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneParticipationTypeDefault = `LEADER_ONLY`;
+export const updateContestApiV1ContestsContestIdPatchResponseDataOneEvaluateOnSubmitDefault = true;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountDefault = 0;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountMin = 0;
 
@@ -447,6 +455,7 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -518,6 +527,96 @@ export const DeleteContestApiV1ContestsContestIdDeleteResponse = zod.object({
   "status": zod.number().default(deleteContestApiV1ContestsContestIdDeleteResponseStatusDefault),
   "message": zod.string().default(deleteContestApiV1ContestsContestIdDeleteResponseMessageDefault),
   "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get the contest submission dashboard and aggregate analytics.
+
+Only accessible by the contest creator, assigned instructors, or administrators.
+ * @summary Get contest submission dashboard analytics
+ */
+export const GetContestDashboardApiV1ContestsContestIdDashboardGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getContestDashboardApiV1ContestsContestIdDashboardGetResponseSuccessDefault = true;
+export const getContestDashboardApiV1ContestsContestIdDashboardGetResponseStatusDefault = 200;
+export const getContestDashboardApiV1ContestsContestIdDashboardGetResponseMessageDefault = `Success`;
+
+export const GetContestDashboardApiV1ContestsContestIdDashboardGetResponse = zod.object({
+  "success": zod.boolean().default(getContestDashboardApiV1ContestsContestIdDashboardGetResponseSuccessDefault),
+  "status": zod.number().default(getContestDashboardApiV1ContestsContestIdDashboardGetResponseStatusDefault),
+  "message": zod.string().default(getContestDashboardApiV1ContestsContestIdDashboardGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_analytics": zod.object({
+  "total_submissions": zod.number().describe('Total number of submissions in the contest'),
+  "accepted": zod.number().describe('Number of accepted submissions (AC)'),
+  "wrong_answer": zod.number().describe('Number of wrong answer submissions (WA)'),
+  "time_limit_exceeded": zod.number().describe('Number of time limit exceeded submissions (TLE)'),
+  "runtime_error": zod.number().describe('Number of runtime error submissions (RE)'),
+  "compilation_error": zod.number().describe('Number of compilation error submissions (CE)'),
+  "memory_limit_exceeded": zod.number().describe('Number of memory limit exceeded submissions (MLE)'),
+  "system_error": zod.number().describe('Number of system error submissions (SYSTEM_ERROR)')
+}).describe('Contest submissions aggregate analytics'),
+  "needs_attention": zod.object({
+  "system_errors": zod.number().describe('Total system errors across the contest'),
+  "problematic_questions": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the question'),
+  "title": zod.string().describe('Title of the question'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "attempts": zod.number().describe('Number of attempts on this question'),
+  "acceptance_rate": zod.number().describe('Acceptance rate of the question as a percentage')
+}).describe('Question with potentially low acceptance rate or system errors.')).describe('List of questions that may need attention')
+}).describe('Items needing attention or review'),
+  "team_performance": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the team'),
+  "name": zod.string().describe('Name of the team'),
+  "solved": zod.number().describe('Number of questions solved by the team'),
+  "attempted": zod.number().describe('Number of questions attempted by the team'),
+  "failed": zod.number().describe('Number of failed attempts by the team'),
+  "acceptance_rate": zod.number().describe('Acceptance rate of the team as a percentage'),
+  "last_activity_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp of the team\'s last activity')
+}).describe('Performance metrics for teams participating in the contest.')).describe('Performance metrics of teams'),
+  "problem_health": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the question'),
+  "title": zod.string().describe('Title of the question'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "attempts": zod.number().describe('Number of attempts on this question'),
+  "accepted": zod.number().describe('Number of accepted submissions'),
+  "acceptance_rate": zod.number().describe('Acceptance rate of the question as a percentage'),
+  "system_errors": zod.number().describe('Number of system errors on this question')
+}).describe('Health and submission metrics for a contest problem.')).describe('Health metrics of problems'),
+  "recent_submissions": zod.array(zod.object({
+  "id": zod.uuid().describe('Unique identifier of the submission'),
+  "submitted_by": zod.object({
+  "id": zod.uuid().describe('Unique identifier of the user'),
+  "name": zod.string().describe('Name of the user')
+}).describe('Details of the user who submitted'),
+  "team": zod.union([zod.object({
+  "id": zod.uuid().describe('Unique identifier of the team'),
+  "name": zod.string().describe('Name of the team')
+}).describe('Minimal details of the team associated with the submission.'),zod.null()]).optional().describe('Details of the team, if any'),
+  "question": zod.object({
+  "id": zod.uuid().describe('Unique identifier of the question'),
+  "title": zod.string().describe('Title of the question')
+}).describe('Details of the question submitted for'),
+  "language": zod.string().describe('Programming language name'),
+  "status": zod.enum(['PENDING', 'QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Status of the submission'),
+  "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp when the submission was created')
+}).describe('Details of a single recent submission.')).describe('Most recent submissions list')
+}).describe('Comprehensive schema for the contest submission and analytics dashboard.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -1078,6 +1177,7 @@ export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamA
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault = `individual`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDuringContestDefault = false;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParticipationTypeDefault = `LEADER_ONLY`;
+export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneEvaluateOnSubmitDefault = true;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountDefault = 0;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountMin = 0;
 
@@ -1115,6 +1215,7 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDuringContestDefault).describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
+  "evaluate_on_submit": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
