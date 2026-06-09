@@ -54,6 +54,8 @@ export interface ContestCreate {
   show_leaderboard_during_contest?: boolean;
   /** Participation type for team contests */
   participation_type?: ContestTeamParticipationType;
+  /** Whether to evaluate submissions immediately on submit */
+  evaluate_on_submit?: boolean;
   /** List of audience IDs to link to this contest */
   audience_ids?: string[];
 }

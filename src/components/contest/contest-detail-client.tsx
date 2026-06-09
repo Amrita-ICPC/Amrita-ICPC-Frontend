@@ -513,6 +513,24 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                             : "Hidden"
                                     }
                                 />
+                                <Separator className="my-0.5 bg-border/40" />
+                                <InfoRow
+                                    label="Evaluation Mode"
+                                    value={
+                                        <Badge
+                                            variant="outline"
+                                            className={
+                                                contest.evaluate_on_submit
+                                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                                    : "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20"
+                                            }
+                                        >
+                                            {contest.evaluate_on_submit
+                                                ? "Immediate"
+                                                : "On Session Finish"}
+                                        </Badge>
+                                    }
+                                />
                                 {contest.contest_mode === "team" && contest.participation_type && (
                                     <>
                                         <Separator className="my-0.5 bg-border/40" />

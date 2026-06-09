@@ -46,6 +46,8 @@ export interface ContestSummaryResponse {
   show_leaderboard_during_contest: boolean;
   /** Participation type for team contests */
   participation_type: ContestTeamParticipationType;
+  /** Whether to evaluate submissions immediately on submit */
+  evaluate_on_submit: boolean;
   /** List of audiences linked to this contest */
   audiences?: ContestAudienceResponse[];
 }

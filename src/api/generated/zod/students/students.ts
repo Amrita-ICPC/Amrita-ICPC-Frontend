@@ -490,6 +490,7 @@ export const StartContestSessionApiV1StudentsContestsContestIdStartPostResponse 
   "data": zod.union([zod.object({
   "contest_id": zod.uuid().describe('The UUID of the contest'),
   "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "evaluate_on_submit": zod.boolean().describe('Whether to evaluate submissions immediately on submit'),
   "session": zod.object({
   "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
   "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
@@ -555,6 +556,7 @@ export const GetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetResponse =
   "data": zod.union([zod.object({
   "contest_id": zod.uuid().describe('The UUID of the contest'),
   "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "evaluate_on_submit": zod.boolean().describe('Whether to evaluate submissions immediately on submit'),
   "session": zod.object({
   "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
   "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
@@ -620,6 +622,7 @@ export const FinishContestSessionApiV1StudentsContestsContestIdFinishPostRespons
   "data": zod.union([zod.object({
   "contest_id": zod.uuid().describe('The UUID of the contest'),
   "contest_team_id": zod.uuid().describe('The UUID of the contest team'),
+  "evaluate_on_submit": zod.boolean().describe('Whether to evaluate submissions immediately on submit'),
   "session": zod.object({
   "already_started": zod.boolean().describe('Indicates if the contest session has already started'),
   "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the session was started'),
@@ -1675,7 +1678,7 @@ export const GetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuesti
   "id": zod.uuid().describe('The unique ID of the submission'),
   "question_id": zod.uuid().describe('The ID of the question submitted for'),
   "language_id": zod.number().describe('Judge0 language ID used'),
-  "status": zod.enum(['QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('The current status of the submission'),
+  "status": zod.enum(['PENDING', 'QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('The current status of the submission'),
   "score": zod.number().describe('Score achieved on this submission'),
   "passed_testcases": zod.number().describe('Number of passed test cases'),
   "total_testcases": zod.number().describe('Total number of test cases for the question'),

@@ -68,6 +68,7 @@ interface EditorPanelProps {
     setConsoleTab: (tab: "output" | "submissions") => void;
     submissions: any[];
     isSubmissionsLoading: boolean;
+    isSubmitDisabled?: boolean;
 }
 
 export function EditorPanel({
@@ -98,6 +99,7 @@ export function EditorPanel({
     setConsoleTab,
     submissions,
     isSubmissionsLoading,
+    isSubmitDisabled = false,
 }: EditorPanelProps) {
     const activeLang = LANGUAGES.find((l) => l.id === selectedLanguageId);
     const { resolvedTheme } = useTheme();
@@ -167,6 +169,13 @@ export function EditorPanel({
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-500/10 text-slate-655 dark:text-slate-400 border border-slate-500/25">
                         <Terminal className="h-3 w-3" />
                         Compile Error
+                    </span>
+                );
+            case "PENDING":
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        <Clock className="h-3 w-3 text-indigo-500" />
+                        Pending
                     </span>
                 );
             case "QUEUED":
@@ -317,10 +326,10 @@ export function EditorPanel({
                         size="sm"
                         variant="ghost"
                         onClick={onSubmit}
-                        disabled={isSubmitting || isRunning}
+                        disabled={isSubmitting || isRunning || isSubmitDisabled}
                         className={cn(
                             "h-7 gap-1 border text-xs font-semibold px-2.5 transition-all",
-                            isSubmitting
+                            isSubmitting || isSubmitDisabled
                                 ? "bg-muted/40 border-border text-muted-foreground"
                                 : "border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 hover:bg-slate-250 dark:hover:bg-slate-800 text-slate-655 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
                         )}

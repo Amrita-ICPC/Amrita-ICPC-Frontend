@@ -13,6 +13,7 @@ Represents the lifecycle and final verdict of a code submission
 during online judging.
 
 Attributes:
+    PENDING: Submission is just saved in the database later it will be moved to queue
     QUEUED: Submission is accepted by the system and waiting to be judged.
     RUNNING: Submission is currently being compiled or executed.
     AC: Accepted; all test cases passed.
@@ -25,6 +26,7 @@ export type SubmissionStatus = typeof SubmissionStatus[keyof typeof SubmissionSt
 
 
 export const SubmissionStatus = {
+  PENDING: 'PENDING',
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',
   SYSTEM_ERROR: 'SYSTEM_ERROR',

@@ -26,6 +26,7 @@ import type {
 
 import type {
   APIResponse,
+  APIResponseContestDashboardResponse,
   APIResponseContestDetailResponse,
   APIResponseContestQuestionsListResponse,
   APIResponseListContestAudienceResponse,
@@ -633,6 +634,101 @@ export const useDeleteContestApiV1ContestsContestIdDelete = <TError = ExceptionR
       return useMutation(getDeleteContestApiV1ContestsContestIdDeleteMutationOptions(options), queryClient);
     }
     /**
+ * Get the contest submission dashboard and aggregate analytics.
+
+Only accessible by the contest creator, assigned instructors, or administrators.
+ * @summary Get contest submission dashboard analytics
+ */
+export const getContestDashboardApiV1ContestsContestIdDashboardGet = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseContestDashboardResponse>(
+      {url: `/api/v1/contests/${contestId}/dashboard`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetContestDashboardApiV1ContestsContestIdDashboardGetQueryKey = (contestId: string,) => {
+    return [
+    `/api/v1/contests/${contestId}/dashboard`
+    ] as const;
+    }
+
+
+export const getGetContestDashboardApiV1ContestsContestIdDashboardGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContestDashboardApiV1ContestsContestIdDashboardGetQueryKey(contestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>> = ({ signal }) => getContestDashboardApiV1ContestsContestIdDashboardGet(contestId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContestDashboardApiV1ContestsContestIdDashboardGetQueryResult = NonNullable<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>>
+export type GetContestDashboardApiV1ContestsContestIdDashboardGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetContestDashboardApiV1ContestsContestIdDashboardGet<TData = Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>,
+          TError,
+          Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContestDashboardApiV1ContestsContestIdDashboardGet<TData = Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>,
+          TError,
+          Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContestDashboardApiV1ContestsContestIdDashboardGet<TData = Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get contest submission dashboard analytics
+ */
+
+export function useGetContestDashboardApiV1ContestsContestIdDashboardGet<TData = Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestDashboardApiV1ContestsContestIdDashboardGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContestDashboardApiV1ContestsContestIdDashboardGetQueryOptions(contestId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Get paginated contest questions.
 
 Args:
