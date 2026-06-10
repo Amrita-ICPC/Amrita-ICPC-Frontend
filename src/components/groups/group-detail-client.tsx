@@ -220,7 +220,7 @@ function PeoplePicker({
         if (selectedList.length === 0) return;
         addUsers({
             audienceId: group.id,
-            data: { user_ids: selectedList.map((user) => user.user_id) },
+            data: { user_ids: selectedList.map((user) => user.id) },
         });
     }
 

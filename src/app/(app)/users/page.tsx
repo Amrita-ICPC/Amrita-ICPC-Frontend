@@ -1,26 +1,21 @@
-import AccessDenied from "@/components/global/access-denied";
+import AuthGuard from "@/components/global/auth-guard";
 import { UsersClient } from "@/components/users/users-client";
-import { auth } from "@/lib/auth/auth";
-import { isAdmin } from "@/lib/auth/guards";
+import { UserType } from "@/lib/auth/utils";
 
 export default async function UsersPage() {
-    const session = await auth();
-
-    if (!isAdmin(session?.user)) {
-        return <AccessDenied />;
-    }
-
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Search, filter, and sync platform users from Keycloak.
-                    </p>
+        <AuthGuard requiredGroups={[UserType.ADMIN]}>
+            <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Search, filter, and sync platform users from Keycloak.
+                        </p>
+                    </div>
                 </div>
+                <UsersClient />
             </div>
-            <UsersClient />
-        </div>
+        </AuthGuard>
     );
 }
