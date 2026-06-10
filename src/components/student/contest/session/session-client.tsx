@@ -11,15 +11,12 @@ import { StudentCodeRunResponse } from "@/api/generated/model";
 import {
     getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryKey,
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
-    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
     useFinishContestSessionApiV1StudentsContestsContestIdFinishPost,
     useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGet,
     useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet,
     useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGet,
-    useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet,
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
-    useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet,
     useGetWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspaceGet,
     useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost,
     useSaveWorkspaceApiV1StudentsContestsContestIdQuestionsQuestionIdWorkspacePut,
@@ -34,9 +31,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { useContestSession } from "@/lib/providers/contest-session-provider";
+import { useSessionTimer } from "@/lib/providers/session-timer-provider";
 import { cn } from "@/lib/utils";
 
-import { useContestSession } from "./contest-session-provider";
 import { EditorPanel } from "./editor-panel";
 import { ProblemView } from "./problem-view";
 import { SessionHeader } from "./session-header";
@@ -54,22 +52,15 @@ export function SessionClient({ contestId }: SessionClientProps) {
         useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
     const contest = contestRes?.data;
 
-    const { data: statusRes, isLoading: isStatusLoading } =
-        useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet(contestId);
-    const participation = statusRes?.data;
-
-    const { data: runtimeRes, isLoading: isRuntimeLoading } =
-        useGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGet(contestId);
-    const runtimeSession = runtimeRes?.data;
-
     const { data: questionsRes, isLoading: isQuestionsLoading } =
         useGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGet(contestId);
     const questionsList = useMemo(() => questionsRes?.data?.questions || [], [questionsRes]);
-    const isGlobalLoading =
-        isContestLoading || isStatusLoading || isRuntimeLoading || isQuestionsLoading;
 
-    // 2. State Management
+    // 2. State & Timer Providers
     const { activeQuestionId, setActiveQuestionId } = useContestSession();
+    const { timeLeft, runtimeSession, isTimerLoading: isRuntimeLoading } = useSessionTimer();
+
+    const isGlobalLoading = isContestLoading || isRuntimeLoading || isQuestionsLoading;
 
     // Set initial active question once questions list is loaded
     useEffect(() => {
@@ -82,7 +73,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [editorCode, setEditorCode] = useState<string>("");
     const [loadedKey, setLoadedKey] = useState<string>("");
     const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [timeLeft, setTimeLeft] = useState<string>("00:00:00");
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
     const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState<boolean>(false);
 
@@ -476,94 +466,6 @@ export function SessionClient({ contestId }: SessionClientProps) {
             executeSubmit();
         }
     };
-
-    // 5. Check runtime status / eligibility on load
-    useEffect(() => {
-        if (isGlobalLoading) return;
-
-        const alreadyStarted = participation?.session?.already_started;
-        const canStart = participation?.session?.can_start;
-        const runStatus = contest?.run_status;
-
-        const isNotEligible = !alreadyStarted && !canStart;
-        const isNotActive = runStatus === "ENDED" || contest?.status === "DRAFT";
-
-        if (isNotEligible || isNotActive) {
-            const reason = isNotActive
-                ? "The contest is not currently active."
-                : participation?.session?.reason ||
-                  "Cannot enter session page. You do not have access.";
-
-            toast.error(reason);
-
-            // Invalidate queries in parallel to ensure details page gets fresh status
-            void queryClient.invalidateQueries({
-                queryKey:
-                    getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(contestId),
-            });
-            void queryClient.invalidateQueries({
-                queryKey:
-                    getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
-                        contestId,
-                    ),
-            });
-            void queryClient.invalidateQueries({
-                queryKey:
-                    getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(contestId),
-            });
-
-            router.push(`/student/contest/${contestId}`);
-        }
-    }, [isGlobalLoading, participation, contest, contestId, router, queryClient]);
-
-    // 6. Timer Ticking
-    useEffect(() => {
-        const endTimeStr = runtimeSession?.runtime?.effective_end_time;
-        if (!endTimeStr) return;
-
-        const updateTimer = () => {
-            const now = new Date().getTime();
-            const target = new Date(endTimeStr).getTime();
-            const diff = target - now;
-
-            if (diff <= 0) {
-                setTimeLeft("00:00:00");
-                toast.info("The contest session has ended.");
-                // Invalidate queries in parallel to ensure details page gets fresh status
-                void queryClient.invalidateQueries({
-                    queryKey:
-                        getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey(
-                            contestId,
-                        ),
-                });
-                void queryClient.invalidateQueries({
-                    queryKey:
-                        getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey(
-                            contestId,
-                        ),
-                });
-                void queryClient.invalidateQueries({
-                    queryKey:
-                        getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey(
-                            contestId,
-                        ),
-                });
-                router.push(`/student/contest/${contestId}`);
-                return;
-            }
-
-            const h = Math.floor(diff / 3_600_000);
-            const m = Math.floor((diff % 3_600_000) / 60_000);
-            const s = Math.floor((diff % 60_000) / 1000);
-            setTimeLeft(
-                `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`,
-            );
-        };
-
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
-        return () => clearInterval(interval);
-    }, [runtimeSession?.runtime?.effective_end_time, contestId, router, queryClient]);
 
     if (isGlobalLoading) {
         return (
