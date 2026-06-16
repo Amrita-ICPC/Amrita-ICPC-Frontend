@@ -18,7 +18,7 @@ export interface StudentSubmissionResponse {
   /** Judge0 language ID used */
   language_id: number;
   /** The current status of the submission */
-  status: SubmissionStatus;
+  status?: SubmissionStatus | null;
   /** Score achieved on this submission */
   score: number;
   /** Number of passed test cases */

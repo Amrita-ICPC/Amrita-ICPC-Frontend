@@ -127,7 +127,15 @@ export function EditorPanel({
         }
     };
 
-    const renderStatusBadge = (status: string) => {
+    const renderStatusBadge = (status: string | null | undefined) => {
+        if (!status) {
+            return (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 animate-pulse">
+                    <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                    Evaluating
+                </span>
+            );
+        }
         switch (status) {
             case "AC":
                 return (
@@ -171,6 +179,13 @@ export function EditorPanel({
                         Compile Error
                     </span>
                 );
+            case "SYSTEM_ERROR":
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-455 border border-rose-500/25">
+                        <AlertTriangle className="h-3 w-3" />
+                        System Error
+                    </span>
+                );
             case "PENDING":
                 return (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
@@ -196,7 +211,7 @@ export function EditorPanel({
                 return (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-455 border border-rose-500/25">
                         <AlertTriangle className="h-3 w-3" />
-                        {status}
+                        System Error
                     </span>
                 );
         }
@@ -210,9 +225,15 @@ export function EditorPanel({
 
     const currentTheme = mounted && resolvedTheme === "light" ? "light" : "vs-dark";
 
-    const hasRunningSubmission = submissions.some(
-        (s) => s.status === "QUEUED" || s.status === "RUNNING",
-    );
+    const hasRunningSubmission = submissions.some((s) => {
+        const statusStr = (s.status as string) || "";
+        return (
+            statusStr === "QUEUED" ||
+            statusStr === "RUNNING" ||
+            statusStr === "PENDING" ||
+            !s.status
+        );
+    });
 
     return (
         <div className="flex-1 flex flex-col bg-white dark:bg-[#090d16] overflow-hidden">

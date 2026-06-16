@@ -1678,7 +1678,7 @@ export const GetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuesti
   "id": zod.uuid().describe('The unique ID of the submission'),
   "question_id": zod.uuid().describe('The ID of the question submitted for'),
   "language_id": zod.number().describe('Judge0 language ID used'),
-  "status": zod.enum(['PENDING', 'QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('The current status of the submission'),
+  "status": zod.union([zod.enum(['SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Enumeration of submission evaluation statuses.\n\nRepresents the lifecycle and final verdict of a code submission\nduring online judging.\n\nAttributes:\n    AC: Accepted; all test cases passed.\n    WA: Wrong Answer; one or more test cases failed.\n    TLE: Time Limit Exceeded during execution.\n    RE: Runtime Error occurred while running the submission.\n    CE: Compilation Error prevented execution.\n    MLE: Memory Limit Exceeded during execution.'),zod.null()]).optional().describe('The current status of the submission'),
   "score": zod.number().describe('Score achieved on this submission'),
   "passed_testcases": zod.number().describe('Number of passed test cases'),
   "total_testcases": zod.number().describe('Total number of test cases for the question'),

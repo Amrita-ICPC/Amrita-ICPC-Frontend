@@ -1,6 +1,15 @@
 "use client";
 
-import { Activity, ArrowRight, BarChart2, FileText, Send, ShieldCheck, Users } from "lucide-react";
+import {
+    Activity,
+    ArrowRight,
+    BarChart2,
+    Cpu,
+    FileText,
+    Send,
+    ShieldCheck,
+    Users,
+} from "lucide-react";
 import Link from "next/link";
 
 import type { ContestDetailResponse } from "@/api/generated/model";
@@ -66,6 +75,18 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             iconColor: "text-yellow-600 dark:text-yellow-400",
             href: `/contest/${contest.id}/access`,
             metaColor: "text-yellow-600 dark:text-yellow-500",
+        },
+        {
+            title: "Evaluate Contest",
+            description:
+                "Trigger evaluation of all contest submissions and view real-time grading progress.",
+            metaText: "Evaluate submissions",
+            buttonText: "Open Evaluate",
+            icon: Cpu,
+            iconBg: "bg-amber-500/10 dark:bg-amber-500/20",
+            iconColor: "text-amber-600 dark:text-amber-400",
+            href: `/contest/${contest.id}/evaluate`,
+            metaColor: "text-amber-600 dark:text-amber-500",
         },
         {
             title: "Reports & Analytics",

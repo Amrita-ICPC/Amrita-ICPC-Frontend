@@ -13,22 +13,17 @@ Represents the lifecycle and final verdict of a code submission
 during online judging.
 
 Attributes:
-    PENDING: Submission is just saved in the database later it will be moved to queue
-    QUEUED: Submission is accepted by the system and waiting to be judged.
-    RUNNING: Submission is currently being compiled or executed.
     AC: Accepted; all test cases passed.
     WA: Wrong Answer; one or more test cases failed.
     TLE: Time Limit Exceeded during execution.
     RE: Runtime Error occurred while running the submission.
     CE: Compilation Error prevented execution.
+    MLE: Memory Limit Exceeded during execution.
  */
 export type SubmissionStatus = typeof SubmissionStatus[keyof typeof SubmissionStatus];
 
 
 export const SubmissionStatus = {
-  PENDING: 'PENDING',
-  QUEUED: 'QUEUED',
-  RUNNING: 'RUNNING',
   SYSTEM_ERROR: 'SYSTEM_ERROR',
   AC: 'AC',
   WA: 'WA',
