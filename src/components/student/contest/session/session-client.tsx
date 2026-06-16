@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { StudentCodeRunResponse } from "@/api/generated/model";
 import {
+    getGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetQueryKey,
     getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryKey,
     getGetRuntimeSessionApiV1StudentsContestsContestIdRuntimeGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
@@ -165,13 +166,54 @@ export function SessionClient({ contestId }: SessionClientProps) {
         );
     const workspaceData = workspaceRes?.data;
 
+    const [prevHasRunning, setPrevHasRunning] = useState(false);
+
     const { data: submissionsRes, isLoading: isSubmissionsLoading } =
         useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGet(
             contestId,
             activeQuestionId || "",
-            { query: { enabled: !!activeQuestionId } },
+            {
+                query: {
+                    enabled: !!activeQuestionId,
+                    refetchInterval: (query) => {
+                        const subs = query?.state?.data?.data || [];
+                        const hasRunning = subs.some((s: any) => {
+                            const statusStr = (s.status as string) || "";
+                            return (
+                                statusStr === "QUEUED" ||
+                                statusStr === "RUNNING" ||
+                                statusStr === "PENDING" ||
+                                !s.status
+                            );
+                        });
+                        return hasRunning ? 2000 : false;
+                    },
+                },
+            },
         );
-    const submissions = submissionsRes?.data || [];
+    const submissions = useMemo(() => submissionsRes?.data || [], [submissionsRes?.data]);
+
+    // Invalidate questions query to update solved status when running submissions finish
+    useEffect(() => {
+        const hasRunning = submissions.some((s) => {
+            const statusStr = (s.status as string) || "";
+            return (
+                statusStr === "QUEUED" ||
+                statusStr === "RUNNING" ||
+                statusStr === "PENDING" ||
+                !s.status
+            );
+        });
+        if (prevHasRunning && !hasRunning) {
+            void queryClient.invalidateQueries({
+                queryKey:
+                    getGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetQueryKey(
+                        contestId,
+                    ),
+            });
+        }
+        setPrevHasRunning(hasRunning);
+    }, [submissions, prevHasRunning, contestId, queryClient]);
 
     // Determine starter templates
     const currentTemplates = useMemo(() => questionDetails?.templates || [], [questionDetails]);

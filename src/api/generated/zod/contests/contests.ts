@@ -613,7 +613,7 @@ export const GetContestDashboardApiV1ContestsContestIdDashboardGetResponse = zod
   "title": zod.string().describe('Title of the question')
 }).describe('Details of the question submitted for'),
   "language": zod.string().describe('Programming language name'),
-  "status": zod.enum(['PENDING', 'QUEUED', 'RUNNING', 'SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Status of the submission'),
+  "status": zod.union([zod.enum(['SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Enumeration of submission evaluation statuses.\n\nRepresents the lifecycle and final verdict of a code submission\nduring online judging.\n\nAttributes:\n    AC: Accepted; all test cases passed.\n    WA: Wrong Answer; one or more test cases failed.\n    TLE: Time Limit Exceeded during execution.\n    RE: Runtime Error occurred while running the submission.\n    CE: Compilation Error prevented execution.\n    MLE: Memory Limit Exceeded during execution.'),zod.null()]).optional().describe('Status of the submission'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp when the submission was created')
 }).describe('Details of a single recent submission.')).describe('Most recent submissions list')
 }).describe('Comprehensive schema for the contest submission and analytics dashboard.'),zod.null()]).optional(),
@@ -1683,6 +1683,69 @@ export const CancelContestApiV1ContestsContestIdCancelPostResponse = zod.object(
   "status": zod.number().default(cancelContestApiV1ContestsContestIdCancelPostResponseStatusDefault),
   "message": zod.string().default(cancelContestApiV1ContestsContestIdCancelPostResponseMessageDefault),
   "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Trigger re-evaluation of all submissions in a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[EvaluationResponse]: The created evaluation process state.
+ * @summary Trigger contest evaluation
+ */
+export const EvaluateContestApiV1ContestsContestIdEvaluationPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+/**
+ * Get the status of a contest evaluation process.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[EvaluationStatusResponse]: Current evaluation status and metrics.
+ * @summary Get contest evaluation status
+ */
+export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseSuccessDefault = true;
+export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseStatusDefault = 200;
+export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseMessageDefault = `Success`;
+
+export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetResponse = zod.object({
+  "success": zod.boolean().default(getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseSuccessDefault),
+  "status": zod.number().default(getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseStatusDefault),
+  "message": zod.string().default(getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid().describe('Evaluation ID'),
+  "contest_id": zod.uuid().describe('Contest ID'),
+  "status": zod.string().describe('Evaluation status (PENDING, RUNNING, COMPLETED)'),
+  "total_submissions": zod.number().describe('Total submissions to evaluate'),
+  "processed_submissions": zod.number().describe('Number of evaluated submissions')
+}).describe('Schema for contest evaluation status polling.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

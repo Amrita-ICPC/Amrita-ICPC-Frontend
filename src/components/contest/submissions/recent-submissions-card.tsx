@@ -111,8 +111,9 @@ export function RecentSubmissionsCard({ submissions, contestId }: RecentSubmissi
                                 </TableRow>
                             ) : (
                                 submissions.slice(0, 10).map((submission, index) => {
-                                    const statusConfig = STATUS_MAP[submission.status] || {
-                                        label: submission.status,
+                                    const statusKey = submission.status || "";
+                                    const statusConfig = STATUS_MAP[statusKey] || {
+                                        label: statusKey,
                                         className:
                                             "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
                                     };

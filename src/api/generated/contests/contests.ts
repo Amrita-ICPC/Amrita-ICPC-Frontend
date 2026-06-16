@@ -29,6 +29,8 @@ import type {
   APIResponseContestDashboardResponse,
   APIResponseContestDetailResponse,
   APIResponseContestQuestionsListResponse,
+  APIResponseEvaluationResponse,
+  APIResponseEvaluationStatusResponse,
   APIResponseListContestAudienceResponse,
   APIResponseListContestQuestionResponse,
   APIResponseListContestSummaryResponse,
@@ -2191,3 +2193,176 @@ export const useCancelContestApiV1ContestsContestIdCancelPost = <TError = Except
       > => {
       return useMutation(getCancelContestApiV1ContestsContestIdCancelPostMutationOptions(options), queryClient);
     }
+    /**
+ * Trigger re-evaluation of all submissions in a contest.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[EvaluationResponse]: The created evaluation process state.
+ * @summary Trigger contest evaluation
+ */
+export const evaluateContestApiV1ContestsContestIdEvaluationPost = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseEvaluationResponse>(
+      {url: `/api/v1/contests/${contestId}/evaluation`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getEvaluateContestApiV1ContestsContestIdEvaluationPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext> => {
+
+const mutationKey = ['evaluateContestApiV1ContestsContestIdEvaluationPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, {contestId: string}> = (props) => {
+          const {contestId} = props ?? {};
+
+          return  evaluateContestApiV1ContestsContestIdEvaluationPost(contestId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EvaluateContestApiV1ContestsContestIdEvaluationPostMutationResult = NonNullable<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>>
+
+    export type EvaluateContestApiV1ContestsContestIdEvaluationPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Trigger contest evaluation
+ */
+export const useEvaluateContestApiV1ContestsContestIdEvaluationPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>,
+        TError,
+        {contestId: string},
+        TContext
+      > => {
+      return useMutation(getEvaluateContestApiV1ContestsContestIdEvaluationPostMutationOptions(options), queryClient);
+    }
+    /**
+ * Get the status of a contest evaluation process.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    user_id (UUID): Authenticated user ID.
+    service (ContestService): Injected domain service.
+
+Returns:
+    APIResponse[EvaluationStatusResponse]: Current evaluation status and metrics.
+ * @summary Get contest evaluation status
+ */
+export const getEvaluationStatusApiV1ContestsContestIdEvaluationGet = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseEvaluationStatusResponse>(
+      {url: `/api/v1/contests/${contestId}/evaluation`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey = (contestId: string,) => {
+    return [
+    `/api/v1/contests/${contestId}/evaluation`
+    ] as const;
+    }
+
+
+export const getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryOptions = <TData = Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey(contestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>> = ({ signal }) => getEvaluationStatusApiV1ContestsContestIdEvaluationGet(contestId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryResult = NonNullable<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>>
+export type GetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData = Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>,
+          TError,
+          Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData = Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>,
+          TError,
+          Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData = Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get contest evaluation status
+ */
+
+export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData = Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvaluationStatusApiV1ContestsContestIdEvaluationGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryOptions(contestId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+

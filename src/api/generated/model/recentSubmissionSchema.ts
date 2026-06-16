@@ -25,7 +25,7 @@ export interface RecentSubmissionSchema {
   /** Programming language name */
   language: string;
   /** Status of the submission */
-  status: SubmissionStatus;
+  status?: SubmissionStatus | null;
   /** Timestamp when the submission was created */
   created_at: string;
 }
