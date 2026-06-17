@@ -161,11 +161,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
         evaluateMutation.mutate({ contestId });
     };
 
-    const handleReset = () => {
-        setEvaluationId(null);
-        localStorage.removeItem(`contest_evaluation_active_${contestId}`);
-    };
-
     const formatTime = (secs: number) => {
         const m = Math.floor(secs / 60);
         const s = secs % 60;
