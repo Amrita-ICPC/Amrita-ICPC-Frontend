@@ -37,6 +37,8 @@ export function SessionTimerProvider({
     useEffect(() => {
         if (!effectiveEndTime) return;
 
+        let interval: NodeJS.Timeout;
+
         const updateTimer = () => {
             const now = new Date().getTime();
             const target = new Date(effectiveEndTime).getTime();
@@ -44,7 +46,7 @@ export function SessionTimerProvider({
 
             if (diff <= 0) {
                 setTimeLeft("00:00:00");
-                clearInterval(interval);
+                if (interval) clearInterval(interval);
                 toast.info("The contest session has ended.");
                 // Invalidate queries in parallel to ensure details page gets fresh status
                 void queryClient.invalidateQueries({
@@ -79,7 +81,7 @@ export function SessionTimerProvider({
         };
 
         updateTimer();
-        const interval = setInterval(updateTimer, 1000);
+        interval = setInterval(updateTimer, 1000);
         return () => clearInterval(interval);
     }, [effectiveEndTime, contestId, router, queryClient]);
 

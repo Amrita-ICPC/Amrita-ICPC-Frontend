@@ -220,7 +220,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     {!evaluationId && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-slate-500/10 text-slate-500 dark:text-slate-400 border-transparent font-bold text-[10px]"
+                                            className="bg-muted/10 text-muted-foreground border-transparent font-bold text-[10px]"
                                         >
                                             IDLE
                                         </Badge>
@@ -228,27 +228,27 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     {evaluationId && status === "PENDING" && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-amber-500/10 text-amber-500 border-transparent animate-pulse flex items-center gap-1 font-bold text-[10px]"
+                                            className="bg-warning/10 text-warning border-transparent animate-pulse flex items-center gap-1 font-bold text-[10px]"
                                         >
-                                            <span className="h-1 w-1 rounded-full bg-amber-500 animate-ping" />
+                                            <span className="h-1 w-1 rounded-full bg-warning animate-ping" />
                                             QUEUED
                                         </Badge>
                                     )}
                                     {evaluationId && status === "RUNNING" && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-blue-500/10 text-blue-500 border-transparent flex items-center gap-1 font-bold text-[10px]"
+                                            className="bg-info/10 text-info border-transparent flex items-center gap-1 font-bold text-[10px]"
                                         >
-                                            <Loader2 className="h-2.5 w-2.5 animate-spin text-blue-500" />
+                                            <Loader2 className="h-2.5 w-2.5 animate-spin text-info" />
                                             RUNNING
                                         </Badge>
                                     )}
                                     {evaluationId && status === "COMPLETED" && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-emerald-500/10 text-emerald-500 border-transparent flex items-center gap-1 font-bold text-[10px]"
+                                            className="bg-success/10 text-success border-transparent flex items-center gap-1 font-bold text-[10px]"
                                         >
-                                            <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
+                                            <CheckCircle2 className="h-2.5 w-2.5 text-success" />
                                             COMPLETED
                                         </Badge>
                                     )}
@@ -492,7 +492,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                                 key={q.question_id}
                                                                 className="py-3 px-2 text-center"
                                                             >
-                                                                <div className="flex flex-col items-center justify-center rounded bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-450 h-10 w-12 mx-auto">
+                                                                <div className="flex flex-col items-center justify-center rounded bg-success/10 border border-success/20 text-success h-10 w-12 mx-auto">
                                                                     <span className="text-xs font-bold">
                                                                         +{detail.attempts || 1}
                                                                     </span>
@@ -518,7 +518,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                                 key={q.question_id}
                                                                 className="py-3 px-2 text-center"
                                                             >
-                                                                <div className="flex flex-col items-center justify-center rounded bg-rose-500/10 dark:bg-rose-500/5 border border-rose-500/20 text-rose-600 dark:text-rose-455 h-10 w-12 mx-auto">
+                                                                <div className="flex flex-col items-center justify-center rounded bg-destructive/10 border border-destructive/20 text-destructive h-10 w-12 mx-auto">
                                                                     <span className="text-xs font-bold">
                                                                         -{detail.attempts}
                                                                     </span>
