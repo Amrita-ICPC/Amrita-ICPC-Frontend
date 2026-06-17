@@ -48,6 +48,18 @@ export interface ContestSummaryResponse {
   participation_type: ContestTeamParticipationType;
   /** Whether to evaluate submissions immediately on submit */
   evaluate_on_submit: boolean;
+  /** Maximum submissions allowed per question */
+  max_submission_per_question?: number | null;
   /** List of audiences linked to this contest */
   audiences?: ContestAudienceResponse[];
+  /**
+     * Number of questions in the contest
+     * @minimum 0
+     */
+  question_count?: number;
+  /**
+     * Number of teams in the contest (confirmed and approved)
+     * @minimum 0
+     */
+  team_count?: number;
 }

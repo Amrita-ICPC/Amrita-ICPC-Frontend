@@ -233,7 +233,8 @@ export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBody = zod.
   "solution_code": zod.union([zod.string(),zod.null()]).optional()
 })),zod.null()]).optional(),
   "time_limit_ms": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTimeLimitMsOneExclusiveMin),zod.null()]).optional(),
-  "memory_limit_mb": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional()
+  "memory_limit_mb": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional(),
+  "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
 })
 
 export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutResponse = zod.unknown()

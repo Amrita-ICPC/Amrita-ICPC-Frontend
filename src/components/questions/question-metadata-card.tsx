@@ -40,6 +40,8 @@ interface ProblemMetadataCardProps {
     setAllowedLanguages: (val: number[]) => void;
     tags: string[];
     setTags: (val: string[]) => void;
+    maxSubmission: string;
+    setMaxSubmission: (val: string) => void;
 }
 
 const DIFFICULTY_OPTIONS = [
@@ -76,6 +78,8 @@ export function ProblemMetadataCard({
     setScore,
     duration,
     setDuration,
+    maxSubmission,
+    setMaxSubmission,
     allowedLanguages,
     setAllowedLanguages,
     tags,
@@ -226,6 +230,23 @@ export function ProblemMetadataCard({
                         />
                         <p className="text-[10px] text-muted-foreground/60 leading-tight">
                             Suggested duration for the challenge.
+                        </p>
+                    </div>
+
+                    {/* Max Submissions */}
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                            Max Submissions
+                        </Label>
+                        <Input
+                            placeholder="e.g. 5"
+                            type="number"
+                            value={maxSubmission}
+                            onChange={(e) => setMaxSubmission(e.target.value)}
+                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                        />
+                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                            Maximum submissions allowed for this question. Leave blank for no limit.
                         </p>
                     </div>
 

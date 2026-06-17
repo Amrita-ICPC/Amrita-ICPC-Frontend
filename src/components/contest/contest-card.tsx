@@ -95,6 +95,13 @@ const WaveBackground = () => (
     </div>
 );
 
+function formatDuration(seconds?: number | null) {
+    if (!seconds) return "—";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ""}` : `${m}m`;
+}
+
 export function ContestCard({ contest }: ContestCardProps) {
     const cStatus = CONTEST_STATUS_STYLES[contest.status] ?? CONTEST_STATUS_STYLES.DRAFT;
     const rStatus = RUN_STATUS_STYLES[contest.run_status] ?? RUN_STATUS_STYLES.UPCOMING;
@@ -212,7 +219,7 @@ export function ContestCard({ contest }: ContestCardProps) {
                         <span className="text-[11px] font-medium">Duration</span>
                     </div>
                     <span className="text-[14px] font-bold text-foreground pl-4">
-                        {contest.duration ? `${Math.floor(contest.duration / 60)}h` : "—"}
+                        {formatDuration(contest.duration)}
                     </span>
                 </div>
                 <div className="flex flex-col">
@@ -220,14 +227,18 @@ export function ContestCard({ contest }: ContestCardProps) {
                         <FileQuestion className="h-3.5 w-3.5" />
                         <span className="text-[11px] font-medium">Questions</span>
                     </div>
-                    <span className="text-[14px] font-bold text-foreground pl-4">—</span>
+                    <span className="text-[14px] font-bold text-foreground pl-4">
+                        {contest.question_count ?? "—"}
+                    </span>
                 </div>
                 <div className="flex flex-col">
                     <div className="flex items-center gap-1 text-muted-foreground">
                         <Users className="h-3.5 w-3.5" />
                         <span className="text-[11px] font-medium">Teams</span>
                     </div>
-                    <span className="text-[14px] font-bold text-foreground pl-4">—</span>
+                    <span className="text-[14px] font-bold text-foreground pl-4">
+                        {contest.team_count ?? "—"}
+                    </span>
                 </div>
             </div>
 

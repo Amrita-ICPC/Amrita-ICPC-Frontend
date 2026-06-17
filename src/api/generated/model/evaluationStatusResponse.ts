@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { EvaluationStatus } from './evaluationStatus';
 
 /**
  * Schema for contest evaluation status polling.
@@ -15,7 +16,7 @@ export interface EvaluationStatusResponse {
   /** Contest ID */
   contest_id: string;
   /** Evaluation status (PENDING, RUNNING, COMPLETED) */
-  status: string;
+  status: EvaluationStatus;
   /** Total submissions to evaluate */
   total_submissions: number;
   /** Number of evaluated submissions */

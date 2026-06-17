@@ -16,4 +16,6 @@ export interface StudentContestQuestionResponse {
   attempted: boolean;
   /** Whether the student has solved the question */
   solved: boolean;
+  /** Maximum submissions allowed for this question */
+  max_submission?: number | null;
 }

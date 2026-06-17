@@ -59,6 +59,8 @@ export interface ContestDetailResponse {
   participation_type?: ContestTeamParticipationType;
   /** Whether to evaluate submissions immediately on submit */
   evaluate_on_submit?: boolean;
+  /** Maximum submissions allowed per question */
+  max_submission_per_question?: number | null;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */

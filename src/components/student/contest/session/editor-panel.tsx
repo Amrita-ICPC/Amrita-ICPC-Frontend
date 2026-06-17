@@ -69,6 +69,8 @@ interface EditorPanelProps {
     submissions: any[];
     isSubmissionsLoading: boolean;
     isSubmitDisabled?: boolean;
+    maxSubmission?: number | null;
+    submissionsCount: number;
 }
 
 export function EditorPanel({
@@ -100,6 +102,8 @@ export function EditorPanel({
     submissions,
     isSubmissionsLoading,
     isSubmitDisabled = false,
+    maxSubmission,
+    submissionsCount,
 }: EditorPanelProps) {
     const activeLang = LANGUAGES.find((l) => l.id === selectedLanguageId);
     const { resolvedTheme } = useTheme();
@@ -363,7 +367,13 @@ export function EditorPanel({
                         ) : (
                             <>
                                 <Send className="h-3.5 w-3.5" />
-                                Submit
+                                {maxSubmission && maxSubmission > 0 ? (
+                                    <>
+                                        Submit ({submissionsCount}/{maxSubmission})
+                                    </>
+                                ) : (
+                                    "Submit"
+                                )}
                             </>
                         )}
                     </Button>

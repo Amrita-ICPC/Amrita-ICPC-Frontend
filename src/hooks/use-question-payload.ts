@@ -52,6 +52,7 @@ export function useQuestionPayload(form: ReturnType<typeof useQuestionForm>) {
             templates: templates,
             score: metadata.score,
             duration: metadata.duration ? Number(metadata.duration) : null,
+            max_submission: metadata.maxSubmission ? Number(metadata.maxSubmission) : null,
         };
     }, [form]);
 

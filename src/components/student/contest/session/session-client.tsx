@@ -522,7 +522,12 @@ export function SessionClient({ contestId }: SessionClientProps) {
 
     const isImmediate = runtimeSession?.evaluate_on_submit ?? true;
     const hasAlreadySubmitted = submissions.length > 0;
-    const isSubmitDisabled = !isImmediate && hasAlreadySubmitted;
+
+    // Check submission limits
+    const maxSubmission = (questionDetails as any)?.max_submission ?? 0;
+    const hasReachedSubmissionLimit = maxSubmission > 0 && submissions.length >= maxSubmission;
+
+    const isSubmitDisabled = (!isImmediate && hasAlreadySubmitted) || hasReachedSubmissionLimit;
 
     return (
         <div className="fixed inset-0 z-50 bg-background text-foreground flex flex-col font-sans select-none">
@@ -640,6 +645,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         setConsoleTab={setConsoleTab}
                         submissions={submissions}
                         isSubmissionsLoading={isSubmissionsLoading}
+                        maxSubmission={maxSubmission}
+                        submissionsCount={submissions.length}
                     />
                 </div>
             </div>
