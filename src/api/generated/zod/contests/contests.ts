@@ -1760,3 +1760,70 @@ export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetResponse = zo
 })
 })
 
+/**
+ * Get the contest leaderboard standings.
+
+Only accessible by authorized users with read permissions.
+
+Args:
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    service: Injected domain service.
+    user_id: Authenticated user ID.
+
+Returns:
+    The sorted standings.
+
+Raises:
+    ContestNotFoundError: If the contest is not found.
+    PermissionDeniedError: If the user lacks permission to access the contest.
+ * @summary Get contest leaderboard standings
+ */
+export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseSuccessDefault = true;
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseStatusDefault = 200;
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseMessageDefault = `Success`;
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemTotalPenaltyDefault = 0;
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemQuestionDetailsItemScoreDefault = 0;
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemQuestionDetailsItemAttemptsDefault = 0;
+
+export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponse = zod.object({
+  "success": zod.boolean().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseSuccessDefault),
+  "status": zod.number().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseStatusDefault),
+  "message": zod.string().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_id": zod.uuid().describe('ID of the contest'),
+  "last_updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of when the leaderboard was calculated'),
+  "standings": zod.array(zod.object({
+  "rank": zod.number().describe('Current rank of the team'),
+  "team_id": zod.uuid().describe('ID of the team'),
+  "team_name": zod.string().describe('Name of the team'),
+  "total_score": zod.number().describe('Accumulated score of the team'),
+  "total_penalty": zod.number().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemTotalPenaltyDefault).describe('Total penalty time in seconds (standard for ICPC)'),
+  "question_details": zod.array(zod.object({
+  "question_id": zod.uuid().describe('ID of the question'),
+  "question_title": zod.string().describe('Title of the question'),
+  "is_solved": zod.boolean().describe('Whether the team has solved this question (AC)'),
+  "score": zod.number().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemQuestionDetailsItemScoreDefault).describe('Score achieved on this question'),
+  "attempts": zod.number().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemQuestionDetailsItemAttemptsDefault).describe('Total number of evaluation attempts'),
+  "time_taken_seconds": zod.union([zod.number(),zod.null()]).optional().describe('Time taken in seconds from contest start to solve the question')
+}).describe('Details of a team\'s submission status for a single contest question.')).optional().describe('Performance details for each question in the contest')
+}).describe('A single row\/entry in the contest leaderboard representing a team\'s standing.')).describe('List of team standings ordered by rank')
+}).describe('Response containing the complete leaderboard standings for a contest.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
