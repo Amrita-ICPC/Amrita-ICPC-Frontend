@@ -31,6 +31,7 @@ import type {
   APIResponseContestQuestionsListResponse,
   APIResponseEvaluationResponse,
   APIResponseEvaluationStatusResponse,
+  APIResponseLeaderboardResponse,
   APIResponseListContestAudienceResponse,
   APIResponseListContestQuestionResponse,
   APIResponseListContestSummaryResponse,
@@ -2355,6 +2356,114 @@ export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryOptions(contestId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Get the contest leaderboard standings.
+
+Only accessible by authorized users with read permissions.
+
+Args:
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    service: Injected domain service.
+    user_id: Authenticated user ID.
+
+Returns:
+    The sorted standings.
+
+Raises:
+    ContestNotFoundError: If the contest is not found.
+    PermissionDeniedError: If the user lacks permission to access the contest.
+ * @summary Get contest leaderboard standings
+ */
+export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGet = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseLeaderboardResponse>(
+      {url: `/api/v1/contests/${contestId}/leaderboard`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey = (contestId: string,) => {
+    return [
+    `/api/v1/contests/${contestId}/leaderboard`
+    ] as const;
+    }
+
+
+export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey(contestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>> = ({ signal }) => getContestLeaderboardApiV1ContestsContestIdLeaderboardGet(contestId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryResult = NonNullable<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>>
+export type GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>,
+          TError,
+          Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>,
+          TError,
+          Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get contest leaderboard standings
+ */
+
+export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions(contestId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

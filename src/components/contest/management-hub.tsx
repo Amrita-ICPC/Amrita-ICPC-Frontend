@@ -1,15 +1,6 @@
 "use client";
 
-import {
-    Activity,
-    ArrowRight,
-    BarChart2,
-    Cpu,
-    FileText,
-    Send,
-    ShieldCheck,
-    Users,
-} from "lucide-react";
+import { ArrowRight, Cpu, FileText, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 
 import type { ContestDetailResponse } from "@/api/generated/model";
@@ -44,28 +35,6 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaColor: "text-violet-600 dark:text-violet-400",
         },
         {
-            title: "View Submissions",
-            description: "View all submissions, run rejudges and check submission status.",
-            metaText: `${contest.submission_count ?? 0} Submissions`,
-            buttonText: "Open Submissions",
-            icon: Send,
-            iconBg: "bg-orange-500/10 dark:bg-orange-500/20",
-            iconColor: "text-orange-600 dark:text-orange-400",
-            href: `/contest/${contest.id}/submissions`,
-            metaColor: "text-orange-500",
-        },
-        {
-            title: "Monitor Contest",
-            description: "Live monitoring tools, clarifications, leaderboard and system health.",
-            metaText: contest.run_status === "LIVE" ? "Contest is live" : "Contest not live yet",
-            buttonText: "Open Monitor",
-            icon: Activity,
-            iconBg: "bg-emerald-500/10 dark:bg-emerald-500/20",
-            iconColor: "text-emerald-600 dark:text-emerald-400",
-            href: `/contest/${contest.id}/monitor`,
-            metaColor: "text-emerald-600 dark:text-emerald-500",
-        },
-        {
             title: "Access Management",
             description: "Manage management permissions and configure participation restrictions.",
             metaText: "Permissions & Access",
@@ -88,23 +57,12 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             href: `/contest/${contest.id}/evaluate`,
             metaColor: "text-amber-600 dark:text-amber-500",
         },
-        {
-            title: "Reports & Analytics",
-            description: "View summary reports, exports and performance analytics.",
-            metaText: "",
-            buttonText: "View Reports",
-            icon: BarChart2,
-            iconBg: "bg-indigo-500/10 dark:bg-indigo-500/20",
-            iconColor: "text-indigo-600 dark:text-indigo-400",
-            href: `/contest/${contest.id}/reports`,
-            metaColor: "",
-        },
     ];
 
     return (
         <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Management Hub</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {cards.map((card, i) => {
                     const Icon = card.icon;
                     return (
