@@ -24,4 +24,6 @@ export interface ContestBankCloneRequest {
   score?: number;
   /** Default duration for cloned questions in seconds */
   duration?: number | null;
+  /** Default maximum submissions allowed for cloned questions */
+  max_submission?: number | null;
 }

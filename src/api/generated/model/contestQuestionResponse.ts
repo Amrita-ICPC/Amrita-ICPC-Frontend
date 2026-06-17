@@ -18,6 +18,8 @@ export interface ContestQuestionResponse {
   duration: number | null;
   /** Points awarded for solving this question */
   score: number;
+  /** Maximum submissions allowed for this question */
+  max_submission: number | null;
   /** When question was added to contest */
   created_at: string;
   /** User ID who added the question */

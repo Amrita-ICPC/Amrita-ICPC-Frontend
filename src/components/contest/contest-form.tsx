@@ -98,6 +98,7 @@ const formSchema = z
             ])
             .optional()
             .nullable(),
+        max_submission_per_question: z.number().int().min(1).optional().nullable(),
     })
     .refine(
         (values) => {
@@ -166,6 +167,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             evaluate_on_submit: initialData?.evaluate_on_submit ?? true,
             participation_type:
                 initialData?.participation_type ?? ContestTeamParticipationType.LEADER_ONLY,
+            max_submission_per_question: initialData?.max_submission_per_question ?? undefined,
         },
         mode: "onTouched",
     });
@@ -243,6 +245,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 evaluate_on_submit: values.evaluate_on_submit,
                 participation_type:
                     values.contest_mode === ContestMode.team ? values.participation_type : null,
+                max_submission_per_question: values.max_submission_per_question ?? null,
             };
             await updateContestMutation.mutateAsync({
                 contestId,
@@ -278,6 +281,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                     values.contest_mode === ContestMode.team
                         ? (values.participation_type ?? undefined)
                         : undefined,
+                max_submission_per_question: values.max_submission_per_question ?? null,
             };
             await createContestMutation.mutateAsync({ data: payload });
         }
@@ -741,6 +745,33 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                     Control when coding submissions are evaluated. Immediate
                                     evaluates on every submission. Session Finish evaluates once
                                     coding time runs out.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="max_submission_per_question">
+                                    Max Submissions per Question
+                                </Label>
+                                <Input
+                                    id="max_submission_per_question"
+                                    type="number"
+                                    min={1}
+                                    placeholder="No limit"
+                                    {...register("max_submission_per_question", {
+                                        setValueAs: (value) => {
+                                            if (value === "") return undefined;
+                                            const parsed = Number(value);
+                                            return Number.isFinite(parsed) ? parsed : undefined;
+                                        },
+                                    })}
+                                />
+                                {errors.max_submission_per_question && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.max_submission_per_question.message}
+                                    </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                    Limit the number of submissions allowed for each question.
                                 </p>
                             </div>
 

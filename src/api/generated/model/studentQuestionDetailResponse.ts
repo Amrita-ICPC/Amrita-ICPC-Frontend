@@ -19,4 +19,6 @@ export interface StudentQuestionDetailResponse {
   allowed_languages?: string[];
   tags?: TagResponse[];
   templates?: StudentTemplateResponse[];
+  /** Maximum submissions allowed for this question */
+  max_submission?: number | null;
 }

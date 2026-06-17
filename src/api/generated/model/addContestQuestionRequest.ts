@@ -18,4 +18,6 @@ export interface AddContestQuestionRequest {
   duration?: number | null;
   /** Points awarded for solving this question (optional, defaults to 100) */
   score?: number | null;
+  /** Maximum submissions allowed for this question (optional) */
+  max_submission?: number | null;
 }

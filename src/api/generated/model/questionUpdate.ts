@@ -19,4 +19,6 @@ export interface QuestionUpdate {
   templates?: QuestionTemplateCreate[] | null;
   time_limit_ms?: number | null;
   memory_limit_mb?: number | null;
+  /** Maximum submissions allowed for this question */
+  max_submission?: number | null;
 }

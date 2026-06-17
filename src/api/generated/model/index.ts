@@ -120,6 +120,7 @@ export * from './contestUpdate';
 export * from './draftCodeRunRequest';
 export * from './draftTestCase';
 export * from './evaluationResponse';
+export * from './evaluationStatus';
 export * from './evaluationStatusResponse';
 export * from './exceptionResponse';
 export * from './executionStatus';

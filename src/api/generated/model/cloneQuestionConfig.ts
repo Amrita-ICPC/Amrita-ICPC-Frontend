@@ -13,4 +13,6 @@ export interface CloneQuestionConfig {
   question_id: string;
   score?: number | null;
   duration?: number | null;
+  /** Maximum submissions allowed for this question */
+  max_submission?: number | null;
 }

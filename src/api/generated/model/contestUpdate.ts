@@ -52,4 +52,6 @@ export interface ContestUpdate {
   participation_type?: ContestTeamParticipationType | null;
   /** Whether to evaluate submissions immediately on submit */
   evaluate_on_submit?: boolean | null;
+  /** Maximum submissions allowed per question */
+  max_submission_per_question?: number | null;
 }

@@ -56,6 +56,8 @@ export interface ContestCreate {
   participation_type?: ContestTeamParticipationType;
   /** Whether to evaluate submissions immediately on submit */
   evaluate_on_submit?: boolean;
+  /** Maximum submissions allowed per question */
+  max_submission_per_question?: number | null;
   /** List of audience IDs to link to this contest */
   audience_ids?: string[];
 }

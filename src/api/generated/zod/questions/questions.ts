@@ -446,7 +446,8 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchBody = zod.object({
   "solution_code": zod.union([zod.string(),zod.null()]).optional()
 })),zod.null()]).optional(),
   "time_limit_ms": zod.union([zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin),zod.null()]).optional(),
-  "memory_limit_mb": zod.union([zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional()
+  "memory_limit_mb": zod.union([zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional(),
+  "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
 })
 
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseSuccessDefault = true;

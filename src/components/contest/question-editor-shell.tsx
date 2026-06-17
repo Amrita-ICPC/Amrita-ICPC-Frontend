@@ -340,6 +340,8 @@ export function QuestionEditorShell({
                                                     setScore={metadata.setScore}
                                                     duration={metadata.duration}
                                                     setDuration={metadata.setDuration}
+                                                    maxSubmission={metadata.maxSubmission}
+                                                    setMaxSubmission={metadata.setMaxSubmission}
                                                     allowedLanguages={metadata.allowedLanguages}
                                                     setAllowedLanguages={
                                                         metadata.setAllowedLanguages

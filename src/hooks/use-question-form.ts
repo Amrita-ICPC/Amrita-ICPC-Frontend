@@ -13,6 +13,7 @@ export function useQuestionForm() {
     const [memoryLimit, setMemoryLimit] = useState(256);
     const [score, setScore] = useState(100);
     const [duration, setDuration] = useState("");
+    const [maxSubmission, setMaxSubmission] = useState("");
     const [allowedLanguages, setAllowedLanguages] = useState<number[]>([]); // Initialize empty to avoid invalid IDs
     const [tags, setTags] = useState<string[]>([]);
 
@@ -41,6 +42,7 @@ export function useQuestionForm() {
         setMemoryLimit(data.memory_limit_mb ?? 256);
         setScore((data as any).score ?? 100);
         setDuration((data as any).duration?.toString() ?? "");
+        setMaxSubmission((data as any).max_submission?.toString() ?? "");
 
         // Parse question_text
         try {
@@ -122,12 +124,24 @@ export function useQuestionForm() {
             setScore,
             duration,
             setDuration,
+            maxSubmission,
+            setMaxSubmission,
             allowedLanguages,
             setAllowedLanguages,
             tags,
             setTags,
         }),
-        [title, difficulty, timeLimit, memoryLimit, score, duration, allowedLanguages, tags],
+        [
+            title,
+            difficulty,
+            timeLimit,
+            memoryLimit,
+            score,
+            duration,
+            maxSubmission,
+            allowedLanguages,
+            tags,
+        ],
     );
 
     const contentObj = useMemo(
