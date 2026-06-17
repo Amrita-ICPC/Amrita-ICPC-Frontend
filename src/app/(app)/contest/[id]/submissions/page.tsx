@@ -12,7 +12,7 @@ export default async function ContestSubmissionsPage({
     params: Promise<{ id: string }>;
     searchParams?: Promise<SearchParams>;
 }) {
-    const [{ id }] = await Promise.all([params, searchParams]);
+    const { id } = await params;
 
     return (
         <div className="flex h-full flex-col">
