@@ -1790,6 +1790,56 @@ export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetResponse = zo
 })
 
 /**
+ * Compute and persist team member scores for a contest.
+
+Calculates each member's best score per question, aggregates totals,
+and persists to ContestTeamProgress. Subsequent leaderboard calls
+use these stored scores for efficient ranking.
+
+Args:
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    user_id: Authenticated user ID.
+    service: Injected domain service.
+
+Returns:
+    APIResponse[MessageResponse]: Confirmation message.
+
+Raises:
+    ContestNotFoundError: If the contest is not found.
+    PermissionDeniedError: If the user lacks permission to manage the contest.
+ * @summary Compute and persist team scores
+ */
+export const ComputeTeamScoresApiV1ContestsContestIdScoresPostParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const computeTeamScoresApiV1ContestsContestIdScoresPostResponseSuccessDefault = true;
+export const computeTeamScoresApiV1ContestsContestIdScoresPostResponseStatusDefault = 200;
+export const computeTeamScoresApiV1ContestsContestIdScoresPostResponseMessageDefault = `Success`;
+
+export const ComputeTeamScoresApiV1ContestsContestIdScoresPostResponse = zod.object({
+  "success": zod.boolean().default(computeTeamScoresApiV1ContestsContestIdScoresPostResponseSuccessDefault),
+  "status": zod.number().default(computeTeamScoresApiV1ContestsContestIdScoresPostResponseStatusDefault),
+  "message": zod.string().default(computeTeamScoresApiV1ContestsContestIdScoresPostResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "message": zod.string().describe('Response message')
+}).describe('Schema for message response.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Get the contest leaderboard standings.
 
 Only accessible by authorized users with read permissions.

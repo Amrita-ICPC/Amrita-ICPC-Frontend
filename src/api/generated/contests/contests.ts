@@ -2368,6 +2368,85 @@ export function useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet<TData 
 
 
 /**
+ * Compute and persist team member scores for a contest.
+
+Calculates each member's best score per question, aggregates totals,
+and persists to ContestTeamProgress. Subsequent leaderboard calls
+use these stored scores for efficient ranking.
+
+Args:
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    user_id: Authenticated user ID.
+    service: Injected domain service.
+
+Returns:
+    APIResponse[MessageResponse]: Confirmation message.
+
+Raises:
+    ContestNotFoundError: If the contest is not found.
+    PermissionDeniedError: If the user lacks permission to manage the contest.
+ * @summary Compute and persist team scores
+ */
+export const computeTeamScoresApiV1ContestsContestIdScoresPost = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseMessageResponse>(
+      {url: `/api/v1/contests/${contestId}/scores`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getComputeTeamScoresApiV1ContestsContestIdScoresPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>, TError,{contestId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>, TError,{contestId: string}, TContext> => {
+
+const mutationKey = ['computeTeamScoresApiV1ContestsContestIdScoresPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>, {contestId: string}> = (props) => {
+          const {contestId} = props ?? {};
+
+          return  computeTeamScoresApiV1ContestsContestIdScoresPost(contestId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ComputeTeamScoresApiV1ContestsContestIdScoresPostMutationResult = NonNullable<Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>>
+
+    export type ComputeTeamScoresApiV1ContestsContestIdScoresPostMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Compute and persist team scores
+ */
+export const useComputeTeamScoresApiV1ContestsContestIdScoresPost = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>, TError,{contestId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof computeTeamScoresApiV1ContestsContestIdScoresPost>>,
+        TError,
+        {contestId: string},
+        TContext
+      > => {
+      return useMutation(getComputeTeamScoresApiV1ContestsContestIdScoresPostMutationOptions(options), queryClient);
+    }
+    /**
  * Get the contest leaderboard standings.
 
 Only accessible by authorized users with read permissions.
