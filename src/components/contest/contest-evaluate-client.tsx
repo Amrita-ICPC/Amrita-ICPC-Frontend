@@ -1,13 +1,23 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, Cpu, Loader2, Play, RefreshCw, Trophy } from "lucide-react";
+import {
+    AlertTriangle,
+    Calculator,
+    CheckCircle2,
+    Cpu,
+    Loader2,
+    Play,
+    RefreshCw,
+    Trophy,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
     getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey,
     getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey,
+    useComputeTeamScoresApiV1ContestsContestIdScoresPost,
     useEvaluateContestApiV1ContestsContestIdEvaluationPost,
     useGetContestApiV1ContestsContestIdGet,
     useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet,
@@ -159,6 +169,29 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
     const handleStartEvaluation = () => {
         setElapsedSeconds(0);
         evaluateMutation.mutate({ contestId });
+    };
+
+    const computeScoresMutation = useComputeTeamScoresApiV1ContestsContestIdScoresPost({
+        mutation: {
+            onSuccess: () => {
+                toast.success("Team scores computed successfully!");
+                void queryClient.invalidateQueries({
+                    queryKey:
+                        getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey(
+                            contestId,
+                        ),
+                });
+            },
+            onError: (err: any) => {
+                const msg =
+                    err?.response?.data?.message || err?.message || "Failed to compute scores";
+                toast.error(msg);
+            },
+        },
+    });
+
+    const handleComputeScores = () => {
+        computeScoresMutation.mutate({ contestId });
     };
 
     const formatTime = (secs: number) => {
@@ -364,6 +397,20 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     ).toLocaleTimeString()}
                                 </span>
                             )}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleComputeScores}
+                                disabled={computeScoresMutation.isPending || isLeaderboardLoading}
+                                className="h-8 gap-1.5"
+                            >
+                                {computeScoresMutation.isPending ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                    <Calculator className="h-3.5 w-3.5" />
+                                )}
+                                Compute Scores
+                            </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
