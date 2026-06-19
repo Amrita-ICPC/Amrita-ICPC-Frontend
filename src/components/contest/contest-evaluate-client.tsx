@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertTriangle,
+    BarChart3,
     Calculator,
     CheckCircle2,
     Cpu,
@@ -11,6 +12,7 @@ import {
     RefreshCw,
     Trophy,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -86,7 +88,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
     // Extract list of questions from standings to build table columns dynamically
     const questionsList = useMemo(() => {
         if (!leaderboardData?.data?.standings?.length) return [];
-        return leaderboardData.data.standings[0].question_details || [];
     }, [leaderboardData]);
 
     // Poll status using standard React useEffect with interval if active
@@ -411,21 +412,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                 )}
                                 Compute Scores
                             </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => refetchLeaderboard()}
-                                disabled={isLeaderboardLoading}
-                                className="h-8 gap-1.5"
-                            >
-                                <RefreshCw
-                                    className={cn(
-                                        "h-3.5 w-3.5",
-                                        isLeaderboardLoading && "animate-spin",
-                                    )}
-                                />
-                                Refresh
-                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -458,22 +444,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                             <th className="py-3 px-4 text-center w-28">
                                                 Penalty (m)
                                             </th>
-                                            {questionsList.map((q, idx) => (
-                                                <th
-                                                    key={q.question_id}
-                                                    className="py-3 px-2 text-center min-w-[70px] max-w-[100px]"
-                                                    title={q.question_title}
-                                                >
-                                                    <div className="flex flex-col items-center">
-                                                        <span className="font-mono text-sm text-foreground">
-                                                            {String.fromCharCode(65 + idx)}
-                                                        </span>
-                                                        <span className="text-[9px] font-medium text-muted-foreground truncate max-w-[80px]">
-                                                            {q.question_title}
-                                                        </span>
-                                                    </div>
-                                                </th>
-                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/40">
@@ -500,7 +470,13 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 font-semibold text-sm text-foreground">
-                                                    {row.team_name}
+                                                    <Link
+                                                        href={`/contest/${contestId}/evaluate/${row.team_id}`}
+                                                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+                                                    >
+                                                        <BarChart3 className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                                                        {row.team_name}
+                                                    </Link>
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
                                                     <span className="inline-flex h-7 px-2.5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
@@ -510,75 +486,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                 <td className="py-3 px-4 text-center font-mono text-xs text-muted-foreground">
                                                     {Math.floor((row.total_penalty || 0) / 60)}
                                                 </td>
-                                                {questionsList.map((q) => {
-                                                    const detail = row.question_details?.find(
-                                                        (qd) => qd.question_id === q.question_id,
-                                                    );
-                                                    if (!detail) {
-                                                        return (
-                                                            <td
-                                                                key={q.question_id}
-                                                                className="py-3 px-2 text-center"
-                                                            >
-                                                                <div className="flex items-center justify-center rounded border border-dashed border-border/40 h-10 w-12 mx-auto text-muted-foreground/30">
-                                                                    <span className="text-xs">
-                                                                        -
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    }
-                                                    if (detail.is_solved) {
-                                                        return (
-                                                            <td
-                                                                key={q.question_id}
-                                                                className="py-3 px-2 text-center"
-                                                            >
-                                                                <div className="flex flex-col items-center justify-center rounded bg-success/10 border border-success/20 text-success h-10 w-12 mx-auto">
-                                                                    <span className="text-xs font-bold">
-                                                                        +{detail.attempts || 1}
-                                                                    </span>
-                                                                    {detail.time_taken_seconds !==
-                                                                        null &&
-                                                                        detail.time_taken_seconds !==
-                                                                            undefined && (
-                                                                            <span className="text-[9px] opacity-80 font-mono">
-                                                                                {Math.floor(
-                                                                                    detail.time_taken_seconds /
-                                                                                        60,
-                                                                                )}
-                                                                                m
-                                                                            </span>
-                                                                        )}
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    }
-                                                    if (detail.attempts && detail.attempts > 0) {
-                                                        return (
-                                                            <td
-                                                                key={q.question_id}
-                                                                className="py-3 px-2 text-center"
-                                                            >
-                                                                <div className="flex flex-col items-center justify-center rounded bg-destructive/10 border border-destructive/20 text-destructive h-10 w-12 mx-auto">
-                                                                    <span className="text-xs font-bold">
-                                                                        -{detail.attempts}
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    }
-                                                    return (
-                                                        <td
-                                                            key={q.question_id}
-                                                            className="py-3 px-2 text-center"
-                                                        >
-                                                            <div className="flex items-center justify-center rounded border border-dashed border-border/40 h-10 w-12 mx-auto text-muted-foreground/30">
-                                                                <span className="text-xs">-</span>
-                                                            </div>
-                                                        </td>
-                                                    );
-                                                })}
                                             </tr>
                                         ))}
                                     </tbody>

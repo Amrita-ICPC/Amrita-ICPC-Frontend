@@ -211,6 +211,8 @@ export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTimeLim
 
 export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMemoryLimitMbOneExclusiveMin = 0;
 
+export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMaxSubmissionOneExclusiveMin = 0;
+
 
 
 export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBody = zod.object({
@@ -234,7 +236,7 @@ export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBody = zod.
 })),zod.null()]).optional(),
   "time_limit_ms": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTimeLimitMsOneExclusiveMin),zod.null()]).optional(),
   "memory_limit_mb": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMemoryLimitMbOneExclusiveMin),zod.null()]).optional(),
-  "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
+  "max_submission": zod.union([zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyMaxSubmissionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed for this question')
 })
 
 export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutResponse = zod.unknown()
