@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ContestMode } from './contestMode';
+import type { ContestResultVisibility } from './contestResultVisibility';
 import type { ContestRunStatus } from './contestRunStatus';
 import type { ContestStatus } from './contestStatus';
 import type { ContestTeamParticipationType } from './contestTeamParticipationType';
@@ -61,6 +62,8 @@ export interface ContestDetailResponse {
   evaluate_on_submit?: boolean;
   /** Maximum submissions allowed per question */
   max_submission_per_question?: number | null;
+  /** Result visibility configuration for this contest */
+  result_visibility?: ContestResultVisibility;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */

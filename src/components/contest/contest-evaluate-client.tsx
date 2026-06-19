@@ -10,13 +10,16 @@ import {
     Loader2,
     Play,
     RefreshCw,
+    Search,
     Trophy,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
+    getGetContestApiV1ContestsContestIdGetQueryKey,
     getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey,
     getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey,
     useComputeTeamScoresApiV1ContestsContestIdScoresPost,
@@ -24,11 +27,24 @@ import {
     useGetContestApiV1ContestsContestIdGet,
     useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet,
     useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet,
+    usePublishResultsApiV1ContestsContestIdPublishResultsPost,
 } from "@/api/generated/contests/contests";
+import { ContestResultVisibility } from "@/api/generated/model";
+import { AppPagination } from "@/components/shared/app-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 
 import { AsyncStateHandler } from "../shared/async-state-handler";
@@ -39,6 +55,52 @@ interface ContestEvaluateClientProps {
 
 export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps) {
     const queryClient = useQueryClient();
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const searchParam = searchParams.get("search") || "";
+    const sortParam = searchParams.get("sort") || "desc";
+    const pageParam = parseInt(searchParams.get("page") || "1", 10);
+    const pageSizeParam = 50;
+
+    const [searchTerm, setSearchTerm] = useState(searchParam);
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    // Sync search input with URL search params when debounced search changes
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        const currentSearch = searchParams.get("search") || "";
+
+        if (debouncedSearch) {
+            params.set("search", debouncedSearch);
+        } else {
+            params.delete("search");
+        }
+
+        if (currentSearch !== debouncedSearch) {
+            params.set("page", "1");
+        }
+
+        const newQueryString = params.toString();
+        if (newQueryString !== searchParams.toString()) {
+            router.replace(`${pathname}?${newQueryString}`);
+        }
+    }, [debouncedSearch, pathname, router, searchParams]);
+
+    const handleSortChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("sort", value);
+        params.set("page", "1");
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
+    const handlePageChange = (newPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", String(newPage));
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
     const [evaluationId, setEvaluationId] = useState<string | null>(() => {
         if (typeof window !== "undefined") {
             return localStorage.getItem(`contest_evaluation_active_${contestId}`);
@@ -69,11 +131,17 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
         !!evaluationId && (!statusData || status === "PENDING" || status === "RUNNING");
 
     // Fetch contest leaderboard standings
-    const {
-        data: leaderboardData,
-        isLoading: isLeaderboardLoading,
-        refetch: refetchLeaderboard,
-    } = useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet(contestId);
+    const { data: leaderboardData, isLoading: isLeaderboardLoading } =
+        useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet(contestId, {
+            search: searchParam || undefined,
+            sort_order: sortParam,
+            page: pageParam,
+            page_size: pageSizeParam,
+        });
+
+    const pagination = leaderboardData?.pagination;
+    const totalPages = pagination?.total_pages || 1;
+    const currentPage = pagination?.page || 1;
 
     // Invalidate and refetch leaderboard when evaluation finishes successfully
     useEffect(() => {
@@ -84,11 +152,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
             });
         }
     }, [status, contestId, queryClient]);
-
-    // Extract list of questions from standings to build table columns dynamically
-    const questionsList = useMemo(() => {
-        if (!leaderboardData?.data?.standings?.length) return [];
-    }, [leaderboardData]);
 
     // Poll status using standard React useEffect with interval if active
     useEffect(() => {
@@ -193,6 +256,30 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
 
     const handleComputeScores = () => {
         computeScoresMutation.mutate({ contestId });
+    };
+
+    const publishResultsMutation = usePublishResultsApiV1ContestsContestIdPublishResultsPost({
+        mutation: {
+            onSuccess: (res, variables) => {
+                const visibility = variables.params.visibility;
+                toast.success(`Results visibility updated to ${visibility} successfully!`);
+                void queryClient.invalidateQueries({
+                    queryKey: getGetContestApiV1ContestsContestIdGetQueryKey(contestId),
+                });
+            },
+            onError: (err: any) => {
+                const msg =
+                    err?.response?.data?.message || err?.message || "Failed to update visibility";
+                toast.error(msg);
+            },
+        },
+    });
+
+    const handlePublishResultsChange = (visibility: ContestResultVisibility) => {
+        publishResultsMutation.mutate({
+            contestId,
+            params: { visibility },
+        });
     };
 
     const formatTime = (secs: number) => {
@@ -339,7 +426,71 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                         </div>
 
                         {/* Right side: Action Controls */}
-                        <div className="flex flex-row items-center gap-3 shrink-0 self-start md:self-auto">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 shrink-0 self-start md:self-auto">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    Results Visibility
+                                </span>
+                                <RadioGroup
+                                    value={
+                                        contest?.result_visibility ?? ContestResultVisibility.HIDDEN
+                                    }
+                                    onValueChange={(val) =>
+                                        handlePublishResultsChange(val as ContestResultVisibility)
+                                    }
+                                    disabled={publishResultsMutation.isPending || isContestLoading}
+                                    className="flex flex-wrap items-center gap-4 py-1"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <RadioGroupItem
+                                            value={ContestResultVisibility.HIDDEN}
+                                            id="v-hidden"
+                                        />
+                                        <label
+                                            htmlFor="v-hidden"
+                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
+                                        >
+                                            Hidden
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <RadioGroupItem
+                                            value={ContestResultVisibility.LEADERBOARD_ONLY}
+                                            id="v-leaderboard"
+                                        />
+                                        <label
+                                            htmlFor="v-leaderboard"
+                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
+                                        >
+                                            Leaderboard Only
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <RadioGroupItem
+                                            value={ContestResultVisibility.TEAM_RESULTS_ONLY}
+                                            id="v-team"
+                                        />
+                                        <label
+                                            htmlFor="v-team"
+                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
+                                        >
+                                            Team Results Only
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <RadioGroupItem
+                                            value={ContestResultVisibility.FULL_RESULTS}
+                                            id="v-full"
+                                        />
+                                        <label
+                                            htmlFor="v-full"
+                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
+                                        >
+                                            Full Results
+                                        </label>
+                                    </div>
+                                </RadioGroup>
+                            </div>
                             {!evaluationId ? (
                                 <Button
                                     onClick={handleStartEvaluation}
@@ -414,6 +565,29 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                             </Button>
                         </div>
                     </CardHeader>
+                    <div className="flex flex-col gap-3 px-6 py-3 border-b border-border/40 sm:flex-row sm:items-center sm:justify-between bg-muted/5">
+                        <div className="relative flex-1 max-w-xs">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Search teams..."
+                                className="pl-8 h-9"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Select value={sortParam} onValueChange={handleSortChange}>
+                                <SelectTrigger className="w-[140px] h-9">
+                                    <SelectValue placeholder="Sort Order" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="desc">Highest Score</SelectItem>
+                                    <SelectItem value="asc">Lowest Score</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                     <CardContent className="p-0">
                         {isLeaderboardLoading && !leaderboardData ? (
                             <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -434,63 +608,80 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                 </p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-border bg-muted/20 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                                            <th className="py-3 px-4 text-center w-14">Rank</th>
-                                            <th className="py-3 px-4 min-w-[200px]">Team Name</th>
-                                            <th className="py-3 px-4 text-center w-20">Solved</th>
-                                            <th className="py-3 px-4 text-center w-28">
-                                                Penalty (m)
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/40">
-                                        {leaderboardData.data.standings.map((row) => (
-                                            <tr
-                                                key={row.team_id}
-                                                className="group hover:bg-muted/30 transition-colors align-middle"
-                                            >
-                                                <td className="py-3 px-4">
-                                                    <div
-                                                        className={cn(
-                                                            "h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto border",
-                                                            row.rank === 1 &&
-                                                                "border-amber-400 bg-amber-500/10 text-amber-500 dark:text-amber-450 shadow-sm",
-                                                            row.rank === 2 &&
-                                                                "border-slate-350 bg-slate-350/10 text-slate-500 dark:text-slate-400 shadow-sm",
-                                                            row.rank === 3 &&
-                                                                "border-orange-400 bg-orange-500/10 text-orange-500 dark:text-orange-450 shadow-sm",
-                                                            row.rank > 3 &&
-                                                                "border-border bg-muted/40 text-muted-foreground",
-                                                        )}
-                                                    >
-                                                        {row.rank}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4 font-semibold text-sm text-foreground">
-                                                    <Link
-                                                        href={`/contest/${contestId}/evaluate/${row.team_id}`}
-                                                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-                                                    >
-                                                        <BarChart3 className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                                                        {row.team_name}
-                                                    </Link>
-                                                </td>
-                                                <td className="py-3 px-4 text-center">
-                                                    <span className="inline-flex h-7 px-2.5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
-                                                        {row.total_score}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-4 text-center font-mono text-xs text-muted-foreground">
-                                                    {Math.floor((row.total_penalty || 0) / 60)}
-                                                </td>
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-border bg-muted/20 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+                                                <th className="py-3 px-4 text-center w-14">Rank</th>
+                                                <th className="py-3 px-4 min-w-[200px]">
+                                                    Team Name
+                                                </th>
+                                                <th className="py-3 px-4 text-center w-20">
+                                                    Solved
+                                                </th>
+                                                <th className="py-3 px-4 text-center w-28">
+                                                    Penalty (m)
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/40">
+                                            {leaderboardData.data.standings.map((row) => (
+                                                <tr
+                                                    key={row.team_id}
+                                                    className="group hover:bg-muted/30 transition-colors align-middle"
+                                                >
+                                                    <td className="py-3 px-4">
+                                                        <div
+                                                            className={cn(
+                                                                "h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto border",
+                                                                row.rank === 1 &&
+                                                                    "border-amber-400 bg-amber-500/10 text-amber-500 dark:text-amber-450 shadow-sm",
+                                                                row.rank === 2 &&
+                                                                    "border-slate-350 bg-slate-350/10 text-slate-500 dark:text-slate-400 shadow-sm",
+                                                                row.rank === 3 &&
+                                                                    "border-orange-400 bg-orange-500/10 text-orange-500 dark:text-orange-450 shadow-sm",
+                                                                row.rank > 3 &&
+                                                                    "border-border bg-muted/40 text-muted-foreground",
+                                                            )}
+                                                        >
+                                                            {row.rank}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3 px-4 font-semibold text-sm text-foreground">
+                                                        <Link
+                                                            href={`/contest/${contestId}/evaluate/${row.team_id}`}
+                                                            className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+                                                        >
+                                                            <BarChart3 className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                                                            {row.team_name}
+                                                        </Link>
+                                                    </td>
+                                                    <td className="py-3 px-4 text-center">
+                                                        <span className="inline-flex h-7 px-2.5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
+                                                            {row.total_score}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-4 text-center font-mono text-xs text-muted-foreground">
+                                                        {Math.floor((row.total_penalty || 0) / 60)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {pagination && pagination.total_pages > 1 && (
+                                    <div className="border-t border-border/40 p-4 flex justify-end">
+                                        <AppPagination
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            hasPrevious={pagination.has_previous ?? false}
+                                            hasNext={pagination.has_next ?? false}
+                                            onPageChange={handlePageChange}
+                                        />
+                                    </div>
+                                )}
+                            </>
                         )}
                     </CardContent>
                 </Card>
