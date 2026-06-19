@@ -342,6 +342,78 @@ export const GetTeamApiV1ContestsContestIdTeamsTeamIdGetResponse = zod.object({
 })
 
 /**
+ * Get score, participation, flag, and submission status analytics for a contest team.
+ * @summary Get contest team analytics
+ */
+export const GetContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid()
+})
+
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseSuccessDefault = true;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseStatusDefault = 200;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseMessageDefault = `Success`;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneScoreDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemScoreDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsFlaggedDefault = false;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsParticipatedDefault = false;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsLeaderDefault = false;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneTotalSubmissionsDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneAcceptedSubmissionDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneWrongAnswerDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneTimeLimitExceededDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneRuntimeErrorDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneCompilationErrorDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMemoryLimitExceededDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneSystemErrorDefault = 0;
+export const getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOnePendingSubmissionDefault = 0;
+
+export const GetContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_team_id": zod.uuid(),
+  "name": zod.string(),
+  "score": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneScoreDefault),
+  "members": zod.array(zod.object({
+  "id": zod.uuid(),
+  "contest_team_member_id": zod.uuid(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "score": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemScoreDefault),
+  "is_flagged": zod.boolean().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsFlaggedDefault),
+  "flagged_reason": zod.union([zod.string(),zod.null()]).optional(),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "is_participated": zod.boolean().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsParticipatedDefault),
+  "is_leader": zod.boolean().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMembersItemIsLeaderDefault)
+})).optional(),
+  "total_submissions": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneTotalSubmissionsDefault),
+  "accepted_submission": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneAcceptedSubmissionDefault),
+  "wrong_answer": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneWrongAnswerDefault),
+  "time_limit_exceeded": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneTimeLimitExceededDefault),
+  "runtime_error": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneRuntimeErrorDefault),
+  "compilation_error": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneCompilationErrorDefault),
+  "memory_limit_exceeded": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneMemoryLimitExceededDefault),
+  "system_error": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOneSystemErrorDefault),
+  "pending_submission": zod.number().default(getContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGetResponseDataOnePendingSubmissionDefault)
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Get a paginated list of members in a specific team.
 
 Args:
@@ -393,6 +465,192 @@ export const GetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetRes
   "role": zod.string(),
   "is_leader": zod.boolean().default(getTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGetResponseDataOneItemIsLeaderDefault)
 }).describe('Schema for team member response.\n\nRepresents a user who is part of a team with essential information.\n\nAttributes:\n    id: Unique identifier for the user.\n    user_id: External user identifier (e.g., student ID).\n    name: Full name of the user.\n    email: Email address of the user.\n    role: Role of the user in the system.\n    is_leader: Whether this member is the team leader.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get member profile, contest session timing, and aggregate analytics.
+ * @summary Get contest team member detail
+ */
+export const GetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid()
+})
+
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseSuccessDefault = true;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseStatusDefault = 200;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsLeaderDefault = false;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsParticipatedDefault = false;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneScoreDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneExtraTimeSecondsDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneRemainingTimeSecondsDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsFlaggedDefault = false;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTotalDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsAcceptedDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsWrongAnswerDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTimeLimitExceededDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsRuntimeErrorDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsMemoryLimitExceededDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsCompilationErrorDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsSystemErrorDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsPendingDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsAttemptedDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsSolvedDefault = 0;
+export const getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsUnsolvedDefault = 0;
+
+export const GetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_team_member_id": zod.uuid(),
+  "user_id": zod.uuid(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "is_leader": zod.boolean().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsLeaderDefault),
+  "is_participated": zod.boolean().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsParticipatedDefault),
+  "score": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneScoreDefault),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "base_end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "extra_time_seconds": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneExtraTimeSecondsDefault),
+  "remaining_time_seconds": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneRemainingTimeSecondsDefault),
+  "is_flagged": zod.boolean().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneIsFlaggedDefault),
+  "flagged_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional(),
+  "flagged_reason": zod.union([zod.string(),zod.null()]).optional(),
+  "submission_statistics": zod.object({
+  "total": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTotalDefault),
+  "accepted": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsAcceptedDefault),
+  "wrong_answer": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsWrongAnswerDefault),
+  "time_limit_exceeded": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTimeLimitExceededDefault),
+  "runtime_error": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsRuntimeErrorDefault),
+  "memory_limit_exceeded": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsMemoryLimitExceededDefault),
+  "compilation_error": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsCompilationErrorDefault),
+  "system_error": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsSystemErrorDefault),
+  "pending": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsPendingDefault)
+}).optional(),
+  "question_statistics": zod.object({
+  "attempted": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsAttemptedDefault),
+  "solved": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsSolvedDefault),
+  "unsolved": zod.number().default(getContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsUnsolvedDefault)
+}).optional()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get all contest questions with submission counts for a contest team member.
+ * @summary Get contest team member question analytics
+ */
+export const GetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetParams = zod.object({
+  "contest_team_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid()
+})
+
+export const getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseSuccessDefault = true;
+export const getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseStatusDefault = 200;
+export const getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseDataOneItemTotalSubmissionDefault = 0;
+export const getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseDataOneItemAcceptedSubmissionDefault = 0;
+
+export const GetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "question_id": zod.uuid(),
+  "title": zod.string(),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),
+  "time_limit_ms": zod.number(),
+  "memory_limit_mb": zod.number(),
+  "total_submission": zod.number().default(getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseDataOneItemTotalSubmissionDefault),
+  "accepted_submission": zod.number().default(getContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetResponseDataOneItemAcceptedSubmissionDefault)
+})),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get submissions and submission statistics for one contest team member question.
+ * @summary Get contest team member question submissions
+ */
+export const GetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault = true;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault = 200;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTotalDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsAcceptedDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsWrongAnswerDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTimeLimitExceededDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsRuntimeErrorDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsCompilationErrorDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemScoreDefault = 0;
+
+export const GetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "question_id": zod.uuid(),
+  "question_title": zod.string(),
+  "statistics": zod.object({
+  "total": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTotalDefault),
+  "accepted": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsAcceptedDefault),
+  "wrong_answer": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsWrongAnswerDefault),
+  "time_limit_exceeded": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTimeLimitExceededDefault),
+  "runtime_error": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsRuntimeErrorDefault),
+  "compilation_error": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsCompilationErrorDefault)
+}).optional(),
+  "submissions": zod.array(zod.object({
+  "submission_id": zod.uuid(),
+  "status": zod.union([zod.enum(['SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Enumeration of submission evaluation statuses.\n\nRepresents the lifecycle and final verdict of a code submission\nduring online judging.\n\nAttributes:\n    AC: Accepted; all test cases passed.\n    WA: Wrong Answer; one or more test cases failed.\n    TLE: Time Limit Exceeded during execution.\n    RE: Runtime Error occurred while running the submission.\n    CE: Compilation Error prevented execution.\n    MLE: Memory Limit Exceeded during execution.'),zod.null()]).optional(),
+  "score": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemScoreDefault),
+  "language": zod.string(),
+  "created_at": zod.iso.datetime({"offset":true}),
+  "execution_time": zod.union([zod.number(),zod.null()]).optional(),
+  "memory": zod.union([zod.number(),zod.null()]).optional()
+})).optional()
+}),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
