@@ -58,6 +58,10 @@ export interface StudentContestAvailableResponse {
   duration?: number | null;
   /** Whether to show leaderboard during the contest */
   show_leaderboard_during_contest: boolean;
+  /** Whether the leaderboard is visible once results are published */
+  show_leaderboard: boolean;
+  /** Whether a team's own submissions are visible once results are published */
+  show_team_submissions: boolean;
   /** Participation type for team contests */
   participation_type: ContestTeamParticipationType;
 }

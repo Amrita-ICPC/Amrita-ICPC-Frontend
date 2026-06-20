@@ -28,15 +28,14 @@ import {
     useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet,
     useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet,
     usePublishResultsApiV1ContestsContestIdPublishResultsPost,
+    useUpdateContestApiV1ContestsContestIdPatch,
 } from "@/api/generated/contests/contests";
-import { ContestResultVisibility } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
     Select,
     SelectContent,
@@ -44,6 +43,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 
@@ -261,24 +261,60 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
     const publishResultsMutation = usePublishResultsApiV1ContestsContestIdPublishResultsPost({
         mutation: {
             onSuccess: (res, variables) => {
-                const visibility = variables.params.visibility;
-                toast.success(`Results visibility updated to ${visibility} successfully!`);
+                const isPublished = variables.params.publish;
+                toast.success(
+                    isPublished
+                        ? "Results published successfully!"
+                        : "Results unpublished successfully!",
+                );
                 void queryClient.invalidateQueries({
                     queryKey: getGetContestApiV1ContestsContestIdGetQueryKey(contestId),
                 });
             },
             onError: (err: any) => {
                 const msg =
-                    err?.response?.data?.message || err?.message || "Failed to update visibility";
+                    err?.response?.data?.message ||
+                    err?.message ||
+                    "Failed to update publication status";
                 toast.error(msg);
             },
         },
     });
 
-    const handlePublishResultsChange = (visibility: ContestResultVisibility) => {
+    const updateContestMutation = useUpdateContestApiV1ContestsContestIdPatch({
+        mutation: {
+            onSuccess: () => {
+                toast.success("Contest settings updated successfully!");
+                void queryClient.invalidateQueries({
+                    queryKey: getGetContestApiV1ContestsContestIdGetQueryKey(contestId),
+                });
+            },
+            onError: (err: any) => {
+                const msg =
+                    err?.response?.data?.message ||
+                    err?.message ||
+                    "Failed to update contest settings";
+                toast.error(msg);
+            },
+        },
+    });
+
+    const handlePublishResultsToggle = (publish: boolean) => {
         publishResultsMutation.mutate({
             contestId,
-            params: { visibility },
+            params: { publish },
+        });
+    };
+
+    const handleSettingChange = (
+        field: "show_leaderboard" | "show_team_submissions",
+        value: boolean,
+    ) => {
+        updateContestMutation.mutate({
+            contestId,
+            data: {
+                [field]: value,
+            },
         });
     };
 
@@ -426,76 +462,12 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                         </div>
 
                         {/* Right side: Action Controls */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 shrink-0 self-start md:self-auto">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                    Results Visibility
-                                </span>
-                                <RadioGroup
-                                    value={
-                                        contest?.result_visibility ?? ContestResultVisibility.HIDDEN
-                                    }
-                                    onValueChange={(val) =>
-                                        handlePublishResultsChange(val as ContestResultVisibility)
-                                    }
-                                    disabled={publishResultsMutation.isPending || isContestLoading}
-                                    className="flex flex-wrap items-center gap-4 py-1"
-                                >
-                                    <div className="flex items-center gap-1.5">
-                                        <RadioGroupItem
-                                            value={ContestResultVisibility.HIDDEN}
-                                            id="v-hidden"
-                                        />
-                                        <label
-                                            htmlFor="v-hidden"
-                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
-                                        >
-                                            Hidden
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <RadioGroupItem
-                                            value={ContestResultVisibility.LEADERBOARD_ONLY}
-                                            id="v-leaderboard"
-                                        />
-                                        <label
-                                            htmlFor="v-leaderboard"
-                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
-                                        >
-                                            Leaderboard Only
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <RadioGroupItem
-                                            value={ContestResultVisibility.TEAM_RESULTS_ONLY}
-                                            id="v-team"
-                                        />
-                                        <label
-                                            htmlFor="v-team"
-                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
-                                        >
-                                            Team Results Only
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <RadioGroupItem
-                                            value={ContestResultVisibility.FULL_RESULTS}
-                                            id="v-full"
-                                        />
-                                        <label
-                                            htmlFor="v-full"
-                                            className="text-xs font-semibold leading-none cursor-pointer text-muted-foreground select-none"
-                                        >
-                                            Full Results
-                                        </label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
+                        <div className="flex flex-col items-stretch sm:items-end gap-3 shrink-0 self-start md:self-auto min-w-[200px]">
                             {!evaluationId ? (
                                 <Button
                                     onClick={handleStartEvaluation}
                                     disabled={evaluateMutation.isPending}
-                                    className="px-5 shadow-sm font-semibold h-9"
+                                    className="px-5 shadow-sm font-semibold h-9 w-full sm:w-auto justify-center"
                                 >
                                     {evaluateMutation.isPending ? (
                                         <>
@@ -514,7 +486,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     onClick={handleStartEvaluation}
                                     disabled={evaluateMutation.isPending}
                                     variant="outline"
-                                    className="shadow-sm font-semibold h-9"
+                                    className="shadow-sm font-semibold h-9 w-full sm:w-auto justify-center"
                                 >
                                     {evaluateMutation.isPending ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -524,6 +496,106 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     Run New Evaluation
                                 </Button>
                             )}
+
+                            <div className="flex flex-col gap-3 rounded-lg border border-border/40 bg-card p-4 w-full sm:w-[220px]">
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                                        Results Publication
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-xs font-semibold">Status:</span>
+                                        {contest?.results_published_at ? (
+                                            <Badge
+                                                variant="outline"
+                                                className="bg-emerald-500/10 text-emerald-500 border-transparent font-bold text-[9px] px-1.5 py-0"
+                                            >
+                                                PUBLISHED
+                                            </Badge>
+                                        ) : (
+                                            <Badge
+                                                variant="outline"
+                                                className="bg-amber-500/10 text-amber-500 border-transparent font-bold text-[9px] px-1.5 py-0"
+                                            >
+                                                DRAFT
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {contest?.results_published_at ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handlePublishResultsToggle(false)}
+                                        disabled={
+                                            publishResultsMutation.isPending || isContestLoading
+                                        }
+                                        className="w-full justify-center h-8 font-semibold text-xs border-destructive/25 text-destructive hover:bg-destructive/10"
+                                    >
+                                        {publishResultsMutation.isPending && (
+                                            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                                        )}
+                                        Unpublish Results
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handlePublishResultsToggle(true)}
+                                        disabled={
+                                            publishResultsMutation.isPending || isContestLoading
+                                        }
+                                        className="w-full justify-center h-8 font-semibold text-xs bg-indigo-650 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                                    >
+                                        {publishResultsMutation.isPending && (
+                                            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                                        )}
+                                        Publish Results
+                                    </Button>
+                                )}
+
+                                <div className="border-t border-border/40 pt-2.5 space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <label
+                                            htmlFor="show-leaderboard"
+                                            className="text-[11px] font-semibold text-muted-foreground cursor-pointer select-none"
+                                        >
+                                            Show Leaderboard
+                                        </label>
+                                        <Switch
+                                            id="show-leaderboard"
+                                            checked={!!contest?.show_leaderboard}
+                                            onCheckedChange={(checked) =>
+                                                handleSettingChange("show_leaderboard", checked)
+                                            }
+                                            disabled={
+                                                updateContestMutation.isPending || isContestLoading
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-2">
+                                        <label
+                                            htmlFor="show-submissions"
+                                            className="text-[11px] font-semibold text-muted-foreground cursor-pointer select-none"
+                                        >
+                                            Show Submissions
+                                        </label>
+                                        <Switch
+                                            id="show-submissions"
+                                            checked={!!contest?.show_team_submissions}
+                                            onCheckedChange={(checked) =>
+                                                handleSettingChange(
+                                                    "show_team_submissions",
+                                                    checked,
+                                                )
+                                            }
+                                            disabled={
+                                                updateContestMutation.isPending || isContestLoading
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -623,6 +695,12 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                 <th className="py-3 px-4 text-center w-28">
                                                     Penalty (m)
                                                 </th>
+                                                {contest?.results_published_at !== null &&
+                                                    contest?.results_published_at !== undefined && (
+                                                        <th className="py-3 px-4 text-center w-28">
+                                                            Result
+                                                        </th>
+                                                    )}
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border/40">
@@ -665,6 +743,24 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                                     <td className="py-3 px-4 text-center font-mono text-xs text-muted-foreground">
                                                         {Math.floor((row.total_penalty || 0) / 60)}
                                                     </td>
+                                                    {contest?.results_published_at !== null &&
+                                                        contest?.results_published_at !==
+                                                            undefined && (
+                                                            <td className="py-3 px-4 text-center">
+                                                                <Button
+                                                                    asChild
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-8 shadow-sm font-semibold"
+                                                                >
+                                                                    <Link
+                                                                        href={`/contest/${contestId}/evaluate/${row.team_id}`}
+                                                                    >
+                                                                        Result
+                                                                    </Link>
+                                                                </Button>
+                                                            </td>
+                                                        )}
                                                 </tr>
                                             ))}
                                         </tbody>

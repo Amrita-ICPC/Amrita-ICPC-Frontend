@@ -58,8 +58,14 @@ export interface StudentContestDetailsResponse {
   duration?: number | null;
   /** Whether to show leaderboard during the contest */
   show_leaderboard_during_contest: boolean;
+  /** Whether the leaderboard is visible once results are published */
+  show_leaderboard: boolean;
+  /** Whether a team's own submissions are visible once results are published */
+  show_team_submissions: boolean;
   /** Participation type for team contests */
   participation_type: ContestTeamParticipationType;
   /** Contest rules */
   rules?: string | null;
+  /** Time results were published (UTC); null if unpublished */
+  results_published_at?: string | null;
 }

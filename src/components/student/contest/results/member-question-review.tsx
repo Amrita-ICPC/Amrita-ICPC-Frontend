@@ -1,25 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import * as React from "react";
 
-import type { ContestTeamMemberQuestionAnalytics } from "@/api/generated/model/contestTeamMemberQuestionAnalytics";
-import type { ContestTeamMemberQuestionSubmissionItem } from "@/api/generated/model/contestTeamMemberQuestionSubmissionItem";
+import type { StudentMemberQuestionAnalytics } from "@/api/generated/model/studentMemberQuestionAnalytics";
+import type { StudentSubmissionItem } from "@/api/generated/model/studentSubmissionItem";
+import { useGetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet } from "@/api/generated/students/students";
 import { useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet } from "@/api/generated/submissions/submissions";
-import { useGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet } from "@/api/generated/teams/teams";
-import {
-    MetricTile,
-    SourceCodeViewer,
-    TestCaseViewer,
-} from "@/components/contest/shared/submission-viewers";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-
+import { MetricTile, SourceCodeViewer } from "@/components/contest/shared/submission-viewers";
 import {
     difficultyTone,
     formatDateTime,
@@ -28,18 +16,23 @@ import {
     numberValue,
     statusLabel,
     statusTone,
-} from "./member-detail-utils";
+} from "@/components/contest/team-member-analytics/member-detail-utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface MemberQuestionReviewProps {
     contestId: string;
-    contestTeamId: string;
     contestTeamMemberId: string;
-    questions: ContestTeamMemberQuestionAnalytics[];
+    questions: StudentMemberQuestionAnalytics[];
     selectedQuestionId: string | null;
     onSelectQuestion: (questionId: string) => void;
 }
 
-function questionStatus(question: ContestTeamMemberQuestionAnalytics) {
+function questionStatus(question: StudentMemberQuestionAnalytics) {
     if (numberValue(question.accepted_submission) > 0) return "Solved";
     if (numberValue(question.total_submission) > 0) return "Attempted";
     return "Unattempted";
@@ -50,7 +43,7 @@ function QuestionNavigator({
     selectedQuestionId,
     onSelectQuestion,
 }: {
-    questions: ContestTeamMemberQuestionAnalytics[];
+    questions: StudentMemberQuestionAnalytics[];
     selectedQuestionId: string | null;
     onSelectQuestion: (questionId: string) => void;
 }) {
@@ -117,7 +110,7 @@ function QuestionSummary({
     total,
     accepted,
 }: {
-    question: ContestTeamMemberQuestionAnalytics;
+    question: StudentMemberQuestionAnalytics;
     total: number;
     accepted: number;
 }) {
@@ -144,7 +137,7 @@ function QuestionSummary({
                     </div>
                     <h2 className="mt-3 text-xl font-bold tracking-tight">{question.title}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Review submissions, source code, and testcase results for this question.
+                        Review your submissions and source code for this question.
                     </p>
                 </div>
                 <div className="grid min-w-64 grid-cols-2 gap-3">
@@ -173,11 +166,10 @@ function SubmissionCard({
     expanded,
     onToggle,
 }: {
-    submission: ContestTeamMemberQuestionSubmissionItem;
+    submission: StudentSubmissionItem;
     expanded: boolean;
     onToggle: () => void;
 }) {
-    const [testcasesOpen, setTestcasesOpen] = React.useState(false);
     const { data, isLoading, isError } = useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet(
         submission.submission_id,
         { query: { enabled: expanded } },
@@ -217,18 +209,25 @@ function SubmissionCard({
                         </p>
                     </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 text-sm sm:min-w-72">
+                <div className="grid grid-cols-4 gap-3 text-sm sm:min-w-80">
                     <div>
                         <p className="text-[11px] uppercase text-muted-foreground">Score</p>
                         <p className="font-bold tabular-nums">{numberValue(submission.score)}</p>
                     </div>
                     <div>
+                        <p className="text-[11px] uppercase text-muted-foreground">Passed</p>
+                        <p className="font-medium tabular-nums">
+                            {numberValue(submission.passed_testcases)} /{" "}
+                            {numberValue(submission.total_testcases)}
+                        </p>
+                    </div>
+                    <div>
                         <p className="text-[11px] uppercase text-muted-foreground">Runtime</p>
-                        <p className="font-medium">{formatRuntime(submission.execution_time)}</p>
+                        <p className="font-medium">{formatRuntime(submission.execution_time_ms)}</p>
                     </div>
                     <div>
                         <p className="text-[11px] uppercase text-muted-foreground">Memory</p>
-                        <p className="font-medium">{formatMemory(submission.memory)}</p>
+                        <p className="font-medium">{formatMemory(submission.memory_kb)}</p>
                     </div>
                 </div>
             </button>
@@ -263,31 +262,6 @@ function SubmissionCard({
                                 code={detail.source_code}
                                 language={detail.language.name}
                             />
-
-                            <Separator />
-
-                            <Button
-                                variant="outline"
-                                onClick={() => setTestcasesOpen((current) => !current)}
-                                className="w-full justify-between"
-                            >
-                                <span className="inline-flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
-                                    {testcasesOpen
-                                        ? "Hide testcase results"
-                                        : "View testcase results"}
-                                </span>
-                                {testcasesOpen ? (
-                                    <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                    <ChevronRight className="h-4 w-4" />
-                                )}
-                            </Button>
-
-                            <TestCaseViewer
-                                submissionId={submission.submission_id}
-                                open={testcasesOpen}
-                            />
                         </div>
                     )}
                 </div>
@@ -298,7 +272,6 @@ function SubmissionCard({
 
 export function MemberQuestionReview({
     contestId,
-    contestTeamId,
     contestTeamMemberId,
     questions,
     selectedQuestionId,
@@ -306,15 +279,11 @@ export function MemberQuestionReview({
 }: MemberQuestionReviewProps) {
     const selectedQuestion =
         questions.find((question) => question.question_id === selectedQuestionId) ?? questions[0];
-    const [expandedSubmission, setExpandedSubmission] = React.useState<{
-        questionId: string;
-        submissionId: string;
-    } | null>(null);
+    const [expandedSubmissionId, setExpandedSubmissionId] = React.useState<string | null>(null);
 
     const { data, isLoading, isError } =
-        useGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet(
+        useGetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet(
             contestId,
-            contestTeamId,
             contestTeamMemberId,
             selectedQuestion?.question_id ?? "",
             { query: { enabled: !!selectedQuestion } },
@@ -344,14 +313,17 @@ export function MemberQuestionReview({
             <QuestionNavigator
                 questions={questions}
                 selectedQuestionId={selectedQuestion.question_id}
-                onSelectQuestion={onSelectQuestion}
+                onSelectQuestion={(questionId) => {
+                    setExpandedSubmissionId(null);
+                    onSelectQuestion(questionId);
+                }}
             />
 
             <Card className="border-border/70 bg-card shadow-sm">
                 <CardHeader className="border-b border-border/70">
                     <CardTitle>Responses</CardTitle>
                     <CardDescription>
-                        Question response viewer with submissions and testcase evidence.
+                        Your submissions and source code for this question.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
@@ -375,7 +347,7 @@ export function MemberQuestionReview({
                         <div className="rounded-lg border border-dashed border-border/70 p-8 text-center">
                             <p className="font-medium">No submissions for this question</p>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Once this member submits a response, it will appear here.
+                                Once you submit a response, it will appear here.
                             </p>
                         </div>
                     ) : (
@@ -384,20 +356,12 @@ export function MemberQuestionReview({
                                 <SubmissionCard
                                     key={submission.submission_id}
                                     submission={submission}
-                                    expanded={
-                                        expandedSubmission?.questionId ===
-                                            selectedQuestion.question_id &&
-                                        expandedSubmission.submissionId === submission.submission_id
-                                    }
+                                    expanded={expandedSubmissionId === submission.submission_id}
                                     onToggle={() => {
-                                        setExpandedSubmission((current) =>
-                                            current?.questionId === selectedQuestion.question_id &&
-                                            current.submissionId === submission.submission_id
+                                        setExpandedSubmissionId((current) =>
+                                            current === submission.submission_id
                                                 ? null
-                                                : {
-                                                      questionId: selectedQuestion.question_id,
-                                                      submissionId: submission.submission_id,
-                                                  },
+                                                : submission.submission_id,
                                         );
                                     }}
                                 />

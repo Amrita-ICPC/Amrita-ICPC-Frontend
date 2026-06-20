@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ContestMode } from './contestMode';
-import type { ContestResultVisibility } from './contestResultVisibility';
 import type { ContestTeamParticipationType } from './contestTeamParticipationType';
 import type { ScoringType } from './scoringType';
 import type { TeamApprovalMode } from './teamApprovalMode';
@@ -59,8 +58,10 @@ export interface ContestCreate {
   evaluate_on_submit?: boolean;
   /** Maximum submissions allowed per question */
   max_submission_per_question?: number | null;
-  /** Result visibility configuration for this contest */
-  result_visibility?: ContestResultVisibility;
+  /** Whether the leaderboard is visible once results are published */
+  show_leaderboard?: boolean;
+  /** Whether a team's own submissions are visible once results are published */
+  show_team_submissions?: boolean;
   /** List of audience IDs to link to this contest */
   audience_ids?: string[];
 }

@@ -2569,14 +2569,14 @@ export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TDa
 
 
 /**
- * Publish or update contest results visibility.
+ * Publish or unpublish contest results.
 
 Only accessible by authorized users with update permissions.
 
 Args:
     request: Framework context.
     contest_id: Unique identifier of the contest.
-    visibility: The visibility status to set.
+    publish: True to publish results, false to unpublish.
     user_id: Authenticated user ID.
     service: Injected domain service.
 
@@ -2586,7 +2586,7 @@ Returns:
 Raises:
     ContestNotFoundError: If the contest is not found.
     PermissionDeniedError: If the user lacks manage permission.
- * @summary Publish or update contest results visibility
+ * @summary Publish or unpublish contest results
  */
 export const publishResultsApiV1ContestsContestIdPublishResultsPost = (
     contestId: string,
@@ -2636,7 +2636,7 @@ const {mutation: mutationOptions} = options ?
     export type PublishResultsApiV1ContestsContestIdPublishResultsPostMutationError = ExceptionResponse | HTTPValidationError
 
     /**
- * @summary Publish or update contest results visibility
+ * @summary Publish or unpublish contest results
  */
 export const usePublishResultsApiV1ContestsContestIdPublishResultsPost = <TError = ExceptionResponse | HTTPValidationError,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>, TError,{contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams}, TContext>, }

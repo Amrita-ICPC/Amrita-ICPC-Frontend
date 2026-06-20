@@ -54,4 +54,8 @@ export interface ContestUpdate {
   evaluate_on_submit?: boolean | null;
   /** Maximum submissions allowed per question */
   max_submission_per_question?: number | null;
+  /** Whether the leaderboard is visible once results are published */
+  show_leaderboard?: boolean | null;
+  /** Whether a team's own submissions are visible once results are published */
+  show_team_submissions?: boolean | null;
 }

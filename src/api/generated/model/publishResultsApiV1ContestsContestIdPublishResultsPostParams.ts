@@ -5,11 +5,10 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ContestResultVisibility } from './contestResultVisibility';
 
 export type PublishResultsApiV1ContestsContestIdPublishResultsPostParams = {
 /**
- * The results visibility status to set
+ * True to publish results, false to unpublish
  */
-visibility: ContestResultVisibility;
+publish: boolean;
 };
