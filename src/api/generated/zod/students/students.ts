@@ -69,6 +69,8 @@ export const GetStudentContestsApiV1StudentsContestsGetResponse = zod.object({
   "max_team_size": zod.number().describe('Maximum team size'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
+  "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests')
 }).describe('Schema for contest available for students (List view).')),
   "total": zod.number(),
@@ -133,8 +135,11 @@ export const GetStudentContestByIdApiV1StudentsContestsContestIdGetResponse = zo
   "max_team_size": zod.number().describe('Maximum team size'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
   "show_leaderboard_during_contest": zod.boolean().describe('Whether to show leaderboard during the contest'),
+  "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published'),
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Participation type for team contests'),
-  "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules')
+  "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
+  "results_published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Time results were published (UTC); null if unpublished')
 }).describe('Placeholder for contest details response.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -457,6 +462,308 @@ export const InviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContes
   "status": zod.number().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseStatusDefault),
   "message": zod.string().default(inviteMembersToContestTeamApiV1StudentsContestsContestIdTeamsContestTeamIdInvitationPatchResponseMessageDefault),
   "data": zod.null().optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get the contest leaderboard for a student, gated by the contest's result visibility setting.
+ * @summary Get contest leaderboard for student
+ */
+export const GetStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQuerySortOrderDefault = `desc`;
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageDefault = 1;
+
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageSizeDefault = 50;
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageSizeMax = 100;
+
+
+
+export const GetStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryParams = zod.object({
+  "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by team name'),
+  "sort_order": zod.string().default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQuerySortOrderDefault).describe('Sort order: asc or desc'),
+  "page": zod.number().min(1).default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageDefault).describe('Page number'),
+  "page_size": zod.number().min(1).max(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageSizeMax).default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetQueryPageSizeDefault).describe('Items per page')
+})
+
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseSuccessDefault = true;
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseStatusDefault = 200;
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseMessageDefault = `Success`;
+export const getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseDataOneStandingsItemTotalPenaltyDefault = 0;
+
+export const GetStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponse = zod.object({
+  "success": zod.boolean().default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseSuccessDefault),
+  "status": zod.number().default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseStatusDefault),
+  "message": zod.string().default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_id": zod.uuid().describe('ID of the contest'),
+  "last_updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of when the leaderboard was calculated'),
+  "standings": zod.array(zod.object({
+  "rank": zod.number().describe('Current rank of the team'),
+  "team_id": zod.uuid().describe('ID of the team'),
+  "team_name": zod.string().describe('Name of the team'),
+  "total_score": zod.number().describe('Accumulated score of the team'),
+  "total_penalty": zod.number().default(getStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGetResponseDataOneStandingsItemTotalPenaltyDefault).describe('Total penalty time in seconds (standard for ICPC)')
+}).describe('A single row\/entry in the contest leaderboard representing a team\'s standing.')).describe('List of team standings ordered by rank')
+}).describe('Response containing the complete leaderboard standings for a contest.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get score, participation, and submission status analytics for the student's own team.
+ * @summary Get the caller's own team results for a contest
+ */
+export const GetMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseSuccessDefault = true;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseStatusDefault = 200;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseMessageDefault = `Success`;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneScoreDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemIsLeaderDefault = false;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemIsParticipatedDefault = false;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemScoreDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneTotalSubmissionsDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneAcceptedSubmissionDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneWrongAnswerDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneTimeLimitExceededDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneRuntimeErrorDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneCompilationErrorDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMemoryLimitExceededDefault = 0;
+export const getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOnePendingSubmissionDefault = 0;
+
+export const GetMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponse = zod.object({
+  "success": zod.boolean().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseSuccessDefault),
+  "status": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseStatusDefault),
+  "message": zod.string().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_team_id": zod.uuid().describe('Contest team identifier'),
+  "name": zod.string().describe('Team name'),
+  "score": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneScoreDefault).describe('Aggregated team score'),
+  "members": zod.array(zod.object({
+  "user_id": zod.uuid().describe('User ID of the member'),
+  "contest_team_member_id": zod.uuid().describe('ContestTeamMember record ID'),
+  "name": zod.string().describe('Full name of the member'),
+  "email": zod.string().describe('Email address of the member'),
+  "is_leader": zod.boolean().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemIsLeaderDefault).describe('Whether this member is the team leader'),
+  "is_participated": zod.boolean().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemIsParticipatedDefault).describe('Whether the member has started the contest session'),
+  "score": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMembersItemScoreDefault).describe('Member\'s accumulated score'),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the member started the contest'),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Timestamp when the member\'s session ended')
+}).describe('Lightweight member row inside the team analytics response.\n\nFlagging fields are intentionally excluded — they are instructor-only.')).optional().describe('Summary rows for each accepted team member'),
+  "total_submissions": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneTotalSubmissionsDefault).describe('Total submissions by the team'),
+  "accepted_submission": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneAcceptedSubmissionDefault).describe('Accepted submissions'),
+  "wrong_answer": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneWrongAnswerDefault).describe('Wrong answer submissions'),
+  "time_limit_exceeded": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneTimeLimitExceededDefault).describe('Time limit exceeded submissions'),
+  "runtime_error": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneRuntimeErrorDefault).describe('Runtime error submissions'),
+  "compilation_error": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneCompilationErrorDefault).describe('Compilation error submissions'),
+  "memory_limit_exceeded": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOneMemoryLimitExceededDefault).describe('Memory limit exceeded submissions'),
+  "pending_submission": zod.number().default(getMyContestTeamResultsApiV1StudentsContestsContestIdResultsGetResponseDataOnePendingSubmissionDefault).describe('Submissions still being judged')
+}).describe('Team-level analytics visible to all accepted members of the team.\n\nInstructor-only fields stripped:\n  - Member flagging details\n  - system_error verdict counts'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get profile, session timing, and aggregate analytics for a member of the caller's own team.
+ * @summary Get a team member's results for a contest
+ */
+export const GetContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid()
+})
+
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseSuccessDefault = true;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseStatusDefault = 200;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneIsLeaderDefault = false;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneIsParticipatedDefault = false;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneScoreDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTotalDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsAcceptedDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsWrongAnswerDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTimeLimitExceededDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsRuntimeErrorDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsMemoryLimitExceededDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsCompilationErrorDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsPendingDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsAttemptedDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsSolvedDefault = 0;
+export const getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsUnsolvedDefault = 0;
+
+export const GetContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "contest_team_member_id": zod.uuid().describe('ContestTeamMember record ID'),
+  "user_id": zod.uuid().describe('User ID of the member'),
+  "name": zod.string().describe('Full name of the member'),
+  "email": zod.string().describe('Email address of the member'),
+  "is_leader": zod.boolean().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneIsLeaderDefault).describe('Whether this member is the team leader'),
+  "is_participated": zod.boolean().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneIsParticipatedDefault).describe('Whether the member has started the contest session'),
+  "score": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneScoreDefault).describe('Member\'s accumulated score'),
+  "started_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Session start timestamp'),
+  "ended_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Session end timestamp'),
+  "submission_statistics": zod.object({
+  "total": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTotalDefault).describe('Total number of submissions'),
+  "accepted": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsAcceptedDefault).describe('Accepted (AC)'),
+  "wrong_answer": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsWrongAnswerDefault).describe('Wrong answer (WA)'),
+  "time_limit_exceeded": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsTimeLimitExceededDefault).describe('Time limit exceeded (TLE)'),
+  "runtime_error": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsRuntimeErrorDefault).describe('Runtime error (RE)'),
+  "memory_limit_exceeded": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsMemoryLimitExceededDefault).describe('Memory limit exceeded (MLE)'),
+  "compilation_error": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsCompilationErrorDefault).describe('Compilation error (CE)'),
+  "pending": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneSubmissionStatisticsPendingDefault).describe('Pending \/ in-queue submissions')
+}).optional().describe('Verdict breakdown for all submissions by this member'),
+  "question_statistics": zod.object({
+  "attempted": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsAttemptedDefault).describe('Number of questions attempted'),
+  "solved": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsSolvedDefault).describe('Number of questions solved (at least one AC)'),
+  "unsolved": zod.number().default(getContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGetResponseDataOneQuestionStatisticsUnsolvedDefault).describe('Attempted questions not yet solved')
+}).optional().describe('Question-level attempt and solve counts for this member')
+}).describe('Detailed analytics for a single team member, student-safe.\n\nStripped vs instructor\'s ContestTeamMemberDetail:\n  - is_flagged, flagged_at, flagged_reason\n  - extra_time_seconds, remaining_time_seconds, base_end_time\n  - system_error in submission_statistics'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get all contest questions with submission counts for a member of the caller's own team.
+ * @summary Get a team member's question analytics for a contest
+ */
+export const GetContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid()
+})
+
+export const getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseSuccessDefault = true;
+export const getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseStatusDefault = 200;
+export const getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseDataOneItemTotalSubmissionDefault = 0;
+export const getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseDataOneItemAcceptedSubmissionDefault = 0;
+
+export const GetContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "question_id": zod.uuid().describe('Question identifier'),
+  "title": zod.string().describe('Question title'),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Question difficulty level'),
+  "time_limit_ms": zod.number().describe('Time limit in milliseconds'),
+  "memory_limit_mb": zod.number().describe('Memory limit in megabytes'),
+  "total_submission": zod.number().default(getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseDataOneItemTotalSubmissionDefault).describe('Total submissions by this member for this question'),
+  "accepted_submission": zod.number().default(getContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGetResponseDataOneItemAcceptedSubmissionDefault).describe('Accepted submissions by this member for this question')
+}).describe('Per-question analytics row for a single member.\n\nEquivalent to ContestTeamMemberQuestionAnalytics (instructor) —\nno fields removed here since question metadata is not sensitive.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get submissions and verdict statistics for one question by a member of the caller's own team.
+ * @summary Get a team member's submissions for one question in a contest
+ */
+export const GetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "contest_team_member_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault = true;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault = 200;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault = `Success`;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTotalDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsAcceptedDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsWrongAnswerDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTimeLimitExceededDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsRuntimeErrorDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsCompilationErrorDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsMemoryLimitExceededDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemScoreDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemPassedTestcasesDefault = 0;
+export const getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemTotalTestcasesDefault = 0;
+
+export const GetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseStatusDefault),
+  "message": zod.string().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "question_id": zod.uuid().describe('Question identifier'),
+  "question_title": zod.string().describe('Question title'),
+  "statistics": zod.object({
+  "total": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTotalDefault).describe('Total submissions for this question'),
+  "accepted": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsAcceptedDefault).describe('Accepted submissions'),
+  "wrong_answer": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsWrongAnswerDefault).describe('Wrong answer submissions'),
+  "time_limit_exceeded": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsTimeLimitExceededDefault).describe('Time limit exceeded submissions'),
+  "runtime_error": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsRuntimeErrorDefault).describe('Runtime error submissions'),
+  "compilation_error": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsCompilationErrorDefault).describe('Compilation error submissions'),
+  "memory_limit_exceeded": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneStatisticsMemoryLimitExceededDefault).describe('Memory limit exceeded submissions')
+}).optional().describe('Aggregate verdict breakdown for this question'),
+  "submissions": zod.array(zod.object({
+  "submission_id": zod.uuid().describe('Unique submission identifier'),
+  "status": zod.union([zod.enum(['SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Enumeration of submission evaluation statuses.\n\nRepresents the lifecycle and final verdict of a code submission\nduring online judging.\n\nAttributes:\n    AC: Accepted; all test cases passed.\n    WA: Wrong Answer; one or more test cases failed.\n    TLE: Time Limit Exceeded during execution.\n    RE: Runtime Error occurred while running the submission.\n    CE: Compilation Error prevented execution.\n    MLE: Memory Limit Exceeded during execution.'),zod.null()]).optional().describe('Verdict for this submission'),
+  "score": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemScoreDefault).describe('Score awarded for this submission'),
+  "language": zod.string().describe('Programming language name used'),
+  "created_at": zod.iso.datetime({"offset":true}).describe('Submission timestamp (UTC)'),
+  "execution_time_ms": zod.union([zod.number(),zod.null()]).optional().describe('Execution time in milliseconds'),
+  "memory_kb": zod.union([zod.number(),zod.null()]).optional().describe('Memory used in kilobytes'),
+  "passed_testcases": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemPassedTestcasesDefault).describe('Number of testcases passed'),
+  "total_testcases": zod.number().default(getContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetResponseDataOneSubmissionsItemTotalTestcasesDefault).describe('Total testcases evaluated')
+}).describe('A single submission row in the student-facing list.\n\nStripped vs instructor\'s ContestTeamMemberQuestionSubmissionItem:\n  - No source_code field\nStripped vs SubmissionDetailResponse (instructor):\n  - No source_code, no testcase I\/O, no submitted_by user detail\n    (student already knows whose submissions these are by route context)')).optional().describe('Individual submission records, newest first')
+}).describe('All submissions by one member for one question, student-safe.\n\nEquivalent to ContestTeamMemberQuestionSubmissions (instructor) but:\n  - No source code in individual submission items\n  - No testcase input\/output data\n  - system_error excluded from stats'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

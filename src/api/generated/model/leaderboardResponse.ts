@@ -5,7 +5,6 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { ContestResultVisibility } from './contestResultVisibility';
 import type { LeaderboardRow } from './leaderboardRow';
 
 /**
@@ -14,8 +13,6 @@ import type { LeaderboardRow } from './leaderboardRow';
 export interface LeaderboardResponse {
   /** ID of the contest */
   contest_id: string;
-  /** Result visibility configuration for this contest */
-  result_visibility?: ContestResultVisibility;
   /** Timestamp of when the leaderboard was calculated */
   last_updated_at: string;
   /** List of team standings ordered by rank */

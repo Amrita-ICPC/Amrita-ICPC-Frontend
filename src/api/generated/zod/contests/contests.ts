@@ -44,7 +44,8 @@ export const createContestApiV1ContestsPostBodyParticipationTypeDefault = `LEADE
 export const createContestApiV1ContestsPostBodyEvaluateOnSubmitDefault = true;
 export const createContestApiV1ContestsPostBodyMaxSubmissionPerQuestionOneExclusiveMin = 0;
 
-export const createContestApiV1ContestsPostBodyResultVisibilityDefault = `HIDDEN`;
+export const createContestApiV1ContestsPostBodyShowLeaderboardDefault = false;
+export const createContestApiV1ContestsPostBodyShowTeamSubmissionsDefault = false;
 
 export const CreateContestApiV1ContestsPostBody = zod.object({
   "name": zod.string().min(1).max(createContestApiV1ContestsPostBodyNameMax).describe('Contest name'),
@@ -67,7 +68,8 @@ export const CreateContestApiV1ContestsPostBody = zod.object({
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(createContestApiV1ContestsPostBodyParticipationTypeDefault).describe('Participation type for team contests'),
   "evaluate_on_submit": zod.boolean().default(createContestApiV1ContestsPostBodyEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "max_submission_per_question": zod.union([zod.number().gt(createContestApiV1ContestsPostBodyMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
-  "result_visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).default(createContestApiV1ContestsPostBodyResultVisibilityDefault).describe('Result visibility configuration for this contest'),
+  "show_leaderboard": zod.boolean().default(createContestApiV1ContestsPostBodyShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().default(createContestApiV1ContestsPostBodyShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
   "audience_ids": zod.array(zod.uuid()).optional().describe('List of audience IDs to link to this contest')
 }).describe('Schema for creating a contest.')
 
@@ -152,7 +154,9 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
 }).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest'),
   "question_count": zod.number().min(getAllContestsApiV1ContestsGetResponseDataOneItemQuestionCountMin).default(getAllContestsApiV1ContestsGetResponseDataOneItemQuestionCountDefault).describe('Number of questions in the contest'),
-  "team_count": zod.number().min(getAllContestsApiV1ContestsGetResponseDataOneItemTeamCountMin).default(getAllContestsApiV1ContestsGetResponseDataOneItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)')
+  "team_count": zod.number().min(getAllContestsApiV1ContestsGetResponseDataOneItemTeamCountMin).default(getAllContestsApiV1ContestsGetResponseDataOneItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)'),
+  "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published')
 }).describe('Schema for contest summary response (List view).')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -245,7 +249,9 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
 }).describe('Schema for audience information within a contest.')).optional().describe('List of audiences linked to this contest'),
   "question_count": zod.number().min(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemQuestionCountMin).default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemQuestionCountDefault).describe('Number of questions in the contest'),
-  "team_count": zod.number().min(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemTeamCountMin).default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)')
+  "team_count": zod.number().min(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemTeamCountMin).default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)'),
+  "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published')
 }).describe('Schema for contest summary response (List view).')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -302,7 +308,8 @@ export const getContestApiV1ContestsContestIdGetResponseDataOneParticipationType
 export const getContestApiV1ContestsContestIdGetResponseDataOneEvaluateOnSubmitDefault = true;
 export const getContestApiV1ContestsContestIdGetResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin = 0;
 
-export const getContestApiV1ContestsContestIdGetResponseDataOneResultVisibilityDefault = `HIDDEN`;
+export const getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDefault = false;
+export const getContestApiV1ContestsContestIdGetResponseDataOneShowTeamSubmissionsDefault = false;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountDefault = 0;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountMin = 0;
 
@@ -342,7 +349,8 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(getContestApiV1ContestsContestIdGetResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "evaluate_on_submit": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "max_submission_per_question": zod.union([zod.number().gt(getContestApiV1ContestsContestIdGetResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
-  "result_visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).default(getContestApiV1ContestsContestIdGetResponseDataOneResultVisibilityDefault).describe('Result visibility configuration for this contest'),
+  "show_leaderboard": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -366,7 +374,8 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "results_published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Time results were published (UTC); null if unpublished')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -434,7 +443,9 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "show_leaderboard_during_contest": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to show leaderboard during the contest'),
   "participation_type": zod.union([zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).describe('Enumeration of contest team participation types.\n\nAttributes:\n    LEADER_ONLY: Only leader can code\n    INDIVIDUAL_WORKSPACE: Each team member has their own workspace'),zod.null()]).optional().describe('Participation type for team contests'),
   "evaluate_on_submit": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to evaluate submissions immediately on submit'),
-  "max_submission_per_question": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed per question')
+  "max_submission_per_question": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed per question'),
+  "show_leaderboard": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether a team\'s own submissions are visible once results are published')
 }).describe('Schema for updating a contest.')
 
 export const updateContestApiV1ContestsContestIdPatchResponseSuccessDefault = true;
@@ -455,7 +466,8 @@ export const updateContestApiV1ContestsContestIdPatchResponseDataOneParticipatio
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneEvaluateOnSubmitDefault = true;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin = 0;
 
-export const updateContestApiV1ContestsContestIdPatchResponseDataOneResultVisibilityDefault = `HIDDEN`;
+export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDefault = false;
+export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowTeamSubmissionsDefault = false;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountDefault = 0;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountMin = 0;
 
@@ -495,7 +507,8 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "evaluate_on_submit": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "max_submission_per_question": zod.union([zod.number().gt(updateContestApiV1ContestsContestIdPatchResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
-  "result_visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneResultVisibilityDefault).describe('Result visibility configuration for this contest'),
+  "show_leaderboard": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -519,7 +532,8 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "results_published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Time results were published (UTC); null if unpublished')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1224,7 +1238,8 @@ export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParti
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneEvaluateOnSubmitDefault = true;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin = 0;
 
-export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneResultVisibilityDefault = `HIDDEN`;
+export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDefault = false;
+export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowTeamSubmissionsDefault = false;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountDefault = 0;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountMin = 0;
 
@@ -1264,7 +1279,8 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "participation_type": zod.enum(['LEADER_ONLY', 'INDIVIDUAL_WORKSPACE']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneParticipationTypeDefault).describe('Participation type for team contests'),
   "evaluate_on_submit": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneEvaluateOnSubmitDefault).describe('Whether to evaluate submissions immediately on submit'),
   "max_submission_per_question": zod.union([zod.number().gt(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
-  "result_visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneResultVisibilityDefault).describe('Result visibility configuration for this contest'),
+  "show_leaderboard": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
+  "show_team_submissions": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -1288,7 +1304,8 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time (UTC)'),
   "updated_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who last updated'),
   "published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Published time (UTC)'),
-  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest')
+  "published_by": zod.union([zod.uuid(),zod.null()]).optional().describe('User ID who published the contest'),
+  "results_published_at": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Time results were published (UTC); null if unpublished')
 }).describe('Schema for comprehensive contest response (Detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1906,7 +1923,6 @@ export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryParam
 export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseSuccessDefault = true;
 export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseStatusDefault = 200;
 export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseMessageDefault = `Success`;
-export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneResultVisibilityDefault = `HIDDEN`;
 export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneStandingsItemTotalPenaltyDefault = 0;
 
 export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponse = zod.object({
@@ -1915,7 +1931,6 @@ export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponse =
   "message": zod.string().default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseMessageDefault),
   "data": zod.union([zod.object({
   "contest_id": zod.uuid().describe('ID of the contest'),
-  "result_visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).default(getContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponseDataOneResultVisibilityDefault).describe('Result visibility configuration for this contest'),
   "last_updated_at": zod.iso.datetime({"offset":true}).describe('Timestamp of when the leaderboard was calculated'),
   "standings": zod.array(zod.object({
   "rank": zod.number().describe('Current rank of the team'),
@@ -1940,14 +1955,14 @@ export const GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetResponse =
 })
 
 /**
- * Publish or update contest results visibility.
+ * Publish or unpublish contest results.
 
 Only accessible by authorized users with update permissions.
 
 Args:
     request: Framework context.
     contest_id: Unique identifier of the contest.
-    visibility: The visibility status to set.
+    publish: True to publish results, false to unpublish.
     user_id: Authenticated user ID.
     service: Injected domain service.
 
@@ -1957,14 +1972,14 @@ Returns:
 Raises:
     ContestNotFoundError: If the contest is not found.
     PermissionDeniedError: If the user lacks manage permission.
- * @summary Publish or update contest results visibility
+ * @summary Publish or unpublish contest results
  */
 export const PublishResultsApiV1ContestsContestIdPublishResultsPostParams = zod.object({
   "contest_id": zod.uuid()
 })
 
 export const PublishResultsApiV1ContestsContestIdPublishResultsPostQueryParams = zod.object({
-  "visibility": zod.enum(['HIDDEN', 'LEADERBOARD_ONLY', 'TEAM_RESULTS_ONLY', 'FULL_RESULTS']).describe('The results visibility status to set')
+  "publish": zod.boolean().describe('True to publish results, false to unpublish')
 })
 
 export const publishResultsApiV1ContestsContestIdPublishResultsPostResponseSuccessDefault = true;

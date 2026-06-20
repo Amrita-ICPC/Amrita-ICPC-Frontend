@@ -15,6 +15,7 @@ import {
     Trophy,
     Users,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -185,6 +186,7 @@ function TimelineItem({
     isLast = false,
     isCompleted = false,
     isActive = false,
+    children,
 }: {
     label: string;
     time: string;
@@ -192,6 +194,7 @@ function TimelineItem({
     isLast?: boolean;
     isCompleted?: boolean;
     isActive?: boolean;
+    children?: React.ReactNode;
 }) {
     return (
         <div className="flex gap-4">
@@ -228,6 +231,7 @@ function TimelineItem({
                     <p className="text-xs text-muted-foreground font-semibold tabular-nums">
                         {time}
                     </p>
+                    {children}
                 </div>
                 <Badge
                     variant={isCompleted ? "secondary" : "outline"}
@@ -649,10 +653,57 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     />
                                     <TimelineItem
                                         label="Result Published"
-                                        time="To be announced"
-                                        status="Not yet"
+                                        time={
+                                            contest.results_published_at !== null &&
+                                            contest.results_published_at !== undefined
+                                                ? "Results are available"
+                                                : "To be announced"
+                                        }
+                                        status={
+                                            contest.results_published_at !== null &&
+                                            contest.results_published_at !== undefined
+                                                ? "Published"
+                                                : "Not yet"
+                                        }
+                                        isCompleted={
+                                            contest.results_published_at !== null &&
+                                            contest.results_published_at !== undefined
+                                        }
                                         isLast
-                                    />
+                                    >
+                                        {contest.results_published_at !== null &&
+                                            contest.results_published_at !== undefined && (
+                                                <div className="mt-2 flex flex-wrap gap-2">
+                                                    <Button
+                                                        asChild
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 font-semibold"
+                                                    >
+                                                        <Link
+                                                            href={`/student/contest/${contestId}/results`}
+                                                        >
+                                                            Result
+                                                        </Link>
+                                                    </Button>
+                                                    {contest.show_leaderboard && (
+                                                        <Button
+                                                            asChild
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 font-semibold"
+                                                        >
+                                                            <Link
+                                                                href={`/student/contest/${contestId}/results/leaderboard`}
+                                                            >
+                                                                <Trophy className="h-3.5 w-3.5" />
+                                                                Leaderboard
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            )}
+                                    </TimelineItem>
                                 </div>
                             </CardContent>
                         </Card>
@@ -809,15 +860,52 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                     />
                                                 )}
                                                 {effectiveRunStatus === "ENDED" && (
-                                                    <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
-                                                        <Trophy className="h-8 w-8 mb-2 text-slate-400 dark:text-slate-600 animate-pulse" />
-                                                        <span className="text-sm font-bold text-foreground">
-                                                            Contest Closed
-                                                        </span>
-                                                        <span className="text-[11px] text-muted-foreground/80 mt-1 font-medium">
-                                                            Submissions are disabled. Results will
-                                                            be published soon.
-                                                        </span>
+                                                    <div className="space-y-4 w-full">
+                                                        <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
+                                                            <Trophy className="h-8 w-8 mb-2 text-slate-400 dark:text-slate-600 animate-pulse" />
+                                                            <span className="text-sm font-bold text-foreground">
+                                                                Contest Closed
+                                                            </span>
+                                                            <span className="text-[11px] text-muted-foreground/80 mt-1 font-medium">
+                                                                {contest.results_published_at !==
+                                                                    null &&
+                                                                contest.results_published_at !==
+                                                                    undefined
+                                                                    ? "Submissions are disabled. Results are now available."
+                                                                    : "Submissions are disabled. Results will be published soon."}
+                                                            </span>
+                                                        </div>
+                                                        {contest.results_published_at !== null &&
+                                                            contest.results_published_at !==
+                                                                undefined && (
+                                                                <div className="flex flex-col gap-2 sm:flex-row">
+                                                                    <Button
+                                                                        asChild
+                                                                        className="w-full h-11 font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-2 group bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
+                                                                    >
+                                                                        <Link
+                                                                            href={`/student/contest/${contestId}/results`}
+                                                                        >
+                                                                            Result
+                                                                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                                                        </Link>
+                                                                    </Button>
+                                                                    {contest.show_leaderboard && (
+                                                                        <Button
+                                                                            asChild
+                                                                            variant="outline"
+                                                                            className="w-full h-11 font-bold shadow-sm transition-all duration-300 flex items-center justify-center gap-2 group"
+                                                                        >
+                                                                            <Link
+                                                                                href={`/student/contest/${contestId}/results/leaderboard`}
+                                                                            >
+                                                                                <Trophy className="h-4 w-4" />
+                                                                                Leaderboard
+                                                                            </Link>
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                     </div>
                                                 )}
 
