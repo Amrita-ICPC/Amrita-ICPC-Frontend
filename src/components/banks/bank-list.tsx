@@ -53,7 +53,7 @@ export function BankList() {
         if (value) newParams.set("search", value);
         else newParams.delete("search");
         newParams.set("page", "1");
-        router.push(`${pathname}?${newParams.toString()}`);
+        router.replace(`${pathname}?${newParams.toString()}`);
     };
 
     const handleSort = (value: BankSortBy) => {
