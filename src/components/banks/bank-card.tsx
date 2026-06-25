@@ -127,7 +127,9 @@ export function BankCard({ bank }: BankCardProps) {
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                         <HelpCircle className="h-3.5 w-3.5 text-blue" />
                         <span className="text-xs font-semibold text-foreground/80">
-                            {(bank as any).questions_count || (bank as any).questions?.length || 0}{" "}
+                            {(bank as any).total_questions_count ??
+                                (bank as any).questions?.length ??
+                                0}{" "}
                             Questions
                         </span>
                     </div>

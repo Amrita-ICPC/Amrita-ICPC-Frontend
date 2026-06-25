@@ -110,7 +110,9 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                         <HelpCircle className="size-4 text-blue" />
                         <span className="font-semibold text-foreground/80">
-                            {(bank as any).questions_count || (bank as any).questions?.length || 0}{" "}
+                            {(bank as any).total_questions_count ??
+                                (bank as any).questions?.length ??
+                                0}{" "}
                             Questions
                         </span>
                     </div>
