@@ -1,6 +1,8 @@
 import { FileCode2, ShieldCheck, Trophy, Users } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Card } from "@/components/ui/card";
 import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute } from "@/lib/auth/utils";
 
@@ -33,43 +35,33 @@ export default async function DashboardPage() {
                         label: "Contests",
                         desc: "View and manage programming contests",
                         href: "/contest",
-                        color: "text-indigo-500",
-                        bg: "bg-indigo-500/10",
                     },
                     {
                         icon: FileCode2,
                         label: "Question Banks",
                         desc: "Browse and edit question collections",
                         href: "/banks",
-                        color: "text-emerald-500",
-                        bg: "bg-emerald-500/10",
                     },
                     {
                         icon: Users,
                         label: "Teams",
                         desc: "Manage contest teams and approvals",
                         href: "/teams",
-                        color: "text-orange-500",
-                        bg: "bg-orange-500/10",
                     },
-                ].map(({ icon: Icon, label, desc, href, color, bg }) => (
-                    <a
-                        key={href}
-                        href={href}
-                        className="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent"
-                    >
-                        <div
-                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}
-                        >
-                            <Icon className={`h-5 w-5 ${color}`} />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {label}
-                            </p>
-                            <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>
-                        </div>
-                    </a>
+                ].map(({ icon: Icon, label, desc, href }) => (
+                    <Link key={href} href={href} className="group block">
+                        <Card className="flex flex-row items-start gap-4 p-5 hover:border-primary/40 hover:bg-accent transition-all duration-300">
+                            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Icon className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                    {label}
+                                </p>
+                                <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>
+                            </div>
+                        </Card>
+                    </Link>
                 ))}
             </div>
 
