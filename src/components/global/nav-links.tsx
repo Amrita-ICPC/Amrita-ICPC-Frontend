@@ -52,8 +52,8 @@ function NavItem({
                 className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                     active
-                        ? "bg-white/16 font-medium text-sidebar-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]"
-                        : "text-sidebar-foreground/72 hover:bg-white/10 hover:text-sidebar-foreground",
+                        ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground border border-sidebar-border/40"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )}
             >
                 <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-70")} />
@@ -67,7 +67,7 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
     return (
         <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
             <div>
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-cyan-200/70">
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Menu
                 </p>
                 <ul className="space-y-0.5">
@@ -92,7 +92,7 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
 
             {isAdmin && (
                 <div>
-                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-cyan-200/70">
+                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                         Admin
                     </p>
                     <ul className="space-y-0.5">

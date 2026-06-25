@@ -40,15 +40,15 @@ export function UserMenu({ name, email }: UserMenuProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-white/10 hover:bg-white/8">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-[11px] font-semibold text-sidebar-foreground">
+                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:bg-sidebar-accent hover:border-sidebar-border/30">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[11px] font-bold text-primary">
                         {initials(name, email)}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-sidebar-foreground">
+                        <p className="truncate text-xs font-semibold text-sidebar-foreground">
                             {name || "ICPC User"}
                         </p>
-                        <p className="truncate text-[10px] text-sidebar-foreground/60">{email}</p>
+                        <p className="truncate text-[10px] text-muted-foreground">{email}</p>
                     </div>
                 </button>
             </DropdownMenuTrigger>
