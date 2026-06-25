@@ -3,18 +3,18 @@
 }
 
 .page {
-    --canvas: #f8f9fb;
-    --surface: #ffffff;
-    --brand: #6e1f2a;
-    --platform: #003a70;
-    --action: #d62828;
-    --text: #111111;
-    --text-secondary: #555b63;
-    --border: #d9dee5;
-    --muted-surface: #f7f6f3;
+    --canvas: var(--background);
+    --surface: var(--card);
+    --brand: var(--maroon);
+    --platform: var(--competition);
+    --action: var(--action);
+    --text: var(--foreground);
+    --text-secondary: var(--muted-foreground);
+    --border: var(--border);
+    --muted-surface: var(--muted);
     --success: #2e7d32;
-    --warning: #c17a00;
-    --error: #b3261e;
+    --warning: var(--highlight);
+    --error: var(--red);
     --header-height: 5.25rem;
 
     min-height: 100vh;
@@ -24,18 +24,7 @@
 }
 
 :global(.dark) .page {
-    --canvas: #111315;
-    --surface: #1a1d21;
-    --brand: #a84b5b;
-    --platform: #4f8fd6;
-    --action: #ff5a5f;
-    --text: #f3f4f6;
-    --text-secondary: #a7afb7;
-    --border: #343a40;
-    --muted-surface: #161a1f;
     --success: #81c784;
-    --warning: #ffd54a;
-    --error: #ff5a5f;
 }
 
 :global(.dark) .header {
@@ -323,7 +312,7 @@
     border-radius: 0.5rem;
     color: var(--text);
     font-size: 0.92rem;
-    background: var(--surface);
+    background: var(--muted-surface);
 }
 
 .heroTimeline span {
