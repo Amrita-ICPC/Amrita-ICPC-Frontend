@@ -18,10 +18,10 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaText: `${contest.team_count ?? 0} Teams`,
             buttonText: "Open Teams",
             icon: Users,
-            iconBg: "bg-blue-500/10 dark:bg-blue-500/20",
-            iconColor: "text-blue-600 dark:text-blue-400",
+            iconBg: "bg-muted/80",
+            iconColor: "text-muted-foreground",
             href: `/contest/${contest.id}/teams`,
-            metaColor: "text-blue-600 dark:text-blue-400",
+            metaColor: "text-muted-foreground",
         },
         {
             title: "Manage Questions",
@@ -29,10 +29,10 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaText: `${contest.question_count ?? 0} Questions`,
             buttonText: "Open Questions",
             icon: FileText,
-            iconBg: "bg-violet-500/10 dark:bg-violet-500/20",
-            iconColor: "text-violet-600 dark:text-violet-400",
+            iconBg: "bg-muted/80",
+            iconColor: "text-muted-foreground",
             href: `/contest/${contest.id}/questions`,
-            metaColor: "text-violet-600 dark:text-violet-400",
+            metaColor: "text-muted-foreground",
         },
         {
             title: "Access Management",
@@ -40,10 +40,10 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaText: "Permissions & Access",
             buttonText: "Manage Access",
             icon: ShieldCheck,
-            iconBg: "bg-yellow-500/10 dark:bg-yellow-500/20",
-            iconColor: "text-yellow-600 dark:text-yellow-400",
+            iconBg: "bg-muted/80",
+            iconColor: "text-muted-foreground",
             href: `/contest/${contest.id}/access`,
-            metaColor: "text-yellow-600 dark:text-yellow-500",
+            metaColor: "text-muted-foreground",
         },
         {
             title: "Evaluate Contest",
@@ -52,10 +52,10 @@ export function ManagementHub({ contest }: ManagementHubProps) {
             metaText: "Evaluate submissions",
             buttonText: "Open Evaluate",
             icon: Cpu,
-            iconBg: "bg-amber-500/10 dark:bg-amber-500/20",
-            iconColor: "text-amber-600 dark:text-amber-400",
+            iconBg: "bg-muted/80",
+            iconColor: "text-muted-foreground",
             href: `/contest/${contest.id}/evaluate`,
-            metaColor: "text-amber-600 dark:text-amber-500",
+            metaColor: "text-muted-foreground",
         },
     ];
 
@@ -68,17 +68,15 @@ export function ManagementHub({ contest }: ManagementHubProps) {
                     return (
                         <Card
                             key={i}
-                            className="flex flex-col border-border/60 bg-card hover:bg-muted/20 transition-colors overflow-hidden"
+                            className="group flex flex-col border-border/60 bg-card hover:border-primary/30 hover:bg-muted/5 transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden"
                         >
                             <div className="flex flex-1 flex-col p-5">
                                 <div className="flex items-start gap-4">
-                                    <div
-                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.iconBg}`}
-                                    >
-                                        <Icon className={`h-6 w-6 ${card.iconColor}`} />
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/80 group-hover:bg-primary/10 transition-colors duration-300">
+                                        <Icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
                                     </div>
                                     <div className="space-y-1">
-                                        <h3 className="font-semibold text-base text-foreground leading-none mt-1">
+                                        <h3 className="font-semibold text-base text-foreground leading-none mt-1 transition-colors group-hover:text-primary">
                                             {card.title}
                                         </h3>
                                         <p className="text-sm text-muted-foreground leading-snug">
@@ -89,16 +87,16 @@ export function ManagementHub({ contest }: ManagementHubProps) {
                             </div>
 
                             <div className="flex items-center justify-between border-t border-border/40 px-5 py-3 mt-auto bg-muted/10">
-                                <span className={`text-xs font-medium ${card.metaColor}`}>
+                                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">
                                     {card.metaText}
                                 </span>
                                 <Link
                                     href={card.href}
-                                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors"
                                 >
-                                    <span className="rounded-md border border-border/50 bg-background/50 px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-muted/50 transition-colors shadow-sm">
+                                    <span className="rounded-md border border-border/50 bg-background/50 px-2.5 py-1.5 flex items-center gap-1.5 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary transition-all duration-300 shadow-sm">
                                         {card.buttonText}
-                                        <ArrowRight className="h-3 w-3" />
+                                        <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
                                     </span>
                                 </Link>
                             </div>
