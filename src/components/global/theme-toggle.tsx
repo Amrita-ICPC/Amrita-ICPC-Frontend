@@ -13,7 +13,7 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-sidebar-border text-sidebar-foreground/50">
+            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-input text-muted-foreground/50 bg-background">
                 <Sun className="h-4 w-4" />
             </button>
         );
@@ -24,7 +24,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-sidebar-border text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-input bg-background text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             title={`Switch to ${isDark ? "light" : "dark"} mode`}
         >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
