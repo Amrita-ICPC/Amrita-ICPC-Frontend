@@ -544,7 +544,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                         disabled={
                                             publishResultsMutation.isPending || isContestLoading
                                         }
-                                        className="w-full justify-center h-8 font-semibold text-xs bg-indigo-650 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                                        className="w-full justify-center h-8 font-semibold text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
                                     >
                                         {publishResultsMutation.isPending && (
                                             <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />

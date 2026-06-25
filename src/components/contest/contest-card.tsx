@@ -133,12 +133,12 @@ export function ContestCard({ contest }: ContestCardProps) {
     return (
         <Link
             href={`/contest/${contest.id}`}
-            className="group relative flex flex-col overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-md block"
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-md block"
         >
             {/* Header Block (Waves + Badges) */}
-            <div className="relative h-[96px] w-full bg-primary/5 dark:bg-primary/10">
+            <div className="relative h-[96px] w-full bg-primary/5">
                 <WaveBackground />
-                <div className="absolute inset-0 bg-[radial-gradient(theme(colors.primary.DEFAULT)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_20%,transparent_80%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(var(--primary)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_20%,transparent_80%)]" />
 
                 <div className="relative z-10 flex items-start justify-between p-4">
                     {/* Run Status Badge */}
