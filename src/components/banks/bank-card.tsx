@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Edit, Globe, HelpCircle, Trash2, Users } from "lucide-react";
+import { BookOpen, Edit, HelpCircle, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useDeleteBank } from "@/query/bank-query";
@@ -26,37 +27,6 @@ import { BankUpdateDialog } from "./bank-update-dialog";
 interface BankCardProps {
     bank: BankResponse;
 }
-
-const WaveBackground = () => (
-    <div className="absolute inset-0 z-0 opacity-40 dark:opacity-30">
-        <svg
-            className="absolute h-full w-full object-cover"
-            preserveAspectRatio="none"
-            viewBox="0 0 1440 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path
-                d="M0,80 C320,160 560,-40 1440,100 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.15"
-            />
-            <path
-                d="M0,120 C400,200 800,0 1440,120 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.1"
-            />
-            <path
-                d="M0,160 C500,40 900,180 1440,140 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.05"
-            />
-        </svg>
-    </div>
-);
 
 export function BankCard({ bank }: BankCardProps) {
     const router = useRouter();
@@ -84,25 +54,26 @@ export function BankCard({ bank }: BankCardProps) {
 
     return (
         <Card
-            className="group cursor-pointer border-border/60 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md rounded-[16px] overflow-hidden flex flex-col p-0 gap-0"
+            className="group cursor-pointer border border-border/40 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md rounded-2xl overflow-hidden flex flex-col p-0 gap-0 relative"
             onClick={() => router.push(`/banks/${bank.id}`)}
         >
-            {/* Top Section (Blue Background) */}
-            <div className="relative flex flex-col p-6 bg-blue-500/5 dark:bg-blue-500/10 border-b border-border/40">
-                <WaveBackground />
-                <div className="absolute inset-0 bg-[radial-gradient(theme(colors.blue.500)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
+            {/* Top brand identity gradient bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-maroon via-blue via-red to-gold z-10" />
 
-                <div className="relative z-10 flex flex-col">
+            {/* Top Section */}
+            <div className="relative flex flex-col p-5 pt-6 bg-muted/5 border-b border-border/40">
+                <div className="relative flex flex-col">
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/20">
-                                <BookOpen className="size-4" />
+                            {/* Amrita Maroon structural badge */}
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-maroon/10 text-maroon group-hover:bg-maroon group-hover:text-white shadow-sm shadow-maroon/10 transition-all duration-300">
+                                <BookOpen className="size-4.5" />
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-[16px] font-bold leading-tight text-foreground transition-colors group-hover:text-primary line-clamp-1">
+                                <h3 className="text-base font-bold leading-tight text-foreground transition-colors group-hover:text-primary line-clamp-1">
                                     {bank.name}
                                 </h3>
-                                <span className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                                <span className="text-[11px] font-semibold text-muted-foreground mt-1">
                                     Updated {formattedDate}
                                 </span>
                             </div>
@@ -111,17 +82,18 @@ export function BankCard({ bank }: BankCardProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
                                 onClick={() => setDeleteOpen(true)}
                                 disabled={isDeleting}
+                                aria-label="Delete bank"
                             >
                                 <Trash2 className="size-4" />
                             </Button>
                         </div>
                     </div>
 
-                    <div className="mt-5 min-h-[40px]">
-                        <p className="line-clamp-2 text-[13px] text-muted-foreground leading-relaxed">
+                    <div className="mt-4 min-h-[36px]">
+                        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
                             {bank.description || "No description provided for this question bank."}
                         </p>
                     </div>
@@ -129,17 +101,32 @@ export function BankCard({ bank }: BankCardProps) {
             </div>
 
             {/* Bottom Section (Stats and Actions) */}
-            <div className="flex flex-col p-5 bg-card gap-5">
+            <div className="flex flex-col p-4 bg-card gap-4">
                 <div className="flex items-center justify-between px-1">
+                    {/* Visibility badges matching brand colors */}
+                    {(() => {
+                        const isPublic = (bank as any).is_public ?? (bank as any).public;
+                        return isPublic ? (
+                            <Badge
+                                variant="outline"
+                                className="border-gold/30 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
+                            >
+                                Public
+                            </Badge>
+                        ) : (
+                            <Badge
+                                variant="outline"
+                                className="border-red/30 bg-red/10 text-red text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
+                            >
+                                Private
+                            </Badge>
+                        );
+                    })()}
+
+                    {/* Questions count styled in ICPC Blue telemetry */}
                     <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Globe className="h-3.5 w-3.5" />
-                        <span className="text-[12.5px] font-medium">
-                            {(bank as any).is_public ? "Public" : "Private"}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <HelpCircle className="h-3.5 w-3.5" />
-                        <span className="text-[12.5px] font-medium">
+                        <HelpCircle className="h-3.5 w-3.5 text-blue" />
+                        <span className="text-xs font-semibold text-foreground/80">
                             {(bank as any).questions_count || (bank as any).questions?.length || 0}{" "}
                             Questions
                         </span>
@@ -154,27 +141,27 @@ export function BankCard({ bank }: BankCardProps) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="flex-1 h-9 rounded-xl border-border/60 hover:bg-muted shadow-sm transition-all"
+                                className="flex-1 h-8 rounded-lg border-border/60 hover:bg-muted text-xs font-semibold cursor-pointer shadow-sm transition-all"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
                             >
-                                <Users className="mr-2 size-3.5" />
-                                Manage Access
+                                <Users className="mr-1.5 size-3.5" />
+                                Share
                             </Button>
                         }
                     />
                     <Button
                         variant="default"
                         size="sm"
-                        className="flex-1 h-9 rounded-xl shadow-sm hover:scale-[1.02] transition-transform"
+                        className="flex-1 h-8 rounded-lg text-xs font-semibold cursor-pointer shadow-sm bg-red hover:bg-red/90 text-white border-transparent hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                         onClick={(e) => {
                             e.stopPropagation();
                             setUpdateOpen(true);
                         }}
                     >
-                        <Edit className="mr-2 size-3.5" />
-                        Edit Details
+                        <Edit className="mr-1.5 size-3.5" />
+                        Edit
                     </Button>
                 </div>
             </div>
@@ -189,7 +176,7 @@ export function BankCard({ bank }: BankCardProps) {
                     trigger={null}
                 />
                 <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <AlertDialogContent className="rounded-[16px] border-border/60">
+                    <AlertDialogContent className="rounded-2xl border-border/60">
                         <AlertDialogHeader>
                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -203,7 +190,7 @@ export function BankCard({ bank }: BankCardProps) {
                                 onClick={() => {
                                     deleteMutation.mutate({ bankId: bank.id });
                                 }}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg shadow-sm"
                                 disabled={isDeleting}
                             >
                                 {isDeleting ? "Deleting..." : "Delete Bank"}

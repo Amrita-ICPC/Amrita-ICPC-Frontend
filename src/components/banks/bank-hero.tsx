@@ -142,10 +142,10 @@ export function BankHero({ bank }: BankHeroProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <Card className="border-border/60 p-0 gap-0 relative overflow-hidden rounded-[16px]">
-                <div className="absolute top-0 inset-x-0 h-full bg-blue-500/5 dark:bg-blue-500/10 overflow-hidden pointer-events-none border-b border-border/40">
+            <Card className="border p-0 gap-0 relative overflow-hidden rounded-2xl">
+                <div className="absolute top-0 inset-x-0 h-full bg-competition/5 overflow-hidden pointer-events-none border-b border-border">
                     <WaveBackground />
-                    <div className="absolute inset-0 bg-[radial-gradient(theme(colors.blue.500)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(var(--competition)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
                 </div>
                 <CardContent className="relative z-10 p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
