@@ -92,7 +92,7 @@ export function ProblemPreview({
 
     return (
         <div className="max-w-4xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header / Actions - Removed duplicated back button as it's now in QuestionCreateHero */}
+            {/* Header / Actions - Hidden default back button */}
             <div className="flex items-center justify-between mb-8 opacity-0 pointer-events-none h-0 overflow-hidden">
                 <Button
                     variant="ghost"
@@ -104,185 +104,219 @@ export function ProblemPreview({
                 </Button>
             </div>
 
-            {/* Problem Title & Stats */}
-            <div className="space-y-6 mb-12">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px]">
-                        <Hash className="h-3 w-3" /> Challenge
-                    </div>
-                    <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-                        {title || "Untitled Problem"}
-                    </h1>
-                </div>
-
-                <div className="flex flex-wrap gap-6 items-center">
-                    <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-                        <Trophy className="h-4 w-4 text-amber-500" />
-                        <span className="font-medium text-foreground/70">{score} Points</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-                        <Clock className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-foreground/70">{timeLimit}ms</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-                        <Database className="h-4 w-4 text-emerald-500" />
-                        <span className="font-medium text-foreground/70">{memoryLimit}MB</span>
-                    </div>
-                    <Badge
-                        className={cn(
-                            "rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-wider",
-                            difficulty === "EASY"
-                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                                : difficulty === "MEDIUM"
-                                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                                  : "bg-destructive/10 text-destructive border-destructive/20",
-                        )}
-                    >
-                        {difficulty}
-                    </Badge>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="space-y-12">
-                {/* Description */}
-                <section className="prose prose-slate dark:prose-invert max-w-none">
-                    <div className="flex items-center gap-2 mb-6 group">
-                        <div className="h-8 w-1 bg-primary rounded-full" />
-                        <h2 className="text-2xl font-bold tracking-tight m-0">Problem Statement</h2>
-                    </div>
-                    <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkMath] as any}
-                        rehypePlugins={[rehypeKatex] as any}
-                        components={markdownComponents as any}
-                    >
-                        {convertMath(description) || "_No description provided yet._"}
-                    </ReactMarkdown>
-                </section>
-
-                <Separator className="bg-border/40" />
-
-                {/* Input/Output Format */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <section>
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                                <Info className="h-4 w-4" />
-                            </div>
-                            <h2 className="text-xl font-bold tracking-tight m-0">Input Format</h2>
+            {/* Preview Card */}
+            <div className="rounded-xl border border-border/60 bg-card p-6 md:p-8 shadow-sm space-y-8">
+                {/* Problem Title & Stats */}
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+                            <Hash className="h-3.5 w-3.5" /> Challenge Preview
                         </div>
-                        <div className="text-foreground/90 leading-relaxed text-sm">
-                            <ReactMarkdown
-                                remarkPlugins={[remarkGfm, remarkMath] as any}
-                                rehypePlugins={[rehypeKatex] as any}
-                                components={markdownComponents as any}
-                            >
-                                {convertMath(inputFormat) || "_No input format specified._"}
-                            </ReactMarkdown>
-                        </div>
-                    </section>
-
-                    <section>
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                                <ListChecks className="h-4 w-4" />
-                            </div>
-                            <h2 className="text-xl font-bold tracking-tight m-0">Output Format</h2>
-                        </div>
-                        <div className="text-foreground/90 leading-relaxed text-sm">
-                            <ReactMarkdown
-                                remarkPlugins={[remarkGfm, remarkMath] as any}
-                                rehypePlugins={[rehypeKatex] as any}
-                                components={markdownComponents as any}
-                            >
-                                {convertMath(outputFormat) || "_No output format specified._"}
-                            </ReactMarkdown>
-                        </div>
-                    </section>
-                </div>
-
-                {/* Constraints */}
-                <section>
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                            <ListChecks className="h-4 w-4" />
-                        </div>
-                        <h2 className="text-xl font-bold tracking-tight m-0">Constraints</h2>
+                        <h1 className="text-3xl font-extrabold tracking-tight lg:text-4xl text-foreground">
+                            {title || "Untitled Problem"}
+                        </h1>
                     </div>
-                    <div className="bg-muted/30 border border-border/40 rounded-2xl p-6 prose prose-slate dark:prose-invert max-w-none">
-                        <ReactMarkdown
-                            remarkPlugins={[remarkGfm, remarkMath] as any}
-                            rehypePlugins={[rehypeKatex] as any}
-                            components={markdownComponents as any}
+
+                    <div className="flex flex-wrap gap-4 items-center">
+                        <div className="flex items-center gap-2 text-xs bg-muted/40 px-3 py-1.5 rounded-full border border-border/40">
+                            <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                            <span className="font-semibold text-muted-foreground">
+                                {score} Points
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs bg-muted/40 px-3 py-1.5 rounded-full border border-border/40">
+                            <Clock className="h-3.5 w-3.5 text-blue-500" />
+                            <span className="font-semibold text-muted-foreground">
+                                {timeLimit}ms
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs bg-muted/40 px-3 py-1.5 rounded-full border border-border/40">
+                            <Database className="h-3.5 w-3.5 text-emerald-500" />
+                            <span className="font-semibold text-muted-foreground">
+                                {memoryLimit}MB
+                            </span>
+                        </div>
+                        <Badge
+                            variant="outline"
+                            className={cn(
+                                "rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border",
+                                difficulty === "EASY"
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400 dark:bg-emerald-500/20"
+                                    : difficulty === "MEDIUM"
+                                      ? "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 dark:bg-amber-500/20"
+                                      : "bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400 dark:bg-red-500/20",
+                            )}
                         >
-                            {convertMath(constraints) || "_No specific constraints defined._"}
-                        </ReactMarkdown>
+                            {difficulty}
+                        </Badge>
                     </div>
-                </section>
+                </div>
 
-                {/* Notes */}
-                {notes && (
-                    <section>
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                                <FileText className="h-4 w-4" />
-                            </div>
-                            <h2 className="text-xl font-bold tracking-tight m-0">Notes</h2>
+                <Separator className="bg-border/60" />
+
+                {/* Main Content */}
+                <div className="space-y-10">
+                    {/* Description */}
+                    <section className="prose prose-slate dark:prose-invert max-w-none">
+                        <div className="flex items-center gap-2 mb-4 group">
+                            <div className="h-6 w-1 bg-primary rounded-full" />
+                            <h2 className="text-xl font-bold tracking-tight m-0 text-foreground">
+                                Problem Statement
+                            </h2>
                         </div>
-                        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-8 prose prose-sm dark:prose-invert max-w-none italic text-muted-foreground">
+                        <div className="text-foreground/90 leading-relaxed text-sm">
                             <ReactMarkdown
                                 remarkPlugins={[remarkGfm, remarkMath] as any}
                                 rehypePlugins={[rehypeKatex] as any}
                                 components={markdownComponents as any}
                             >
-                                {convertMath(notes)}
+                                {convertMath(description) || "_No description provided yet._"}
                             </ReactMarkdown>
                         </div>
                     </section>
-                )}
 
-                {/* Example Test Cases */}
-                {testCases.filter((tc) => !tc.is_hidden).length > 0 && (
-                    <section className="space-y-8">
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                    <Separator className="bg-border/40" />
+
+                    {/* Input/Output Format */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <section>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                                    <Info className="h-4 w-4" />
+                                </div>
+                                <h2 className="text-lg font-bold tracking-tight m-0 text-foreground">
+                                    Input Format
+                                </h2>
+                            </div>
+                            <div className="text-foreground/90 leading-relaxed text-sm">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath] as any}
+                                    rehypePlugins={[rehypeKatex] as any}
+                                    components={markdownComponents as any}
+                                >
+                                    {convertMath(inputFormat) || "_No input format specified._"}
+                                </ReactMarkdown>
+                            </div>
+                        </section>
+
+                        <section>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+                                    <ListChecks className="h-4 w-4" />
+                                </div>
+                                <h2 className="text-lg font-bold tracking-tight m-0 text-foreground">
+                                    Output Format
+                                </h2>
+                            </div>
+                            <div className="text-foreground/90 leading-relaxed text-sm">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath] as any}
+                                    rehypePlugins={[rehypeKatex] as any}
+                                    components={markdownComponents as any}
+                                >
+                                    {convertMath(outputFormat) || "_No output format specified._"}
+                                </ReactMarkdown>
+                            </div>
+                        </section>
+                    </div>
+
+                    <Separator className="bg-border/40" />
+
+                    {/* Constraints */}
+                    <section>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
                                 <ListChecks className="h-4 w-4" />
                             </div>
-                            <h2 className="text-xl font-bold tracking-tight m-0">Examples</h2>
+                            <h2 className="text-lg font-bold tracking-tight m-0 text-foreground">
+                                Constraints
+                            </h2>
                         </div>
-
-                        <div className="space-y-12">
-                            {testCases
-                                .filter((tc) => !tc.is_hidden)
-                                .map((tc, idx) => (
-                                    <div key={tc.id} className="space-y-4">
-                                        <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 px-2 flex items-center gap-2">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            Example #{idx + 1}
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
-                                                    Input
-                                                </Label>
-                                                <pre className="bg-muted/50 p-4 rounded-2xl border border-border/40 font-mono text-sm min-h-[80px]">
-                                                    {tc.input || "No input"}
-                                                </pre>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
-                                                    Expected Output
-                                                </Label>
-                                                <pre className="bg-primary/5 p-4 rounded-2xl border border-primary/10 font-mono text-sm min-h-[80px]">
-                                                    {tc.output || "No output"}
-                                                </pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                        <div className="bg-muted/30 border border-border/40 rounded-xl p-5 text-sm text-foreground/90 leading-relaxed">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath] as any}
+                                rehypePlugins={[rehypeKatex] as any}
+                                components={markdownComponents as any}
+                            >
+                                {convertMath(constraints) || "_No specific constraints defined._"}
+                            </ReactMarkdown>
                         </div>
                     </section>
-                )}
+
+                    {/* Notes */}
+                    {notes && (
+                        <>
+                            <Separator className="bg-border/40" />
+                            <section>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <FileText className="h-4 w-4" />
+                                    </div>
+                                    <h2 className="text-lg font-bold tracking-tight m-0 text-foreground">
+                                        Notes
+                                    </h2>
+                                </div>
+                                <div className="bg-primary/5 border border-primary/15 text-muted-foreground rounded-xl p-5 text-sm italic">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm, remarkMath] as any}
+                                        rehypePlugins={[rehypeKatex] as any}
+                                        components={markdownComponents as any}
+                                    >
+                                        {convertMath(notes)}
+                                    </ReactMarkdown>
+                                </div>
+                            </section>
+                        </>
+                    )}
+
+                    {/* Example Test Cases */}
+                    {testCases.filter((tc) => !tc.is_hidden).length > 0 && (
+                        <>
+                            <Separator className="bg-border/40" />
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <ListChecks className="h-4 w-4" />
+                                    </div>
+                                    <h2 className="text-lg font-bold tracking-tight m-0 text-foreground">
+                                        Examples
+                                    </h2>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {testCases
+                                        .filter((tc) => !tc.is_hidden)
+                                        .map((tc, idx) => (
+                                            <div key={tc.id} className="space-y-3">
+                                                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1 flex items-center gap-2">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                                    Example #{idx + 1}
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
+                                                            Input
+                                                        </Label>
+                                                        <pre className="bg-muted/40 p-4 rounded-xl border border-border/40 font-mono text-xs min-h-[60px] whitespace-pre-wrap text-foreground/90">
+                                                            {tc.input || "No input"}
+                                                        </pre>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
+                                                            Expected Output
+                                                        </Label>
+                                                        <pre className="bg-primary/5 p-4 rounded-xl border border-primary/10 font-mono text-xs min-h-[60px] whitespace-pre-wrap text-foreground/90">
+                                                            {tc.output || "No output"}
+                                                        </pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </section>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

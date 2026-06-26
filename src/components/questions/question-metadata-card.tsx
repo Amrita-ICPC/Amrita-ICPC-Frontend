@@ -158,139 +158,130 @@ export function ProblemMetadataCard({
                 </p>
             </div>
 
-            <div className="space-y-5">
-                {/* 1. Question Title */}
-                <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                        Question Title <span className="text-red-500 font-bold">*</span>
-                    </Label>
-                    <Input
-                        placeholder="Enter a concise and meaningful title"
-                        className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                </div>
-
-                {/* 2. Difficulty Custom Buttons */}
-                <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                        Difficulty <span className="text-red-500 font-bold">*</span>
-                    </Label>
-                    <div className="flex gap-3">
-                        {DIFFICULTY_OPTIONS.map((opt) => {
-                            const isActive = difficulty === opt.value;
-                            return (
-                                <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => setDifficulty(opt.value as any)}
-                                    className={cn(
-                                        "flex-1 py-2 px-4 rounded-lg border text-xs font-semibold transition-all duration-200 cursor-pointer text-center outline-none",
-                                        isActive
-                                            ? opt.activeColor
-                                            : "border-border/60 hover:border-primary/40 bg-card hover:bg-muted/40 text-muted-foreground",
-                                    )}
-                                >
-                                    {opt.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* 3. Numerical Metrics Rows */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Score */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column: Basic Information */}
+                <div className="space-y-5">
+                    {/* 1. Question Title */}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Score / Points <span className="text-red-500 font-bold">*</span>
+                            Question Title <span className="text-red-500 font-bold">*</span>
                         </Label>
                         <Input
-                            type="number"
-                            value={score}
-                            onChange={(e) => setScore(Number(e.target.value))}
+                            placeholder="Enter a concise and meaningful title"
                             className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                         />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Points awarded for a correct solution.
-                        </p>
                     </div>
 
-                    {/* Duration */}
+                    {/* 2. Difficulty Custom Buttons */}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Duration (minutes)
+                            Difficulty <span className="text-red-500 font-bold">*</span>
                         </Label>
-                        <Input
-                            placeholder="e.g. 120"
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Suggested duration for the challenge.
-                        </p>
+                        <div className="flex gap-3">
+                            {DIFFICULTY_OPTIONS.map((opt) => {
+                                const isActive = difficulty === opt.value;
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        onClick={() => setDifficulty(opt.value as any)}
+                                        className={cn(
+                                            "flex-1 py-2 px-4 rounded-lg border text-xs font-semibold transition-all duration-200 cursor-pointer text-center outline-none",
+                                            isActive
+                                                ? opt.activeColor
+                                                : "border-border/60 hover:border-primary/40 bg-card hover:bg-muted/40 text-muted-foreground",
+                                        )}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
-                    {/* Max Submissions */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Max Submissions
-                        </Label>
-                        <Input
-                            placeholder="e.g. 5"
-                            type="number"
-                            value={maxSubmission}
-                            onChange={(e) => setMaxSubmission(e.target.value)}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum submissions allowed for this question. Leave blank for no limit.
-                        </p>
-                    </div>
+                    {/* 3. Numerical Metrics Rows */}
+                    <div className="grid grid-cols-3 gap-4">
+                        {/* Score */}
+                        <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap">
+                                Score / Points <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={score}
+                                onChange={(e) => setScore(Number(e.target.value))}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                        </div>
 
-                    {/* Time Limit */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Time Limit (ms) <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            value={timeLimit}
-                            onChange={(e) => setTimeLimit(Number(e.target.value))}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum execution time allowed per test case.
-                        </p>
-                    </div>
+                        {/* Duration */}
+                        <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap">
+                                Duration (mins)
+                            </Label>
+                            <Input
+                                placeholder="e.g. 120"
+                                value={duration}
+                                onChange={(e) => setDuration(e.target.value)}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                        </div>
 
-                    {/* Memory Limit */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Memory Limit (MB) <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            value={memoryLimit}
-                            onChange={(e) => setMemoryLimit(Number(e.target.value))}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum memory allocated per test case.
-                        </p>
+                        {/* Max Submissions */}
+                        <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap">
+                                Max Subs
+                            </Label>
+                            <Input
+                                placeholder="e.g. 5"
+                                type="number"
+                                value={maxSubmission}
+                                onChange={(e) => setMaxSubmission(e.target.value)}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* 4. Languages and Tags in double columns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Right Column: Judge Configuration & Selection */}
+                <div className="space-y-5">
+                    {/* Time Limit & Memory Limit */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Time Limit */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Time Limit (ms) <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={timeLimit}
+                                onChange={(e) => setTimeLimit(Number(e.target.value))}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                        </div>
+
+                        {/* Memory Limit */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Memory Limit (MB) <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={memoryLimit}
+                                onChange={(e) => setMemoryLimit(Number(e.target.value))}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                        </div>
+                    </div>
+
                     {/* Allowed Languages */}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
                             Allowed Languages <span className="text-red-500 font-bold">*</span>
                         </Label>
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-2">
                             <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -316,7 +307,7 @@ export function ProblemMetadataCard({
                                             placeholder="Search languages..."
                                             className="h-9 border-none focus:ring-0 text-xs"
                                         />
-                                        <CommandList className="max-h-[250px]">
+                                        <CommandList className="max-h-[200px]">
                                             <CommandEmpty>No languages found.</CommandEmpty>
                                             <CommandGroup>
                                                 {languages.map((lang: any) => (
@@ -347,7 +338,7 @@ export function ProblemMetadataCard({
                                                                     <Check className="h-2.5 w-2.5 text-primary-foreground" />
                                                                 )}
                                                             </div>
-                                                            <span className="font-medium">
+                                                            <span className="font-medium text-xs">
                                                                 {lang.name ||
                                                                     lang.label ||
                                                                     lang.slug ||
@@ -442,7 +433,7 @@ export function ProblemMetadataCard({
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
                             Tags
                         </Label>
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-2">
                             <Popover open={tagOpen} onOpenChange={setTagOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -470,7 +461,7 @@ export function ProblemMetadataCard({
                                             value={tagInput}
                                             onValueChange={setTagInput}
                                         />
-                                        <CommandList className="max-h-[250px]">
+                                        <CommandList className="max-h-[200px]">
                                             <CommandEmpty className="p-0">
                                                 <div className="p-2">
                                                     <Button
