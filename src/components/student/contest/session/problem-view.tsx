@@ -49,33 +49,30 @@ const markdownComponents = {
         />
     ),
     ol: ({ ...props }) => (
-        <ol
-            className="list-decimal pl-5 mb-3 text-xs text-slate-700 dark:text-slate-300 space-y-1"
-            {...props}
-        />
+        <ol className="list-decimal pl-5 mb-3 text-xs text-foreground/80 space-y-1" {...props} />
     ),
     li: ({ ...props }) => <li className="pl-0.5" {...props} />,
     pre: ({ ...props }) => (
         <pre
-            className="bg-slate-100 dark:bg-[#070b13] p-3.5 rounded-xl border border-slate-200 dark:border-slate-800/80 font-mono text-xs text-slate-800 dark:text-slate-200 my-3.5 overflow-x-auto leading-normal"
+            className="bg-muted p-3.5 rounded-xl border border-border font-mono text-xs text-foreground my-3.5 overflow-x-auto leading-normal"
             {...props}
         />
     ),
     code: ({ ...props }) => (
         <code
-            className="bg-slate-100 dark:bg-[#070b13] px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-300 font-mono text-xs"
+            className="bg-muted px-1.5 py-0.5 rounded text-primary font-mono text-xs"
             {...props}
         />
     ),
     table: ({ ...props }) => (
         <table
-            className="w-full text-left border-collapse my-3 border border-slate-200 dark:border-slate-800 text-xs"
+            className="w-full text-left border-collapse my-3 border border-border text-xs"
             {...props}
         />
     ),
     th: ({ ...props }) => (
         <th
-            className="border border-slate-200 dark:border-slate-800 p-2 bg-slate-50 dark:bg-slate-900 font-bold text-slate-900 dark:text-white text-xs"
+            className="border border-border p-2 bg-muted font-bold text-foreground text-xs"
             {...props}
         />
     ),

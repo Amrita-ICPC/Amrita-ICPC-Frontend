@@ -5,29 +5,28 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 const eslintConfig = [
-  {
-
-    ignores: [
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "*.config.mjs",
-      "src/api/generated/**",
-    ],
-  },
-  ...fixupConfigRules(nextVitals),
-  {
-    plugins:{
-      "unused-imports":unusedImports,
-      "simple-import-sort":simpleImportSort
+    {
+        ignores: [
+            ".next/**",
+            "out/**",
+            "build/**",
+            "next-env.d.ts",
+            "*.config.mjs",
+            "src/api/generated/**",
+        ],
     },
-    rules:{
-      //remove unused imports
-      "unused-imports/no-unused-imports": "error",
+    ...fixupConfigRules(nextVitals),
+    {
+        plugins: {
+            "unused-imports": unusedImports,
+            "simple-import-sort": simpleImportSort,
+        },
+        rules: {
+            //remove unused imports
+            "unused-imports/no-unused-imports": "error",
 
-      //warn unused vars
-      "unused-imports/no-unused-vars": [
+            //warn unused vars
+            "unused-imports/no-unused-vars": [
                 "warn",
                 {
                     vars: "all",
@@ -36,14 +35,14 @@ const eslintConfig = [
                     argsIgnorePattern: "^_",
                 },
             ],
-            
-        // sort imports automatically
-        "simple-import-sort/imports": "error",
-        "simple-import-sort/exports": "error",
-    }
-  },
-  //prettier
-  eslintConfigPrettier
+
+            // sort imports automatically
+            "simple-import-sort/imports": "error",
+            "simple-import-sort/exports": "error",
+        },
+    },
+    //prettier
+    eslintConfigPrettier,
 ];
 
 export default eslintConfig;

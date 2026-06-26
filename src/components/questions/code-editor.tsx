@@ -10,7 +10,8 @@ import {
     Play,
     TerminalSquare,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,23 +60,23 @@ interface ExecutionResult {
 }
 
 const STATUS_COLORS: Record<number, string> = {
-    3: "text-emerald-400", // Accepted
-    4: "text-red-400", // Wrong Answer
-    5: "text-amber-400", // Time Limit Exceeded
-    6: "text-red-400", // Compilation Error
-    11: "text-red-400", // Runtime Error
-    13: "text-red-400", // Internal Error
+    3: "text-emerald-500", // Accepted
+    4: "text-red-500", // Wrong Answer
+    5: "text-amber-500", // Time Limit Exceeded
+    6: "text-red-500", // Compilation Error
+    11: "text-red-500", // Runtime Error
+    13: "text-red-500", // Internal Error
 };
 
 function statusColor(id?: number) {
-    if (!id) return "text-slate-400";
-    return STATUS_COLORS[id] ?? (id === 3 ? "text-emerald-400" : "text-red-400");
+    if (!id) return "text-muted-foreground";
+    return STATUS_COLORS[id] ?? (id === 3 ? "text-emerald-500" : "text-red-500");
 }
 
 function OutputPanel({ result, error }: { result: ExecutionResult | null; error: string | null }) {
     if (error) {
         return (
-            <div className="flex items-start gap-3 p-4 text-red-400 text-sm">
+            <div className="flex items-start gap-3 p-4 text-red-500 text-sm">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
             </div>
@@ -84,7 +85,7 @@ function OutputPanel({ result, error }: { result: ExecutionResult | null; error:
 
     if (!result) {
         return (
-            <div className="flex items-center gap-2 p-4 text-slate-600 text-sm">
+            <div className="flex items-center gap-2 p-4 text-muted-foreground text-sm">
                 <TerminalSquare className="h-4 w-4" />
                 <span>Run your code to see output here.</span>
             </div>
@@ -109,7 +110,7 @@ function OutputPanel({ result, error }: { result: ExecutionResult | null; error:
                     )}
                     {result.status?.description ?? "Unknown"}
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     {result.time && (
                         <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {result.time}s
@@ -121,17 +122,19 @@ function OutputPanel({ result, error }: { result: ExecutionResult | null; error:
 
             {/* Output content */}
             {output ? (
-                <pre className="whitespace-pre-wrap break-words rounded-lg bg-[#070d1a] px-4 py-3 font-mono text-xs text-slate-300 leading-relaxed border border-white/5 max-h-[260px] overflow-y-auto">
+                <pre className="whitespace-pre-wrap break-words rounded-lg bg-muted px-4 py-3 font-mono text-xs text-foreground leading-relaxed border border-border max-h-[260px] overflow-y-auto">
                     {output}
                 </pre>
             ) : (
-                <p className="text-xs text-slate-600 italic">No output.</p>
+                <p className="text-xs text-muted-foreground italic">No output.</p>
             )}
         </div>
     );
 }
 
 export function CodeEditor() {
+    const { resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
     const [lang, setLang] = useState<Language>(LANGUAGES[0]);
     const [code, setCode] = useState<string>(lang.placeholder);
     const [stdin, setStdin] = useState("");
@@ -139,6 +142,13 @@ export function CodeEditor() {
     const [result, setResult] = useState<ExecutionResult | null>(null);
     const [execError, setExecError] = useState<string | null>(null);
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setMounted(true);
+    }, []);
+
+    const monacoTheme = mounted && resolvedTheme === "dark" ? "vs-dark" : "vs";
 
     const handleLangChange = (l: Language) => {
         setLang(l);
@@ -175,12 +185,12 @@ export function CodeEditor() {
     };
 
     return (
-        <div className="flex h-[calc(100vh-8rem)] flex-col gap-0 rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5">
+        <div className="flex h-[calc(100vh-8rem)] flex-col gap-0 rounded-xl overflow-hidden shadow-sm border border-border bg-card">
             {/* Toolbar */}
-            <div className="flex items-center justify-between gap-3 bg-[#0a1628] px-4 py-2.5 border-b border-white/5">
+            <div className="flex items-center justify-between gap-3 bg-muted/15 px-4 py-2.5 border-b border-border/40">
                 <div className="flex items-center gap-2">
-                    <TerminalSquare className="h-4 w-4 text-sky-400" />
-                    <span className="text-sm font-semibold text-slate-200">Code Editor</span>
+                    <TerminalSquare className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">Code Editor</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -188,23 +198,23 @@ export function CodeEditor() {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
-                                className="h-8 gap-2 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10"
+                                className="h-8 gap-2 border-border/40 bg-background/50 hover:bg-background/80 text-foreground transition-colors cursor-pointer"
                             >
                                 <span className="text-xs font-medium">{lang.label}</span>
-                                <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+                                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="w-44 bg-[#0f1e35] border-white/10"
+                            className="w-44 border-border/40 p-1 backdrop-blur-xl bg-background/95 shadow-lg"
                         >
                             {LANGUAGES.map((l) => (
                                 <DropdownMenuItem
                                     key={l.id}
                                     onClick={() => handleLangChange(l)}
-                                    className={`cursor-pointer text-sm ${l.id === lang.id ? "text-sky-400 bg-sky-500/10" : "text-slate-300 hover:text-white"}`}
+                                    className={`cursor-pointer text-sm ${l.id === lang.id ? "text-primary bg-primary/10 font-semibold" : "text-muted-foreground hover:bg-muted/50"}`}
                                 >
                                     {l.label}
                                 </DropdownMenuItem>
@@ -215,7 +225,7 @@ export function CodeEditor() {
                     {/* Run button */}
                     <Button
                         size="sm"
-                        className="h-8 gap-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold px-4"
+                        className="h-8 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 cursor-pointer active:scale-95 transition-all shadow-sm"
                         onClick={handleRun}
                         disabled={running}
                     >
@@ -225,7 +235,7 @@ export function CodeEditor() {
                             </>
                         ) : (
                             <>
-                                <Play className="h-3.5 w-3.5 fill-white" /> Run
+                                <Play className="h-3.5 w-3.5 fill-current" /> Run
                             </>
                         )}
                     </Button>
@@ -244,7 +254,7 @@ export function CodeEditor() {
                         onMount={(editor) => {
                             editorRef.current = editor;
                         }}
-                        theme="vs-dark"
+                        theme={monacoTheme}
                         options={{
                             fontSize: 14,
                             fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
@@ -266,14 +276,14 @@ export function CodeEditor() {
                 </div>
 
                 {/* Right panel: stdin + output */}
-                <div className="flex w-[360px] shrink-0 flex-col border-l border-white/5 bg-[#080f1c]">
+                <div className="flex w-[360px] shrink-0 flex-col border-l border-border/40 bg-muted/5">
                     {/* Stdin */}
-                    <div className="flex flex-col gap-1.5 border-b border-white/5 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    <div className="flex flex-col gap-1.5 border-b border-border/20 p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                             Standard Input
                         </p>
                         <Textarea
-                            className="h-28 resize-none font-mono text-xs bg-[#070d1a] border-white/5 text-slate-300 placeholder:text-slate-600 focus-visible:ring-sky-500/40"
+                            className="h-28 resize-none font-mono text-xs bg-background border-border/40 text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary/40"
                             placeholder="Enter input for your program…"
                             value={stdin}
                             onChange={(e) => setStdin(e.target.value)}
@@ -282,7 +292,7 @@ export function CodeEditor() {
 
                     {/* Output */}
                     <div className="flex flex-1 flex-col min-h-0">
-                        <p className="shrink-0 px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <p className="shrink-0 px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                             Output
                         </p>
                         <div className="flex-1 overflow-y-auto">

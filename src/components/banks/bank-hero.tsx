@@ -59,20 +59,20 @@ const WaveBackground = () => (
             <path
                 d="M0,80 C320,160 560,-40 1440,100 L1440,200 L0,200 Z"
                 fill="currentColor"
-                className="text-blue-500"
-                opacity="0.15"
+                className="text-primary"
+                opacity="0.08"
             />
             <path
                 d="M0,120 C400,200 800,0 1440,120 L1440,200 L0,200 Z"
                 fill="currentColor"
-                className="text-blue-500"
-                opacity="0.1"
+                className="text-primary"
+                opacity="0.05"
             />
             <path
                 d="M0,160 C500,40 900,180 1440,140 L1440,200 L0,200 Z"
                 fill="currentColor"
-                className="text-blue-500"
-                opacity="0.05"
+                className="text-primary"
+                opacity="0.03"
             />
         </svg>
     </div>
@@ -82,31 +82,25 @@ function CompactStat({
     icon: Icon,
     label,
     value,
-    colorClass,
-    bgClass,
-    solidBgClass,
+    dotColorClass,
 }: {
     icon: React.ElementType;
     label: string;
     value: number;
-    colorClass: string;
-    bgClass: string;
-    solidBgClass: string;
+    dotColorClass: string;
 }) {
     return (
-        <Card className="border-border/60 shadow-sm relative overflow-hidden rounded-xl p-0 gap-0">
-            <div
-                className={`absolute bottom-0 left-0 right-0 h-1 ${solidBgClass} opacity-80`}
-            ></div>
-            <CardContent className="flex items-center gap-3 p-5">
-                <div
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bgClass} ${colorClass}`}
-                >
+        <Card className="border-border/60 shadow-sm relative overflow-hidden rounded-xl p-0 gap-0 hover:border-primary/20 hover:shadow-md transition-all">
+            <CardContent className="flex items-center gap-3.5 p-5">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
                     <Icon className="size-5" />
                 </div>
-                <div className="min-w-0">
-                    <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
-                    <p className="mt-1 truncate text-[13px] font-semibold text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                        <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
+                        <span className={`size-2 shrink-0 rounded-full ${dotColorClass}`} />
+                    </div>
+                    <p className="mt-1 truncate text-xs font-semibold text-muted-foreground/80">
                         {label}
                     </p>
                 </div>
@@ -142,10 +136,10 @@ export function BankHero({ bank }: BankHeroProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <Card className="border-border/60 p-0 gap-0 relative overflow-hidden rounded-[16px]">
-                <div className="absolute top-0 inset-x-0 h-full bg-blue-500/5 dark:bg-blue-500/10 overflow-hidden pointer-events-none border-b border-border/40">
+            <Card className="border p-0 gap-0 relative overflow-hidden rounded-2xl">
+                <div className="absolute top-0 inset-x-0 h-full bg-competition/5 overflow-hidden pointer-events-none border-b border-border">
                     <WaveBackground />
-                    <div className="absolute inset-0 bg-[radial-gradient(theme(colors.blue.500)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(var(--competition)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
                 </div>
                 <CardContent className="relative z-10 p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -163,7 +157,7 @@ export function BankHero({ bank }: BankHeroProps) {
                                 </span>
                             </div>
                             <div className="flex items-start gap-4">
-                                <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/20 sm:flex">
+                                <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:flex">
                                     <Database className="size-5" />
                                 </div>
                                 <div className="min-w-0">
@@ -245,33 +239,25 @@ export function BankHero({ bank }: BankHeroProps) {
                     icon={FileCode2}
                     label="Easy questions"
                     value={bank.easy_questions_count ?? 0}
-                    colorClass="text-emerald-500"
-                    bgClass="bg-emerald-500/10"
-                    solidBgClass="bg-emerald-500"
+                    dotColorClass="bg-emerald-500"
                 />
                 <CompactStat
                     icon={BarChart3}
                     label="Medium questions"
                     value={bank.medium_questions_count ?? 0}
-                    colorClass="text-amber-500"
-                    bgClass="bg-amber-500/10"
-                    solidBgClass="bg-amber-500"
+                    dotColorClass="bg-amber-500"
                 />
                 <CompactStat
                     icon={Trophy}
                     label="Hard questions"
                     value={bank.hard_questions_count ?? 0}
-                    colorClass="text-rose-500"
-                    bgClass="bg-rose-500/10"
-                    solidBgClass="bg-rose-500"
+                    dotColorClass="bg-rose-500"
                 />
                 <CompactStat
                     icon={Share2}
                     label="Active shares"
                     value={bank.shared_users_count ?? 0}
-                    colorClass="text-blue-500"
-                    bgClass="bg-blue-500/10"
-                    solidBgClass="bg-blue-500"
+                    dotColorClass="bg-blue-500"
                 />
             </div>
 

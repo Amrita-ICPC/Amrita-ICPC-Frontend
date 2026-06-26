@@ -7,7 +7,10 @@ export async function POST(req: NextRequest) {
     const { source_code, language_id, stdin } = body;
 
     if (!source_code || !language_id) {
-        return NextResponse.json({ error: "source_code and language_id required" }, { status: 400 });
+        return NextResponse.json(
+            { error: "source_code and language_id required" },
+            { status: 400 },
+        );
     }
 
     try {

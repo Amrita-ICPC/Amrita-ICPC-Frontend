@@ -1,0 +1,697 @@
+:global(html) {
+    scroll-behavior: smooth;
+}
+
+.page {
+    --canvas: var(--background);
+    --surface: var(--card);
+    --brand: var(--maroon);
+    --platform: var(--competition);
+    --action: var(--action);
+    --text: var(--foreground);
+    --text-secondary: var(--muted-foreground);
+    --border: var(--border);
+    --muted-surface: var(--muted);
+    --success: #2e7d32;
+    --warning: var(--highlight);
+    --error: var(--red);
+    --header-height: 5.25rem;
+
+    min-height: 100vh;
+    background: var(--canvas);
+    color: var(--text);
+    font-family: var(--landing-font-sans), sans-serif;
+}
+
+:global(.dark) .page {
+    --success: #81c784;
+}
+
+:global(.dark) .header {
+    background: rgb(26 29 33 / 84%);
+    border-color: rgb(255 255 255 / 6%);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
+}
+
+.skipLink {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 20;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--action);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 140ms ease;
+}
+
+.skipLink:focus-visible {
+    transform: translateY(0);
+}
+
+.header {
+    position: sticky;
+    top: 1rem;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+    min-height: var(--header-height);
+    width: min(92rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 1rem 1.5rem 0.9rem;
+    border: 1px solid rgb(17 17 17 / 6%);
+    border-radius: 1.25rem;
+    background: rgb(255 255 255 / 84%);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 32px rgb(17 17 17 / 6%);
+    transition:
+        transform 220ms ease,
+        opacity 220ms ease,
+        box-shadow 220ms ease;
+}
+
+.header[data-hidden="true"] {
+    transform: translateY(calc(-100% - 1.5rem));
+    opacity: 0;
+    pointer-events: none;
+}
+
+.headerBrand {
+    display: grid;
+    gap: 0.1rem;
+    justify-self: start;
+}
+
+.headerInstitution,
+.headerDescriptor,
+.headerNavLink,
+.heroKicker,
+.heroPlaneLabel,
+.heroPlaneMeta,
+.sectionLabelNumber,
+.sectionLabelText,
+.entityTableHead,
+.workflowMarker,
+.footer {
+    font-family: var(--landing-font-mono), monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.headerInstitution,
+.headerDescriptor {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.headerWordmark {
+    color: var(--brand);
+    text-decoration: none;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.05;
+}
+
+.headerNav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+}
+
+.headerNavLink {
+    position: relative;
+    padding-bottom: 0.45rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: color 140ms ease;
+}
+
+.headerNavLink::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--action);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 160ms ease;
+}
+
+.headerNavLink:hover,
+.headerNavLink:focus-visible,
+.headerNavLink[aria-current="true"] {
+    color: var(--text);
+}
+
+.headerNavLink:hover::after,
+.headerNavLink:focus-visible::after,
+.headerNavLink[aria-current="true"]::after {
+    transform: scaleX(1);
+}
+
+.headerAction,
+.primaryAction {
+    text-decoration: none;
+}
+
+.headerAction {
+    justify-self: end;
+}
+
+.main {
+    width: min(92rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 1.5rem 0 4rem;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr);
+    gap: 3.5rem;
+    align-items: center;
+    min-height: calc(100svh - var(--header-height) - 2rem);
+    padding: 2.5rem 0 4rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.heroIntro {
+    max-width: 44rem;
+    padding: 1.5rem 0;
+}
+
+.heroKicker {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.heroBrand {
+    margin: 0;
+    color: var(--brand);
+    font-size: clamp(3rem, 7vw, 6.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+}
+
+.heroStatement {
+    max-width: 36rem;
+    margin: 1.5rem 0 0;
+    color: var(--text);
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    line-height: 1.55;
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.25rem;
+    margin-top: 2rem;
+}
+
+.secondaryAction {
+    text-decoration: none;
+}
+
+.heroPlane {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: auto repeat(4, minmax(0, 1fr));
+    gap: 0;
+    overflow: hidden;
+}
+
+.heroPlaneHeader,
+.heroPlaneRow {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 8.5rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+}
+
+.heroPlaneHeader {
+    align-items: end;
+    border-bottom: 1px solid var(--border);
+    background: var(--muted-surface);
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+.heroPlaneEyebrow {
+    margin: 0 0 0.45rem;
+    color: var(--text-secondary);
+    font-family: var(--landing-font-mono), monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.heroPlaneTitle {
+    margin: 0;
+    color: var(--brand);
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.heroPlaneMeta {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.heroPlaneRow {
+    align-items: start;
+    border-bottom: 1px solid var(--border);
+}
+
+.heroPlaneRow:last-child {
+    border-bottom: 0;
+}
+
+.heroPlaneLabel {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.heroTimeline,
+.heroInlineList,
+.heroVerdicts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.85rem;
+}
+
+.heroTimeline span,
+.heroInlineList span,
+.heroVerdict {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--text);
+    font-size: 0.92rem;
+    background: var(--muted-surface);
+}
+
+.heroTimeline span {
+    color: var(--platform);
+}
+
+.heroVerdict[data-state="success"] {
+    color: var(--success);
+}
+
+.heroVerdict[data-state="warning"] {
+    color: var(--warning);
+}
+
+.heroVerdict[data-state="error"] {
+    color: var(--error);
+}
+
+.section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 2.25rem 0 2.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sectionLabelWrap {
+    position: static;
+    width: min(100%, 42rem);
+}
+
+.sectionRule {
+    width: 100%;
+    height: 1px;
+    margin-bottom: 1rem;
+    background: var(--border);
+}
+
+.sectionRuleFill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--action);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 180ms ease;
+}
+
+.sectionRuleFill[data-active="true"] {
+    transform: scaleX(1);
+}
+
+.sectionLabelNumber,
+.sectionLabelText {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sectionBody {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 0.7rem;
+    max-width: 42rem;
+}
+
+.sectionTitle {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.75rem, 3vw, 2.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.sectionSummary {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.entityTable {
+    gap: 0;
+    overflow: hidden;
+}
+
+.entityTableContent {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.entityTableHead {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.entityRow {
+    display: grid;
+    grid-template-columns: minmax(9rem, 11rem) minmax(0, 1.7fr) minmax(10rem, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.entityRow:last-child {
+    border-bottom: 0;
+}
+
+.entityName,
+.entityOutput {
+    color: var(--platform);
+    font-weight: 600;
+}
+
+.workflowCard {
+    gap: 0;
+    overflow: hidden;
+}
+
+.workflowList {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.workflowItem {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.workflowItem:last-child {
+    border-bottom: 0;
+}
+
+.workflowMarker {
+    color: var(--platform);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+}
+
+.workflowContent {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.workflowTitle {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.workflowDescription {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.evaluationGrid,
+.accessGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    overflow: hidden;
+}
+
+.accessGrid {
+    grid-template-columns: 1.25fr 0.95fr;
+}
+
+.evaluationBlock,
+.accessBlock {
+    padding: 1rem 1.25rem 1.25rem;
+    border-right: 1px solid var(--border);
+}
+
+.evaluationBlock:last-child,
+.accessBlock:last-child {
+    border-right: 0;
+}
+
+.evaluationTitle {
+    margin: 0 0 1rem;
+    color: var(--platform);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.evaluationList,
+.languageList,
+.archiveList {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.evaluationList li,
+.languageList li,
+.archiveList li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.evaluationDot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--text-secondary);
+}
+
+.evaluationDot[data-state="success"] {
+    background: var(--success);
+}
+
+.evaluationDot[data-state="warning"] {
+    background: var(--warning);
+}
+
+.evaluationDot[data-state="error"] {
+    background: var(--error);
+}
+
+.roleList {
+    display: grid;
+    gap: 0;
+}
+
+.roleRow {
+    display: grid;
+    grid-template-columns: minmax(8rem, 9rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.roleRow:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.roleName {
+    margin: 0;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.roleDescription {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: min(92rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 0 0 2rem;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.footer p {
+    margin: 0;
+}
+
+@media (max-width: 1080px) {
+    .header {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 1rem;
+    }
+
+    .headerNav {
+        justify-content: start;
+        justify-self: start;
+    }
+
+    .headerAction {
+        justify-self: start;
+    }
+
+    .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        gap: 2rem;
+    }
+
+    .heroIntro {
+        max-width: 100%;
+    }
+
+    .evaluationGrid,
+    .accessGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .evaluationBlock,
+    .accessBlock {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .evaluationBlock:last-child,
+    .accessBlock:last-child {
+        border-bottom: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    .header,
+    .main,
+    .footer {
+        width: calc(100% - 1rem);
+    }
+
+    .heroPlaneHeader,
+    .heroPlaneRow,
+    .entityRow,
+    .workflowItem,
+    .roleRow,
+    .evaluationBlock,
+    .accessBlock {
+        grid-template-columns: 1fr;
+    }
+
+    .entityRow,
+    .workflowItem {
+        gap: 0.55rem;
+    }
+
+    .heroActions {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .headerNav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.25rem;
+    }
+
+    .footer {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :global(html) {
+        scroll-behavior: auto;
+    }
+
+    .skipLink,
+    .headerNavLink,
+    .headerAction,
+    .primaryAction,
+    .secondaryAction,
+    .sectionRuleFill {
+        transition: none;
+    }
+}

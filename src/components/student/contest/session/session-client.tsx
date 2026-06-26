@@ -548,7 +548,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
             />
 
             {/* Questions Tab Selector */}
-            <div className="flex h-11 shrink-0 items-center border-b border-border bg-slate-100 dark:bg-[#090d16] px-6 gap-2">
+            <div className="flex h-11 shrink-0 items-center border-b border-border bg-muted px-6 gap-2">
                 {questionsList.map((q, idx) => {
                     const isSelected = activeQuestionId === q.id;
                     return (
@@ -558,8 +558,8 @@ export function SessionClient({ contestId }: SessionClientProps) {
                             className={cn(
                                 "flex h-full items-center px-4 text-xs font-bold transition-all relative outline-none",
                                 isSelected
-                                    ? "text-indigo-600 dark:text-white border-b-2 border-indigo-500"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200",
+                                    ? "text-primary border-b-2 border-primary"
+                                    : "text-muted-foreground hover:text-foreground",
                             )}
                         >
                             <div className="flex items-center gap-1.5">

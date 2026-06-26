@@ -85,10 +85,10 @@ function ContestListRow({ contest }: { contest: ContestSummaryResponse }) {
         <Link
             href={`/contest/${contest.id}`}
             aria-label={`View contest ${contest.name}`}
-            className="group relative flex min-h-[72px] flex-col gap-3 rounded-[16px] border border-border/60 bg-card p-3 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-4 block"
+            className="group relative flex min-h-[72px] flex-col gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-4 block"
         >
             {/* Left: Big Icon Container */}
-            <div className="hidden h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[16px] bg-primary/10 dark:bg-primary/15 md:flex">
+            <div className="hidden h-[64px] w-[64px] shrink-0 items-center justify-center rounded-2xl bg-primary/10 md:flex">
                 <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border-[2px] border-primary/50 text-primary">
                     <Trophy className="h-[18px] w-[18px]" />
                 </div>
@@ -176,9 +176,9 @@ function ListSkeleton() {
             {Array.from({ length: 5 }).map((_, i) => (
                 <div
                     key={i}
-                    className="flex min-h-[72px] items-center gap-4 rounded-[16px] border border-border/60 p-3"
+                    className="flex min-h-[72px] items-center gap-4 rounded-2xl border border-border p-3"
                 >
-                    <Skeleton className="hidden md:block h-[64px] w-[64px] rounded-[14px]" />
+                    <Skeleton className="hidden md:block h-[64px] w-[64px] rounded-xl" />
                     <div className="flex flex-1 min-w-0 flex-col gap-2">
                         <Skeleton className="h-4 w-24" />
                         <Skeleton className="h-5 w-64" />

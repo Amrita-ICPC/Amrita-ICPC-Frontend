@@ -192,15 +192,15 @@ export function EditorPanel({
                 );
             case "PENDING":
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                        <Clock className="h-3 w-3 text-indigo-500" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-competition/10 text-competition border border-competition/20">
+                        <Clock className="h-3 w-3 text-competition" />
                         Pending
                     </span>
                 );
             case "QUEUED":
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 animate-pulse">
-                        <Loader2 className="h-3 w-3 animate-spin text-indigo-500" />
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-competition/10 text-competition border border-competition/20 animate-pulse">
+                        <Loader2 className="h-3 w-3 animate-spin text-competition" />
                         Queued
                     </span>
                 );
@@ -227,7 +227,7 @@ export function EditorPanel({
         }
     }, [runResult]);
 
-    const currentTheme = mounted && resolvedTheme === "light" ? "light" : "vs-dark";
+    const currentTheme = mounted && resolvedTheme === "dark" ? "vs-dark" : "vs";
 
     const hasRunningSubmission = submissions.some((s) => {
         const statusStr = (s.status as string) || "";

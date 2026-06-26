@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute, UserType } from "@/lib/auth/utils";
 
 import { NavLinks } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
 export default async function Sidenavbar() {
@@ -15,14 +16,14 @@ export default async function Sidenavbar() {
         <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
             {/* Logo */}
             <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/15 text-xs font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-maroon text-xs font-bold text-white">
                     IC
                 </div>
                 <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight text-sidebar-foreground">
+                    <p className="text-sm font-semibold leading-tight text-foreground">
                         ICPC Platform
                     </p>
-                    <p className="text-[10px] leading-tight text-sidebar-foreground/60">
+                    <p className="text-[10px] leading-tight text-muted-foreground">
                         Amrita University
                     </p>
                 </div>
@@ -31,9 +32,12 @@ export default async function Sidenavbar() {
             {/* Nav */}
             <NavLinks isAdmin={isAdmin} isStudent={isStudent} />
 
-            {/* User */}
-            <div className="border-t border-sidebar-border px-3 pb-4 pt-2">
-                <UserMenu name={user?.name} email={user?.email} />
+            {/* User & Theme */}
+            <div className="flex items-center gap-2 border-t border-sidebar-border px-3 pb-4 pt-2">
+                <div className="flex-1 min-w-0">
+                    <UserMenu name={user?.name} email={user?.email} />
+                </div>
+                <ThemeToggle />
             </div>
         </aside>
     );

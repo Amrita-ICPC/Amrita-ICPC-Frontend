@@ -149,7 +149,7 @@ function QuickInfoCard({
     icon: React.ElementType;
     label: string;
     value: string | number;
-    color?: "primary" | "emerald" | "amber" | "rose" | "sky" | "violet" | "indigo";
+    color?: "primary" | "emerald" | "amber" | "rose" | "sky" | "violet" | "competition";
 }) {
     const colorStyles = {
         primary: "text-primary bg-primary/10",
@@ -158,11 +158,11 @@ function QuickInfoCard({
         rose: "text-rose-600 dark:text-rose-400 bg-rose-500/10",
         sky: "text-sky-600 dark:text-sky-400 bg-sky-500/10",
         violet: "text-violet-600 dark:text-violet-400 bg-violet-500/10",
-        indigo: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10",
+        competition: "text-competition bg-competition/10",
     };
 
     return (
-        <div className="flex flex-col gap-2 p-4 rounded-xl border border-border/50 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-200 group">
+        <div className="flex flex-col gap-2 p-4 rounded-xl border border-border/50 bg-card hover:bg-muted/40 transition-all duration-200 group">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <div
                     className={cn(
@@ -528,7 +528,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                             <QuickInfoCard
                                                 icon={Clock}
                                                 label="Session Limit"
-                                                color="indigo"
+                                                color="competition"
                                                 value={(() => {
                                                     const h = Math.floor(contest.duration / 3600);
                                                     const m = Math.floor(
@@ -553,7 +553,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     <QuickInfoCard
                                         icon={Laptop}
                                         label="Contest Mode"
-                                        color="indigo"
+                                        color="competition"
                                         value={contest.contest_mode.toLowerCase()}
                                     />
 

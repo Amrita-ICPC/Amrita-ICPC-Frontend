@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Edit, Globe, HelpCircle, Trash2, Users } from "lucide-react";
+import { BookOpen, Edit, HelpCircle, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { allBanksKey, bankDetailKey, useDeleteBank } from "@/query/bank-query";
@@ -71,8 +72,9 @@ export function BankRowItem({ bank }: BankRowItemProps) {
             >
                 <TableCell className="py-4 px-5 w-2/5">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/10 text-blue-500 shadow-sm group-hover:bg-blue-500/20 transition-colors">
-                            <BookOpen className="size-5" />
+                        {/* Amrita Maroon structural icon box */}
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-maroon/10 border border-maroon/10 text-maroon shadow-sm group-hover:bg-maroon group-hover:text-white transition-all duration-300">
+                            <BookOpen className="size-4.5" />
                         </div>
                         <div className="min-w-0">
                             <p className="font-bold text-base text-foreground group-hover:text-primary transition-colors leading-tight">
@@ -86,45 +88,36 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                 </TableCell>
                 <TableCell className="text-sm font-medium py-4 px-5">
                     {(() => {
-                        const rawVisibility =
-                            (bank as any).is_public ??
-                            (bank as any).public ??
-                            (bank as any).visibility;
-                        const isPublic =
-                            rawVisibility === true || rawVisibility === "public"
-                                ? true
-                                : rawVisibility === false || rawVisibility === "private"
-                                  ? false
-                                  : undefined;
-
-                        if (isPublic === undefined) return null;
-                        return (
-                            <div className="flex items-center gap-2 text-foreground/80">
-                                <Globe className="size-4 text-muted-foreground" />{" "}
-                                {isPublic ? "Public" : "Private"}
-                            </div>
+                        const isPublic = (bank as any).is_public ?? (bank as any).public;
+                        return isPublic ? (
+                            <Badge
+                                variant="outline"
+                                className="border-gold/30 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
+                            >
+                                Public
+                            </Badge>
+                        ) : (
+                            <Badge
+                                variant="outline"
+                                className="border-red/30 bg-red/10 text-red text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
+                            >
+                                Private
+                            </Badge>
                         );
                     })()}
                 </TableCell>
                 <TableCell className="text-sm font-medium py-4 px-5">
-                    {(() => {
-                        const questionsCount =
-                            (bank as any).questions_count ??
-                            (bank as any).questions?.length ??
-                            (bank as any).questionCount;
-
-                        if (questionsCount === undefined) return null;
-                        return (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <HelpCircle className="size-4" />{" "}
-                                {questionsCount === 1
-                                    ? "1 Question"
-                                    : `${questionsCount} Questions`}
-                            </div>
-                        );
-                    })()}
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <HelpCircle className="size-4 text-blue" />
+                        <span className="font-semibold text-foreground/80">
+                            {(bank as any).total_questions_count ??
+                                (bank as any).questions?.length ??
+                                0}{" "}
+                            Questions
+                        </span>
+                    </div>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground font-medium py-4 px-5">
+                <TableCell className="text-sm text-muted-foreground font-semibold py-4 px-5">
                     {formattedDate}
                 </TableCell>
                 <TableCell className="text-right py-4 px-5">
@@ -135,23 +128,23 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                         <Button
                             variant="outline"
                             size="sm"
-                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
+                            className="text-muted-foreground border-border hover:bg-muted rounded-lg h-8 px-3 text-xs font-semibold cursor-pointer"
                             onClick={() => setShareOpen(true)}
                         >
-                            <Users className="mr-2 size-3.5 shrink-0" /> Manage Access
+                            <Users className="mr-1.5 size-3.5 shrink-0" /> Share
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
-                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
+                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3 text-xs font-semibold cursor-pointer"
                             onClick={() => setUpdateOpen(true)}
                         >
-                            <Edit className="mr-2 size-3.5 shrink-0" /> Edit Details
+                            <Edit className="mr-1.5 size-3.5 shrink-0" /> Edit
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1"
+                            className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1 cursor-pointer"
                             onClick={() => setDeleteOpen(true)}
                             disabled={isDeleting}
                         >

@@ -30,29 +30,29 @@ export default async function SettingsPage() {
 
     return (
         <div className="mx-auto max-w-3xl space-y-6">
-            <section className="rounded-2xl border border-[#203a80]/35 bg-linear-to-r from-[#18326e] to-[#13285e] px-6 py-5 text-white shadow-[0_20px_38px_-22px_rgba(13,30,74,0.9)] dark:border-white/12 dark:from-[#112554] dark:to-[#0f214d]">
+            <section className="rounded-2xl border border-transparent bg-maroon px-6 py-5 text-white shadow-sm">
                 <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-white/14">
-                        <ShieldCheck className="h-4.5 w-4.5" />
+                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
+                        <ShieldCheck className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-                        <p className="mt-1 text-sm text-blue-100/90">
+                        <p className="mt-1 text-sm text-white/80">
                             Manage your profile and account security.
                         </p>
                     </div>
                 </div>
             </section>
 
-            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_36px_-28px_rgba(18,43,102,0.7)]">
-                <div className="flex items-center gap-2 border-b border-[#203a80]/25 bg-[#13285e] px-5 py-3 text-white dark:border-white/10 dark:bg-[#0f214d]">
-                    <UserCircle2 className="h-4.5 w-4.5" />
+            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <div className="flex items-center gap-2 border-b border-border/40 bg-muted/10 px-5 py-3 text-foreground">
+                    <UserCircle2 className="h-4.5 w-4.5 text-muted-foreground" />
                     <h2 className="text-sm font-semibold tracking-wide">Profile</h2>
                 </div>
 
                 <div className="space-y-6 p-5">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                             {initials(fullName, email)}
                         </div>
                         <div className="min-w-0">
@@ -91,9 +91,9 @@ export default async function SettingsPage() {
                 </div>
             </section>
 
-            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_36px_-28px_rgba(18,43,102,0.7)]">
-                <div className="flex items-center gap-2 border-b border-[#203a80]/25 bg-[#13285e] px-5 py-3 text-white dark:border-white/10 dark:bg-[#0f214d]">
-                    <UsersRound className="h-4.5 w-4.5" />
+            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <div className="flex items-center gap-2 border-b border-border/40 bg-muted/10 px-5 py-3 text-foreground">
+                    <UsersRound className="h-4.5 w-4.5 text-muted-foreground" />
                     <h2 className="text-sm font-semibold tracking-wide">Access Summary</h2>
                 </div>
 

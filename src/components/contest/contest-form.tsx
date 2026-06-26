@@ -16,14 +16,13 @@ import {
     TeamApprovalMode,
 } from "@/api/generated/model";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,8 +33,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
     contestDetailKey,
     contestKeys,
@@ -118,8 +117,16 @@ export interface ContestFormProps {
     contestId?: string;
 }
 
+const STEPS = [
+    { number: 1, title: "General", description: "Name & info" },
+    { number: 2, title: "Schedule", description: "Contest window" },
+    { number: 3, title: "Participation", description: "Mode & sizes" },
+    { number: 4, title: "Settings", description: "Rules & scoring" },
+];
+
 export function ContestForm({ initialData, contestId }: ContestFormProps) {
     const router = useRouter();
+    const [currentStep, setCurrentStep] = useState(1);
 
     const now = useMemo(() => {
         const start = new Date();
@@ -139,6 +146,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
         handleSubmit,
         control,
         setValue,
+        trigger,
         formState: { errors, isSubmitting },
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -216,6 +224,38 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
         }
     }
 
+    const handleNext = async () => {
+        let fieldsToValidate: (keyof FormValues)[] = [];
+        if (currentStep === 1) {
+            fieldsToValidate = ["name", "description", "rules", "image"];
+        } else if (currentStep === 2) {
+            fieldsToValidate = [
+                "start_time",
+                "end_time",
+                "registration_start",
+                "registration_end",
+                "duration",
+            ];
+        } else if (currentStep === 3) {
+            fieldsToValidate = [
+                "contest_mode",
+                "participation_type",
+                "max_teams",
+                "min_team_size",
+                "max_team_size",
+            ];
+        }
+
+        const isValid = await trigger(fieldsToValidate);
+        if (isValid) {
+            setCurrentStep((prev) => prev + 1);
+        }
+    };
+
+    const handleBack = () => {
+        setCurrentStep((prev) => Math.max(1, prev - 1));
+    };
+
     const onSubmit = handleSubmit(async (values) => {
         if (initialData && contestId) {
             const payload: ContestUpdate = {
@@ -292,109 +332,223 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
 
     return (
         <>
-            <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader className="space-y-1">
-                        <CardTitle>
-                            {initialData ? "Edit Contest Details" : "Contest Details"}
-                        </CardTitle>
-                        <CardDescription>
-                            Provide the core information participants will see.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="e.g. ICPC Warmup Round"
-                                    {...register("name")}
-                                />
-                                {errors.name && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.name.message}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Short summary of the contest"
-                                    rows={4}
-                                    {...register("description")}
-                                />
-                                {errors.description && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.description.message}
-                                    </p>
-                                )}
-                            </div>
+            <form onSubmit={onSubmit} className="max-w-4xl mx-auto w-full">
+                <Card>
+                    <CardHeader className="border-b border-border pb-6">
+                        <div className="flex items-center justify-between gap-4">
+                            {STEPS.map((step, idx) => (
+                                <div key={step.number} className="flex flex-1 items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className={cn(
+                                                "flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold border transition-all duration-200",
+                                                currentStep === step.number
+                                                    ? "border-primary bg-primary text-primary-foreground ring-4 ring-primary/10"
+                                                    : currentStep > step.number
+                                                      ? "border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400"
+                                                      : "border-muted-foreground/30 bg-background text-muted-foreground",
+                                            )}
+                                        >
+                                            {currentStep > step.number ? "✓" : step.number}
+                                        </div>
+                                        <div className="hidden md:block text-left">
+                                            <p
+                                                className={cn(
+                                                    "text-xs font-semibold leading-none",
+                                                    currentStep === step.number
+                                                        ? "text-foreground"
+                                                        : "text-muted-foreground",
+                                                )}
+                                            >
+                                                {step.title}
+                                            </p>
+                                            <p className="text-[10px] text-muted-foreground/70 mt-1 leading-none">
+                                                {step.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {idx < STEPS.length - 1 && (
+                                        <div
+                                            className={cn(
+                                                "h-[2px] min-w-[1.5rem] flex-1 mx-4 bg-muted transition-all duration-300",
+                                                currentStep > step.number
+                                                    ? "bg-emerald-500"
+                                                    : "bg-muted",
+                                            )}
+                                        />
+                                    )}
+                                </div>
+                            ))}
                         </div>
-
-                        <Separator />
-
-                        <div className="space-y-4">
-                            <div>
-                                <h3 className="text-sm font-semibold">Schedule</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Times are entered in your local timezone and saved as UTC.
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        {currentStep === 1 && (
+                            <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="start_time">Start time</Label>
+                                    <Label htmlFor="name">Name</Label>
                                     <Input
-                                        id="start_time"
-                                        type="datetime-local"
-                                        {...register("start_time")}
+                                        id="name"
+                                        placeholder="e.g. ICPC Warmup Round"
+                                        {...register("name")}
                                     />
-                                    {errors.start_time && (
+                                    {errors.name && (
                                         <p className="text-sm text-destructive">
-                                            {errors.start_time.message}
+                                            {errors.name.message}
                                         </p>
                                     )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="end_time">End time</Label>
-                                    <Input
-                                        id="end_time"
-                                        type="datetime-local"
-                                        {...register("end_time")}
+                                    <Label htmlFor="description">Description</Label>
+                                    <Textarea
+                                        id="description"
+                                        placeholder="Short summary of the contest"
+                                        rows={4}
+                                        {...register("description")}
                                     />
-                                    {errors.end_time && (
+                                    {errors.description && (
                                         <p className="text-sm text-destructive">
-                                            {errors.end_time.message}
+                                            {errors.description.message}
                                         </p>
                                     )}
                                 </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="registration_start">Registration start</Label>
-                                    <Input
-                                        id="registration_start"
-                                        type="datetime-local"
-                                        {...register("registration_start")}
+                                    <Label htmlFor="rules">Rules</Label>
+                                    <Textarea
+                                        id="rules"
+                                        placeholder="Optional contest rules or guidelines"
+                                        rows={4}
+                                        {...register("rules")}
                                     />
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="registration_end">Registration end</Label>
+                                    <Label>Contest Banner Image</Label>
                                     <Input
-                                        id="registration_end"
-                                        type="datetime-local"
-                                        {...register("registration_end")}
+                                        type="file"
+                                        accept="image/*"
+                                        disabled={uploadImageMutation.isPending}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) void onPickImage(file);
+                                        }}
                                     />
+                                    <p className="text-xs text-muted-foreground">
+                                        Upload a banner image (recommended 16:9).
+                                    </p>
+
+                                    {uploadImageMutation.isPending && (
+                                        <p className="text-sm text-muted-foreground">Uploading…</p>
+                                    )}
+
+                                    {imageUrl ? (
+                                        <div className="space-y-2 mt-4">
+                                            <div className="relative aspect-video max-w-md overflow-hidden rounded-md border bg-muted">
+                                                <Image
+                                                    src={imageUrl}
+                                                    alt="Contest image preview"
+                                                    fill
+                                                    sizes="(min-width: 1024px) 33vw, 100vw"
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between gap-3 max-w-md">
+                                                <p className="min-w-0 truncate text-xs text-muted-foreground">
+                                                    {uploadedImage?.object_key ?? imageUrl}
+                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setIsImageViewerOpen(true)}
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setUploadedImage(null);
+                                                            setValue("image", null, {
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            });
+                                                        }}
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
+                        )}
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
+                        {currentStep === 2 && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-sm font-semibold">Contest Window</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Times are entered in your local timezone and saved as UTC.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="start_time">Start Time</Label>
+                                        <Input
+                                            id="start_time"
+                                            type="datetime-local"
+                                            {...register("start_time")}
+                                        />
+                                        {errors.start_time && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.start_time.message}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="end_time">End Time</Label>
+                                        <Input
+                                            id="end_time"
+                                            type="datetime-local"
+                                            {...register("end_time")}
+                                        />
+                                        {errors.end_time && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.end_time.message}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="registration_start">
+                                            Registration Start
+                                        </Label>
+                                        <Input
+                                            id="registration_start"
+                                            type="datetime-local"
+                                            {...register("registration_start")}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="registration_end">Registration End</Label>
+                                        <Input
+                                            id="registration_end"
+                                            type="datetime-local"
+                                            {...register("registration_end")}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 max-w-md">
                                     <Label htmlFor="duration">Session Duration (Minutes)</Label>
                                     <Input
                                         id="duration"
@@ -420,21 +574,12 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
-                        <Separator />
-
-                        <div className="space-y-4">
-                            <div>
-                                <h3 className="text-sm font-semibold">Participation</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Limits and team settings for this contest.
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Contest mode</Label>
+                        {currentStep === 3 && (
+                            <div className="space-y-6">
+                                <div className="space-y-2 max-w-md">
+                                    <Label>Contest Mode</Label>
                                     <Controller
                                         control={control}
                                         name="contest_mode"
@@ -460,441 +605,379 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                 </div>
 
                                 {contestMode === ContestMode.team && (
-                                    <div className="space-y-2 md:col-span-2">
-                                        <Label>Team Participation Mode</Label>
-                                        <Controller
-                                            control={control}
-                                            name="participation_type"
-                                            render={({ field }) => (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            field.onChange(
-                                                                ContestTeamParticipationType.LEADER_ONLY,
-                                                            )
-                                                        }
-                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
-                                                            field.value ===
-                                                            ContestTeamParticipationType.LEADER_ONLY
-                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                                                : "border-border/60 bg-card text-card-foreground"
-                                                        }`}
-                                                    >
-                                                        <span className="font-semibold text-sm mb-1">
-                                                            Leader Only
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground leading-normal">
-                                                            Only the team leader is allowed to write
-                                                            and submit code. Other members have
-                                                            read-only access.
-                                                        </span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            field.onChange(
-                                                                ContestTeamParticipationType.INDIVIDUAL_WORKSPACE,
-                                                            )
-                                                        }
-                                                        className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
-                                                            field.value ===
-                                                            ContestTeamParticipationType.INDIVIDUAL_WORKSPACE
-                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                                                : "border-border/60 bg-card text-card-foreground"
-                                                        }`}
-                                                    >
-                                                        <span className="font-semibold text-sm mb-1">
-                                                            Individual Workspaces
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground leading-normal">
-                                                            Each team member gets their own separate
-                                                            workspace. They can code and submit
-                                                            independently.
-                                                        </span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        />
+                                    <div className="space-y-6 pt-4 border-t border-border">
+                                        <div className="space-y-2">
+                                            <Label>Team Participation Mode</Label>
+                                            <Controller
+                                                control={control}
+                                                name="participation_type"
+                                                render={({ field }) => (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                field.onChange(
+                                                                    ContestTeamParticipationType.LEADER_ONLY,
+                                                                )
+                                                            }
+                                                            className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
+                                                                field.value ===
+                                                                ContestTeamParticipationType.LEADER_ONLY
+                                                                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                    : "border-border/60 bg-card text-card-foreground"
+                                                            }`}
+                                                        >
+                                                            <span className="font-semibold text-sm mb-1">
+                                                                Leader Only
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground leading-normal">
+                                                                Only the team leader is allowed to
+                                                                write and submit code. Other members
+                                                                have read-only access.
+                                                            </span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                field.onChange(
+                                                                    ContestTeamParticipationType.INDIVIDUAL_WORKSPACE,
+                                                                )
+                                                            }
+                                                            className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all hover:bg-muted/30 ${
+                                                                field.value ===
+                                                                ContestTeamParticipationType.INDIVIDUAL_WORKSPACE
+                                                                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                    : "border-border/60 bg-card text-card-foreground"
+                                                            }`}
+                                                        >
+                                                            <span className="font-semibold text-sm mb-1">
+                                                                Individual Workspaces
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground leading-normal">
+                                                                Each team member gets their own
+                                                                separate workspace. They can code
+                                                                and submit independently.
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="max_teams">Max Teams</Label>
+                                                <Input
+                                                    id="max_teams"
+                                                    type="number"
+                                                    min={1}
+                                                    placeholder="No limit"
+                                                    {...register("max_teams", {
+                                                        setValueAs: (value) => {
+                                                            if (value === "") return undefined;
+                                                            const parsed = Number(value);
+                                                            return Number.isFinite(parsed)
+                                                                ? parsed
+                                                                : undefined;
+                                                        },
+                                                    })}
+                                                />
+                                                {errors.max_teams && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.max_teams.message}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="min_team_size">Min Team Size</Label>
+                                                <Input
+                                                    id="min_team_size"
+                                                    type="number"
+                                                    min={1}
+                                                    {...register("min_team_size", {
+                                                        valueAsNumber: true,
+                                                    })}
+                                                />
+                                                {errors.min_team_size && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.min_team_size.message}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="max_team_size">Max Team Size</Label>
+                                                <Input
+                                                    id="max_team_size"
+                                                    type="number"
+                                                    min={1}
+                                                    {...register("max_team_size", {
+                                                        valueAsNumber: true,
+                                                    })}
+                                                />
+                                                {errors.max_team_size && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.max_team_size.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
+                        )}
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                <div className="space-y-2">
-                                    <Label htmlFor="max_teams">Max teams</Label>
-                                    <Input
-                                        id="max_teams"
-                                        type="number"
-                                        min={1}
-                                        placeholder="No limit"
-                                        {...register("max_teams", {
-                                            setValueAs: (value) => {
-                                                if (value === "") return undefined;
-                                                const parsed = Number(value);
-                                                return Number.isFinite(parsed) ? parsed : undefined;
-                                            },
-                                        })}
-                                    />
-                                    {errors.max_teams && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.max_teams.message}
-                                        </p>
-                                    )}
+                        {currentStep === 4 && (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>Visibility</Label>
+                                        <Controller
+                                            control={control}
+                                            name="is_public"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={String(field.value ?? true)}
+                                                    onValueChange={(value) =>
+                                                        field.onChange(value === "true")
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="true">Public</SelectItem>
+                                                        <SelectItem value="false">
+                                                            Private
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Scoring Type</Label>
+                                        <Controller
+                                            control={control}
+                                            name="scoring_type"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={(value) => field.onChange(value)}
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Select scoring" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value={ScoringType.AUTO}>
+                                                            Auto
+                                                        </SelectItem>
+                                                        <SelectItem value={ScoringType.MANUAL}>
+                                                            Manual
+                                                        </SelectItem>
+                                                        <SelectItem value={ScoringType.HYBRID}>
+                                                            Hybrid
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="min_team_size">Min team size</Label>
-                                    <Input
-                                        id="min_team_size"
-                                        type="number"
-                                        min={1}
-                                        disabled={contestMode === ContestMode.individual}
-                                        {...register("min_team_size", { valueAsNumber: true })}
-                                    />
-                                    {errors.min_team_size && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.min_team_size.message}
-                                        </p>
-                                    )}
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>Team Approval Mode</Label>
+                                        <Controller
+                                            control={control}
+                                            name="team_approval_mode"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={(value) => field.onChange(value)}
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Select approval" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem
+                                                            value={TeamApprovalMode.AUTO_APPROVE}
+                                                        >
+                                                            Auto approve
+                                                        </SelectItem>
+                                                        <SelectItem
+                                                            value={
+                                                                TeamApprovalMode.INSTRUCTOR_REVIEW
+                                                            }
+                                                        >
+                                                            Instructor review
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Show Leaderboard during Contest</Label>
+                                        <Controller
+                                            control={control}
+                                            name="show_leaderboard_during_contest"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={String(field.value ?? true)}
+                                                    onValueChange={(value) =>
+                                                        field.onChange(value === "true")
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="true">
+                                                            Show Leaderboard
+                                                        </SelectItem>
+                                                        <SelectItem value="false">
+                                                            Hide Leaderboard
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="max_team_size">Max team size</Label>
-                                    <Input
-                                        id="max_team_size"
-                                        type="number"
-                                        min={1}
-                                        disabled={contestMode === ContestMode.individual}
-                                        {...register("max_team_size", { valueAsNumber: true })}
-                                    />
-                                    {errors.max_team_size && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.max_team_size.message}
-                                        </p>
-                                    )}
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>Evaluation Mode</Label>
+                                        <Controller
+                                            control={control}
+                                            name="evaluate_on_submit"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={String(field.value ?? true)}
+                                                    onValueChange={(value) =>
+                                                        field.onChange(value === "true")
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="true">
+                                                            Evaluate on Submit
+                                                        </SelectItem>
+                                                        <SelectItem value="false">
+                                                            Evaluate on Session Finish
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="max_submission_per_question">
+                                            Max Submissions per Question
+                                        </Label>
+                                        <Input
+                                            id="max_submission_per_question"
+                                            type="number"
+                                            min={1}
+                                            placeholder="No limit"
+                                            {...register("max_submission_per_question", {
+                                                setValueAs: (value) => {
+                                                    if (value === "") return undefined;
+                                                    const parsed = Number(value);
+                                                    return Number.isFinite(parsed)
+                                                        ? parsed
+                                                        : undefined;
+                                                },
+                                            })}
+                                        />
+                                        {errors.max_submission_per_question && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.max_submission_per_question.message}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+                        )}
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Scoring type</Label>
-                                    <Controller
-                                        control={control}
-                                        name="scoring_type"
-                                        render={({ field }) => (
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={(value) => field.onChange(value)}
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select scoring" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value={ScoringType.AUTO}>
-                                                        Auto
-                                                    </SelectItem>
-                                                    <SelectItem value={ScoringType.MANUAL}>
-                                                        Manual
-                                                    </SelectItem>
-                                                    <SelectItem value={ScoringType.HYBRID}>
-                                                        Hybrid
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Team approval</Label>
-                                    <Controller
-                                        control={control}
-                                        name="team_approval_mode"
-                                        render={({ field }) => (
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={(value) => field.onChange(value)}
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select approval" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem
-                                                        value={TeamApprovalMode.AUTO_APPROVE}
-                                                    >
-                                                        Auto approve
-                                                    </SelectItem>
-                                                    <SelectItem
-                                                        value={TeamApprovalMode.INSTRUCTOR_REVIEW}
-                                                    >
-                                                        Instructor review
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="rules">Rules</Label>
-                                <Textarea
-                                    id="rules"
-                                    placeholder="Optional contest rules or guidelines"
-                                    rows={6}
-                                    {...register("rules")}
-                                />
+                        <div className="flex items-center justify-between border-t border-border pt-6 mt-8">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => router.push("/contest")}
+                                disabled={isSubmitting || isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <div className="flex gap-3">
+                                {currentStep > 1 && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleBack}
+                                        disabled={isSubmitting || isPending}
+                                    >
+                                        Back
+                                    </Button>
+                                )}
+                                {currentStep < 4 ? (
+                                    <Button
+                                        type="button"
+                                        onClick={handleNext}
+                                        disabled={isSubmitting || isPending}
+                                    >
+                                        Next
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="submit"
+                                        disabled={
+                                            isSubmitting ||
+                                            isPending ||
+                                            uploadImageMutation.isPending
+                                        }
+                                    >
+                                        {isPending
+                                            ? initialData
+                                                ? "Saving…"
+                                                : "Creating…"
+                                            : initialData
+                                              ? "Save changes"
+                                              : "Create contest"}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
-
-                <div className="flex flex-col gap-6">
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle>Visibility & Evaluation Settings</CardTitle>
-                            <CardDescription>
-                                Control visibility, leaderboard, and evaluation rules.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Public</Label>
-                                <Controller
-                                    control={control}
-                                    name="is_public"
-                                    render={({ field }) => (
-                                        <Select
-                                            value={String(field.value ?? true)}
-                                            onValueChange={(value) =>
-                                                field.onChange(value === "true")
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">Public</SelectItem>
-                                                <SelectItem value="false">Private</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Show Leaderboard during Contest</Label>
-                                <Controller
-                                    control={control}
-                                    name="show_leaderboard_during_contest"
-                                    render={({ field }) => (
-                                        <Select
-                                            value={String(field.value ?? true)}
-                                            onValueChange={(value) =>
-                                                field.onChange(value === "true")
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">
-                                                    Show Leaderboard
-                                                </SelectItem>
-                                                <SelectItem value="false">
-                                                    Hide Leaderboard
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Control whether the real-time leaderboard is visible to students
-                                    during the active contest.
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Evaluation Mode</Label>
-                                <Controller
-                                    control={control}
-                                    name="evaluate_on_submit"
-                                    render={({ field }) => (
-                                        <Select
-                                            value={String(field.value ?? true)}
-                                            onValueChange={(value) =>
-                                                field.onChange(value === "true")
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">
-                                                    Evaluate on Submit
-                                                </SelectItem>
-                                                <SelectItem value="false">
-                                                    Evaluate on Session Finish
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Control when coding submissions are evaluated. Immediate
-                                    evaluates on every submission. Session Finish evaluates once
-                                    coding time runs out.
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="max_submission_per_question">
-                                    Max Submissions per Question
-                                </Label>
-                                <Input
-                                    id="max_submission_per_question"
-                                    type="number"
-                                    min={1}
-                                    placeholder="No limit"
-                                    {...register("max_submission_per_question", {
-                                        setValueAs: (value) => {
-                                            if (value === "") return undefined;
-                                            const parsed = Number(value);
-                                            return Number.isFinite(parsed) ? parsed : undefined;
-                                        },
-                                    })}
-                                />
-                                {errors.max_submission_per_question && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.max_submission_per_question.message}
-                                    </p>
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                    Limit the number of submissions allowed for each question.
-                                </p>
-                            </div>
-
-                            <Separator />
-
-                            <div className="space-y-2">
-                                <Label>Contest image</Label>
-                                <Input
-                                    type="file"
-                                    accept="image/*"
-                                    disabled={uploadImageMutation.isPending}
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) void onPickImage(file);
-                                    }}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Upload a banner image (recommended 16:9). Stored in object
-                                    storage.
-                                </p>
-
-                                {uploadImageMutation.isPending && (
-                                    <p className="text-sm text-muted-foreground">Uploading…</p>
-                                )}
-
-                                {imageUrl ? (
-                                    <div className="space-y-2">
-                                        <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
-                                            <Image
-                                                src={imageUrl}
-                                                alt="Contest image preview"
-                                                fill
-                                                sizes="(min-width: 1024px) 33vw, 100vw"
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="min-w-0 truncate text-xs text-muted-foreground">
-                                                {uploadedImage?.object_key ?? imageUrl}
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <Dialog
-                                                    open={isImageViewerOpen}
-                                                    onOpenChange={setIsImageViewerOpen}
-                                                >
-                                                    <DialogTrigger asChild>
-                                                        <Button type="button" variant="outline">
-                                                            View
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-3xl">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Contest Image</DialogTitle>
-                                                            <DialogDescription>
-                                                                Preview the uploaded banner.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
-                                                            <Image
-                                                                src={imageUrl}
-                                                                alt="Contest image"
-                                                                fill
-                                                                sizes="(min-width: 1024px) 768px, 100vw"
-                                                                className="object-contain"
-                                                            />
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
-
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => {
-                                                        setUploadedImage(null);
-                                                        setValue("image", null, {
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        });
-                                                    }}
-                                                >
-                                                    Remove
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle>{initialData ? "Save" : "Create"}</CardTitle>
-                            <CardDescription>Review and submit when ready.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                disabled={
-                                    isSubmitting || isPending || uploadImageMutation.isPending
-                                }
-                            >
-                                {isPending
-                                    ? initialData
-                                        ? "Saving…"
-                                        : "Creating…"
-                                    : initialData
-                                      ? "Save changes"
-                                      : "Create contest"}
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                onClick={() => router.push("/contest")}
-                            >
-                                Cancel
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
             </form>
+
+            <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
+                <DialogContent className="sm:max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Contest Image</DialogTitle>
+                        <DialogDescription>Preview the uploaded banner.</DialogDescription>
+                    </DialogHeader>
+                    <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
+                        {imageUrl && (
+                            <Image
+                                src={imageUrl}
+                                alt="Contest image"
+                                fill
+                                sizes="(min-width: 1024px) 768px, 100vw"
+                                className="object-contain"
+                            />
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
