@@ -169,17 +169,32 @@ export function OfficialLanding() {
 
     useEffect(() => {
         let previousY = window.scrollY;
+        let accumulatedDelta = 0;
 
         const handleScroll = () => {
             const currentY = window.scrollY;
             const delta = currentY - previousY;
 
-            if (currentY < 24) {
+            if (currentY < 200) {
                 setHeaderHidden(false);
-            } else if (delta > 8) {
-                setHeaderHidden(true);
-            } else if (delta < -8) {
-                setHeaderHidden(false);
+                accumulatedDelta = 0;
+            } else {
+                // If scroll direction changed, reset accumulatedDelta in the new direction
+                if (delta > 0 && accumulatedDelta < 0) {
+                    accumulatedDelta = delta;
+                } else if (delta < 0 && accumulatedDelta > 0) {
+                    accumulatedDelta = delta;
+                } else {
+                    accumulatedDelta += delta;
+                }
+
+                if (accumulatedDelta > 50) {
+                    setHeaderHidden(true);
+                    accumulatedDelta = 0;
+                } else if (accumulatedDelta < -50) {
+                    setHeaderHidden(false);
+                    accumulatedDelta = 0;
+                }
             }
 
             previousY = currentY;
