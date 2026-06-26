@@ -15,19 +15,20 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+const WORKSPACE_ITEMS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/contest", label: "Contests", icon: Trophy },
-    { href: "/teams", label: "Teams", icon: Users },
     { href: "/banks", label: "Question Banks", icon: Database },
     { href: "/questions", label: "Question Editor", icon: FileCode2 },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/teams", label: "Teams", icon: Users },
 ];
 
-const ADMIN_ITEMS = [
-    { href: "/users", label: "Users", icon: UserRoundCog },
+const MANAGEMENT_ITEMS = [
     { href: "/groups", label: "Groups", icon: UsersRound },
+    { href: "/users", label: "Users", icon: UserRoundCog },
 ];
+
+const CONFIGURATION_ITEMS = [{ href: "/settings", label: "Settings", icon: Settings }];
 
 interface NavLinksProps {
     isAdmin: boolean;
@@ -68,10 +69,10 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
         <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
             <div>
                 <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Menu
+                    Workspace
                 </p>
                 <ul className="space-y-0.5">
-                    {NAV_ITEMS.map((item) => {
+                    {WORKSPACE_ITEMS.map((item) => {
                         let href = item.href;
                         if (isStudent) {
                             if (item.label === "Dashboard") href = "/student/dashboard";
@@ -93,15 +94,26 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
             {isAdmin && (
                 <div>
                     <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        Admin
+                        Management
                     </p>
                     <ul className="space-y-0.5">
-                        {ADMIN_ITEMS.map((item) => (
+                        {MANAGEMENT_ITEMS.map((item) => (
                             <NavItem key={item.href} {...item} />
                         ))}
                     </ul>
                 </div>
             )}
+
+            <div>
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Configuration
+                </p>
+                <ul className="space-y-0.5">
+                    {CONFIGURATION_ITEMS.map((item) => (
+                        <NavItem key={item.href} {...item} />
+                    ))}
+                </ul>
+            </div>
         </nav>
     );
 }
