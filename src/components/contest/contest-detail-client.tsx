@@ -8,17 +8,13 @@ import {
     ClipboardList,
     Clock,
     Edit,
-    FileCode2,
     Globe,
     Loader2,
     Lock,
     MoreVertical,
     Play,
-    Send,
     Trash2,
     UserCircle2,
-    UserPlus,
-    Users,
     Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -43,7 +39,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { contestDetailKey, contestKeys, usePublishContest } from "@/query/contest-query";
 
 import { AsyncStateHandler } from "../shared/async-state-handler";
-import { ManagementHub } from "./management-hub";
+import { ContestNavStats } from "./contest-nav-stats";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ElementType }> =
     {
@@ -78,46 +74,6 @@ function fmt(dateStr: string | null | undefined, opts?: Intl.DateTimeFormatOptio
     );
 }
 
-function StatCard({
-    icon: Icon,
-    label,
-    value,
-    sub,
-    color = "primary",
-}: {
-    icon: React.ElementType;
-    label: string;
-    value: number | string;
-    sub?: string;
-    color?: "primary" | "emerald" | "blue" | "violet";
-}) {
-    const colorMap = {
-        primary: "bg-primary/10 text-primary",
-        emerald: "bg-emerald-500/10 text-emerald-500",
-        blue: "bg-blue-500/10 text-blue-500",
-        violet: "bg-violet-500/10 text-violet-500",
-    };
-
-    return (
-        <Card className="border-border/60">
-            <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                    <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colorMap[color]}`}
-                    >
-                        <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-foreground">{value}</p>
-                        <p className="text-xs text-muted-foreground">{label}</p>
-                        {sub && <p className="text-xs text-muted-foreground/60 mt-0.5">{sub}</p>}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-start justify-between gap-4 py-2.5">
@@ -133,21 +89,18 @@ function ContestDetailSkeleton() {
             {/* Hero Skeleton */}
             <Skeleton className="h-[200px] w-full rounded-xl" />
 
-            {/* Management Hub Skeleton */}
-            <div className="space-y-4">
-                <Skeleton className="h-6 w-40" />
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <Skeleton key={i} className="h-[140px] rounded-xl" />
+            {/* Nav stats Skeleton */}
+            <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-[104px] rounded-xl" />
                     ))}
                 </div>
-            </div>
-
-            {/* Stats Skeleton */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-24 rounded-xl" />
-                ))}
+                <div className="grid grid-cols-2 gap-3">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                        <Skeleton key={i} className="h-[68px] rounded-xl" />
+                    ))}
+                </div>
             </div>
 
             {/* Detail cards Skeleton */}
@@ -282,9 +235,12 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         variant="outline"
                                         size="sm"
                                         className="bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                                        asChild
                                     >
-                                        <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-                                        Invite
+                                        <Link href={`/contest/${contest.id}/evaluate`}>
+                                            <Play className="mr-1.5 h-3.5 w-3.5" />
+                                            Evaluate Contest
+                                        </Link>
                                     </Button>
 
                                     {(contest.status as string) === "DRAFT" && (
@@ -365,36 +321,8 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                         </div>
                     </div>
 
-                    {/* Management Hub */}
-                    <ManagementHub contest={contest} />
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <StatCard
-                            icon={Users}
-                            label="Teams"
-                            value={contest.team_count ?? 0}
-                            color="primary"
-                        />
-                        <StatCard
-                            icon={FileCode2}
-                            label="Questions"
-                            value={contest.question_count ?? 0}
-                            color="blue"
-                        />
-                        <StatCard
-                            icon={Send}
-                            label="Submissions"
-                            value={contest.submission_count ?? 0}
-                            color="violet"
-                        />
-                        <StatCard
-                            icon={UserCircle2}
-                            label="Participants"
-                            value={contest.participant_count ?? 0}
-                            color="emerald"
-                        />
-                    </div>
+                    {/* Nav stats — teams/questions/access double as management entry points */}
+                    <ContestNavStats contest={contest} />
 
                     {/* Detail cards */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

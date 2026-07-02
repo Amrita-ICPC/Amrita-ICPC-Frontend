@@ -6,6 +6,7 @@ import { type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { THEME_IDS } from "@/lib/theme-config";
 
 import { SessionIntegrityProvider } from "./session-integrity-provider";
 import TanstackQueryProvider from "./tanstack-query-provider";
@@ -23,6 +24,7 @@ export default function Provider({ children }: ProviderProps) {
                         attribute="class"
                         defaultTheme="system"
                         enableSystem
+                        themes={THEME_IDS}
                         disableTransitionOnChange
                     >
                         <TooltipProvider>{children}</TooltipProvider>
