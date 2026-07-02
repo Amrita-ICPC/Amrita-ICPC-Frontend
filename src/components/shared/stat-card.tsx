@@ -10,6 +10,7 @@ export interface StatCardProps {
     label: string;
     value: number | string;
     color?: "primary" | "emerald" | "amber" | "red" | "blue";
+    themed?: boolean;
     className?: string;
 }
 
@@ -18,6 +19,7 @@ export function StatCard({
     label,
     value,
     color = "primary",
+    themed = false,
     className,
 }: StatCardProps) {
     const colorMap = {
@@ -36,6 +38,16 @@ export function StatCard({
         blue: "hover:shadow-blue-500/5",
     };
 
+    const surfaceMap = {
+        primary:
+            "border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-card hover:border-primary/35",
+        emerald:
+            "border-emerald-500/20 bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-card hover:border-emerald-500/35",
+        amber: "border-amber-500/20 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-card hover:border-amber-500/35",
+        red: "border-red-500/20 bg-gradient-to-br from-red-500/15 via-red-500/5 to-card hover:border-red-500/35",
+        blue: "border-blue-500/20 bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-card hover:border-blue-500/35",
+    };
+
     return (
         <motion.div
             whileHover={{ y: -4, scale: 1.01 }}
@@ -44,14 +56,17 @@ export function StatCard({
         >
             <Card
                 className={cn(
-                    "group relative overflow-hidden border-border/60 bg-card transition-all duration-300 hover:border-border/80 hover:shadow-2xl",
-                    glowMap[color],
+                    "group relative overflow-hidden transition-all duration-300 hover:shadow-2xl",
+                    themed
+                        ? "border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-card hover:border-primary/35 hover:shadow-primary/10"
+                        : surfaceMap[color],
+                    !themed && glowMap[color],
                 )}
             >
                 <div
                     className={cn(
                         "absolute -right-6 -top-6 h-24 w-24 rounded-full blur-3xl opacity-20",
-                        colorMap[color].split(" ")[0],
+                        themed ? "bg-contrast" : colorMap[color].split(" ")[0],
                     )}
                 />
                 <CardContent className="p-6">
@@ -59,13 +74,15 @@ export function StatCard({
                         <div
                             className={cn(
                                 "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
-                                colorMap[color],
+                                themed
+                                    ? "border-contrast/25 bg-contrast/15 text-contrast"
+                                    : colorMap[color],
                             )}
                         >
                             <Icon className="h-6 w-6" />
                         </div>
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80">
                                 {label}
                             </p>
                             <p className="text-3xl font-bold text-foreground tabular-nums tracking-tight">

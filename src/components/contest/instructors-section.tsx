@@ -185,6 +185,7 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                                                         </Badge>
                                                     ) : (
                                                         <Button
+                                                            type="button"
                                                             size="sm"
                                                             variant="default"
                                                             className="h-8 rounded-lg shadow-sm font-semibold px-4 transition-all"
@@ -288,6 +289,7 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                                                     </div>
 
                                                     <Button
+                                                        type="button"
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 shadow-sm"

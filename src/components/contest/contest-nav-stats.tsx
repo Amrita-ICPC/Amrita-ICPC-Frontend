@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, FileCode2, Send, ShieldCheck, UserCircle2, Users } from "lucide-react";
+import { ArrowRight, FileCode2, Send, UserCircle2, Users } from "lucide-react";
 import Link from "next/link";
 
 import type { ContestDetailResponse } from "@/api/generated/model";
@@ -67,7 +67,7 @@ function StatTile({
 export function ContestNavStats({ contest }: ContestNavStatsProps) {
     return (
         <div className="space-y-3">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <NavStatTile
                     href={`/contest/${contest.id}/teams`}
                     value={contest.team_count ?? 0}
@@ -79,12 +79,6 @@ export function ContestNavStats({ contest }: ContestNavStatsProps) {
                     value={contest.question_count ?? 0}
                     label="Questions"
                     icon={FileCode2}
-                />
-                <NavStatTile
-                    href={`/contest/${contest.id}/access`}
-                    value="Set"
-                    label="Access"
-                    icon={ShieldCheck}
                 />
             </div>
             <div className="grid grid-cols-2 gap-3">

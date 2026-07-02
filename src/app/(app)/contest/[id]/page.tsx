@@ -2,6 +2,7 @@ import { ContestDetailClient } from "@/components/contest/contest-detail-client"
 import { ContestForm } from "@/components/contest/contest-form";
 import AccessDenied from "@/components/global/access-denied";
 import AuthGuard from "@/components/global/auth-guard";
+import { Button } from "@/components/ui/button";
 import { Roles } from "@/lib/auth/utils";
 
 import { EditContestClient } from "./edit/edit-contest-client";
@@ -27,15 +28,20 @@ export default async function ContestDetailPage({
     if (isNew || isEdit) {
         return (
             <div className="flex h-full flex-col gap-6 p-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        {isNew ? "Create Contest" : "Edit Contest"}
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {isNew
-                            ? "Set up contest details, registration, and visibility."
-                            : "Modify contest details, schedule, and settings."}
-                    </p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            {isNew ? "Create Contest" : "Edit Contest"}
+                        </h1>
+                        <p className="text-muted-foreground">
+                            {isNew
+                                ? "Set up contest details, registration, and visibility."
+                                : "Modify contest details, schedule, and settings."}
+                        </p>
+                    </div>
+                    <Button type="submit" form="contest-form" className="shrink-0 px-5">
+                        {isNew ? "Create contest" : "Save changes"}
+                    </Button>
                 </div>
 
                 <AuthGuard

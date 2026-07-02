@@ -321,7 +321,7 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                         </div>
                     </div>
 
-                    {/* Nav stats — teams/questions/access double as management entry points */}
+                    {/* Navigation stats and contest totals */}
                     <ContestNavStats contest={contest} />
 
                     {/* Detail cards */}

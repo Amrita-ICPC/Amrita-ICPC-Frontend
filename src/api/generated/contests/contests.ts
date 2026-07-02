@@ -29,12 +29,12 @@ import type {
   APIResponseContestDashboardResponse,
   APIResponseContestDetailResponse,
   APIResponseContestQuestionsListResponse,
+  APIResponseContestsListResponse,
   APIResponseEvaluationResponse,
   APIResponseEvaluationStatusResponse,
   APIResponseLeaderboardResponse,
   APIResponseListContestAudienceResponse,
   APIResponseListContestQuestionResponse,
-  APIResponseListContestSummaryResponse,
   APIResponseListInstructorResponse,
   APIResponseMessageResponse,
   APIResponseNoneType,
@@ -47,12 +47,10 @@ import type {
   ExceptionResponse,
   GetAllContestsApiV1ContestsGetParams,
   GetContestInstructorsApiV1ContestsContestIdInstructorsGetParams,
-  GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams,
   GetContestQuestionsApiV1ContestsContestIdQuestionsGetParams,
   GetDeletedContestsApiV1ContestsDeletedGetParams,
   HTTPValidationError,
   InstructorManageRequest,
-  PublishResultsApiV1ContestsContestIdPublishResultsPostParams,
   QuestionUpdate,
   RemoveContestQuestionRequest,
   ReorderContestQuestionsRequest
@@ -174,7 +172,7 @@ export const getAllContestsApiV1ContestsGet = (
 ) => {
 
 
-      return axiosWithAuth<APIResponseListContestSummaryResponse>(
+      return axiosWithAuth<APIResponseContestsListResponse>(
       {url: `/api/v1/contests/`, method: 'GET',
         params, signal
     },
@@ -286,7 +284,7 @@ export const getDeletedContestsApiV1ContestsDeletedGet = (
 ) => {
 
 
-      return axiosWithAuth<APIResponseListContestSummaryResponse>(
+      return axiosWithAuth<APIResponseContestsListResponse>(
       {url: `/api/v1/contests/deleted`, method: 'GET',
         params, signal
     },
@@ -2456,10 +2454,6 @@ Only accessible by authorized users with read permissions.
 Args:
     request: Framework context.
     contest_id: The unique identifier of the contest.
-    search: Optional search term for team name.
-    sort_order: Sort order by score ('asc' or 'desc').
-    page: Current page number.
-    page_size: Maximum items per page.
     service: Injected domain service.
     user_id: Authenticated user ID.
 
@@ -2473,14 +2467,12 @@ Raises:
  */
 export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGet = (
     contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams,
  signal?: AbortSignal
 ) => {
 
 
       return axiosWithAuth<APIResponseLeaderboardResponse>(
-      {url: `/api/v1/contests/${contestId}/leaderboard`, method: 'GET',
-        params, signal
+      {url: `/api/v1/contests/${contestId}/leaderboard`, method: 'GET', signal
     },
       );
     }
@@ -2488,25 +2480,23 @@ export const getContestLeaderboardApiV1ContestsContestIdLeaderboardGet = (
 
 
 
-export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey = (contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams,) => {
+export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey = (contestId: string,) => {
     return [
-    `/api/v1/contests/${contestId}/leaderboard`, ...(params ? [params] : [])
+    `/api/v1/contests/${contestId}/leaderboard`
     ] as const;
     }
 
 
-export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+export const getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions = <TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey(contestId,params);
+  const queryKey =  queryOptions?.queryKey ?? getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryKey(contestId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>> = ({ signal }) => getContestLeaderboardApiV1ContestsContestIdLeaderboardGet(contestId,params, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>> = ({ signal }) => getContestLeaderboardApiV1ContestsContestIdLeaderboardGet(contestId, signal);
 
 
 
@@ -2520,8 +2510,7 @@ export type GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryError 
 
 
 export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params: undefined |  GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
+ contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>,
           TError,
@@ -2531,8 +2520,7 @@ export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TDa
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>,
           TError,
@@ -2542,8 +2530,7 @@ export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TDa
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2551,12 +2538,11 @@ export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TDa
  */
 
 export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TData = Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError = ExceptionResponse | HTTPValidationError>(
- contestId: string,
-    params?: GetContestLeaderboardApiV1ContestsContestIdLeaderboardGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContestLeaderboardApiV1ContestsContestIdLeaderboardGet>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions(contestId,params,options)
+  const queryOptions = getGetContestLeaderboardApiV1ContestsContestIdLeaderboardGetQueryOptions(contestId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2568,83 +2554,3 @@ export function useGetContestLeaderboardApiV1ContestsContestIdLeaderboardGet<TDa
 
 
 
-/**
- * Publish or unpublish contest results.
-
-Only accessible by authorized users with update permissions.
-
-Args:
-    request: Framework context.
-    contest_id: Unique identifier of the contest.
-    publish: True to publish results, false to unpublish.
-    user_id: Authenticated user ID.
-    service: Injected domain service.
-
-Returns:
-    APIResponse[MessageResponse]: Standardized API response containing success message.
-
-Raises:
-    ContestNotFoundError: If the contest is not found.
-    PermissionDeniedError: If the user lacks manage permission.
- * @summary Publish or unpublish contest results
- */
-export const publishResultsApiV1ContestsContestIdPublishResultsPost = (
-    contestId: string,
-    params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams,
- signal?: AbortSignal
-) => {
-
-
-      return axiosWithAuth<APIResponseMessageResponse>(
-      {url: `/api/v1/contests/${contestId}/publish-results`, method: 'POST',
-        params, signal
-    },
-      );
-    }
-
-
-
-export const getPublishResultsApiV1ContestsContestIdPublishResultsPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>, TError,{contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>, TError,{contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams}, TContext> => {
-
-const mutationKey = ['publishResultsApiV1ContestsContestIdPublishResultsPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>, {contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams}> = (props) => {
-          const {contestId,params} = props ?? {};
-
-          return  publishResultsApiV1ContestsContestIdPublishResultsPost(contestId,params,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PublishResultsApiV1ContestsContestIdPublishResultsPostMutationResult = NonNullable<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>>
-
-    export type PublishResultsApiV1ContestsContestIdPublishResultsPostMutationError = ExceptionResponse | HTTPValidationError
-
-    /**
- * @summary Publish or unpublish contest results
- */
-export const usePublishResultsApiV1ContestsContestIdPublishResultsPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>, TError,{contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof publishResultsApiV1ContestsContestIdPublishResultsPost>>,
-        TError,
-        {contestId: string;params: PublishResultsApiV1ContestsContestIdPublishResultsPostParams},
-        TContext
-      > => {
-      return useMutation(getPublishResultsApiV1ContestsContestIdPublishResultsPostMutationOptions(options), queryClient);
-    }

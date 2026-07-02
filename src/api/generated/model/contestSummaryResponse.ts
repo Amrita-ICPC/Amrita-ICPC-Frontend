@@ -62,8 +62,4 @@ export interface ContestSummaryResponse {
      * @minimum 0
      */
   team_count?: number;
-  /** Whether the leaderboard is visible once results are published */
-  show_leaderboard: boolean;
-  /** Whether a team's own submissions are visible once results are published */
-  show_team_submissions: boolean;
 }

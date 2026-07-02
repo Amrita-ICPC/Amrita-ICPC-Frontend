@@ -76,20 +76,20 @@ export function ContestFilters() {
     };
 
     return (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative min-w-[220px] flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
                 <Input
                     type="search"
                     placeholder="Search contests..."
-                    className="pl-8"
+                    className="h-10 border-primary/15 bg-background/80 pl-9 shadow-xs placeholder:text-muted-foreground/70 focus-visible:border-primary/35 focus-visible:ring-primary/15"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
                 <Select value={initialRunStatus} onValueChange={handleRunStatusChange}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="h-10 w-[140px] border-primary/15 bg-background/80 shadow-xs focus:ring-primary/15">
                         <SelectValue placeholder="Run Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -101,7 +101,7 @@ export function ContestFilters() {
                 </Select>
 
                 <Select value={initialStatus} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="h-10 w-[150px] border-primary/15 bg-background/80 shadow-xs focus:ring-primary/15">
                         <SelectValue placeholder="Contest Status" />
                     </SelectTrigger>
                     <SelectContent>

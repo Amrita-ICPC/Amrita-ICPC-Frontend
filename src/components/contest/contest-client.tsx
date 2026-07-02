@@ -1,6 +1,16 @@
 "use client";
 
-import { ArrowRight, Calendar, Clock, FileQuestion, Trophy, Users } from "lucide-react";
+import {
+    ArrowRight,
+    Calendar,
+    CalendarClock,
+    CheckCircle2,
+    Clock,
+    FileQuestion,
+    Radio,
+    Trophy,
+    Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +23,7 @@ import type {
     GetAllContestsApiV1ContestsGetParams,
 } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { StatCard } from "@/components/shared/stat-card";
 import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -229,10 +240,54 @@ export function ContestClient({ initialParams }: ContestClientProps) {
     const pagination = data?.pagination;
     const totalPages = pagination?.total_pages || 1;
     const currentPage = pagination?.page || 1;
+    const responseData = data?.data;
+    const contests = Array.isArray(responseData) ? responseData : (responseData?.contests ?? []);
+    const contestStats = {
+        total: Array.isArray(responseData)
+            ? (pagination?.total ?? responseData.length)
+            : (responseData?.total_count ?? pagination?.total ?? 0),
+        live: Array.isArray(responseData)
+            ? responseData.filter((contest) => contest.run_status === "LIVE").length
+            : (responseData?.live_count ?? 0),
+        upcoming: Array.isArray(responseData)
+            ? responseData.filter((contest) => contest.run_status === "UPCOMING").length
+            : (responseData?.upcoming_count ?? 0),
+        completed: Array.isArray(responseData)
+            ? responseData.filter((contest) => contest.run_status === "ENDED").length
+            : (responseData?.completed_count ?? 0),
+    };
 
     return (
         <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                    icon={Trophy}
+                    label="Total Contests"
+                    value={isLoading ? "—" : contestStats.total}
+                    color="primary"
+                    themed
+                />
+                <StatCard
+                    icon={Radio}
+                    label="Live"
+                    value={isLoading ? "—" : contestStats.live}
+                    color="emerald"
+                />
+                <StatCard
+                    icon={CalendarClock}
+                    label="Upcoming"
+                    value={isLoading ? "—" : contestStats.upcoming}
+                    color="amber"
+                />
+                <StatCard
+                    icon={CheckCircle2}
+                    label="Completed"
+                    value={isLoading ? "—" : contestStats.completed}
+                    color="blue"
+                />
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-primary/15 bg-gradient-to-r from-primary/10 via-card to-primary/5 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <ContestFilters />
                 <ViewToggle view={view} onChange={setView} />
             </div>
@@ -256,8 +311,8 @@ export function ContestClient({ initialParams }: ContestClientProps) {
             >
                 {view === "grid" ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {data?.data && data.data.length > 0 ? (
-                            data.data.map((contest) => (
+                        {contests.length > 0 ? (
+                            contests.map((contest) => (
                                 <ContestCard key={contest.id} contest={contest} />
                             ))
                         ) : (
@@ -268,9 +323,9 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                     </div>
                 ) : (
                     <>
-                        {data?.data && data.data.length > 0 ? (
+                        {contests.length > 0 ? (
                             <div className="flex flex-col gap-4">
-                                {data.data.map((contest) => (
+                                {contests.map((contest) => (
                                     <ContestListRow key={contest.id} contest={contest} />
                                 ))}
                             </div>
