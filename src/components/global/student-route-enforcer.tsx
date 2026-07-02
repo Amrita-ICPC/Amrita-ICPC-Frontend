@@ -12,8 +12,9 @@ export default function StudentRouteEnforcer({
     isStudent: boolean;
 }) {
     const pathname = usePathname();
+    const allowedSharedPaths = ["/invitation", "/settings"];
 
-    if (isStudent && !pathname.startsWith("/student") && pathname !== "/invitation") {
+    if (isStudent && !pathname.startsWith("/student") && !allowedSharedPaths.includes(pathname)) {
         if (pathname === "/dashboard") {
             redirect("/student/dashboard");
         }
