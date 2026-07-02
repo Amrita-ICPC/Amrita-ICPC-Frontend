@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/auth/auth";
+import { getDefaultRoute } from "@/lib/auth/utils";
 
 function initials(name?: string | null, email?: string | null) {
     const seed = name || email || "U";
@@ -26,6 +27,7 @@ export default async function SettingsPage() {
     const fullName = user.name || "ICPC User";
     const email = user.email || "Not available";
     const userId = user.id || "Not available";
+    const isStudent = getDefaultRoute(user) === "/student/dashboard";
 
     const permissions = [...new Set([...(user.groups ?? []), ...(user.roles ?? [])])];
 
@@ -92,55 +94,57 @@ export default async function SettingsPage() {
                 </div>
             </section>
 
-            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_36px_-28px_rgba(18,43,102,0.7)]">
-                <div className="flex items-center gap-2 border-b border-[#203a80]/25 bg-[#13285e] px-5 py-3 text-white dark:border-white/10 dark:bg-[#0f214d]">
-                    <UsersRound className="h-4.5 w-4.5" />
-                    <h2 className="text-sm font-semibold tracking-wide">Access Summary</h2>
-                </div>
-
-                <div className="space-y-4 p-5">
-                    <div>
-                        <p className="mb-2 text-xs font-medium text-muted-foreground">
-                            Groups & Permissions
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {permissions.length > 0 ? (
-                                permissions.map((perm) => (
-                                    <Badge
-                                        key={perm}
-                                        variant="secondary"
-                                        className="border border-border bg-muted/70 text-foreground"
-                                    >
-                                        {perm}
-                                    </Badge>
-                                ))
-                            ) : (
-                                <span className="text-sm text-muted-foreground">
-                                    No role metadata found.
-                                </span>
-                            )}
-                        </div>
+            {!isStudent && (
+                <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_36px_-28px_rgba(18,43,102,0.7)]">
+                    <div className="flex items-center gap-2 border-b border-[#203a80]/25 bg-[#13285e] px-5 py-3 text-white dark:border-white/10 dark:bg-[#0f214d]">
+                        <UsersRound className="h-4.5 w-4.5" />
+                        <h2 className="text-sm font-semibold tracking-wide">Access Summary</h2>
                     </div>
 
-                    <div className="rounded-lg border border-border bg-muted/35 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">
-                                    Password & Account Security
-                                </p>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Authentication is managed by SSO. Contact your administrator for
-                                    credential updates.
-                                </p>
+                    <div className="space-y-4 p-5">
+                        <div>
+                            <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                Groups & Permissions
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {permissions.length > 0 ? (
+                                    permissions.map((perm) => (
+                                        <Badge
+                                            key={perm}
+                                            variant="secondary"
+                                            className="border border-border bg-muted/70 text-foreground"
+                                        >
+                                            {perm}
+                                        </Badge>
+                                    ))
+                                ) : (
+                                    <span className="text-sm text-muted-foreground">
+                                        No role metadata found.
+                                    </span>
+                                )}
                             </div>
-                            <Button variant="secondary" size="sm" disabled>
-                                <KeyRound className="h-3.5 w-3.5" />
-                                Managed by SSO
-                            </Button>
+                        </div>
+
+                        <div className="rounded-lg border border-border bg-muted/35 p-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">
+                                        Password & Account Security
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Authentication is managed by SSO. Contact your administrator
+                                        for credential updates.
+                                    </p>
+                                </div>
+                                <Button variant="secondary" size="sm" disabled>
+                                    <KeyRound className="h-3.5 w-3.5" />
+                                    Managed by SSO
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             <AppearanceSection />
         </div>
