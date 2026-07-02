@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Eye, GripVertical, MoreVertical, Trash2 } from "lucide-react";
+import { Edit, GripVertical, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 import type { PaginationResponse, QuestionListSummaryResponse } from "@/api/generated/model";
@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -25,6 +24,8 @@ interface QuestionRowProps {
     dragHandleProps?: any;
     isDragging?: boolean;
     isOverlay?: boolean;
+    canReorder?: boolean;
+    onRemove?: () => void;
 }
 
 export function QuestionRow({
@@ -37,19 +38,19 @@ export function QuestionRow({
     dragHandleProps,
     isDragging,
     isOverlay,
+    canReorder = true,
+    onRemove,
 }: QuestionRowProps) {
     return (
         <div
             className={cn(
-                "group grid grid-cols-[48px_80px_1fr_120px_200px_140px] items-center gap-4 px-6 py-4",
+                "group grid grid-cols-[48px_100px_1fr_120px_200px_110px] items-center gap-4 bg-card px-6 py-5",
                 !isDragging && !isOverlay && "transition-colors duration-200",
                 isDragging && !isOverlay && "opacity-20 bg-muted/50",
                 isOverlay &&
-                    "bg-background shadow-xl border-2 border-primary/40 rounded-lg cursor-grabbing z-[999]",
+                    "bg-background shadow-xl border-2 border-primary/40 rounded-xl cursor-grabbing z-[999]",
                 isSelected && !isOverlay && "bg-primary/10 border-l-2 border-l-primary",
-                !isSelected &&
-                    !isOverlay &&
-                    "bg-transparent hover:bg-muted/40 border-l-2 border-l-transparent",
+                !isSelected && !isOverlay && "hover:bg-muted/25",
             )}
         >
             <div className="flex justify-center" onPointerDown={(e) => e.stopPropagation()}>
@@ -59,9 +60,18 @@ export function QuestionRow({
                 <div
                     className={cn(
                         "p-1 hover:bg-muted/40 rounded-md transition-colors",
-                        isOverlay ? "cursor-grabbing" : "cursor-grab",
+                        !canReorder
+                            ? "cursor-not-allowed opacity-30"
+                            : isOverlay
+                              ? "cursor-grabbing"
+                              : "cursor-grab",
                     )}
-                    {...dragHandleProps}
+                    {...(canReorder ? dragHandleProps : {})}
+                    title={
+                        canReorder
+                            ? "Drag to reorder"
+                            : "Use Default Order and clear filters to reorder"
+                    }
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
                 </div>
@@ -140,14 +150,6 @@ export function QuestionRow({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
-                    aria-label="Preview question"
-                >
-                    <Eye className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
                     asChild
                 >
                     <Link
@@ -157,23 +159,15 @@ export function QuestionRow({
                         <Edit className="h-3.5 w-3.5" />
                     </Link>
                 </Button>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground hover:bg-muted"
-                            aria-label="More options"
-                        >
-                            <MoreVertical className="h-3.5 w-3.5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
-                            <Trash2 className="mr-2 h-4 w-4" /> Remove
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
+                    aria-label="Remove question"
+                    onClick={onRemove}
+                >
+                    <Trash2 className="h-3.5 w-3.5" />
+                </Button>
             </div>
         </div>
     );

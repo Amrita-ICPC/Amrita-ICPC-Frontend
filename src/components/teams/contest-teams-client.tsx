@@ -1,17 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-    Ban,
-    CheckCircle2,
-    Clock,
-    Eye,
-    FileText,
-    MoreVertical,
-    Search,
-    Users,
-    XCircle,
-} from "lucide-react";
+import { Ban, CheckCircle2, Clock, Eye, MoreVertical, Search, Users, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -23,7 +13,6 @@ import { TeamStatus } from "@/api/generated/model/teamStatus";
 import {
     getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey,
     useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch,
-    useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
     useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet,
     useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch,
@@ -60,6 +49,7 @@ import {
 
 interface ContestTeamsClientProps {
     contestId: string;
+    embedded?: boolean;
 }
 
 function ApprovalBadge({ status }: { status: string }) {
@@ -79,7 +69,7 @@ function ApprovalBadge({ status }: { status: string }) {
     }
     return (
         <Badge className="border-transparent bg-amber-500/12 text-amber-600 hover:bg-amber-500/20 dark:bg-amber-500/15 dark:text-amber-400 font-semibold px-2.5 py-0.5 rounded-full">
-            Pending
+            Waiting
         </Badge>
     );
 }
@@ -238,12 +228,10 @@ function TeamMembersDropdown({
 function TeamActionsDropdown({
     onApprove,
     onReject,
-    onDisqualify,
     busy,
 }: {
     onApprove: () => void;
     onReject: () => void;
-    onDisqualify: () => void;
     busy?: boolean;
 }) {
     return (
@@ -267,16 +255,12 @@ function TeamActionsDropdown({
                     <XCircle className="mr-2 h-4 w-4 text-red-500" />
                     Reject team
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={onDisqualify}>
-                    <Ban className="mr-2 h-4 w-4 text-violet-500" />
-                    Disqualify team
-                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
 }
 
-export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
+export function ContestTeamsClient({ contestId, embedded = false }: ContestTeamsClientProps) {
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
@@ -284,7 +268,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
     const [teamStatus, setTeamStatus] = useState<TeamStatus | "ALL">("ALL");
     const [approvalStatus, setApprovalStatus] = useState<TeamApprovalStatus | "ALL">("ALL");
     const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(new Set());
-    const [bulkBusy, setBulkBusy] = useState<null | "approve" | "reject" | "disqualify">(null);
+    const [bulkBusy, setBulkBusy] = useState<null | "approve" | "reject">(null);
 
     const { data, isLoading, isError } = useGetContestTeamsApiV1ContestsContestIdTeamsGet(
         contestId,
@@ -297,7 +281,16 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         },
     );
 
-    const teams = useMemo(() => data?.data?.teams ?? [], [data?.data?.teams]);
+    const teams = useMemo(() => {
+        const priority: Record<string, number> = {
+            [TeamApprovalStatus.WAITING]: 0,
+            [TeamApprovalStatus.APPROVED]: 1,
+            [TeamApprovalStatus.REJECTED]: 2,
+        };
+        return [...(data?.data?.teams ?? [])].sort(
+            (a, b) => (priority[a.approval_status] ?? 3) - (priority[b.approval_status] ?? 3),
+        );
+    }, [data?.data?.teams]);
     const pagination = data?.pagination;
     const teamStats = data?.data;
 
@@ -311,8 +304,6 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
 
     const approveMutation = useApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatch();
     const rejectMutation = useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch();
-    const disqualifyMutation =
-        useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch();
 
     const baseTeamsQueryKey = getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId);
 
@@ -337,16 +328,6 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
             await refreshTeams();
         } catch {
             toast.error(`Failed to reject "${team.name}"`);
-        }
-    }
-
-    async function disqualifyTeam(team: ContestTeamResponse) {
-        try {
-            await disqualifyMutation.mutateAsync({ contestId, contestTeamId: team.id });
-            toast.success(`Disqualified "${team.name}"`);
-            await refreshTeams();
-        } catch {
-            toast.error(`Failed to disqualify "${team.name}"`);
         }
     }
 
@@ -379,7 +360,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         });
     }
 
-    async function runBulk(action: "approve" | "reject" | "disqualify") {
+    async function runBulk(action: "approve" | "reject") {
         const ids = Array.from(selectedTeamIds);
         if (ids.length === 0) return;
         setBulkBusy(action);
@@ -388,9 +369,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                 ids.map((id) => {
                     if (action === "approve")
                         return approveMutation.mutateAsync({ contestId, contestTeamId: id });
-                    if (action === "reject")
-                        return rejectMutation.mutateAsync({ contestId, contestTeamId: id });
-                    return disqualifyMutation.mutateAsync({ contestId, contestTeamId: id });
+                    return rejectMutation.mutateAsync({ contestId, contestTeamId: id });
                 }),
             );
             toast.success(`${action[0].toUpperCase() + action.slice(1)}d ${ids.length} team(s)`);
@@ -403,90 +382,269 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
         }
     }
 
-    return (
-        <div className="flex flex-col min-h-screen bg-background">
-            {/* Hero */}
-            <div className="relative overflow-hidden rounded-[12px] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm m-4 md:m-6 mb-2">
-                <div className="relative space-y-6">
-                    <div>
-                        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-                            Contest teams
-                        </h1>
-                        <p className="text-[13px] text-muted-foreground mt-1">
-                            Review registrations and track approval status for this contest.
-                        </p>
+    if (embedded) {
+        const requestFilters = [
+            { value: "ALL", label: "All", count: stats.total, color: "text-primary" },
+            {
+                value: TeamApprovalStatus.WAITING,
+                label: "Waiting",
+                count: stats.pending,
+                color: "text-sky-600 dark:text-sky-400",
+            },
+            {
+                value: TeamApprovalStatus.APPROVED,
+                label: "Accepted",
+                count: stats.approved,
+                color: "text-emerald-600 dark:text-emerald-400",
+            },
+            {
+                value: TeamApprovalStatus.REJECTED,
+                label: "Rejected",
+                count: stats.rejected,
+                color: "text-rose-600 dark:text-rose-400",
+            },
+        ];
+
+        return (
+            <div className="p-4 md:p-6">
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+                    <div className="flex flex-col gap-4 border-b border-border/60 p-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-wrap items-center gap-2">
+                            {requestFilters.map((filter) => (
+                                <button
+                                    key={filter.value}
+                                    type="button"
+                                    onClick={() => {
+                                        setApprovalStatus(
+                                            filter.value as TeamApprovalStatus | "ALL",
+                                        );
+                                        setPage(1);
+                                    }}
+                                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${filter.color} ${
+                                        approvalStatus === filter.value
+                                            ? "border-current bg-current/10 ring-1 ring-current/15"
+                                            : "border-border bg-background hover:border-current/40"
+                                    }`}
+                                >
+                                    {filter.label}
+                                    <span className="ml-2 opacity-70">{filter.count}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="relative w-full lg:w-80">
+                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={search}
+                                onChange={(event) => {
+                                    setSearch(event.target.value);
+                                    setPage(1);
+                                }}
+                                placeholder="Search teams..."
+                                className="h-11 bg-background pl-9"
+                            />
+                        </div>
                     </div>
 
-                    {/* Counts */}
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <Users className="h-5 w-5" />
+                    <div className="grid grid-cols-[1fr_160px_220px] gap-4 border-b border-border/60 bg-muted/20 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <span>Team</span>
+                        <span>Status</span>
+                        <span className="text-right">Action</span>
+                    </div>
+
+                    <div className="divide-y divide-border/50">
+                        {isLoading ? (
+                            Array.from({ length: 3 }).map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="grid grid-cols-[1fr_160px_220px] items-center gap-4 px-6 py-5"
+                                >
+                                    <Skeleton className="h-12 w-56" />
+                                    <Skeleton className="h-7 w-24 rounded-full" />
+                                    <Skeleton className="ml-auto h-9 w-40" />
+                                </div>
+                            ))
+                        ) : teams.length === 0 ? (
+                            <div className="flex min-h-48 flex-col items-center justify-center text-muted-foreground">
+                                <Users className="mb-3 size-8 opacity-30" />
+                                <p className="text-sm">No team requests found.</p>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-none text-foreground">
-                                    {stats.total}
-                                </span>
-                                <span className="text-[12px] text-muted-foreground mt-1">
-                                    Total
-                                </span>
-                            </div>
+                        ) : (
+                            teams.map((team) => {
+                                const initials = team.name?.slice(0, 2).toUpperCase() || "T";
+                                const memberNames = (team.members_preview ?? [])
+                                    .map((member) => member.name)
+                                    .join(", ");
+                                const isWaiting =
+                                    team.approval_status === TeamApprovalStatus.WAITING;
+                                return (
+                                    <div
+                                        key={team.id}
+                                        className="grid grid-cols-1 items-center gap-4 px-6 py-5 transition-colors hover:bg-muted/20 md:grid-cols-[1fr_160px_220px]"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-4">
+                                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-bold text-primary">
+                                                {initials}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="truncate font-semibold text-foreground">
+                                                    {team.name}
+                                                </p>
+                                                <p className="mt-1 truncate text-sm text-muted-foreground">
+                                                    {team.members_preview?.length ?? 0} member
+                                                    {(team.members_preview?.length ?? 0) === 1
+                                                        ? ""
+                                                        : "s"}
+                                                    {memberNames ? ` · ${memberNames}` : ""}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <ApprovalBadge status={team.approval_status} />
+                                        <div className="flex justify-start gap-2 md:justify-end">
+                                            {isWaiting && (
+                                                <>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="border-emerald-500/25 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
+                                                        disabled={
+                                                            approveMutation.isPending ||
+                                                            rejectMutation.isPending
+                                                        }
+                                                        onClick={() => approveTeam(team)}
+                                                    >
+                                                        <CheckCircle2 className="size-4" />
+                                                        Accept
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="border-rose-500/25 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
+                                                        disabled={
+                                                            approveMutation.isPending ||
+                                                            rejectMutation.isPending
+                                                        }
+                                                        onClick={() => rejectTeam(team)}
+                                                    >
+                                                        <XCircle className="size-4" />
+                                                        Reject
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    {pagination && pagination.total_pages > 1 && (
+                        <div className="flex justify-end border-t border-border/60 p-4">
+                            <AppPagination
+                                currentPage={page}
+                                totalPages={pagination.total_pages}
+                                hasNext={pagination.has_next}
+                                hasPrevious={pagination.has_previous}
+                                onPageChange={setPage}
+                            />
                         </div>
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
-                                <CheckCircle2 className="h-5 w-5" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-none text-foreground">
-                                    {stats.approved}
-                                </span>
-                                <span className="text-[12px] text-muted-foreground mt-1">
-                                    Approved
-                                </span>
-                            </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            className={
+                embedded
+                    ? "flex flex-col bg-transparent"
+                    : "flex min-h-screen flex-col bg-background"
+            }
+        >
+            {/* Hero */}
+            {!embedded && (
+                <div className="relative overflow-hidden rounded-[12px] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm m-4 md:m-6 mb-2">
+                    <div className="relative space-y-6">
+                        <div>
+                            <h1 className="text-[22px] font-bold tracking-tight text-foreground">
+                                Contest teams
+                            </h1>
+                            <p className="text-[13px] text-muted-foreground mt-1">
+                                Review registrations and track approval status for this contest.
+                            </p>
                         </div>
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
-                                <Clock className="h-5 w-5" />
+
+                        {/* Counts */}
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                            <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <Users className="h-5 w-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold leading-none text-foreground">
+                                        {stats.total}
+                                    </span>
+                                    <span className="text-[12px] text-muted-foreground mt-1">
+                                        Total
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-none text-foreground">
-                                    {stats.pending}
-                                </span>
-                                <span className="text-[12px] text-muted-foreground mt-1">
-                                    Pending
-                                </span>
+                            <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+                                    <CheckCircle2 className="h-5 w-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold leading-none text-foreground">
+                                        {stats.approved}
+                                    </span>
+                                    <span className="text-[12px] text-muted-foreground mt-1">
+                                        Approved
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
-                                <XCircle className="h-5 w-5" />
+                            <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                                    <Clock className="h-5 w-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold leading-none text-foreground">
+                                        {stats.pending}
+                                    </span>
+                                    <span className="text-[12px] text-muted-foreground mt-1">
+                                        Waiting
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-none text-foreground">
-                                    {stats.rejected}
-                                </span>
-                                <span className="text-[12px] text-muted-foreground mt-1">
-                                    Rejected
-                                </span>
+                            <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+                                    <XCircle className="h-5 w-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold leading-none text-foreground">
+                                        {stats.rejected}
+                                    </span>
+                                    <span className="text-[12px] text-muted-foreground mt-1">
+                                        Rejected
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
-                                <Ban className="h-5 w-5" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-none text-foreground">
-                                    {stats.disqualified}
-                                </span>
-                                <span className="text-[12px] text-muted-foreground mt-1">
-                                    Disqualified
-                                </span>
+                            <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card p-3 shadow-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
+                                    <Ban className="h-5 w-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold leading-none text-foreground">
+                                        {stats.disqualified}
+                                    </span>
+                                    <span className="text-[12px] text-muted-foreground mt-1">
+                                        Disqualified
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Filter & Actions Bar */}
             <div className="sticky top-0 z-20 flex min-h-[72px] flex-col justify-center border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-md transition-all">
@@ -521,7 +679,7 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                 <SelectItem value={TeamApprovalStatus.APPROVED}>
                                     Approved
                                 </SelectItem>
-                                <SelectItem value={TeamApprovalStatus.WAITING}>Pending</SelectItem>
+                                <SelectItem value={TeamApprovalStatus.WAITING}>Waiting</SelectItem>
                                 <SelectItem value={TeamApprovalStatus.REJECTED}>
                                     Rejected
                                 </SelectItem>
@@ -548,13 +706,6 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                             </SelectContent>
                         </Select>
                     </div>
-                    <Button
-                        variant="outline"
-                        className="h-10 shadow-sm w-full sm:w-auto bg-card border-border/60"
-                    >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Reports
-                    </Button>
                 </div>
 
                 {/* Bulk actions */}
@@ -585,15 +736,6 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                 className="h-8 shadow-sm"
                             >
                                 <XCircle className="mr-2 h-3.5 w-3.5 text-red-500" /> Reject
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={bulkBusy !== null}
-                                onClick={() => runBulk("disqualify")}
-                                className="h-8 shadow-sm"
-                            >
-                                <Ban className="mr-2 h-3.5 w-3.5 text-violet-500" /> Disqualify
                             </Button>
                             <Button
                                 size="sm"
@@ -812,14 +954,10 @@ export function ContestTeamsClient({ contestId }: ContestTeamsClientProps) {
                                                         <TeamActionsDropdown
                                                             busy={
                                                                 approveMutation.isPending ||
-                                                                rejectMutation.isPending ||
-                                                                disqualifyMutation.isPending
+                                                                rejectMutation.isPending
                                                             }
                                                             onApprove={() => approveTeam(team)}
                                                             onReject={() => rejectTeam(team)}
-                                                            onDisqualify={() =>
-                                                                disqualifyTeam(team)
-                                                            }
                                                         />
                                                     </div>
                                                 </TableCell>

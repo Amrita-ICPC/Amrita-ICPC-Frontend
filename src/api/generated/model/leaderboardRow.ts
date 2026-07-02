@@ -5,7 +5,6 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
-import type { LeaderboardQuestionDetail } from './leaderboardQuestionDetail';
 
 /**
  * A single row/entry in the contest leaderboard representing a team's standing.
@@ -21,6 +20,4 @@ export interface LeaderboardRow {
   total_score: number;
   /** Total penalty time in seconds (standard for ICPC) */
   total_penalty?: number;
-  /** Performance details for each question in the contest */
-  question_details?: LeaderboardQuestionDetail[];
 }
