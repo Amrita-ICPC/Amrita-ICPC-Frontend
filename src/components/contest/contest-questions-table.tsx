@@ -50,6 +50,7 @@ interface ContestQuestionsTableProps {
     onSortChange: (sortBy: string, sortOrder: string) => void;
     sortBy?: string;
     sortOrder?: string;
+    embedded?: boolean;
 }
 
 export function ContestQuestionsTable({
@@ -64,6 +65,7 @@ export function ContestQuestionsTable({
     onSortChange,
     sortBy = "order",
     sortOrder = "asc",
+    embedded = false,
 }: ContestQuestionsTableProps) {
     const [search, setSearch] = useState("");
     const [difficulty, setDifficulty] = useState("ALL");
@@ -163,6 +165,7 @@ export function ContestQuestionsTable({
     };
 
     const handleSaveOrder = () => {
+        if (!canReorder) return;
         const reorders = orderedQuestions.map((q, i) => ({
             question_id: q.id,
             order: (pagination?.page ? (pagination.page - 1) * pagination.page_size : 0) + i + 1,
@@ -196,141 +199,160 @@ export function ContestQuestionsTable({
         });
     };
 
+    const canReorder =
+        sortBy === "order" &&
+        sortOrder === "asc" &&
+        difficulty === "ALL" &&
+        search.trim() === "" &&
+        tagName.trim() === "";
+
     return (
         <>
             {/* Toolbar */}
-            <div className="sticky top-0 z-20 flex min-h-[72px] flex-col justify-center border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-md transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-3 flex-1">
-                        <div className="relative min-w-[200px] flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                            <Input
-                                placeholder="Search by name..."
-                                className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
-                                value={search}
-                                onChange={(e) => handleSearch(e.target.value)}
-                            />
-                        </div>
-                        <div className="relative min-w-[180px] flex-1">
-                            <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                            <Input
-                                placeholder="Filter by tag..."
-                                className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
-                                value={tagName}
-                                onChange={(e) => handleTag(e.target.value)}
-                            />
-                        </div>
-                        <Select value={difficulty} onValueChange={handleDifficulty}>
-                            <SelectTrigger className="w-[140px] bg-background border-border/60 h-10 shadow-sm">
-                                <Filter className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                                <SelectValue placeholder="Difficulty" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Levels</SelectItem>
-                                <SelectItem value="EASY">Easy</SelectItem>
-                                <SelectItem value="MEDIUM">Medium</SelectItem>
-                                <SelectItem value="HARD">Hard</SelectItem>
-                            </SelectContent>
-                        </Select>
+            {(!embedded || selectedIds.length > 0 || hasOrderChanged) && (
+                <div className="sticky top-0 z-20 flex min-h-[72px] flex-col justify-center border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-md transition-all">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        {!embedded && (
+                            <div className="flex flex-wrap items-center gap-3 flex-1">
+                                <div className="relative min-w-[200px] flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                                    <Input
+                                        placeholder="Search by name..."
+                                        className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
+                                        value={search}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="relative min-w-[180px] flex-1">
+                                    <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                                    <Input
+                                        placeholder="Filter by tag..."
+                                        className="pl-9 bg-background border-border/60 focus:border-primary/50 transition-colors h-10 shadow-sm"
+                                        value={tagName}
+                                        onChange={(e) => handleTag(e.target.value)}
+                                    />
+                                </div>
+                                <Select value={difficulty} onValueChange={handleDifficulty}>
+                                    <SelectTrigger className="w-[140px] bg-background border-border/60 h-10 shadow-sm">
+                                        <Filter className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                                        <SelectValue placeholder="Difficulty" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All Levels</SelectItem>
+                                        <SelectItem value="EASY">Easy</SelectItem>
+                                        <SelectItem value="MEDIUM">Medium</SelectItem>
+                                        <SelectItem value="HARD">Hard</SelectItem>
+                                    </SelectContent>
+                                </Select>
 
-                        <div className="flex items-center gap-2 bg-background/40 p-1 rounded-lg border border-border/20">
-                            <Select
-                                value={sortBy}
-                                onValueChange={(val) => onSortChange(val, sortOrder)}
-                            >
-                                <SelectTrigger className="w-[130px] border-none bg-transparent h-8 text-xs font-semibold focus:ring-0">
-                                    <SortAsc className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                                    <SelectValue placeholder="Sort By" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="order">Default Order</SelectItem>
-                                    <SelectItem value="difficulty">Difficulty</SelectItem>
-                                    <SelectItem value="title">Problem Name</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <div className="w-px h-4 bg-border/40" />
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:bg-background/60"
-                                aria-label={`Toggle sort direction (${sortOrder === "asc" ? "ascending" : "descending"})`}
-                                title="Toggle sort direction"
-                                onClick={() =>
-                                    onSortChange(sortBy, sortOrder === "asc" ? "desc" : "asc")
-                                }
-                            >
-                                <ArrowUpDown
-                                    className={cn(
-                                        "h-3.5 w-3.5 transition-transform duration-200",
-                                        sortOrder === "desc" && "rotate-180",
-                                    )}
-                                />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                        {selectedIds.length === 2 && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-primary/40 text-primary hover:bg-primary/5 gap-2 h-9"
-                                onClick={handleSwitch}
-                            >
-                                <ArrowUpDown className="h-4 w-4" />
-                                Switch Position
-                            </Button>
-                        )}
-                        {hasOrderChanged && (
-                            <Button
-                                variant="default"
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9 px-4 shadow-lg shadow-primary/20 animate-in fade-in zoom-in duration-200"
-                                onClick={handleSaveOrder}
-                                disabled={reorderMutation.isPending}
-                            >
-                                {reorderMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Save className="h-4 w-4" />
-                                )}
-                                Save New Ordering
-                            </Button>
-                        )}
-                        {selectedIds.length > 0 && (
-                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className="gap-2 h-9 px-4 shadow-lg shadow-destructive/20"
-                                    onClick={handleRemoveSelected}
-                                    disabled={removeMutation.isPending}
-                                >
-                                    {removeMutation.isPending ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Trash2 className="h-4 w-4" />
-                                    )}
-                                    Remove ({selectedIds.length})
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-muted-foreground hover:text-foreground h-9"
-                                    onClick={() => setSelectedIds([])}
-                                >
-                                    Cancel
-                                </Button>
+                                <div className="flex items-center gap-2 bg-background/40 p-1 rounded-lg border border-border/20">
+                                    <Select
+                                        value={sortBy}
+                                        onValueChange={(val) => onSortChange(val, sortOrder)}
+                                    >
+                                        <SelectTrigger className="w-[130px] border-none bg-transparent h-8 text-xs font-semibold focus:ring-0">
+                                            <SortAsc className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                                            <SelectValue placeholder="Sort By" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="order">Default Order</SelectItem>
+                                            <SelectItem value="difficulty">Difficulty</SelectItem>
+                                            <SelectItem value="title">Problem Name</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <div className="w-px h-4 bg-border/40" />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 hover:bg-background/60"
+                                        aria-label={`Toggle sort direction (${sortOrder === "asc" ? "ascending" : "descending"})`}
+                                        title="Toggle sort direction"
+                                        onClick={() =>
+                                            onSortChange(
+                                                sortBy,
+                                                sortOrder === "asc" ? "desc" : "asc",
+                                            )
+                                        }
+                                    >
+                                        <ArrowUpDown
+                                            className={cn(
+                                                "h-3.5 w-3.5 transition-transform duration-200",
+                                                sortOrder === "desc" && "rotate-180",
+                                            )}
+                                        />
+                                    </Button>
+                                </div>
                             </div>
                         )}
+
+                        <div
+                            className={cn(
+                                "flex items-center gap-2 mt-4 sm:mt-0",
+                                embedded && "sm:ml-auto",
+                            )}
+                        >
+                            {selectedIds.length === 2 && canReorder && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-primary/40 text-primary hover:bg-primary/5 gap-2 h-9"
+                                    onClick={handleSwitch}
+                                >
+                                    <ArrowUpDown className="h-4 w-4" />
+                                    Switch Position
+                                </Button>
+                            )}
+                            {hasOrderChanged && canReorder && (
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9 px-4 shadow-lg shadow-primary/20 animate-in fade-in zoom-in duration-200"
+                                    onClick={handleSaveOrder}
+                                    disabled={reorderMutation.isPending}
+                                >
+                                    {reorderMutation.isPending ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Save className="h-4 w-4" />
+                                    )}
+                                    Save New Ordering
+                                </Button>
+                            )}
+                            {selectedIds.length > 0 && (
+                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="gap-2 h-9 px-4 shadow-lg shadow-destructive/20"
+                                        onClick={handleRemoveSelected}
+                                        disabled={removeMutation.isPending}
+                                    >
+                                        {removeMutation.isPending ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="h-4 w-4" />
+                                        )}
+                                        Remove ({selectedIds.length})
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-muted-foreground hover:text-foreground h-9"
+                                        onClick={() => setSelectedIds([])}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Table */}
             <div className="flex-1 p-4 md:p-6 pt-2">
-                <div className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-md overflow-hidden shadow-xl">
-                    <div className="grid grid-cols-[48px_80px_1fr_120px_200px_140px] items-center gap-4 px-6 py-4 border-b border-border/60 bg-muted/50 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+                    <div className="grid grid-cols-[48px_100px_1fr_120px_200px_110px] items-center gap-4 border-b border-border/60 bg-muted/40 px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                         <div className="flex justify-center">
                             <Checkbox
                                 checked={
@@ -346,14 +368,14 @@ export function ContestQuestionsTable({
                             className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
                             onClick={() => handleSort("order")}
                         >
-                            Order{" "}
+                            Serial No.{" "}
                             {sortBy === "order" && (
                                 <ArrowUpDown
                                     className={cn("h-3 w-3", sortOrder === "desc" && "rotate-180")}
                                 />
                             )}
                         </div>
-                        <div>Problem Details</div>
+                        <div>Title</div>
                         <div
                             className="flex items-center justify-center gap-2 cursor-pointer hover:text-foreground transition-colors"
                             onClick={() => handleSort("difficulty")}
@@ -366,7 +388,7 @@ export function ContestQuestionsTable({
                             )}
                         </div>
                         <div>Tags</div>
-                        <div className="text-right px-2">Actions</div>
+                        <div className="px-2 text-right">Actions</div>
                     </div>
 
                     <SortableList
@@ -385,7 +407,7 @@ export function ContestQuestionsTable({
                         )}
                     >
                         <div
-                            className={`divide-y divide-border/10 transition-opacity duration-200 ${isLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+                            className={`divide-y divide-border/50 transition-opacity duration-200 ${isLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
                         >
                             {orderedQuestions.map((question, index) => (
                                 <QuestionSortableRow
@@ -396,13 +418,20 @@ export function ContestQuestionsTable({
                                     pagination={pagination}
                                     isSelected={selectedIds.includes(question.id)}
                                     toggleSelection={() => toggleSelection(question.id)}
+                                    canReorder={canReorder}
+                                    onRemove={() =>
+                                        removeMutation.mutate({
+                                            contestId,
+                                            data: { question_ids: [question.id] },
+                                        })
+                                    }
                                 />
                             ))}
                         </div>
                     </SortableList>
 
                     {orderedQuestions.length === 0 && !isLoading && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-muted/5 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-muted-foreground">
                             <FileCode2 className="h-16 w-16 opacity-20 mb-4" />
                             <h3 className="text-lg font-bold text-foreground">
                                 No questions found
@@ -413,7 +442,7 @@ export function ContestQuestionsTable({
                         </div>
                     )}
                     {/* Pagination Footer */}
-                    {pagination && (
+                    {pagination && !embedded && (
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border/40 px-6 py-4 bg-muted/10">
                             <p className="text-xs text-muted-foreground font-medium">
                                 Showing{" "}

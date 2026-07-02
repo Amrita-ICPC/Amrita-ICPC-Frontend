@@ -1,23 +1,31 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
+import { Library, Plus } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import {
     useGetContestApiV1ContestsContestIdGet,
     useGetContestQuestionsApiV1ContestsContestIdQuestionsGet,
 } from "@/api/generated/contests/contests";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { BankCloneDialog } from "../banks/bank-clone-dialog";
 import { AsyncStateHandler } from "../shared/async-state-handler";
 import { ContestQuestionsHero } from "./contest-questions-hero";
 import { ContestQuestionsTable } from "./contest-questions-table";
 
 interface ContestQuestionsClientProps {
     contestId: string;
+    embedded?: boolean;
 }
 
-export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProps) {
+export function ContestQuestionsClient({
+    contestId,
+    embedded = false,
+}: ContestQuestionsClientProps) {
     const [search, setSearch] = useState("");
     const [difficulty, setDifficulty] = useState<string>("ALL");
     const [tagName, setTagName] = useState("");
@@ -44,7 +52,7 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
         contestId,
         {
             page,
-            page_size: 10,
+            page_size: embedded ? 100 : 10,
             search: search || undefined,
             difficulty: difficulty === "ALL" ? undefined : (difficulty as any),
             tag_name: tagName || undefined,
@@ -113,17 +121,59 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                 </div>
             }
         >
-            <div className="flex flex-col min-h-screen bg-background">
-                <ContestQuestionsHero
-                    contestId={contestId}
-                    contestName={contest?.name}
-                    stats={{
-                        total: questionsResponse?.total_count ?? 0,
-                        easy: questionsResponse?.easy_count ?? 0,
-                        medium: questionsResponse?.medium_count ?? 0,
-                        hard: questionsResponse?.hard_count ?? 0,
-                    }}
-                />
+            <div
+                className={
+                    embedded
+                        ? "flex flex-col bg-transparent"
+                        : "flex min-h-screen flex-col bg-background"
+                }
+            >
+                {!embedded && (
+                    <ContestQuestionsHero
+                        contestId={contestId}
+                        contestName={contest?.name}
+                        stats={{
+                            total: questionsResponse?.total_count ?? 0,
+                            easy: questionsResponse?.easy_count ?? 0,
+                            medium: questionsResponse?.medium_count ?? 0,
+                            hard: questionsResponse?.hard_count ?? 0,
+                        }}
+                    />
+                )}
+
+                {embedded && (
+                    <div className="flex flex-col gap-4 border-b border-border/60 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                            <h3 className="font-semibold text-foreground">Contest Questions</h3>
+                            <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                                {questionsResponse?.total_count ?? 0} questions
+                            </span>
+                            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                Easy {questionsResponse?.easy_count ?? 0}
+                            </span>
+                            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                Medium {questionsResponse?.medium_count ?? 0}
+                            </span>
+                            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                                Hard {questionsResponse?.hard_count ?? 0}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button size="sm" asChild>
+                                <Link href={`/contest/${contestId}/questions/new`}>
+                                    <Plus className="size-4" />
+                                    New Question
+                                </Link>
+                            </Button>
+                            <BankCloneDialog targetId={contestId} targetType="contest">
+                                <Button size="sm" variant="outline">
+                                    <Library className="size-4" />
+                                    From Bank
+                                </Button>
+                            </BankCloneDialog>
+                        </div>
+                    </div>
+                )}
 
                 <ContestQuestionsTable
                     contestId={contestId}
@@ -137,6 +187,7 @@ export function ContestQuestionsClient({ contestId }: ContestQuestionsClientProp
                     onSortChange={handleSortChange}
                     sortBy={sortBy}
                     sortOrder={sortOrder}
+                    embedded={embedded}
                 />
             </div>
         </AsyncStateHandler>

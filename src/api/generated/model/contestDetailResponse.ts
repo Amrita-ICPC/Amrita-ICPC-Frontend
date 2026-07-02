@@ -61,6 +61,10 @@ export interface ContestDetailResponse {
   evaluate_on_submit?: boolean;
   /** Maximum submissions allowed per question */
   max_submission_per_question?: number | null;
+  /** Whether the leaderboard is visible once results are published */
+  show_leaderboard?: boolean;
+  /** Whether a team's own submissions are visible once results are published */
+  show_team_submissions?: boolean;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */
@@ -101,4 +105,6 @@ export interface ContestDetailResponse {
   published_at?: string | null;
   /** User ID who published the contest */
   published_by?: string | null;
+  /** Time results were published (UTC); null if unpublished */
+  results_published_at?: string | null;
 }

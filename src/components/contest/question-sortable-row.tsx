@@ -14,6 +14,8 @@ interface QuestionSortableRowProps {
     pagination?: PaginationResponse;
     isSelected: boolean;
     toggleSelection: () => void;
+    canReorder: boolean;
+    onRemove: () => void;
 }
 
 export function QuestionSortableRow({
@@ -23,9 +25,12 @@ export function QuestionSortableRow({
     pagination,
     isSelected,
     toggleSelection,
+    canReorder,
+    onRemove,
 }: QuestionSortableRowProps) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: question.id,
+        disabled: !canReorder,
     });
 
     const style = {
@@ -43,6 +48,8 @@ export function QuestionSortableRow({
                 isSelected={isSelected}
                 toggleSelection={toggleSelection}
                 dragHandleProps={{ ...attributes, ...listeners }}
+                canReorder={canReorder}
+                onRemove={onRemove}
                 isDragging={isDragging}
             />
         </div>

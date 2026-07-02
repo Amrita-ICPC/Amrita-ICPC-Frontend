@@ -101,6 +101,8 @@
 
 /* Dark mode — deep slate, tuned for card/border separation */
 .dark {
+    --radius: 0.5rem;
+
     --background: #0a0f1e;
     --foreground: #eef2ff;
 
@@ -150,6 +152,8 @@
 
 /* Forest — green-accented light palette */
 .forest {
+    --radius: 0.5rem;
+
     --background: #f4f7f3;
     --foreground: #1a2b20;
 
@@ -197,6 +201,8 @@
 
 /* Rose — warm-accented light palette */
 .rose {
+    --radius: 0.5rem;
+
     --background: #faf5f6;
     --foreground: #2b1c22;
 
@@ -244,6 +250,8 @@
 
 /* Midnight — deep violet-blue dark palette */
 .midnight {
+    --radius: 0.5rem;
+
     --background: #0b0a1c;
     --foreground: #ece9ff;
 
@@ -291,6 +299,8 @@
 
 /* Slate — neutral high-legibility dark palette */
 .slate {
+    --radius: 0.5rem;
+
     --background: #0b0d10;
     --foreground: #f2f4f6;
 

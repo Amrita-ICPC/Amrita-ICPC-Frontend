@@ -1,12 +1,11 @@
 "use client";
 
 import {
-    AlertCircle,
-    Ban,
     BarChart3,
     Calendar,
     ClipboardList,
     Clock,
+    Code2,
     Edit,
     Globe,
     Loader2,
@@ -15,7 +14,8 @@ import {
     Play,
     Trash2,
     UserCircle2,
-    Zap,
+    UserRoundCheck,
+    Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,29 +36,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { contestDetailKey, contestKeys, usePublishContest } from "@/query/contest-query";
 
 import { AsyncStateHandler } from "../shared/async-state-handler";
-import { ContestNavStats } from "./contest-nav-stats";
-
-const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ElementType }> =
-    {
-        PUBLISHED: {
-            label: "Published",
-            className: "bg-emerald-500/10 text-emerald-500 border-transparent",
-            icon: Zap,
-        },
-        CANCELLED: {
-            label: "Cancelled",
-            className: "bg-zinc-500/10 text-zinc-400 border-transparent",
-            icon: Ban,
-        },
-        DRAFT: {
-            label: "Draft",
-            className: "bg-orange-500/10 text-orange-500 border-transparent",
-            icon: AlertCircle,
-        },
-    };
+import { ContestTeamsClient } from "../teams/contest-teams-client";
+import { ContestQuestionsClient } from "./contest-questions-client";
 
 function fmt(dateStr: string | null | undefined, opts?: Intl.DateTimeFormatOptions) {
     if (!dateStr) return "—";
@@ -102,12 +85,6 @@ function ContestDetailSkeleton() {
                     ))}
                 </div>
             </div>
-
-            {/* Detail cards Skeleton */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <Skeleton className="h-64 rounded-xl" />
-                <Skeleton className="h-64 rounded-xl" />
-            </div>
         </div>
     );
 }
@@ -146,14 +123,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
     const handleDeleteContest = () => deleteMutation.mutate({ contestId });
     const handlePublish = () => publishMutation.mutate({ contestId });
 
-    const statusCfg = (() => {
-        if (!contest) return STATUS_CONFIG.DRAFT;
-        if (contest.status === "DRAFT") return STATUS_CONFIG.DRAFT;
-        if (contest.status === "CANCELLED") return STATUS_CONFIG.CANCELLED;
-        return STATUS_CONFIG.PUBLISHED;
-    })();
-    const StatusIcon = statusCfg.icon;
-
     const duration =
         contest && contest.end_time
             ? (() => {
@@ -177,44 +146,48 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
             {contest && (
                 <div className="space-y-6">
                     {/* Hero */}
-                    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6">
+                    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#081326] p-7 text-white shadow-[0_24px_60px_-28px_rgba(2,6,23,0.8)] md:p-8">
+                        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,color-mix(in_srgb,var(--primary)_66%,#17356b),#081326_78%)] opacity-90" />
+                        <div className="pointer-events-none absolute -left-16 -top-36 size-[28rem] rounded-full bg-primary/45 blur-3xl" />
+                        <div className="pointer-events-none absolute -bottom-40 right-1/4 size-80 rounded-full bg-primary/25 blur-3xl" />
+                        <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_center,white_1px,transparent_1.3px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
+                        <Code2 className="pointer-events-none absolute -bottom-16 -right-5 size-56 rotate-[-5deg] text-white/[0.07]" />
                         {contest.image && (
                             <div
                                 className="absolute inset-0 opacity-10 bg-cover bg-center"
                                 style={{ backgroundImage: `url(${contest.image})` }}
                             />
                         )}
-                        <div className="relative">
-                            <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+                        <div className="relative z-10">
+                            <div className="mb-7 flex flex-wrap items-start justify-between gap-5">
                                 <div className="flex flex-wrap items-start gap-3">
                                     <Badge
                                         variant="outline"
-                                        className={`${statusCfg.className} flex items-center gap-1.5`}
-                                    >
-                                        <StatusIcon className="h-3 w-3" />
-                                        {statusCfg.label}
-                                    </Badge>
-                                    <Badge
-                                        variant="outline"
-                                        className="border-border/60 text-muted-foreground flex items-center gap-1.5"
+                                        className="flex items-center gap-2 border-transparent px-3 py-1.5 text-xs font-bold shadow-sm"
+                                        style={{
+                                            backgroundColor: "var(--contrast-accent)",
+                                            color: "var(--contrast-foreground)",
+                                        }}
                                     >
                                         {contest.is_public ? (
-                                            <Globe className="h-3 w-3" />
+                                            <Globe className="h-3.5 w-3.5" />
                                         ) : (
-                                            <Lock className="h-3 w-3" />
+                                            <Lock className="h-3.5 w-3.5" />
                                         )}
                                         {contest.is_public ? "Public" : "Private"}
                                     </Badge>
                                     <Badge
                                         variant="outline"
-                                        className="border-border/60 text-muted-foreground capitalize"
+                                        className="gap-2 border-violet-300/25 bg-violet-400/20 px-3 py-1.5 text-xs font-semibold text-violet-100 capitalize backdrop-blur-md"
                                     >
+                                        <span className="size-1.5 rounded-full bg-violet-300" />
                                         {contest.contest_mode}
                                     </Badge>
                                     <Badge
                                         variant="outline"
-                                        className="border-border/60 text-muted-foreground capitalize"
+                                        className="gap-2 border-emerald-300/30 bg-emerald-400/20 px-3 py-1.5 text-xs font-semibold text-emerald-200 capitalize backdrop-blur-md"
                                     >
+                                        <span className="size-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_currentColor]" />
                                         {contest.run_status}
                                     </Badge>
                                 </div>
@@ -222,8 +195,7 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 <div className="flex items-center gap-2">
                                     <Button
                                         variant="outline"
-                                        size="sm"
-                                        className="bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                                        className="h-10 border-sky-300/30 bg-sky-400/20 px-4 text-sky-100 backdrop-blur-md hover:bg-sky-400/30 hover:text-white"
                                         asChild
                                     >
                                         <Link href={`/contest/${contest.id}?edit=1`}>
@@ -232,21 +204,22 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         </Link>
                                     </Button>
                                     <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                                        className="h-10 border-0 px-4 font-semibold shadow-md shadow-black/20"
+                                        style={{
+                                            backgroundColor: "var(--contrast-accent)",
+                                            color: "var(--contrast-foreground)",
+                                        }}
                                         asChild
                                     >
                                         <Link href={`/contest/${contest.id}/evaluate`}>
-                                            <Play className="mr-1.5 h-3.5 w-3.5" />
-                                            Evaluate Contest
+                                            <BarChart3 className="mr-1.5 h-4 w-4" />
+                                            Results
                                         </Link>
                                     </Button>
 
                                     {(contest.status as string) === "DRAFT" && (
                                         <Button
-                                            size="sm"
-                                            className="shadow-sm"
+                                            className="h-10 bg-emerald-600 px-4 text-white shadow-md shadow-emerald-500/15 hover:bg-emerald-500"
                                             onClick={handlePublish}
                                             disabled={publishMutation.isPending}
                                         >
@@ -264,7 +237,7 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                className="h-9 w-9 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                                                className="h-10 w-10 border-violet-300/30 bg-violet-400/20 text-violet-100 backdrop-blur-md hover:bg-violet-400/30 hover:text-white"
                                             >
                                                 <MoreVertical className="h-4 w-4" />
                                             </Button>
@@ -289,43 +262,105 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 </div>
                             </div>
 
-                            <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+                            <h1 className="mb-2 max-w-4xl text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
                                 {contest.name}
                             </h1>
                             {contest.description && (
-                                <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                                <p className="max-w-3xl text-sm leading-relaxed text-slate-300 md:text-base">
                                     {contest.description}
                                 </p>
                             )}
 
-                            <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1.5">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>
-                                        {fmt(contest.start_time)} — {fmt(contest.end_time)}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <Clock className="h-4 w-4" />
-                                    <span>{duration} duration</span>
-                                </div>
-                                {contest.creator && (
-                                    <div className="flex items-center gap-1.5">
-                                        <UserCircle2 className="h-4 w-4" />
-                                        <span>
-                                            by {contest.creator.name || contest.creator.email}
-                                        </span>
+                            <div className="mt-8 grid max-w-6xl gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                <div className="rounded-2xl border border-white/10 bg-[#081326]/55 p-4 backdrop-blur-md">
+                                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                        <Calendar className="size-4 text-primary" />
+                                        Starts
                                     </div>
-                                )}
+                                    <p className="text-sm font-semibold text-white">
+                                        {fmt(contest.start_time)}
+                                    </p>
+                                </div>
+                                <div className="rounded-2xl border border-white/10 bg-[#081326]/55 p-4 backdrop-blur-md">
+                                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                        <Calendar className="size-4 text-contrast" />
+                                        Ends
+                                    </div>
+                                    <p className="text-sm font-semibold text-white">
+                                        {fmt(contest.end_time)}
+                                    </p>
+                                </div>
+                                <div className="rounded-2xl border border-white/10 bg-[#081326]/55 p-4 backdrop-blur-md">
+                                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                        <Clock className="size-4 text-emerald-400" />
+                                        Duration
+                                    </div>
+                                    <p className="text-sm font-semibold text-white">{duration}</p>
+                                </div>
+                                <div className="rounded-2xl border border-white/10 bg-[#081326]/55 p-4 backdrop-blur-md">
+                                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                        <UserRoundCheck className="size-4 text-violet-300" />
+                                        Registration
+                                    </div>
+                                    {contest.registration_start || contest.registration_end ? (
+                                        <div className="space-y-1 text-xs text-slate-300">
+                                            <p>
+                                                <span className="text-slate-500">Opens </span>
+                                                {fmt(contest.registration_start)}
+                                            </p>
+                                            <p>
+                                                <span className="text-slate-500">Closes </span>
+                                                {fmt(contest.registration_end)}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm font-semibold text-white">
+                                            No registration window
+                                        </p>
+                                    )}
+                                </div>
                             </div>
+
+                            {contest.creator && (
+                                <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                                    <UserCircle2 className="size-4" />
+                                    Created by {contest.creator.name || contest.creator.email}
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Navigation stats and contest totals */}
-                    <ContestNavStats contest={contest} />
+                    <Card className="overflow-hidden border-border/60 p-0">
+                        <Tabs defaultValue="questions" className="gap-0">
+                            <div className="border-b border-border/60 bg-primary/5 p-4">
+                                <TabsList className="grid h-auto w-full max-w-xl grid-cols-2 rounded-xl bg-muted/60 p-1.5">
+                                    <TabsTrigger
+                                        value="questions"
+                                        className="gap-2 rounded-lg py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        <Code2 className="size-4" />
+                                        Questions
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="teams"
+                                        className="gap-2 rounded-lg py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        <Users className="size-4" />
+                                        Team Requests
+                                    </TabsTrigger>
+                                </TabsList>
+                            </div>
+                            <TabsContent value="questions" className="m-0">
+                                <ContestQuestionsClient contestId={contest.id} embedded />
+                            </TabsContent>
+                            <TabsContent value="teams" className="m-0">
+                                <ContestTeamsClient contestId={contest.id} embedded />
+                            </TabsContent>
+                        </Tabs>
+                    </Card>
 
                     {/* Detail cards */}
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="hidden grid-cols-1 gap-6 md:grid-cols-2">
                         {/* Schedule */}
                         <Card className="border-border/60">
                             <CardHeader className="pb-2 pt-5 px-5">
