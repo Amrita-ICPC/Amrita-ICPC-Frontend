@@ -38,11 +38,11 @@ export default async function ContestPage(props: { searchParams?: Promise<Search
 
     return (
         <div className="flex h-full flex-col space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-primary/15 pb-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Contests</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Contest</h1>
                     <p className="text-sm text-muted-foreground">
-                        Manage and explore programming contests.
+                        Create, organize, and manage programming contests from one place.
                     </p>
                 </div>
                 {canCreate && (
