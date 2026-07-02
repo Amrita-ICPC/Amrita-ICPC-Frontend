@@ -25,6 +25,7 @@ import {
     useSoftDeleteContestApiV1ContestsContestIdSoftDeleteDelete,
 } from "@/api/generated/contests/contests";
 import type { ContestDetailResponse } from "@/api/generated/model";
+import { useGetContestTeamsApiV1ContestsContestIdTeamsGet } from "@/api/generated/teams/teams";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -98,6 +99,13 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
         useGetContestApiV1ContestsContestIdGet(contestId);
     const contest: ContestDetailResponse | undefined = data?.data ?? undefined;
     const router = useRouter();
+
+    const { data: teamsData } = useGetContestTeamsApiV1ContestsContestIdTeamsGet(
+        contestId,
+        { page: 1, page_size: 1 },
+        { query: { enabled: !!contest } },
+    );
+    const waitingCount = teamsData?.data?.waiting_count ?? 0;
 
     const deleteMutation = useSoftDeleteContestApiV1ContestsContestIdSoftDeleteDelete({
         mutation: {
@@ -347,6 +355,11 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                     >
                                         <Users className="size-4" />
                                         Team Requests
+                                        {waitingCount > 0 && (
+                                            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-white">
+                                                {waitingCount}
+                                            </span>
+                                        )}
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
