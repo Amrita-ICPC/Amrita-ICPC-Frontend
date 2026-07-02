@@ -1,6 +1,7 @@
 import { IdCard, KeyRound, Mail, ShieldCheck, UserCircle2, UsersRound } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { AppearanceSection } from "@/components/settings/appearance-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +141,8 @@ export default async function SettingsPage() {
                     </div>
                 </div>
             </section>
+
+            <AppearanceSection />
         </div>
     );
 }

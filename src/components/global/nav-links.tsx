@@ -18,9 +18,15 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/contest", label: "Contests", icon: Trophy },
-    { href: "/teams", label: "Teams", icon: Users },
-    { href: "/banks", label: "Question Banks", icon: Database },
-    { href: "/questions", label: "Question Editor", icon: FileCode2 },
+    { href: "/teams", label: "Teams", icon: Users, hideForStaff: true },
+    { href: "/banks", label: "Question Banks", icon: Database, hideForStudent: true },
+    {
+        href: "/questions",
+        label: "Question Editor",
+        icon: FileCode2,
+        hideForStaff: true,
+        hideForStudent: true,
+    },
     { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -67,11 +73,13 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
     return (
         <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
             <div>
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-cyan-200/70">
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
                     Menu
                 </p>
                 <ul className="space-y-0.5">
-                    {NAV_ITEMS.map((item) => {
+                    {NAV_ITEMS.filter((item) =>
+                        isStudent ? !item.hideForStudent : !item.hideForStaff,
+                    ).map((item) => {
                         let href = item.href;
                         if (isStudent) {
                             if (item.label === "Dashboard") href = "/student/dashboard";
@@ -92,7 +100,7 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
 
             {isAdmin && (
                 <div>
-                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-cyan-200/70">
+                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
                         Admin
                     </p>
                     <ul className="space-y-0.5">
