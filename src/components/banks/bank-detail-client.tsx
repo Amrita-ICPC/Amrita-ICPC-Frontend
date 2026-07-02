@@ -1,14 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import Link from "next/link";
-
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetBankDetail } from "@/query/bank-query";
 
 import { BankHero } from "./bank-hero";
+import { BankQuestionsHero } from "./bank-questions-hero";
 import { BankQuestionsTable } from "./bank-questions-table";
 
 interface BankDetailClientProps {
@@ -46,25 +43,18 @@ export function BankDetailClient({ bankId }: BankDetailClientProps) {
                 <div className="flex animate-in flex-col gap-5 fade-in slide-in-from-bottom-4 duration-500">
                     <BankHero bank={bank} />
 
-                    <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                                    Questions
-                                </h2>
-                                <p className="text-sm text-muted-foreground">
-                                    Manage the problems in this collection.
-                                </p>
-                            </div>
-                            <Button asChild>
-                                <Link href={`/banks/${bankId}/questions/new`}>
-                                    <Plus data-icon="inline-start" />
-                                    Add Question
-                                </Link>
-                            </Button>
-                        </div>
-                        <BankQuestionsTable bankId={bankId} />
-                    </div>
+                    <BankQuestionsHero
+                        bankId={bankId}
+                        bankName={bank.name}
+                        stats={{
+                            total: bank.total_questions_count ?? 0,
+                            easy: bank.easy_questions_count ?? 0,
+                            medium: bank.medium_questions_count ?? 0,
+                            hard: bank.hard_questions_count ?? 0,
+                        }}
+                    />
+
+                    <BankQuestionsTable bankId={bankId} />
                 </div>
             )}
         </AsyncStateHandler>

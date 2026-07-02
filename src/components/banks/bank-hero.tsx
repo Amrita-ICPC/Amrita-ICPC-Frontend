@@ -2,18 +2,19 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import {
-    BarChart3,
+    BookOpen,
     Calendar,
     Copy,
-    Database,
+    Crown,
     FileCode2,
     MoreVertical,
     Settings,
     Share2,
     Trash2,
-    Trophy,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -30,7 +31,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { allBanksKey, bankDetailKey, useSoftDeleteBank } from "@/query/bank-query";
 
-import { BankCloneDialog } from "./bank-clone-dialog";
 import { BankShareDialog } from "./bank-share-dialog";
 import { BankUpdateDialog } from "./bank-update-dialog";
 
@@ -47,76 +46,31 @@ interface BankHeroProps {
     bank: BankDetailResponse;
 }
 
-const WaveBackground = () => (
-    <div className="absolute inset-0 z-0 opacity-40 dark:opacity-30 pointer-events-none">
-        <svg
-            className="absolute h-full w-full object-cover"
-            preserveAspectRatio="none"
-            viewBox="0 0 1440 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path
-                d="M0,80 C320,160 560,-40 1440,100 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.15"
-            />
-            <path
-                d="M0,120 C400,200 800,0 1440,120 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.1"
-            />
-            <path
-                d="M0,160 C500,40 900,180 1440,140 L1440,200 L0,200 Z"
-                fill="currentColor"
-                className="text-blue-500"
-                opacity="0.05"
-            />
-        </svg>
-    </div>
-);
-
-function CompactStat({
+function MetaCell({
     icon: Icon,
     label,
     value,
-    colorClass,
-    bgClass,
-    solidBgClass,
+    iconClass,
 }: {
     icon: React.ElementType;
     label: string;
-    value: number;
-    colorClass: string;
-    bgClass: string;
-    solidBgClass: string;
+    value: React.ReactNode;
+    iconClass?: string;
 }) {
     return (
-        <Card className="border-border/60 shadow-sm relative overflow-hidden rounded-xl p-0 gap-0">
-            <div
-                className={`absolute bottom-0 left-0 right-0 h-1 ${solidBgClass} opacity-80`}
-            ></div>
-            <CardContent className="flex items-center gap-3 p-5">
-                <div
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bgClass} ${colorClass}`}
-                >
-                    <Icon className="size-5" />
-                </div>
-                <div className="min-w-0">
-                    <p className="text-2xl font-bold leading-none tabular-nums">{value}</p>
-                    <p className="mt-1 truncate text-[13px] font-semibold text-muted-foreground">
-                        {label}
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-white/10 bg-[#081326]/55 p-4 backdrop-blur-md">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <Icon className={`size-4 ${iconClass ?? "text-primary"}`} />
+                {label}
+            </div>
+            <p className="text-sm font-semibold text-white">{value}</p>
+        </div>
     );
 }
 
 export function BankHero({ bank }: BankHeroProps) {
     const router = useRouter();
+    const { data: session } = useSession();
     const queryClient = useQueryClient();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -134,6 +88,8 @@ export function BankHero({ bank }: BankHeroProps) {
         },
     });
 
+    const isOwner = !!session?.user?.id && session.user.id === bank.created_by;
+
     const formattedDate = new Date(bank.created_at).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
@@ -141,138 +97,121 @@ export function BankHero({ bank }: BankHeroProps) {
     });
 
     return (
-        <div className="flex flex-col gap-4">
-            <Card className="border-border/60 p-0 gap-0 relative overflow-hidden rounded-[16px]">
-                <div className="absolute top-0 inset-x-0 h-full bg-blue-500/5 dark:bg-blue-500/10 overflow-hidden pointer-events-none border-b border-border/40">
-                    <WaveBackground />
-                    <div className="absolute inset-0 bg-[radial-gradient(theme(colors.blue.500)_1px,transparent_1px)] bg-[size:14px_14px] opacity-20 [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]" />
-                </div>
-                <CardContent className="relative z-10 p-6">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0 flex-1">
-                            <div className="mb-4 flex flex-wrap items-center gap-2">
-                                <Badge
-                                    variant="outline"
-                                    className="border-transparent bg-primary/10 text-primary px-2.5 py-0.5 rounded-lg"
-                                >
-                                    Question Bank
-                                </Badge>
-                                <span className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
-                                    <Calendar className="size-3.5" />
-                                    Created {formattedDate}
-                                </span>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/20 sm:flex">
-                                    <Database className="size-5" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h1 className="truncate text-[22px] font-bold tracking-tight">
-                                        {bank.name}
-                                    </h1>
-                                    <p className="mt-1.5 max-w-3xl text-[14px] text-muted-foreground leading-relaxed">
-                                        {bank.description || "No description added."}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#081326] p-7 text-white shadow-[0_24px_60px_-28px_rgba(2,6,23,0.8)] md:p-8">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,color-mix(in_srgb,var(--primary)_66%,#17356b),#081326_78%)] opacity-90" />
+            <div className="pointer-events-none absolute -left-16 -top-36 size-[28rem] rounded-full bg-primary/45 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-40 right-1/4 size-80 rounded-full bg-primary/25 blur-3xl" />
+            <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_center,white_1px,transparent_1.3px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
+            <BookOpen className="pointer-events-none absolute -bottom-16 -right-5 size-56 rotate-[-5deg] text-white/[0.07]" />
 
-                        <div className="flex flex-wrap items-center gap-2 bg-card/60 backdrop-blur-sm p-1.5 rounded-xl border border-border/40 shadow-sm">
-                            <BankUpdateDialog
-                                bank={bank as any}
-                                trigger={
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 rounded-lg hover:bg-muted"
-                                    >
-                                        <Settings className="mr-1.5 size-3.5" />
-                                        Edit
-                                    </Button>
-                                }
-                            />
+            <div className="relative z-10">
+                <div className="mb-7 flex flex-wrap items-start justify-between gap-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                            variant="outline"
+                            className="border-transparent bg-white/10 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur-md"
+                        >
+                            Question Bank
+                        </Badge>
+                        {isOwner && (
+                            <Badge
+                                variant="outline"
+                                className="gap-1.5 border-white/15 bg-white/10 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-white/90 backdrop-blur-md"
+                            >
+                                <Crown className="size-3" />
+                                Owner
+                            </Badge>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <BankUpdateDialog
+                            bank={bank as any}
+                            trigger={
+                                <Button
+                                    variant="outline"
+                                    className="h-10 border-white/15 bg-white/10 px-4 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
+                                >
+                                    <Settings className="mr-1.5 size-3.5" />
+                                    Edit
+                                </Button>
+                            }
+                        />
+                        {isOwner && (
                             <BankShareDialog
                                 bankId={bank.id}
                                 bankName={bank.name}
                                 trigger={
                                     <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 rounded-lg hover:bg-muted"
+                                        variant="outline"
+                                        className="h-10 border-white/15 bg-white/10 px-4 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
                                     >
                                         <Share2 className="mr-1.5 size-3.5" />
                                         Access
                                     </Button>
                                 }
                             />
-                            <BankCloneDialog targetId={bank.id}>
+                        )}
+                        <Button
+                            asChild
+                            className="h-10 border-0 px-4 font-semibold shadow-md shadow-black/20"
+                            style={{
+                                backgroundColor: "var(--contrast-accent)",
+                                color: "var(--contrast-foreground)",
+                            }}
+                        >
+                            <Link href={`/banks/${bank.id}/import`}>
+                                <Copy className="mr-1.5 size-3.5" />
+                                Clone
+                            </Link>
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
                                 <Button
-                                    variant="default"
-                                    size="sm"
-                                    className="h-8 rounded-lg shadow-sm"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-10 w-10 border-violet-300/30 bg-violet-400/20 text-violet-100 backdrop-blur-md hover:bg-violet-400/30 hover:text-white"
                                 >
-                                    <Copy className="mr-1.5 size-3.5" />
-                                    Clone
+                                    <MoreVertical className="h-4 w-4" />
                                 </Button>
-                            </BankCloneDialog>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="size-8 rounded-lg hover:bg-muted"
-                                    >
-                                        <MoreVertical className="size-4 text-muted-foreground" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44 rounded-xl">
-                                    <DropdownMenuItem
-                                        onClick={() => setIsDeleteDialogOpen(true)}
-                                        className="cursor-pointer gap-2 text-destructive focus:text-destructive rounded-lg"
-                                    >
-                                        <Trash2 className="size-4" />
-                                        Delete Bank
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                    className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Bank
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <CompactStat
-                    icon={FileCode2}
-                    label="Easy questions"
-                    value={bank.easy_questions_count ?? 0}
-                    colorClass="text-emerald-500"
-                    bgClass="bg-emerald-500/10"
-                    solidBgClass="bg-emerald-500"
-                />
-                <CompactStat
-                    icon={BarChart3}
-                    label="Medium questions"
-                    value={bank.medium_questions_count ?? 0}
-                    colorClass="text-amber-500"
-                    bgClass="bg-amber-500/10"
-                    solidBgClass="bg-amber-500"
-                />
-                <CompactStat
-                    icon={Trophy}
-                    label="Hard questions"
-                    value={bank.hard_questions_count ?? 0}
-                    colorClass="text-rose-500"
-                    bgClass="bg-rose-500/10"
-                    solidBgClass="bg-rose-500"
-                />
-                <CompactStat
-                    icon={Share2}
-                    label="Active shares"
-                    value={bank.shared_users_count ?? 0}
-                    colorClass="text-blue-500"
-                    bgClass="bg-blue-500/10"
-                    solidBgClass="bg-blue-500"
-                />
+                <h1 className="mb-2 max-w-4xl text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
+                    {bank.name}
+                </h1>
+                {bank.description && (
+                    <p className="max-w-3xl text-sm leading-relaxed text-slate-300 md:text-base">
+                        {bank.description}
+                    </p>
+                )}
+
+                <div className="mt-8 grid max-w-4xl gap-3 sm:grid-cols-3">
+                    <MetaCell icon={Calendar} label="Created" value={formattedDate} />
+                    <MetaCell
+                        icon={FileCode2}
+                        label="Total Questions"
+                        value={bank.total_questions_count ?? 0}
+                        iconClass="text-emerald-400"
+                    />
+                    <MetaCell
+                        icon={Share2}
+                        label="Active Shares"
+                        value={bank.shared_users_count ?? 0}
+                        iconClass="text-violet-300"
+                    />
+                </div>
             </div>
 
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
