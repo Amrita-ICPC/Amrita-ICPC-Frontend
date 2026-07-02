@@ -28,4 +28,6 @@ export interface BankResponse {
   created_at: string;
   /** Last update time */
   updated_at: string;
+  /** Total number of questions in the bank */
+  total_questions_count?: number;
 }

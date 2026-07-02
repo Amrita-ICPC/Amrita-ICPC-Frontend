@@ -71,7 +71,7 @@ export const getAllBanksApiV1BanksGetResponseDataOneItemNameMax = 255;
 
 export const getAllBanksApiV1BanksGetResponseDataOneItemDescriptionOneMax = 5000;
 
-
+export const getAllBanksApiV1BanksGetResponseDataOneItemTotalQuestionsCountDefault = 0;
 
 export const GetAllBanksApiV1BanksGetResponse = zod.object({
   "success": zod.boolean().default(getAllBanksApiV1BanksGetResponseSuccessDefault),
@@ -83,7 +83,8 @@ export const GetAllBanksApiV1BanksGetResponse = zod.object({
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
-  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time')
+  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
+  "total_questions_count": zod.number().default(getAllBanksApiV1BanksGetResponseDataOneItemTotalQuestionsCountDefault).describe('Total number of questions in the bank')
 }).describe('Schema for standard bank responses.\n\nProvides the standard view of a bank including metadata like IDs and timestamps.')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -132,7 +133,7 @@ export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemNameMax = 255
 
 export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemDescriptionOneMax = 5000;
 
-
+export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemTotalQuestionsCountDefault = 0;
 
 export const GetDeletedBanksApiV1BanksDeletedGetResponse = zod.object({
   "success": zod.boolean().default(getDeletedBanksApiV1BanksDeletedGetResponseSuccessDefault),
@@ -144,7 +145,8 @@ export const GetDeletedBanksApiV1BanksDeletedGetResponse = zod.object({
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
-  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time')
+  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
+  "total_questions_count": zod.number().default(getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemTotalQuestionsCountDefault).describe('Total number of questions in the bank')
 }).describe('Schema for standard bank responses.\n\nProvides the standard view of a bank including metadata like IDs and timestamps.')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -385,7 +387,7 @@ export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneNameMax = 255;
 
 export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneDescriptionOneMax = 5000;
 
-
+export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneTotalQuestionsCountDefault = 0;
 
 export const RestoreBankApiV1BanksBankIdRestorePostResponse = zod.object({
   "success": zod.boolean().default(restoreBankApiV1BanksBankIdRestorePostResponseSuccessDefault),
@@ -397,7 +399,8 @@ export const RestoreBankApiV1BanksBankIdRestorePostResponse = zod.object({
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
-  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time')
+  "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
+  "total_questions_count": zod.number().default(restoreBankApiV1BanksBankIdRestorePostResponseDataOneTotalQuestionsCountDefault).describe('Total number of questions in the bank')
 }).describe('Schema for standard bank responses.\n\nProvides the standard view of a bank including metadata like IDs and timestamps.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

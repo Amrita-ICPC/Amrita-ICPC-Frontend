@@ -516,24 +516,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                         </Card>
                     </div>
 
-                    {/* Rules */}
-                    {contest.rules && (
-                        <Card className="border-border/60">
-                            <CardHeader className="pb-2 pt-5 px-5">
-                                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <BarChart3 className="h-4 w-4 text-primary" />
-                                    Rules
-                                </div>
-                            </CardHeader>
-                            <CardContent className="px-5 pb-5">
-                                <Separator className="mb-3" />
-                                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                                    {contest.rules}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    )}
-
                     {/* Meta */}
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
                         <span>

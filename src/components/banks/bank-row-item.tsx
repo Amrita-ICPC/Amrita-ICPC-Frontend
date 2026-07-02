@@ -1,8 +1,9 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Edit, Globe, HelpCircle, Trash2, Users } from "lucide-react";
+import { BookOpen, CalendarDays, Crown, Edit, HelpCircle, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +19,6 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { allBanksKey, bankDetailKey, useDeleteBank } from "@/query/bank-query";
 
 import { BankShareDialog } from "./bank-share-dialog";
@@ -30,6 +30,7 @@ interface BankRowItemProps {
 
 export function BankRowItem({ bank }: BankRowItemProps) {
     const router = useRouter();
+    const { data: session } = useSession();
     const queryClient = useQueryClient();
     const [updateOpen, setUpdateOpen] = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
@@ -59,91 +60,89 @@ export function BankRowItem({ bank }: BankRowItemProps) {
         year: "numeric",
     });
 
+    const questionCount = bank.total_questions_count ?? 0;
+    const isOwner = !!session?.user?.id && session.user.id === bank.created_by;
+
     const handleRowClick = () => {
         router.push(`/banks/${bank.id}`);
     };
 
     return (
         <>
-            <TableRow
+            <div
+                role="button"
+                tabIndex={0}
                 onClick={handleRowClick}
-                className="group cursor-pointer border-border/40 hover:bg-background/40 transition-colors"
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRowClick();
+                }}
+                aria-label={`Open bank ${bank.name}`}
+                className="group relative flex min-h-[96px] cursor-pointer flex-col gap-3 rounded-[16px] border border-border/60 bg-card p-4 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md md:flex-row md:items-center md:gap-5"
             >
-                <TableCell className="py-4 px-5 w-2/5">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/10 text-blue-500 shadow-sm group-hover:bg-blue-500/20 transition-colors">
-                            <BookOpen className="size-5" />
-                        </div>
-                        <div className="min-w-0">
-                            <p className="font-bold text-base text-foreground group-hover:text-primary transition-colors leading-tight">
-                                {bank.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground line-clamp-1 mt-1.5 font-medium">
-                                {bank.description || "No description"}
-                            </p>
+                {/* Left: Icon */}
+                <div className="hidden h-[76px] w-[76px] shrink-0 items-center justify-center rounded-[16px] bg-blue-500/10 md:flex">
+                    <div className="flex h-[44px] w-[44px] items-center justify-center rounded-full border-[2px] border-blue-500/50 text-blue-500">
+                        <BookOpen className="h-5 w-5" />
+                    </div>
+                </div>
+
+                {/* Middle: Content */}
+                <div className="flex flex-1 min-w-0 flex-col justify-center py-1">
+                    <div className="flex items-center gap-2">
+                        <h3 className="line-clamp-1 min-w-0 text-[17px] font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
+                            {bank.name}
+                        </h3>
+                        {isOwner && (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                                <Crown className="size-2.5" />
+                                Owner
+                            </span>
+                        )}
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground truncate">
+                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">Updated {formattedDate}</span>
+                        {bank.description && (
+                            <>
+                                <span className="shrink-0">·</span>
+                                <span className="truncate">{bank.description}</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right: Stats & Actions */}
+                <div className="mt-2 flex shrink-0 items-center justify-between gap-4 pt-3 md:mt-0 md:justify-end md:pt-0">
+                    <div className="flex gap-6">
+                        <div className="flex flex-col items-start gap-0.5">
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                                <HelpCircle className="h-3.5 w-3.5 shrink-0" />
+                                <span className="text-[12px] font-medium">Questions</span>
+                            </div>
+                            <span className="text-[16px] font-bold text-foreground pl-[18px]">
+                                {questionCount}
+                            </span>
                         </div>
                     </div>
-                </TableCell>
-                <TableCell className="text-sm font-medium py-4 px-5">
-                    {(() => {
-                        const rawVisibility =
-                            (bank as any).is_public ??
-                            (bank as any).public ??
-                            (bank as any).visibility;
-                        const isPublic =
-                            rawVisibility === true || rawVisibility === "public"
-                                ? true
-                                : rawVisibility === false || rawVisibility === "private"
-                                  ? false
-                                  : undefined;
 
-                        if (isPublic === undefined) return null;
-                        return (
-                            <div className="flex items-center gap-2 text-foreground/80">
-                                <Globe className="size-4 text-muted-foreground" />{" "}
-                                {isPublic ? "Public" : "Private"}
-                            </div>
-                        );
-                    })()}
-                </TableCell>
-                <TableCell className="text-sm font-medium py-4 px-5">
-                    {(() => {
-                        const questionsCount =
-                            (bank as any).questions_count ??
-                            (bank as any).questions?.length ??
-                            (bank as any).questionCount;
-
-                        if (questionsCount === undefined) return null;
-                        return (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <HelpCircle className="size-4" />{" "}
-                                {questionsCount === 1
-                                    ? "1 Question"
-                                    : `${questionsCount} Questions`}
-                            </div>
-                        );
-                    })()}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground font-medium py-4 px-5">
-                    {formattedDate}
-                </TableCell>
-                <TableCell className="text-right py-4 px-5">
                     <div
-                        className="flex items-center justify-end gap-2"
+                        className="flex items-center gap-2 pl-4 border-l border-border/40 ml-1"
                         onClick={(e) => e.stopPropagation()}
                     >
+                        {isOwner && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-9 px-3.5"
+                                onClick={() => setShareOpen(true)}
+                            >
+                                <Users className="mr-2 size-3.5 shrink-0" /> Manage Access
+                            </Button>
+                        )}
                         <Button
                             variant="outline"
                             size="sm"
-                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
-                            onClick={() => setShareOpen(true)}
-                        >
-                            <Users className="mr-2 size-3.5 shrink-0" /> Manage Access
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-8 px-3"
+                            className="text-primary border-primary/20 hover:bg-primary/5 hover:text-primary rounded-lg h-9 px-3.5"
                             onClick={() => setUpdateOpen(true)}
                         >
                             <Edit className="mr-2 size-3.5 shrink-0" /> Edit Details
@@ -151,15 +150,16 @@ export function BankRowItem({ bank }: BankRowItemProps) {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1"
+                            className="size-9 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                             onClick={() => setDeleteOpen(true)}
                             disabled={isDeleting}
+                            aria-label="Delete bank"
                         >
                             <Trash2 className="size-4" />
                         </Button>
                     </div>
-                </TableCell>
-            </TableRow>
+                </div>
+            </div>
 
             <div onClick={(e) => e.stopPropagation()}>
                 <BankUpdateDialog bank={bank} open={updateOpen} onOpenChange={setUpdateOpen} />
