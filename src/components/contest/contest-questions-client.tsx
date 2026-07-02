@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { BankCloneDialog } from "../banks/bank-clone-dialog";
 import { AsyncStateHandler } from "../shared/async-state-handler";
 import { ContestQuestionsHero } from "./contest-questions-hero";
 import { ContestQuestionsTable } from "./contest-questions-table";
@@ -165,12 +164,12 @@ export function ContestQuestionsClient({
                                     New Question
                                 </Link>
                             </Button>
-                            <BankCloneDialog targetId={contestId} targetType="contest">
-                                <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" asChild>
+                                <Link href={`/contest/${contestId}/import`}>
                                     <Library className="size-4" />
                                     From Bank
-                                </Button>
-                            </BankCloneDialog>
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 )}

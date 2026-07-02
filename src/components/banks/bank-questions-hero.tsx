@@ -5,9 +5,9 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-interface ContestQuestionsHeroProps {
-    contestId: string;
-    contestName?: string;
+interface BankQuestionsHeroProps {
+    bankId: string;
+    bankName?: string;
     stats: {
         total: number;
         easy: number;
@@ -16,28 +16,28 @@ interface ContestQuestionsHeroProps {
     };
 }
 
-export function ContestQuestionsHero({ contestId, contestName, stats }: ContestQuestionsHeroProps) {
+export function BankQuestionsHero({ bankId, bankName, stats }: BankQuestionsHeroProps) {
     return (
-        <div className="relative overflow-hidden rounded-[12px] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm m-4 md:m-6 mb-2">
+        <div className="relative overflow-hidden rounded-[12px] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-sm">
             <div className="relative space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-                            Contest Questions
-                        </h1>
+                        <h2 className="text-[22px] font-bold tracking-tight text-foreground">
+                            Questions
+                        </h2>
                         <p className="text-[13px] text-muted-foreground mt-1 max-w-2xl">
-                            Explore the challenges designed for{" "}
+                            Curate the problem set inside{" "}
                             <span className="text-foreground font-medium">
-                                {contestName || "this contest"}
+                                {bankName || "this bank"}
                             </span>
-                            . Monitor difficulty distribution and manage the problem set for
-                            participants.
+                            . Track difficulty distribution and reuse these questions across
+                            contests.
                         </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 shrink-0">
                         <Button className="shadow-lg shadow-primary/20 gap-2 h-9 px-4" asChild>
-                            <Link href={`/contest/${contestId}/questions/new`}>
+                            <Link href={`/banks/${bankId}/questions/new`}>
                                 <Plus className="h-4 w-4" />
                                 Add Question
                             </Link>
@@ -47,7 +47,7 @@ export function ContestQuestionsHero({ contestId, contestName, stats }: ContestQ
                             variant="outline"
                             className="bg-background/50 backdrop-blur-sm gap-2 h-9 px-4 border-border/60 hover:bg-muted/50 transition-colors"
                         >
-                            <Link href={`/contest/${contestId}/import`}>
+                            <Link href={`/banks/${bankId}/import`}>
                                 <Library className="h-4 w-4" />
                                 Import
                             </Link>
