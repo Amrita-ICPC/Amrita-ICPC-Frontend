@@ -1,41 +1,15 @@
 "use client";
 
+import type { ContestTeamAnalytics } from "@/api/generated/model/contestTeamAnalytics";
 import type { StudentTeamAnalytics } from "@/api/generated/model/studentTeamAnalytics";
 import { numberValue } from "@/components/contest/team-member-analytics/member-detail-utils";
+import { TeamSubmissionBreakdownChart } from "@/components/contest/team-submission-breakdown-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 interface TeamSummaryCardProps {
     analytics: StudentTeamAnalytics;
-}
-
-function getAcceptanceTone(rate: number) {
-    if (rate >= 70) {
-        return {
-            label: "Strong",
-            badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-            text: "text-emerald-600 dark:text-emerald-400",
-            progress: "bg-emerald-500",
-        };
-    }
-
-    if (rate >= 40) {
-        return {
-            label: "Needs review",
-            badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-            text: "text-amber-600 dark:text-amber-400",
-            progress: "bg-amber-500",
-        };
-    }
-
-    return {
-        label: "At risk",
-        badge: "bg-red-500/10 text-red-600 dark:text-red-400",
-        text: "text-red-600 dark:text-red-400",
-        progress: "bg-red-500",
-    };
 }
 
 function HeroMetric({
@@ -72,14 +46,12 @@ export function TeamSummaryCard({ analytics }: TeamSummaryCardProps) {
     const members = analytics.members ?? [];
     const totalSubmissions = numberValue(analytics.total_submissions);
     const acceptedSubmissions = numberValue(analytics.accepted_submission);
-    const pendingSubmissions = numberValue(analytics.pending_submission);
     const participatedMembers = members.filter((member) => member.is_participated).length;
     const acceptanceRate =
         totalSubmissions > 0 ? Math.round((acceptedSubmissions / totalSubmissions) * 100) : 0;
-    const acceptanceTone = getAcceptanceTone(acceptanceRate);
 
     return (
-        <Card className="self-start border-border/70 bg-card shadow-sm">
+        <Card className="border-border/70 bg-card shadow-sm">
             <CardContent className="p-5 md:p-6">
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -108,46 +80,20 @@ export function TeamSummaryCard({ analytics }: TeamSummaryCardProps) {
                     <HeroMetric
                         label="Submissions"
                         value={totalSubmissions}
-                        hint={`${acceptedSubmissions} accepted`}
-                    />
-                    <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5 shadow-xs">
-                        <div className="flex items-center justify-between gap-2">
-                            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
-                                Acceptance
-                            </p>
-                            <Badge
-                                variant="outline"
-                                className={cn("border-transparent", acceptanceTone.badge)}
-                            >
-                                {acceptanceTone.label}
-                            </Badge>
-                        </div>
-                        <p
-                            className={cn(
-                                "mt-1 text-2xl font-bold tracking-tight tabular-nums",
-                                acceptanceTone.text,
-                            )}
-                        >
-                            {acceptanceRate}%
-                        </p>
-                        <Progress
-                            value={acceptanceRate}
-                            max={100}
-                            className="mt-2 h-2"
-                            indicatorClassName={acceptanceTone.progress}
-                        />
-                    </div>
-                    <HeroMetric
-                        label="Pending"
-                        value={pendingSubmissions}
-                        hint="Waiting for evaluation"
-                        tone="red"
+                        hint={`${acceptedSubmissions} accepted · ${acceptanceRate}% rate`}
                     />
                     <HeroMetric
                         label="Participation"
                         value={`${participatedMembers}/${members.length || 0}`}
                         hint="Members participated"
                         tone={participatedMembers === members.length ? "emerald" : "amber"}
+                    />
+                </div>
+
+                <div className="mt-6 border-t border-border/60 pt-5">
+                    <TeamSubmissionBreakdownChart
+                        analytics={analytics as unknown as ContestTeamAnalytics}
+                        embedded
                     />
                 </div>
             </CardContent>

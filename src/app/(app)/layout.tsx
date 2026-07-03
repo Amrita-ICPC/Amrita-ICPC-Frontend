@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
 
-import AccessDenied from "@/components/global/access-denied";
-import AuthGuard from "@/components/global/auth-guard";
 import { Header } from "@/components/global/header";
 import Sidenavbar from "@/components/global/sidenavbar";
 import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
@@ -11,19 +9,7 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-export default async function AppLayout({
-    children,
-    student,
-    instructor,
-    manager,
-    admin,
-}: {
-    children: React.ReactNode;
-    student?: React.ReactNode;
-    instructor?: React.ReactNode;
-    manager?: React.ReactNode;
-    admin?: React.ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
 
     if (!session?.user) {
@@ -62,21 +48,6 @@ export default async function AppLayout({
                             <StudentRouteEnforcer isStudent={isStudent}>
                                 {children}
                             </StudentRouteEnforcer>
-                        </div>
-                        <div>
-                            {hasRole(UserType.ADMIN) ? (
-                                <AuthGuard requiredGroups={[UserType.ADMIN]}>{admin}</AuthGuard>
-                            ) : hasRole(UserType.MANAGER) ? (
-                                <AuthGuard requiredGroups={[UserType.MANAGER]}>{manager}</AuthGuard>
-                            ) : hasRole(UserType.INSTRUCTOR) ? (
-                                <AuthGuard requiredGroups={[UserType.INSTRUCTOR]}>
-                                    {instructor}
-                                </AuthGuard>
-                            ) : hasRole(UserType.STUDENT) ? (
-                                <AuthGuard requiredGroups={[UserType.STUDENT]}>{student}</AuthGuard>
-                            ) : (
-                                <AccessDenied />
-                            )}
                         </div>
                     </div>
                 </main>
