@@ -24,6 +24,7 @@ Attributes:
     members_preview: List of first 3 members for display.
     extra_members_count: Number of members beyond the preview.
     parent_team: Basic information about the parent team.
+    score: Team score, the average of its accepted members' scores.
  */
 export interface ContestTeamResponse {
   id: string;
@@ -35,4 +36,5 @@ export interface ContestTeamResponse {
   members_preview?: TeamMemberPreview[];
   extra_members_count?: number;
   parent_team?: ParentTeamInfo | null;
+  score?: number;
 }

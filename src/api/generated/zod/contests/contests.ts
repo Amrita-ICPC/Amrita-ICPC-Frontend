@@ -704,6 +704,53 @@ export const GetContestDashboardApiV1ContestsContestIdDashboardGetResponse = zod
 })
 
 /**
+ * Get the contest results summary: total responses, submission statistics,
+and flagged response count.
+
+Only accessible by the contest creator, assigned instructors, or administrators.
+ * @summary Get contest results summary
+ */
+export const GetContestResultsApiV1ContestsContestIdResultsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getContestResultsApiV1ContestsContestIdResultsGetResponseSuccessDefault = true;
+export const getContestResultsApiV1ContestsContestIdResultsGetResponseStatusDefault = 200;
+export const getContestResultsApiV1ContestsContestIdResultsGetResponseMessageDefault = `Success`;
+
+export const GetContestResultsApiV1ContestsContestIdResultsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestResultsApiV1ContestsContestIdResultsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestResultsApiV1ContestsContestIdResultsGetResponseStatusDefault),
+  "message": zod.string().default(getContestResultsApiV1ContestsContestIdResultsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "total_responses": zod.number().describe('Total number of submissions (responses) in the contest'),
+  "submission_statistics": zod.object({
+  "total_submissions": zod.number().describe('Total number of submissions in the contest'),
+  "accepted": zod.number().describe('Number of accepted submissions (AC)'),
+  "wrong_answer": zod.number().describe('Number of wrong answer submissions (WA)'),
+  "time_limit_exceeded": zod.number().describe('Number of time limit exceeded submissions (TLE)'),
+  "runtime_error": zod.number().describe('Number of runtime error submissions (RE)'),
+  "compilation_error": zod.number().describe('Number of compilation error submissions (CE)'),
+  "memory_limit_exceeded": zod.number().describe('Number of memory limit exceeded submissions (MLE)'),
+  "system_error": zod.number().describe('Number of system error submissions (SYSTEM_ERROR)')
+}).describe('Verdict breakdown of submissions in the contest'),
+  "flagged_responses": zod.number().describe('Number of flagged team\/member progress records')
+}).describe('Summary schema for the admin\/instructor contest results page.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Get paginated contest questions.
 
 Args:

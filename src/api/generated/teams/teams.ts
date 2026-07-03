@@ -270,6 +270,8 @@ Args:
     contest_id (UUID): The unique identifier of the contest.
     search (str | None): Optional string to search team names.
     team_status (TeamStatus | None): Optional filter for team status.
+    sort_by (str | None): Optional field to sort by ('score').
+    sort_order (str): Sort order applied when sort_by is set ('asc' or 'desc').
     page (int): Page number (starts from 1).
     page_size (int): Number of teams per page.
     user_id (UUID): Authenticated user ID.

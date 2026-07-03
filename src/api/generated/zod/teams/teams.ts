@@ -31,6 +31,7 @@ export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResp
 export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseStatusDefault = 200;
 export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseMessageDefault = `Success`;
 export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseDataOneExtraMembersCountDefault = 0;
+export const approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseDataOneScoreDefault = 0;
 
 export const ApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponse = zod.object({
   "success": zod.boolean().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseSuccessDefault),
@@ -53,8 +54,9 @@ export const ApproveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResp
   "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string()
-}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional(),
+  "score": zod.number().default(approveTeamApiV1ContestsContestIdTeamsContestTeamIdApprovePatchResponseDataOneScoreDefault)
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.\n    score: Team score, the average of its accepted members\' scores.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -92,6 +94,7 @@ export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchRespon
 export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseStatusDefault = 200;
 export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseMessageDefault = `Success`;
 export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseDataOneExtraMembersCountDefault = 0;
+export const rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseDataOneScoreDefault = 0;
 
 export const RejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponse = zod.object({
   "success": zod.boolean().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseSuccessDefault),
@@ -114,8 +117,9 @@ export const RejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchRespon
   "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string()
-}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional(),
+  "score": zod.number().default(rejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatchResponseDataOneScoreDefault)
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.\n    score: Team score, the average of its accepted members\' scores.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -153,6 +157,7 @@ export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPat
 export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseStatusDefault = 200;
 export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseMessageDefault = `Success`;
 export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseDataOneExtraMembersCountDefault = 0;
+export const disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseDataOneScoreDefault = 0;
 
 export const DisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponse = zod.object({
   "success": zod.boolean().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseSuccessDefault),
@@ -175,8 +180,9 @@ export const DisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPat
   "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string()
-}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional(),
+  "score": zod.number().default(disqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatchResponseDataOneScoreDefault)
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.\n    score: Team score, the average of its accepted members\' scores.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
@@ -199,6 +205,8 @@ Args:
     contest_id (UUID): The unique identifier of the contest.
     search (str | None): Optional string to search team names.
     team_status (TeamStatus | None): Optional filter for team status.
+    sort_by (str | None): Optional field to sort by ('score').
+    sort_order (str): Sort order applied when sort_by is set ('asc' or 'desc').
     page (int): Page number (starts from 1).
     page_size (int): Number of teams per page.
     user_id (UUID): Authenticated user ID.
@@ -212,6 +220,7 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetParams = zod.object({
   "contest_id": zod.uuid()
 })
 
+export const getContestTeamsApiV1ContestsContestIdTeamsGetQuerySortOrderDefault = `desc`;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageDefault = 1;
 
 export const getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeDefault = 10;
@@ -223,6 +232,8 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetQueryParams = zod.obje
   "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by team name'),
   "team_status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),zod.null()]).optional().describe('Filter by team status'),
   "approval_status": zod.union([zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),zod.null()]).optional().describe('Filter by approval status'),
+  "sort_by": zod.union([zod.string(),zod.null()]).optional().describe('Field to sort by. Currently supports \'score\'.'),
+  "sort_order": zod.string().default(getContestTeamsApiV1ContestsContestIdTeamsGetQuerySortOrderDefault).describe('Sort order when sort_by is set: \'asc\' or \'desc\''),
   "page": zod.number().min(1).default(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageDefault).describe('Page number (starts from 1)'),
   "page_size": zod.number().min(1).max(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeMax).default(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageSizeDefault).describe('Number of teams per page')
 })
@@ -231,6 +242,7 @@ export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseSuccessDefault
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseStatusDefault = 200;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseMessageDefault = `Success`;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneTeamsItemExtraMembersCountDefault = 0;
+export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneTeamsItemScoreDefault = 0;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneApprovedCountDefault = 0;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneWaitingCountDefault = 0;
 export const getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneRejectedCountDefault = 0;
@@ -259,8 +271,9 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetResponse = zod.object(
   "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string()
-}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.')),
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional(),
+  "score": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneTeamsItemScoreDefault)
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.\n    score: Team score, the average of its accepted members\' scores.')),
   "approved_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneApprovedCountDefault),
   "waiting_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneWaitingCountDefault),
   "rejected_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneRejectedCountDefault),
@@ -303,6 +316,7 @@ export const getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseSuccessDefault =
 export const getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseStatusDefault = 200;
 export const getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseMessageDefault = `Success`;
 export const getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseDataOneExtraMembersCountDefault = 0;
+export const getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseDataOneScoreDefault = 0;
 
 export const GetTeamApiV1ContestsContestIdTeamsTeamIdGetResponse = zod.object({
   "success": zod.boolean().default(getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseSuccessDefault),
@@ -325,8 +339,9 @@ export const GetTeamApiV1ContestsContestIdTeamsTeamIdGetResponse = zod.object({
   "parent_team": zod.union([zod.object({
   "id": zod.uuid(),
   "name": zod.string()
-}).describe('Schema for basic information about the parent team.'),zod.null()]).optional()
-}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.'),zod.null()]).optional(),
+}).describe('Schema for basic information about the parent team.'),zod.null()]).optional(),
+  "score": zod.number().default(getTeamApiV1ContestsContestIdTeamsTeamIdGetResponseDataOneScoreDefault)
+}).describe('Schema for contest team response without member details.\nUsed for team listings and basic team information.\n\nAttributes:\n    id: Unique identifier for the team.\n    name: Name of the team.\n    status: Status of the team in the contest.\n    approval_status: Approval status of the team.\n    leader_id: ID of the team leader.\n    enrolled_at: Timestamp when the team enrolled.\n    members_preview: List of first 3 members for display.\n    extra_members_count: Number of members beyond the preview.\n    parent_team: Basic information about the parent team.\n    score: Team score, the average of its accepted members\' scores.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

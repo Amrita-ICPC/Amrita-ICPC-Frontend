@@ -15,12 +15,8 @@ export default async function ContestEvaluatePage({
     const [{ id }] = await Promise.all([params, searchParams]);
 
     return (
-        <div className="flex h-full flex-col">
-            <AuthGuard requiredRoles={[Roles.CONTEST_UPDATE]} fallbackComponent={<AccessDenied />}>
-                <div className="flex-1 space-y-4 p-8 pt-6">
-                    <ContestEvaluateClient contestId={id} />
-                </div>
-            </AuthGuard>
-        </div>
+        <AuthGuard requiredRoles={[Roles.CONTEST_UPDATE]} fallbackComponent={<AccessDenied />}>
+            <ContestEvaluateClient contestId={id} />
+        </AuthGuard>
     );
 }
