@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight, Users } from "lucide-react";
-import Link from "next/link";
+import { Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import type { StudentTeamMemberSummary } from "@/api/generated/model/studentTeamMemberSummary";
 import {
@@ -43,9 +43,11 @@ export function TeamMembersTable({
     members,
     canViewSubmissions,
 }: TeamMembersTableProps) {
+    const router = useRouter();
+
     if (!members.length) {
         return (
-            <Card className="border-border/60">
+            <Card className="border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/20 shadow-xs">
                 <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
                     <Users className="h-10 w-10 opacity-40" />
                     <div>
@@ -60,8 +62,8 @@ export function TeamMembersTable({
     }
 
     return (
-        <Card className="border-border/60">
-            <CardHeader className="border-b border-border/60">
+        <Card className="border-border/70 bg-card shadow-sm">
+            <CardHeader className="border-b border-border/70 px-5 py-4">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <CardTitle>Team Members</CardTitle>
@@ -85,9 +87,6 @@ export function TeamMembersTable({
                             <TableHead className="text-center">Score</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Session Window</TableHead>
-                            {canViewSubmissions && (
-                                <TableHead className="text-right">Results</TableHead>
-                            )}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -132,29 +131,28 @@ export function TeamMembersTable({
                                             <p className="font-medium">
                                                 {formatDateTime(member.started_at)}
                                             </p>
-                                            <p className="text-muted-foreground">
+                                            <p className="text-muted-foreground text-xs">
                                                 Ended {formatDateTime(member.ended_at)}
                                             </p>
                                         </div>
                                     </TableCell>
-                                    {canViewSubmissions && (
-                                        <TableCell className="text-right">
-                                            <Link
-                                                href={`/student/contest/${contestId}/results/members/${member.contest_team_member_id}`}
-                                                className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:underline"
-                                            >
-                                                View
-                                                <ArrowRight className="h-3.5 w-3.5" />
-                                            </Link>
-                                        </TableCell>
-                                    )}
                                 </>
                             );
 
                             return (
                                 <TableRow
                                     key={member.contest_team_member_id}
-                                    className={cn("h-[72px] hover:bg-muted/40")}
+                                    className={cn(
+                                        "h-[72px] transition-colors border-border/60",
+                                        canViewSubmissions && "cursor-pointer hover:bg-muted/40",
+                                    )}
+                                    onClick={() => {
+                                        if (canViewSubmissions) {
+                                            router.push(
+                                                `/student/contest/${contestId}/results/members/${member.contest_team_member_id}`,
+                                            );
+                                        }
+                                    }}
                                 >
                                     {row}
                                 </TableRow>

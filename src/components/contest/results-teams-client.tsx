@@ -1,11 +1,13 @@
 "use client";
 
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, Ban, Eye, Flag, Loader2, Search, Users } from "lucide-react";
+import { ArrowUpDown, Ban, Eye, Flag, Loader2, Search, Users, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useEvaluateContestApiV1ContestsContestIdEvaluationPost } from "@/api/generated/contests/contests";
+import { EvaluationScope } from "@/api/generated/model/evaluationScope";
 import { TeamApprovalStatus } from "@/api/generated/model/teamApprovalStatus";
 import { TeamStatus } from "@/api/generated/model/teamStatus";
 import {
@@ -82,6 +84,22 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
             },
         });
 
+    const evaluateMutation = useEvaluateContestApiV1ContestsContestIdEvaluationPost({
+        mutation: {
+            onSuccess: async () => {
+                toast.success("Score computation started successfully!");
+                await queryClient.invalidateQueries({
+                    queryKey: getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId),
+                    exact: false,
+                });
+            },
+            onError: (error: any) => {
+                const msg = error?.response?.data?.message || "Could not start score computation";
+                toast.error(msg);
+            },
+        },
+    });
+
     const teams = teamsQuery.data?.data?.teams ?? [];
     const analyticsQueries = useQueries({
         queries: teams.map((team) => ({
@@ -121,14 +139,35 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                         Review approved and confirmed teams, their members, scores, and submissions.
                     </CardDescription>
                 </div>
-                <div className="flex w-fit items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span className="font-semibold text-foreground">
-                        {flaggedOnly
-                            ? visibleTeams.length
-                            : (teamsQuery.data?.data?.total ?? teams.length)}
-                    </span>
-                    teams in view
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                        onClick={() =>
+                            evaluateMutation.mutate({
+                                contestId,
+                                data: {
+                                    scope: EvaluationScope.ALL,
+                                },
+                            })
+                        }
+                        disabled={evaluateMutation.isPending}
+                        className="gap-1.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90"
+                    >
+                        {evaluateMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Zap className="h-4 w-4" />
+                        )}
+                        {evaluateMutation.isPending ? "Computing..." : "Compute scores"}
+                    </Button>
+                    <div className="flex w-fit items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span className="font-semibold text-foreground">
+                            {flaggedOnly
+                                ? visibleTeams.length
+                                : (teamsQuery.data?.data?.total ?? teams.length)}
+                        </span>
+                        teams in view
+                    </div>
                 </div>
             </CardHeader>
 

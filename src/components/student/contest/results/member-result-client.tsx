@@ -1,15 +1,16 @@
 "use client";
 
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import * as React from "react";
 
+import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
 import {
     useGetContestTeamMemberQuestionAnalyticsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsGet,
     useGetContestTeamMemberResultsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdGet,
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
 } from "@/api/generated/students/students";
-import { Button } from "@/components/ui/button";
+import { MemberVerdictAnalytics } from "@/components/contest/team-member-analytics/member-detail-hero";
+import { Badge } from "@/components/ui/badge";
 
 import { MemberQuestionReview } from "./member-question-review";
 import { MemberResultHero } from "./member-result-hero";
@@ -52,19 +53,6 @@ export function MemberResultClient({ contestId, memberId }: MemberResultClientPr
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h1 className="text-xl font-bold tracking-tight">Member Results</h1>
-                    <p className="text-sm text-muted-foreground">{contest?.name}</p>
-                </div>
-                <Button asChild variant="outline" size="sm" className="gap-1.5 font-semibold">
-                    <Link href={`/student/contest/${contestId}/results`}>
-                        <ArrowLeft className="h-3.5 w-3.5" />
-                        Back to results
-                    </Link>
-                </Button>
-            </div>
-
             {!resultsPublished ? (
                 <ResultsNotPublishedGate />
             ) : !contest?.show_team_submissions ? (
@@ -76,6 +64,28 @@ export function MemberResultClient({ contestId, memberId }: MemberResultClientPr
             ) : (
                 <div className="space-y-6">
                     <MemberResultHero member={memberData.data} />
+
+                    <MemberVerdictAnalytics
+                        member={memberData.data as unknown as ContestTeamMemberDetail}
+                    />
+
+                    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h2 className="font-semibold text-foreground">Responses</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Navigate questions, expand submissions, and inspect testcase
+                                    evidence.
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Badge className="border-transparent bg-background text-foreground">
+                                    {questionsData?.data?.length ?? 0} questions
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+
                     <MemberQuestionReview
                         contestId={contestId}
                         contestTeamMemberId={memberId}

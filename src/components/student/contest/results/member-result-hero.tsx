@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CheckCircle2, Clock3, Mail, Trophy, User } from "lucide-react";
+import { CalendarClock, CheckCircle2, Mail, Trophy, User } from "lucide-react";
 import type { ElementType } from "react";
 
 import type { StudentMemberDetail } from "@/api/generated/model/studentMemberDetail";
@@ -37,12 +37,24 @@ function HeroInfoTile({
     icon: ElementType;
 }) {
     return (
-        <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase text-muted-foreground">
-                <Icon className="h-3.5 w-3.5" />
-                {label}
+        <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs">
+            <div
+                className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                    label === "Started" && "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                    label === "Ended" && "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                    label === "Questions" && "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+                    label === "Solved" && "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+                )}
+            >
+                <Icon className="h-4 w-4" />
             </div>
-            <p className="mt-2 text-sm font-semibold text-foreground">{value}</p>
+            <div>
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</p>
+                <p className="mt-0.5 text-xs font-bold text-foreground truncate max-w-[140px] sm:max-w-none">
+                    {value}
+                </p>
+            </div>
         </div>
     );
 }
@@ -54,30 +66,29 @@ function ScorePanel({ member }: { member: StudentMemberDetail }) {
     const progress = attempted > 0 ? Math.round((solved / attempted) * 100) : 0;
 
     return (
-        <div className="flex h-full min-h-[210px] flex-col items-center justify-center rounded-lg border border-primary/15 bg-primary/5 p-6 text-center">
-            <p className="text-xs font-bold uppercase text-primary">Score</p>
-            <p className="mt-2 text-sm text-muted-foreground">{progress}% solved questions</p>
-            <div className="mt-5 flex h-28 w-28 items-center justify-center rounded-full border border-primary/15 bg-background shadow-inner">
-                <div>
-                    <p className="text-3xl font-bold text-primary tabular-nums">{score}</p>
-                    <p className="text-xs text-muted-foreground">points</p>
+        <div className="flex h-full min-h-[170px] flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center shadow-xs">
+            <p className="text-[10px] font-bold uppercase text-primary">Score</p>
+            <p className="mt-1 text-xs text-muted-foreground">{progress}% solved questions</p>
+            <div className="mt-3 flex h-20 w-20 items-center justify-center rounded-full border border-primary/15 bg-background shadow-inner">
+                <div className="text-center">
+                    <p className="text-xl font-extrabold text-primary tabular-nums leading-none">
+                        {score}
+                    </p>
+                    <p className="mt-0.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                        pts
+                    </p>
                 </div>
             </div>
-            <Progress value={progress} max={100} className="mt-5 h-2 w-full" />
+            <Progress value={progress} max={100} className="mt-4 h-1.5 w-full" />
         </div>
     );
 }
 
 export function MemberResultHero({ member }: MemberResultHeroProps) {
-    const submissionStats = member.submission_statistics;
     const questionStats = member.question_statistics;
-    const totalSubmissions = numberValue(submissionStats?.total);
-    const acceptedSubmissions = numberValue(submissionStats?.accepted);
-    const acceptanceRate =
-        totalSubmissions > 0 ? Math.round((acceptedSubmissions / totalSubmissions) * 100) : 0;
 
     return (
-        <Card className="border-border/70 bg-card shadow-sm">
+        <Card className="border-border/60 bg-card shadow-sm">
             <CardContent className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="space-y-5">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -135,15 +146,6 @@ export function MemberResultHero({ member }: MemberResultHeroProps) {
                         <HeroInfoTile
                             label="Solved"
                             value={numberValue(questionStats?.solved)}
-                            icon={CheckCircle2}
-                        />
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
-                        <HeroInfoTile label="Submissions" value={totalSubmissions} icon={Clock3} />
-                        <HeroInfoTile
-                            label="Acceptance"
-                            value={`${acceptanceRate}%`}
                             icon={CheckCircle2}
                         />
                     </div>

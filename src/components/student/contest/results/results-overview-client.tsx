@@ -1,16 +1,13 @@
 "use client";
 
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 import {
     useGetMyContestTeamResultsApiV1StudentsContestsContestIdResultsGet,
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
 } from "@/api/generated/students/students";
-import { Button } from "@/components/ui/button";
 
 import { ResultsNotPublishedGate } from "./results-gate";
-import { SubmissionBreakdownChart } from "./submission-breakdown-chart";
 import { TeamMembersTable } from "./team-members-table";
 import { TeamSummaryCard } from "./team-summary-card";
 
@@ -39,19 +36,6 @@ export function ResultsOverviewClient({ contestId }: ResultsOverviewClientProps)
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h1 className="text-xl font-bold tracking-tight">Results</h1>
-                    <p className="text-sm text-muted-foreground">{contest?.name}</p>
-                </div>
-                <Button asChild variant="outline" size="sm" className="gap-1.5 font-semibold">
-                    <Link href={`/student/contest/${contestId}`}>
-                        <ArrowLeft className="h-3.5 w-3.5" />
-                        Back to contest
-                    </Link>
-                </Button>
-            </div>
-
             {!resultsPublished ? (
                 <ResultsNotPublishedGate />
             ) : isTeamLoading || !teamData?.data ? (
@@ -60,10 +44,7 @@ export function ResultsOverviewClient({ contestId }: ResultsOverviewClientProps)
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-                        <TeamSummaryCard analytics={teamData.data} />
-                        <SubmissionBreakdownChart analytics={teamData.data} />
-                    </div>
+                    <TeamSummaryCard analytics={teamData.data} />
 
                     <TeamMembersTable
                         contestId={contestId}
