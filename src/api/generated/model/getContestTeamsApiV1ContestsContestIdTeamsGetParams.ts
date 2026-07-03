@@ -22,6 +22,14 @@ team_status?: TeamStatus | null;
  */
 approval_status?: TeamApprovalStatus | null;
 /**
+ * Field to sort by. Currently supports 'score'.
+ */
+sort_by?: string | null;
+/**
+ * Sort order when sort_by is set: 'asc' or 'desc'
+ */
+sort_order?: string;
+/**
  * Page number (starts from 1)
  * @minimum 1
  */
