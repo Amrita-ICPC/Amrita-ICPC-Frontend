@@ -80,7 +80,7 @@ export function StudentCreateTeamDialog({ trigger }: StudentCreateTeamDialogProp
     };
 
     const defaultTrigger = (
-        <Button className="bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 text-primary-foreground font-extrabold text-xs h-9 px-4.5 transition-all gap-1.5 rounded-lg border border-transparent shadow-md shadow-primary/25 hover:shadow-primary/35 flex items-center">
+        <Button className="flex h-9 items-center gap-1.5 rounded-lg border border-transparent bg-primary px-4.5 text-xs font-extrabold text-primary-foreground shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/35">
             <Plus className="h-4 w-4 stroke-[2.5]" />
             Create Team
         </Button>

@@ -81,12 +81,15 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
 
     return (
         <div className="flex flex-col gap-6">
-            <StudentTeamHero pendingInvitations={data?.data?.pending_invitation || 0} />
+            <StudentTeamHero
+                totalTeams={totalItems}
+                pendingInvitations={data?.data?.pending_invitation || 0}
+                pendingRequests={data?.data?.pending_request || 0}
+                isLoading={isLoading}
+            />
 
             {/* Filtering Toolbar Row */}
-            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <StudentTeamFilters view={view} onViewChange={setView} />
-            </div>
+            <StudentTeamFilters view={view} onViewChange={setView} />
 
             {/* API Loading and Error State Wrapper */}
             <AsyncStateHandler
@@ -102,7 +105,7 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                             ))}
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-border/40 overflow-hidden bg-card">
+                        <div className="rounded-2xl border border-border/60 overflow-hidden bg-card">
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-border/40 bg-muted/20">
@@ -148,7 +151,7 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                         </div>
                     ) : (
                         /* TABLE LIST LAYOUT */
-                        <div className="rounded-xl border border-border/40 overflow-hidden bg-card shadow-sm">
+                        <div className="rounded-2xl border border-border/60 overflow-hidden bg-card shadow-sm">
                             <div className="overflow-x-auto w-full">
                                 <table className="w-full border-collapse">
                                     <thead>
@@ -187,8 +190,8 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                 ) : (
                     /* EMPTY STATE */
                     <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/60 bg-card p-12 text-center">
-                        <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-primary mb-2">
-                            <Users className="h-6 w-6 text-indigo-500" />
+                        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
+                            <Users className="h-6 w-6 text-primary" />
                         </div>
                         <h3 className="text-sm font-bold text-foreground">No Teams Found</h3>
                         <p className="text-xs text-muted-foreground max-w-sm font-semibold leading-normal">

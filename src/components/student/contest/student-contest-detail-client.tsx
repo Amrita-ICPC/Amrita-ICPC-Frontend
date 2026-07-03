@@ -8,7 +8,6 @@ import {
     Calendar,
     CheckCircle2,
     Clock,
-    Laptop,
     Share2,
     Shield,
     Sparkles,
@@ -31,114 +30,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/lib/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-import { ContestTeamCards, OverallRegistrationProgressCard } from "./contest-team-cards";
+import { ContestTeamCards } from "./contest-team-cards";
 import { StudentContestDetailSkeleton } from "./student-contest-skeleton";
 
-const BANNERS = [
-    { from: "#162d68", to: "#0c1a40", accent: "#6f97ff" }, // Primary Blue
-    { from: "#0891b2", to: "#164e63", accent: "#a5f3fc" }, // Cyan
-    { from: "#059669", to: "#064e3b", accent: "#a7f3d0" }, // Emerald
-    { from: "#2563eb", to: "#1e3a8a", accent: "#bfdbfe" }, // Blue
-    { from: "#4338ca", to: "#312e81", accent: "#c7d2fe" }, // Indigo
-];
-
-function hashIndex(id: string, len: number) {
-    return id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % len;
-}
-
-function HeroFallbackBanner({ id, name }: { id: string; name: string }) {
-    const b = BANNERS[hashIndex(id, BANNERS.length)];
-    const bgId = `hero-grid-${id}`;
-
-    return (
-        <div
-            className="absolute inset-0 h-full w-full flex flex-col items-center justify-center overflow-hidden"
-            style={{ background: `linear-gradient(to bottom right, ${b.from}, ${b.to})` }}
-        >
-            <svg
-                className="absolute inset-0 h-full w-full pointer-events-none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <defs>
-                    <pattern id={bgId} width="40" height="40" patternUnits="userSpaceOnUse">
-                        <path
-                            d="M 40 0 L 0 0 0 40"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="1"
-                            strokeOpacity="0.05"
-                        />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill={`url(#${bgId})`} />
-                <circle cx="15%" cy="20%" r="150" fill={b.accent} fillOpacity="0.1" />
-                <circle cx="85%" cy="80%" r="200" fill={b.accent} fillOpacity="0.05" />
-                <circle cx="50%" cy="120%" r="300" fill={b.accent} fillOpacity="0.05" />
-            </svg>
-
-            <div className="relative z-10 flex flex-col items-center text-center px-4 w-full">
-                <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] text-white/60 mb-2">
-                    Amrita ICPC
-                </span>
-                <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight line-clamp-1 max-w-4xl drop-shadow-md">
-                    {name}
-                </h2>
-            </div>
-        </div>
-    );
-}
-
-const CONTEST_STATUS_STYLES: Record<
-    string,
-    { bg: string; dot: string; label: string; text: string }
-> = {
-    PUBLISHED: {
-        bg: "bg-emerald-50 dark:bg-emerald-500/10",
-        dot: "bg-emerald-500",
-        label: "Published",
-        text: "text-emerald-700 dark:text-emerald-400",
-    },
-    DRAFT: {
-        bg: "bg-amber-50 dark:bg-amber-500/10",
-        dot: "bg-amber-500",
-        label: "Draft",
-        text: "text-amber-700 dark:text-amber-400",
-    },
-    PAUSED: {
-        bg: "bg-sky-50 dark:bg-sky-500/10",
-        dot: "bg-sky-600",
-        label: "Paused",
-        text: "text-sky-700 dark:text-sky-400",
-    },
-    CANCELLED: {
-        bg: "bg-red-50 dark:bg-red-500/10",
-        dot: "bg-red-500",
-        label: "Cancelled",
-        text: "text-red-700 dark:text-red-400",
-    },
+const RUN_STATUS_STYLES: Record<string, { dot: string; label: string }> = {
+    LIVE: { dot: "bg-success", label: "Live Now" },
+    UPCOMING: { dot: "bg-warning", label: "Upcoming" },
+    ENDED: { dot: "bg-destructive", label: "Ended" },
 };
 
-const RUN_STATUS_STYLES: Record<string, { bg: string; text: string; label: string; glow: string }> =
-    {
-        LIVE: {
-            bg: "bg-emerald-500",
-            text: "text-white",
-            label: "Live Now",
-            glow: "shadow-[0_0_15px_rgba(16,185,129,0.5)]",
-        },
-        UPCOMING: {
-            bg: "bg-primary",
-            text: "text-primary-foreground",
-            label: "Upcoming",
-            glow: "shadow-[0_0_15px_rgba(22,45,104,0.3)] dark:shadow-[0_0_15px_rgba(111,151,255,0.3)]",
-        },
-        ENDED: {
-            bg: "bg-slate-600",
-            text: "text-white",
-            label: "Ended",
-            glow: "shadow-none",
-        },
-    };
+function StatusPill({ dot, label, glow = false }: { dot: string; label: string; glow?: boolean }) {
+    return (
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-100 shadow-sm backdrop-blur-md">
+            <span
+                className={cn("size-2 rounded-full", dot, glow && "shadow-[0_0_9px_currentColor]")}
+            />
+            {label}
+        </span>
+    );
+}
 
 function QuickInfoCard({
     icon: Icon,
@@ -162,7 +72,7 @@ function QuickInfoCard({
     };
 
     return (
-        <div className="flex flex-col gap-2 p-4 rounded-xl border border-border/50 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-200 group">
+        <div className="flex flex-col gap-2 p-4 rounded-xl border border-border/50 bg-muted/40 hover:bg-muted/70 transition-all duration-200 group">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <div
                     className={cn(
@@ -175,6 +85,63 @@ function QuickInfoCard({
                 {label}
             </span>
             <span className="font-bold text-sm text-foreground leading-none">{value}</span>
+        </div>
+    );
+}
+
+function ContestRegistrationProgress({
+    contest,
+}: {
+    contest: { teams_count?: number; max_teams?: number | null };
+}) {
+    const teamCount = contest.teams_count ?? 0;
+    const maxTeams = contest.max_teams;
+    const hasLimit = maxTeams !== null && maxTeams !== undefined && maxTeams > 0;
+    const fillPercentage = hasLimit ? Math.min(100, Math.max(0, (teamCount / maxTeams) * 100)) : 0;
+    const slotsRemaining = hasLimit ? Math.max(0, maxTeams - teamCount) : 0;
+
+    return (
+        <div className="rounded-xl border border-border/50 bg-muted/30 p-4">
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                    Contest Progress
+                </span>
+                {hasLimit ? (
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                        {slotsRemaining} Slots Left
+                    </span>
+                ) : (
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-success">
+                        Open Slots
+                    </span>
+                )}
+            </div>
+
+            <div className="mt-3 flex items-baseline justify-between">
+                <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-foreground tracking-tight">
+                        {teamCount}
+                    </span>
+                    <span className="text-sm font-bold text-muted-foreground">
+                        {hasLimit ? `/ ${maxTeams} Teams` : "Teams Registered"}
+                    </span>
+                </div>
+                {hasLimit && (
+                    <span className="text-xs font-bold text-muted-foreground">
+                        {Math.round(fillPercentage)}% Filled
+                    </span>
+                )}
+            </div>
+
+            {hasLimit && (
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full border border-border/50 bg-muted">
+                    <div
+                        className="h-full rounded-full bg-primary transition-all duration-500"
+                        style={{ width: `${fillPercentage}%` }}
+                    />
+                </div>
+            )}
         </div>
     );
 }
@@ -238,7 +205,7 @@ function TimelineItem({
                     className={cn(
                         "text-[9px] font-extrabold uppercase tracking-widest",
                         isCompleted
-                            ? "bg-emerald-500/10 text-emerald-600 border-transparent dark:bg-emerald-500/20 dark:text-emerald-400"
+                            ? "bg-success/10 text-success border-transparent dark:bg-success/20"
                             : "text-muted-foreground/70",
                     )}
                 >
@@ -321,7 +288,7 @@ function CountdownTimer({ targetDate, label }: { targetDate: string; label: stri
     if (!timeLeft) return null;
 
     return (
-        <div className="flex flex-col gap-3 items-center p-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-border/40 backdrop-blur-sm">
+        <div className="flex flex-col gap-3 items-center p-4 bg-muted/30 rounded-2xl border border-border/40 backdrop-blur-sm">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/80 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-pulse" />
                 {label}
@@ -400,14 +367,6 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
               })()
             : "Not Scheduled";
 
-    const cStatus = contest
-        ? (CONTEST_STATUS_STYLES[contest.status as string] ?? CONTEST_STATUS_STYLES.DRAFT)
-        : CONTEST_STATUS_STYLES.DRAFT;
-
-    const rStatus = contest
-        ? (RUN_STATUS_STYLES[contest.run_status ?? "UPCOMING"] ?? RUN_STATUS_STYLES.UPCOMING)
-        : RUN_STATUS_STYLES.UPCOMING;
-
     const canStart = !!participation?.session?.can_start;
     const effectiveReason = participation?.session?.reason;
     const effectiveRunStatus = contest?.run_status || "UPCOMING";
@@ -428,83 +387,64 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column (Hero & Content) */}
                     <div className="lg:col-span-2 space-y-6">
-                        <Card className="overflow-hidden border-border/60 shadow-sm transition-all p-0 py-0">
-                            {/* Banner Section */}
-                            <div className="relative h-64 w-full border-b border-border/60 bg-muted/20">
+                        <Card className="overflow-hidden border-border/60 shadow-sm transition-all p-0 py-0 gap-0">
+                            {/* Banner Section — same visual language used across contest cards */}
+                            <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden border-b border-primary/20 bg-[linear-gradient(118deg,color-mix(in_srgb,var(--primary)_65%,#0b1220),color-mix(in_srgb,var(--primary)_18%,#0b1220)_82%)] px-8 py-7">
                                 {contest.image ? (
-                                    <img
-                                        src={contest.image}
-                                        alt={contest.name}
-                                        className="h-full w-full object-cover"
-                                    />
+                                    <>
+                                        <img
+                                            src={contest.image}
+                                            alt={contest.name}
+                                            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                                        />
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/25" />
+                                    </>
                                 ) : (
-                                    <HeroFallbackBanner id={contest.id} name={contest.name} />
+                                    <>
+                                        <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_center,white_1px,transparent_1.3px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+                                        <div className="pointer-events-none absolute -left-10 -top-24 size-72 rounded-full bg-primary/35 blur-3xl" />
+                                    </>
                                 )}
-                            </div>
 
-                            <CardContent className="px-6 pb-6 pt-0">
-                                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            {/* Run Status Badge */}
-                                            <div
-                                                className={cn(
-                                                    "flex items-center rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest shadow-sm",
-                                                    rStatus.bg,
-                                                    rStatus.text,
-                                                    rStatus.glow,
-                                                )}
-                                            >
-                                                {rStatus.label}
-                                            </div>
-                                            {/* Contest Status Badge */}
-                                            <div
-                                                className={cn(
-                                                    "flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide border border-current/20 shadow-sm",
-                                                    cStatus.bg,
-                                                    cStatus.text,
-                                                )}
-                                            >
-                                                <span
-                                                    className={cn(
-                                                        "mr-1.5 h-1.5 w-1.5 rounded-full shadow-sm",
-                                                        cStatus.dot,
-                                                    )}
-                                                />
-                                                {cStatus.label}
-                                            </div>
-                                        </div>
-
-                                        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-                                            {contest.name}
-                                        </h1>
-                                        {contest.description && (
-                                            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                                                {contest.description}
-                                            </p>
-                                        )}
-                                    </div>
-
+                                <div className="relative flex items-center justify-between gap-3">
+                                    <StatusPill
+                                        {...(RUN_STATUS_STYLES[contest.run_status ?? "UPCOMING"] ??
+                                            RUN_STATUS_STYLES.UPCOMING)}
+                                        glow
+                                    />
                                     <div className="flex items-center gap-2 shrink-0">
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            className="h-9 w-9 rounded-full shadow-sm hover:text-primary transition-colors"
+                                            className="h-9 w-9 rounded-full border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
                                         >
                                             <Share2 className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            className="h-9 w-9 rounded-full shadow-sm hover:text-primary transition-colors"
+                                            className="h-9 w-9 rounded-full border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
                                         >
                                             <Bookmark className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>
 
+                                <div className="relative mt-8">
+                                    <h1 className="text-3xl font-extrabold tracking-tight text-white">
+                                        {contest.name}
+                                    </h1>
+                                    {contest.description && (
+                                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-200">
+                                            {contest.description}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <CardContent className="px-6 py-6 space-y-6">
                                 {/* Mini Cards / Quick Info */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3 mt-8">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     <QuickInfoCard
                                         icon={Users}
                                         label="Team Size"
@@ -541,22 +481,6 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                             />
                                         )}
 
-                                    <QuickInfoCard
-                                        icon={Shield}
-                                        label="Team Mode"
-                                        color="emerald"
-                                        value={contest.team_approval_mode
-                                            .replace("_", " ")
-                                            .toLowerCase()}
-                                    />
-
-                                    <QuickInfoCard
-                                        icon={Laptop}
-                                        label="Contest Mode"
-                                        color="indigo"
-                                        value={contest.contest_mode.toLowerCase()}
-                                    />
-
                                     {contest.contest_mode.toLowerCase() === "team" &&
                                         contest.participation_type && (
                                             <QuickInfoCard
@@ -568,18 +492,10 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                     .toLowerCase()}
                                             />
                                         )}
-
-                                    <QuickInfoCard
-                                        icon={Trophy}
-                                        label="Leaderboard during Contest"
-                                        color="rose"
-                                        value={
-                                            contest.show_leaderboard_during_contest
-                                                ? "Visible"
-                                                : "Hidden"
-                                        }
-                                    />
                                 </div>
+
+                                {/* Contest-wide registration progress — moved in from the sidebar */}
+                                <ContestRegistrationProgress contest={contest} />
                             </CardContent>
                         </Card>
 
@@ -742,8 +658,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         title: "Checking Status...",
                                         icon: Clock,
                                         iconClass: "text-muted-foreground animate-pulse",
-                                        bgClass:
-                                            "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                        bgClass: "bg-muted/40 border-b border-border/50",
                                     };
                                 }
 
@@ -752,26 +667,26 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         return {
                                             title: "Session in Progress",
                                             icon: Activity,
-                                            iconClass: "text-emerald-500 animate-pulse",
+                                            iconClass: "text-primary animate-pulse",
                                             bgClass:
-                                                "bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5 border-b border-emerald-500/20",
+                                                "bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/20",
                                         };
                                     }
                                     if (canStart) {
                                         return {
                                             title: "You're all set to go!",
                                             icon: Sparkles,
-                                            iconClass: "text-emerald-500 animate-pulse",
+                                            iconClass: "text-primary animate-pulse",
                                             bgClass:
-                                                "bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5 border-b border-emerald-500/20",
+                                                "bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/20",
                                         };
                                     } else {
                                         return {
                                             title: "Contest is Live",
                                             icon: Activity,
-                                            iconClass: "text-rose-500 animate-pulse",
+                                            iconClass: "text-destructive animate-pulse",
                                             bgClass:
-                                                "bg-gradient-to-r from-rose-500/10 to-amber-500/10 dark:from-rose-500/5 dark:to-amber-500/5 border-b border-rose-500/20",
+                                                "bg-gradient-to-r from-destructive/10 to-warning/10 border-b border-destructive/20",
                                         };
                                     }
                                 }
@@ -782,25 +697,24 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                         return {
                                             title: "You're Registered!",
                                             icon: CheckCircle2,
-                                            iconClass: "text-indigo-500",
+                                            iconClass: "text-info",
                                             bgClass:
-                                                "bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/5 dark:to-blue-500/5 border-b border-indigo-500/20",
+                                                "bg-gradient-to-r from-info/10 to-info/5 border-b border-info/20",
                                         };
                                     } else if (regStatus === "PENDING_APPROVAL") {
                                         return {
                                             title: "Registration Pending",
                                             icon: Clock,
-                                            iconClass: "text-amber-500 animate-pulse",
+                                            iconClass: "text-warning animate-pulse",
                                             bgClass:
-                                                "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 dark:from-amber-500/5 dark:to-yellow-500/5 border-b border-amber-500/20",
+                                                "bg-gradient-to-r from-warning/10 to-warning/5 border-b border-warning/20",
                                         };
                                     } else {
                                         return {
                                             title: "Upcoming Contest",
                                             icon: Calendar,
-                                            iconClass: "text-blue-500",
-                                            bgClass:
-                                                "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                            iconClass: "text-info",
+                                            bgClass: "bg-muted/40 border-b border-border/50",
                                         };
                                     }
                                 }
@@ -809,9 +723,8 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     return {
                                         title: "Contest Ended",
                                         icon: Trophy,
-                                        iconClass: "text-slate-400 dark:text-slate-600",
-                                        bgClass:
-                                            "bg-slate-100/50 dark:bg-slate-900/40 border-b border-border/50",
+                                        iconClass: "text-muted-foreground/60",
+                                        bgClass: "bg-muted/50 border-b border-border/50",
                                     };
                                 }
 
@@ -819,8 +732,7 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     title: "Contest Status",
                                     icon: Shield,
                                     iconClass: "text-primary",
-                                    bgClass:
-                                        "bg-slate-50/50 dark:bg-slate-900/30 border-b border-border/50",
+                                    bgClass: "bg-muted/40 border-b border-border/50",
                                 };
                             })();
 
@@ -861,8 +773,8 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                 )}
                                                 {effectiveRunStatus === "ENDED" && (
                                                     <div className="space-y-4 w-full">
-                                                        <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
-                                                            <Trophy className="h-8 w-8 mb-2 text-slate-400 dark:text-slate-600 animate-pulse" />
+                                                        <div className="flex flex-col items-center justify-center p-5 bg-muted/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
+                                                            <Trophy className="h-8 w-8 mb-2 text-muted-foreground/50 animate-pulse" />
                                                             <span className="text-sm font-bold text-foreground">
                                                                 Contest Closed
                                                             </span>
@@ -953,9 +865,6 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                 </Card>
                             );
                         })()}
-
-                        {/* Overall Registrations Card */}
-                        <OverallRegistrationProgressCard contest={contest} />
 
                         {/* Team Status / Roster Cards */}
                         <ContestTeamCards

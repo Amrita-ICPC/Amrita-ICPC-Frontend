@@ -188,12 +188,12 @@ export function StudentInvitationsDrawer({ pendingCount = 0 }: StudentInvitation
             <SheetTrigger asChild>
                 <Button
                     variant="outline"
-                    className="relative bg-slate-900/60 backdrop-blur-md text-slate-100 hover:text-white gap-1.5 h-9 px-4.5 border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all font-extrabold text-xs rounded-lg cursor-pointer"
+                    className="relative h-9 gap-1.5 rounded-lg border-primary/20 bg-background/80 px-4.5 text-xs font-extrabold text-foreground shadow-xs transition-all hover:border-primary/35 hover:bg-primary/5"
                 >
                     <Mail className="h-4 w-4 stroke-[2]" />
                     Invitations
                     {displayPendingCount > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white border-2 border-slate-950 shadow-md animate-pulse">
+                        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white border-2 border-card shadow-md animate-pulse">
                             {displayPendingCount}
                         </span>
                     )}

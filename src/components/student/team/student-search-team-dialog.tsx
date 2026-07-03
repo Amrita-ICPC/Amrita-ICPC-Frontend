@@ -99,7 +99,7 @@ export function StudentSearchTeamDialog() {
             <DialogTrigger asChild>
                 <Button
                     variant="outline"
-                    className="bg-slate-900/60 backdrop-blur-md text-slate-100 hover:text-white gap-1.5 h-9 px-4.5 border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all font-extrabold text-xs rounded-lg cursor-pointer"
+                    className="h-9 gap-1.5 rounded-lg border-primary/20 bg-background/80 px-4.5 text-xs font-extrabold text-foreground shadow-xs transition-all hover:border-primary/35 hover:bg-primary/5"
                 >
                     <UserPlus className="h-4 w-4 stroke-[2]" />
                     Join Team

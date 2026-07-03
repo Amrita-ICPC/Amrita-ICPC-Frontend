@@ -1,56 +1,60 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function StudentTeamCardSkeleton() {
     return (
-        <Card className="overflow-hidden border border-border/40 bg-card">
-            <CardContent className="p-5 flex flex-col space-y-5">
-                {/* Header */}
-                <div className="flex items-start gap-4">
-                    <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
-                    <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Skeleton className="h-5 w-24 rounded" />
-                            <Skeleton className="h-4 w-12 rounded-full" />
-                        </div>
-                        <Skeleton className="h-3 w-16 rounded" />
+        <div className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card shadow-sm dark:border-white/10 animate-pulse">
+            {/* Banner */}
+            <div className="relative flex min-h-[140px] flex-col border-b border-border bg-slate-100 px-6 py-5 dark:border-white/10 dark:bg-slate-800">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="h-7 w-20 rounded-full bg-slate-200/70 dark:bg-slate-700/60" />
+                    <div className="h-7 w-20 rounded-full bg-slate-200/70 dark:bg-slate-700/60" />
+                </div>
+                <div className="mt-auto flex items-center gap-3 pt-6">
+                    <div className="h-11 w-11 rounded-xl bg-slate-200/70 dark:bg-slate-700/60" />
+                    <div className="flex flex-col gap-2">
+                        <div className="h-6 w-32 rounded bg-slate-200 dark:bg-slate-700" />
+                        <div className="h-3.5 w-20 rounded bg-slate-200/70 dark:bg-slate-700/60" />
                     </div>
                 </div>
+            </div>
 
-                {/* Description */}
-                <div className="space-y-2">
-                    <Skeleton className="h-3 w-full rounded" />
-                    <Skeleton className="h-3 w-3/4 rounded" />
+            {/* Description */}
+            <div className="flex min-h-[60px] flex-col justify-center gap-2 border-b border-border px-7 py-3 dark:border-white/10">
+                <Skeleton className="h-3.5 w-full rounded" />
+                <Skeleton className="h-3.5 w-3/4 rounded" />
+            </div>
+
+            {/* Code + Members */}
+            <div className="flex min-h-[60px] items-center border-b border-border px-7 dark:border-white/10">
+                <div className="flex flex-1 items-center gap-2">
+                    <Skeleton className="h-3.5 w-8 rounded" />
+                    <Skeleton className="h-5 w-16 rounded" />
                 </div>
-
-                {/* Roster info */}
-                <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center -space-x-1.5">
-                        <Skeleton className="h-7 w-7 rounded-full" />
-                        <Skeleton className="h-7 w-7 rounded-full" />
-                        <Skeleton className="h-7 w-7 rounded-full" />
+                <div className="h-5 w-px bg-border dark:bg-white/10" />
+                <div className="flex flex-1 items-center justify-end gap-2">
+                    <div className="flex -space-x-1.5">
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                        <Skeleton className="h-6 w-6 rounded-full" />
                     </div>
-                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-4 w-4 rounded" />
                 </div>
+            </div>
 
-                {/* Divider */}
-                <div className="border-t border-border/40" />
+            {/* Join Requests / Role */}
+            <div className="flex min-h-[60px] items-center justify-between border-b border-border px-7 dark:border-white/10">
+                <Skeleton className="h-3 w-24 rounded" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
 
-                {/* Bottom metadata */}
-                <div className="flex items-center justify-between">
-                    <Skeleton className="h-3.5 w-16 rounded" />
-                    <Skeleton className="h-5 w-14 rounded-full" />
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-2">
-                    <Skeleton className="h-9 flex-1 rounded-xl" />
-                    <Skeleton className="h-9 w-9 rounded-xl shrink-0" />
-                </div>
-            </CardContent>
-        </Card>
+            {/* Footer */}
+            <div className="flex items-center gap-2 px-7 py-4">
+                <Skeleton className="h-9 flex-1 rounded-xl" />
+                <Skeleton className="h-9 w-9 rounded-xl shrink-0" />
+            </div>
+        </div>
     );
 }
 
