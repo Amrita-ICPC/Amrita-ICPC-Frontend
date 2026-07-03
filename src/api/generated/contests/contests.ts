@@ -45,6 +45,7 @@ import type {
   ContestBankCloneRequest,
   ContestCreate,
   ContestUpdate,
+  EvaluationTriggerRequest,
   ExceptionResponse,
   GetAllContestsApiV1ContestsGetParams,
   GetContestInstructorsApiV1ContestsContestIdInstructorsGetParams,
@@ -2294,11 +2295,18 @@ export const useCancelContestApiV1ContestsContestIdCancelPost = <TError = Except
       return useMutation(getCancelContestApiV1ContestsContestIdCancelPostMutationOptions(options), queryClient);
     }
     /**
- * Trigger re-evaluation of all submissions in a contest.
+ * Trigger re-evaluation of submissions in a contest.
+
+By default (scope=ALL) every submission in the contest is re-evaluated.
+Pass scope=TEAMS with team_ids to only re-evaluate specific teams'
+submissions, scope=QUESTIONS with question_ids to only re-evaluate
+specific questions' submissions, or scope=STUDENTS with student_ids
+(contest team member ids) to only re-evaluate specific students' submissions.
 
 Args:
     request (Request): Framework context.
     contest_id (UUID): The unique identifier of the contest.
+    payload (EvaluationTriggerRequest): Evaluation scope selection.
     user_id (UUID): Authenticated user ID.
     service (ContestService): Injected domain service.
 
@@ -2308,12 +2316,15 @@ Returns:
  */
 export const evaluateContestApiV1ContestsContestIdEvaluationPost = (
     contestId: string,
+    evaluationTriggerRequest?: EvaluationTriggerRequest,
  signal?: AbortSignal
 ) => {
 
 
       return axiosWithAuth<APIResponseEvaluationResponse>(
-      {url: `/api/v1/contests/${contestId}/evaluation`, method: 'POST', signal
+      {url: `/api/v1/contests/${contestId}/evaluation`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: evaluationTriggerRequest, signal
     },
       );
     }
@@ -2321,8 +2332,8 @@ export const evaluateContestApiV1ContestsContestIdEvaluationPost = (
 
 
 export const getEvaluateContestApiV1ContestsContestIdEvaluationPostMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string;data?: EvaluationTriggerRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string;data?: EvaluationTriggerRequest}, TContext> => {
 
 const mutationKey = ['evaluateContestApiV1ContestsContestIdEvaluationPost'];
 const {mutation: mutationOptions} = options ?
@@ -2334,10 +2345,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, {contestId: string}> = (props) => {
-          const {contestId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, {contestId: string;data?: EvaluationTriggerRequest}> = (props) => {
+          const {contestId,data} = props ?? {};
 
-          return  evaluateContestApiV1ContestsContestIdEvaluationPost(contestId,)
+          return  evaluateContestApiV1ContestsContestIdEvaluationPost(contestId,data,)
         }
 
 
@@ -2348,18 +2359,18 @@ const {mutation: mutationOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type EvaluateContestApiV1ContestsContestIdEvaluationPostMutationResult = NonNullable<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>>
-
+    export type EvaluateContestApiV1ContestsContestIdEvaluationPostMutationBody = EvaluationTriggerRequest | undefined
     export type EvaluateContestApiV1ContestsContestIdEvaluationPostMutationError = ExceptionResponse | HTTPValidationError
 
     /**
  * @summary Trigger contest evaluation
  */
 export const useEvaluateContestApiV1ContestsContestIdEvaluationPost = <TError = ExceptionResponse | HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>, TError,{contestId: string;data?: EvaluationTriggerRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof evaluateContestApiV1ContestsContestIdEvaluationPost>>,
         TError,
-        {contestId: string},
+        {contestId: string;data?: EvaluationTriggerRequest},
         TContext
       > => {
       return useMutation(getEvaluateContestApiV1ContestsContestIdEvaluationPostMutationOptions(options), queryClient);

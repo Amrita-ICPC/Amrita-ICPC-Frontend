@@ -58,8 +58,8 @@ function NavItem({
                 className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                     active
-                        ? "bg-white/16 font-medium text-sidebar-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]"
-                        : "text-sidebar-foreground/72 hover:bg-white/10 hover:text-sidebar-foreground",
+                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_var(--sidebar-border)]"
+                        : "text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
                 )}
             >
                 <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-70")} />

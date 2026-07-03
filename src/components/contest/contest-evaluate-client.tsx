@@ -22,13 +22,13 @@ import {
     getGetContestApiV1ContestsContestIdGetQueryKey,
     getGetContestResultsApiV1ContestsContestIdResultsGetQueryKey,
     getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey,
-    useEvaluateContestApiV1ContestsContestIdEvaluationPost,
     useGetContestApiV1ContestsContestIdGet,
     useGetContestResultsApiV1ContestsContestIdResultsGet,
     useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet,
     usePublishResultsApiV1ContestsContestIdPublishResultsPost,
     useUpdateContestApiV1ContestsContestIdPatch,
 } from "@/api/generated/contests/contests";
+import { EvaluationDialog } from "@/components/contest/evaluation-dialog";
 import { ResultsTeamsClient } from "@/components/contest/results-teams-client";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { Badge } from "@/components/ui/badge";
@@ -76,16 +76,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
             }),
         ]);
     };
-
-    const evaluateMutation = useEvaluateContestApiV1ContestsContestIdEvaluationPost({
-        mutation: {
-            onSuccess: async () => {
-                toast.success("Evaluation started");
-                await invalidateResults();
-            },
-            onError: (error) => toast.error(errorMessage(error, "Could not start evaluation")),
-        },
-    });
 
     const publishMutation = usePublishResultsApiV1ContestsContestIdPublishResultsPost({
         mutation: {
@@ -215,18 +205,22 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
 
                         <div className="space-y-3">
                             <div className="flex flex-wrap justify-end gap-2">
-                                <Button
-                                    className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-                                    onClick={() => evaluateMutation.mutate({ contestId })}
-                                    disabled={evaluateMutation.isPending || evaluationActive}
-                                >
-                                    {evaluateMutation.isPending || evaluationActive ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Zap className="h-4 w-4" />
-                                    )}
-                                    {evaluationActive ? "Evaluating" : "Evaluate"}
-                                </Button>
+                                <EvaluationDialog
+                                    contestId={contestId}
+                                    trigger={
+                                        <Button
+                                            className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                                            disabled={evaluationActive}
+                                        >
+                                            {evaluationActive ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Zap className="h-4 w-4" />
+                                            )}
+                                            {evaluationActive ? "Evaluating" : "Evaluate"}
+                                        </Button>
+                                    }
+                                />
                                 <Button variant="outline" asChild>
                                     <Link href={`/contest/${contestId}/edit`}>
                                         <Pencil className="h-4 w-4" />

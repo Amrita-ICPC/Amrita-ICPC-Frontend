@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { EvaluationScope } from './evaluationScope';
 import type { EvaluationStatus } from './evaluationStatus';
 
 /**
@@ -21,4 +22,12 @@ export interface EvaluationStatusResponse {
   total_submissions: number;
   /** Number of evaluated submissions */
   processed_submissions: number;
+  /** What this run evaluated */
+  scope?: EvaluationScope;
+  /** Contest team ids evaluated, when scope is TEAMS */
+  team_ids?: string[] | null;
+  /** Question ids evaluated, when scope is QUESTIONS */
+  question_ids?: string[] | null;
+  /** Contest team member ids evaluated, when scope is STUDENTS */
+  student_ids?: string[] | null;
 }

@@ -205,6 +205,7 @@ Args:
     contest_id (UUID): The unique identifier of the contest.
     search (str | None): Optional string to search team names.
     team_status (TeamStatus | None): Optional filter for team status.
+    flagged (bool | None): Optional filter for whether the team has flagged progress.
     sort_by (str | None): Optional field to sort by ('score').
     sort_order (str): Sort order applied when sort_by is set ('asc' or 'desc').
     page (int): Page number (starts from 1).
@@ -232,6 +233,7 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetQueryParams = zod.obje
   "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by team name'),
   "team_status": zod.union([zod.enum(['DRAFT', 'CONFIRMED', 'CANCELLED', 'DISQUALIFIED']).describe('Enumeration of team statuses within a contest.\n\nAttributes:\n    DRAFT: Team is being formed and can still be modified.\n    CONFIRMED: Team is finalized and ready for contest participation.\n    DISQUALIFIED: Team has been disqualified from the contest.\n    CANCELLED: Team has been cancelled from the contest.'),zod.null()]).optional().describe('Filter by team status'),
   "approval_status": zod.union([zod.enum(['WAITING', 'APPROVED', 'REJECTED', 'CANCELLED']).describe('Enumeration of approval states for a team\'s contest enrollment.\n\nAttributes:\n    WAITING: Team is awaiting instructor review.\n    APPROVED: Team enrollment is approved.\n    REJECTED: Team enrollment is rejected.\n    CANCELLED: Team enrollment is cancelled.'),zod.null()]).optional().describe('Filter by approval status'),
+  "flagged": zod.union([zod.boolean(),zod.null()]).optional().describe('Filter by flagged status (true: flagged only, false: unflagged only)'),
   "sort_by": zod.union([zod.string(),zod.null()]).optional().describe('Field to sort by. Currently supports \'score\'.'),
   "sort_order": zod.string().default(getContestTeamsApiV1ContestsContestIdTeamsGetQuerySortOrderDefault).describe('Sort order when sort_by is set: \'asc\' or \'desc\''),
   "page": zod.number().min(1).default(getContestTeamsApiV1ContestsContestIdTeamsGetQueryPageDefault).describe('Page number (starts from 1)'),
@@ -279,6 +281,75 @@ export const GetContestTeamsApiV1ContestsContestIdTeamsGetResponse = zod.object(
   "rejected_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneRejectedCountDefault),
   "disqualified_count": zod.number().default(getContestTeamsApiV1ContestsContestIdTeamsGetResponseDataOneDisqualifiedCountDefault)
 }).describe('Schema for paginated team list with status counts.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Get a contest-wide, searchable list of students.
+
+Flattens accepted team members across every team in the contest into a
+single list, keyed by contest_team_member_id — the id used for
+scope=STUDENTS when triggering contest evaluation.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    search (str | None): Optional string to search student names or emails.
+    page (int): Page number (starts from 1).
+    page_size (int): Number of students per page.
+    user_id (UUID): Authenticated user ID.
+    service (TeamService): Injected domain service.
+
+Returns:
+    APIResponse: Standardized response with list of students and pagination state.
+ * @summary Search students across a contest
+ */
+export const GetContestStudentsApiV1ContestsContestIdStudentsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageDefault = 1;
+
+export const getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageSizeDefault = 10;
+export const getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageSizeMax = 100;
+
+
+
+export const GetContestStudentsApiV1ContestsContestIdStudentsGetQueryParams = zod.object({
+  "search": zod.union([zod.string(),zod.null()]).optional().describe('Search by student name or email'),
+  "page": zod.number().min(1).default(getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageDefault).describe('Page number (starts from 1)'),
+  "page_size": zod.number().min(1).max(getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageSizeMax).default(getContestStudentsApiV1ContestsContestIdStudentsGetQueryPageSizeDefault).describe('Number of students per page')
+})
+
+export const getContestStudentsApiV1ContestsContestIdStudentsGetResponseSuccessDefault = true;
+export const getContestStudentsApiV1ContestsContestIdStudentsGetResponseStatusDefault = 200;
+export const getContestStudentsApiV1ContestsContestIdStudentsGetResponseMessageDefault = `Success`;
+export const getContestStudentsApiV1ContestsContestIdStudentsGetResponseDataOneItemIsLeaderDefault = false;
+
+export const GetContestStudentsApiV1ContestsContestIdStudentsGetResponse = zod.object({
+  "success": zod.boolean().default(getContestStudentsApiV1ContestsContestIdStudentsGetResponseSuccessDefault),
+  "status": zod.number().default(getContestStudentsApiV1ContestsContestIdStudentsGetResponseStatusDefault),
+  "message": zod.string().default(getContestStudentsApiV1ContestsContestIdStudentsGetResponseMessageDefault),
+  "data": zod.union([zod.array(zod.object({
+  "contest_team_member_id": zod.uuid(),
+  "user_id": zod.uuid(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "contest_team_id": zod.uuid(),
+  "team_name": zod.string(),
+  "is_leader": zod.boolean().default(getContestStudentsApiV1ContestsContestIdStudentsGetResponseDataOneItemIsLeaderDefault)
+}).describe('Schema for a contest-wide student search result.\n\nRepresents one contest team member, flattened across all teams in a\ncontest. ``contest_team_member_id`` is the id used to scope per-student\ncontest evaluation (``EvaluationScope.STUDENTS``).\n\nAttributes:\n    contest_team_member_id: Unique identifier for the contest team member.\n    user_id: Unique identifier for the underlying user.\n    name: Full name of the student.\n    email: Email address of the student.\n    contest_team_id: Unique identifier of the student\'s team in this contest.\n    team_name: Name of the student\'s team.\n    is_leader: Whether this student is the leader of their team.')),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

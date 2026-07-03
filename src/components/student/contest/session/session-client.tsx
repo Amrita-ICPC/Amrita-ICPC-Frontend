@@ -2,7 +2,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, ChevronLeft, Loader2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft, CircleDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -548,29 +548,58 @@ export function SessionClient({ contestId }: SessionClientProps) {
             />
 
             {/* Questions Tab Selector */}
-            <div className="flex h-11 shrink-0 items-center border-b border-border bg-slate-100 dark:bg-[#090d16] px-6 gap-2">
-                {questionsList.map((q, idx) => {
-                    const isSelected = activeQuestionId === q.id;
-                    return (
-                        <button
-                            key={q.id}
-                            onClick={() => setActiveQuestionId(q.id)}
-                            className={cn(
-                                "flex h-full items-center px-4 text-xs font-bold transition-all relative outline-none",
-                                isSelected
-                                    ? "text-indigo-600 dark:text-white border-b-2 border-indigo-500"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200",
-                            )}
-                        >
-                            <div className="flex items-center gap-1.5">
-                                {q.solved && (
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 fill-emerald-500/10" />
+            <div
+                className="h-11 shrink-0 overflow-x-auto overflow-y-hidden overscroll-x-contain border-b border-border bg-slate-100 px-6 dark:bg-[#090d16]"
+                onWheel={(event) => {
+                    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                        event.currentTarget.scrollLeft += event.deltaY;
+                    }
+                }}
+            >
+                <div className="flex h-full min-w-max items-center gap-2">
+                    {questionsList.map((q, idx) => {
+                        const isSelected = activeQuestionId === q.id;
+                        return (
+                            <button
+                                key={q.id}
+                                onClick={(event) => {
+                                    setActiveQuestionId(q.id);
+                                    event.currentTarget.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "nearest",
+                                        inline: "nearest",
+                                    });
+                                }}
+                                className={cn(
+                                    "relative flex h-full shrink-0 items-center px-4 text-xs font-bold whitespace-nowrap outline-none transition-all",
+                                    isSelected
+                                        ? "border-b-2 border-indigo-500 text-indigo-600 dark:text-white"
+                                        : q.solved
+                                          ? "text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                          : q.attempted
+                                            ? "text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
+                                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
                                 )}
-                                <span>Problem {String.fromCharCode(65 + idx)}</span>
-                            </div>
-                        </button>
-                    );
-                })}
+                                title={
+                                    q.solved
+                                        ? "Solved"
+                                        : q.attempted
+                                          ? "Attempted — not solved yet"
+                                          : "Not attempted"
+                                }
+                            >
+                                <div className="flex items-center gap-1.5">
+                                    {q.solved ? (
+                                        <CheckCircle2 className="h-3.5 w-3.5 fill-emerald-500/10 text-emerald-500" />
+                                    ) : q.attempted ? (
+                                        <CircleDot className="h-3.5 w-3.5 text-amber-500" />
+                                    ) : null}
+                                    <span>Problem {String.fromCharCode(65 + idx)}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Main Area: Split Screen Workspace */}
