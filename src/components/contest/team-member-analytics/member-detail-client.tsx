@@ -1,19 +1,20 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, Clock3, FileText, XCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import * as React from "react";
 
+import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
 import {
     useGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGet,
     useGetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGet,
+    useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet,
 } from "@/api/generated/teams/teams";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
-import { MemberDetailHero } from "./member-detail-hero";
+import { MemberDetailHero, MemberVerdictAnalytics } from "./member-detail-hero";
 import { numberValue } from "./member-detail-utils";
 import { MemberQuestionReview } from "./member-question-review";
 
@@ -23,42 +24,11 @@ interface MemberDetailClientProps {
     contestTeamMemberId: string;
 }
 
-function StatCard({
-    label,
-    value,
-    hint,
-    icon: Icon,
-    tone = "neutral",
-}: {
-    label: string;
-    value: string | number;
-    hint: string;
-    icon: React.ElementType;
-    tone?: "neutral" | "emerald" | "red" | "amber" | "blue";
-}) {
-    const toneClass = {
-        neutral: "border-border/70 bg-card text-foreground",
-        emerald: "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400",
-        red: "border-red-500/20 bg-red-500/5 text-red-600 dark:text-red-400",
-        amber: "border-amber-500/25 bg-amber-500/5 text-amber-600 dark:text-amber-400",
-        blue: "border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400",
-    };
-
+function errorStatus(error: unknown) {
+    if (typeof error !== "object" || error === null) return undefined;
     return (
-        <Card className={cn("border shadow-sm", toneClass[tone])}>
-            <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-background/70">
-                    <Icon className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                    <p className="text-sm font-medium text-muted-foreground">{label}</p>
-                    <p className="mt-1 text-2xl font-bold tracking-tight tabular-nums text-current">
-                        {value}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
-                </div>
-            </CardContent>
-        </Card>
+        (error as { response?: { status?: number }; status?: number }).response?.status ??
+        (error as { status?: number }).status
     );
 }
 
@@ -107,6 +77,7 @@ export function MemberDetailClient({
         data: memberData,
         isLoading: isMemberLoading,
         isError: isMemberError,
+        error: memberError,
         refetch: refetchMember,
     } = useGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGet(
         contestId,
@@ -117,25 +88,60 @@ export function MemberDetailClient({
         data: questionsData,
         isLoading: isQuestionsLoading,
         isError: isQuestionsError,
+        error: questionsError,
         refetch: refetchQuestions,
     } = useGetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGet(
         contestTeamId,
         contestTeamMemberId,
     );
+    const teamMembersQuery = useGetTeamMembersApiV1ContestsContestIdTeamsContestTeamIdMembersGet(
+        contestId,
+        contestTeamId,
+        { page: 1, page_size: 100 },
+    );
 
-    const member = memberData?.data;
-    const questions = questionsData?.data ?? [];
+    const memberProgressNotFound = isMemberError && errorStatus(memberError) === 404;
+    const questionProgressNotFound = isQuestionsError && errorStatus(questionsError) === 404;
+    const hasNoProgress = memberProgressNotFound || questionProgressNotFound;
+    const fallbackIdentity = teamMembersQuery.data?.data?.find(
+        (item) => item.id === contestTeamMemberId || item.user_id === contestTeamMemberId,
+    );
+    const fallbackMember: ContestTeamMemberDetail | undefined = fallbackIdentity
+        ? {
+              contest_team_member_id: contestTeamMemberId,
+              user_id: fallbackIdentity.user_id,
+              name: fallbackIdentity.name,
+              email: fallbackIdentity.email,
+              is_leader: fallbackIdentity.is_leader,
+              is_participated: false,
+              score: 0,
+              submission_statistics: {},
+              question_statistics: {},
+          }
+        : undefined;
+    const member = memberData?.data
+        ? questionProgressNotFound
+            ? { ...memberData.data, is_participated: false }
+            : memberData.data
+        : memberProgressNotFound
+          ? fallbackMember
+          : undefined;
+    const questions = hasNoProgress ? [] : (questionsData?.data ?? []);
     const effectiveSelectedQuestionId = questions.some(
         (question) => question.question_id === selectedQuestionId,
     )
         ? selectedQuestionId
         : (questions[0]?.question_id ?? null);
 
-    if (isMemberLoading || isQuestionsLoading) {
+    if (isMemberLoading || isQuestionsLoading || (hasNoProgress && teamMembersQuery.isLoading)) {
         return <LoadingState />;
     }
 
-    if (isMemberError || isQuestionsError || !member) {
+    if (
+        (isMemberError && !memberProgressNotFound) ||
+        (isQuestionsError && !questionProgressNotFound) ||
+        !member
+    ) {
         return (
             <ErrorState
                 onRetry={() => {
@@ -146,43 +152,20 @@ export function MemberDetailClient({
         );
     }
 
-    const submissionStats = member.submission_statistics;
     const questionStats = member.question_statistics;
 
     return (
         <div className="space-y-6">
-            <MemberDetailHero member={member} />
+            <MemberDetailHero member={member} contestId={contestId} />
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <StatCard
-                    label="Total Submissions"
-                    value={numberValue(submissionStats?.total)}
-                    hint="Across all contest questions"
-                    icon={FileText}
-                    tone="blue"
-                />
-                <StatCard
-                    label="Accepted"
-                    value={numberValue(submissionStats?.accepted)}
-                    hint="Accepted submissions"
-                    icon={CheckCircle2}
-                    tone="emerald"
-                />
-                <StatCard
-                    label="Incorrect"
-                    value={numberValue(submissionStats?.wrong_answer)}
-                    hint="Wrong answer verdicts"
-                    icon={XCircle}
-                    tone="red"
-                />
-                <StatCard
-                    label="Pending"
-                    value={numberValue(submissionStats?.pending)}
-                    hint={`${numberValue(questionStats?.unsolved)} unsolved questions`}
-                    icon={Clock3}
-                    tone="amber"
-                />
-            </div>
+            {hasNoProgress && (
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+                    This member has not started participating yet. Analytics and responses will
+                    appear after their first contest activity.
+                </div>
+            )}
+
+            <MemberVerdictAnalytics member={member} />
 
             <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

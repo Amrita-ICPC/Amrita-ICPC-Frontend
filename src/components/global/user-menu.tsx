@@ -41,8 +41,8 @@ export function UserMenu({ name, email }: UserMenuProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-white/10 hover:bg-white/8">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-[11px] font-semibold text-sidebar-foreground">
+                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/70">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-[11px] font-semibold text-sidebar-accent-foreground">
                         {initials(name, email)}
                     </div>
                     <div className="min-w-0 flex-1">

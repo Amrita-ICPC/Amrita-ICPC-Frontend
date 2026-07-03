@@ -1,6 +1,8 @@
 "use client";
 
+import Editor from "@monaco-editor/react";
 import { CheckCircle2, Code2, XCircle } from "lucide-react";
+import { useTheme } from "next-themes";
 import * as React from "react";
 
 import type { SubmissionTestCaseResultSchema } from "@/api/generated/model/submissionTestCaseResultSchema";
@@ -13,7 +15,7 @@ import {
 } from "@/components/contest/team-member-analytics/member-detail-utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function MetricTile({ label, value }: { label: string; value: string | number }) {
@@ -148,7 +150,25 @@ export function TestCaseViewer({ submissionId, open }: { submissionId: string; o
 }
 
 export function SourceCodeViewer({ code, language }: { code: string; language: string }) {
-    const lines = code.split("\n");
+    const { resolvedTheme } = useTheme();
+    const normalizedLanguage = language.toLowerCase();
+    const monacoLanguage = normalizedLanguage.includes("python")
+        ? "python"
+        : normalizedLanguage.includes("java") && !normalizedLanguage.includes("script")
+          ? "java"
+          : normalizedLanguage.includes("javascript")
+            ? "javascript"
+            : normalizedLanguage.includes("typescript")
+              ? "typescript"
+              : normalizedLanguage.includes("c++") || normalizedLanguage.includes("cpp")
+                ? "cpp"
+                : normalizedLanguage.includes("c#")
+                  ? "csharp"
+                  : normalizedLanguage.includes("go")
+                    ? "go"
+                    : normalizedLanguage.includes("rust")
+                      ? "rust"
+                      : "plaintext";
 
     return (
         <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
@@ -172,27 +192,30 @@ export function SourceCodeViewer({ code, language }: { code: string; language: s
                 </Badge>
             </div>
 
-            <ScrollArea className="h-80 bg-background">
-                <div className="grid min-w-max grid-cols-[auto_1fr] text-sm leading-6">
-                    <div className="select-none border-r border-border/70 bg-muted/30 px-3 py-4 text-right font-mono text-xs text-muted-foreground">
-                        {lines.map((_, index) => (
-                            <div key={index} className="h-6 tabular-nums">
-                                {index + 1}
-                            </div>
-                        ))}
-                    </div>
-                    <pre className="overflow-visible p-4 font-mono text-sm text-foreground">
-                        <code>
-                            {lines.map((line, index) => (
-                                <div key={index} className="h-6 whitespace-pre">
-                                    {line || " "}
-                                </div>
-                            ))}
-                        </code>
-                    </pre>
-                </div>
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
+            <div className="h-80 bg-background">
+                <Editor
+                    height="100%"
+                    language={monacoLanguage}
+                    value={code}
+                    theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
+                    options={{
+                        readOnly: true,
+                        domReadOnly: true,
+                        fontSize: 13,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                        fontLigatures: true,
+                        minimap: { enabled: false },
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        wordWrap: "on",
+                        automaticLayout: true,
+                        contextmenu: false,
+                        folding: true,
+                        renderLineHighlight: "none",
+                        padding: { top: 12, bottom: 12 },
+                    }}
+                />
+            </div>
         </div>
     );
 }

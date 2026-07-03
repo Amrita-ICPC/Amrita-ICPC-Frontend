@@ -1831,11 +1831,18 @@ export const CancelContestApiV1ContestsContestIdCancelPostResponse = zod.object(
 })
 
 /**
- * Trigger re-evaluation of all submissions in a contest.
+ * Trigger re-evaluation of submissions in a contest.
+
+By default (scope=ALL) every submission in the contest is re-evaluated.
+Pass scope=TEAMS with team_ids to only re-evaluate specific teams'
+submissions, scope=QUESTIONS with question_ids to only re-evaluate
+specific questions' submissions, or scope=STUDENTS with student_ids
+(contest team member ids) to only re-evaluate specific students' submissions.
 
 Args:
     request (Request): Framework context.
     contest_id (UUID): The unique identifier of the contest.
+    payload (EvaluationTriggerRequest): Evaluation scope selection.
     user_id (UUID): Authenticated user ID.
     service (ContestService): Injected domain service.
 
@@ -1846,6 +1853,16 @@ Returns:
 export const EvaluateContestApiV1ContestsContestIdEvaluationPostParams = zod.object({
   "contest_id": zod.uuid()
 })
+
+export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyDefault = { scope: "ALL" } as const;
+export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyScopeDefault = `ALL`;
+
+export const EvaluateContestApiV1ContestsContestIdEvaluationPostBody = zod.object({
+  "scope": zod.enum(['ALL', 'TEAMS', 'QUESTIONS', 'STUDENTS']).default(evaluateContestApiV1ContestsContestIdEvaluationPostBodyScopeDefault).describe('What to evaluate: ALL\/TEAMS\/QUESTIONS\/STUDENTS'),
+  "team_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team ids to evaluate (required for TEAMS)'),
+  "question_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Question ids to evaluate (required for QUESTIONS)'),
+  "student_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team member ids to evaluate (required for STUDENTS)')
+}).default(evaluateContestApiV1ContestsContestIdEvaluationPostBodyDefault).describe('Request body for triggering a contest evaluation.\n\n``scope`` selects what gets (re-)evaluated:\n- ALL: every submission in the contest.\n- TEAMS: only submissions from the given ``team_ids``.\n- QUESTIONS: only submissions for the given ``question_ids``.\n- STUDENTS: only submissions from the given ``student_ids`` (contest team member ids).')
 
 /**
  * Get the status of a contest evaluation process.
@@ -1867,6 +1884,7 @@ export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetParams = zod.
 export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseSuccessDefault = true;
 export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseStatusDefault = 200;
 export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseMessageDefault = `Success`;
+export const getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseDataOneScopeDefault = `ALL`;
 
 export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetResponse = zod.object({
   "success": zod.boolean().default(getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseSuccessDefault),
@@ -1877,7 +1895,11 @@ export const GetEvaluationStatusApiV1ContestsContestIdEvaluationGetResponse = zo
   "contest_id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['PENDING', 'RUNNING', 'COMPLETED']).describe('Evaluation status (PENDING, RUNNING, COMPLETED)'),
   "total_submissions": zod.number().describe('Total submissions to evaluate'),
-  "processed_submissions": zod.number().describe('Number of evaluated submissions')
+  "processed_submissions": zod.number().describe('Number of evaluated submissions'),
+  "scope": zod.enum(['ALL', 'TEAMS', 'QUESTIONS', 'STUDENTS']).default(getEvaluationStatusApiV1ContestsContestIdEvaluationGetResponseDataOneScopeDefault).describe('What this run evaluated'),
+  "team_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team ids evaluated, when scope is TEAMS'),
+  "question_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Question ids evaluated, when scope is QUESTIONS'),
+  "student_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team member ids evaluated, when scope is STUDENTS')
 }).describe('Schema for contest evaluation status polling.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

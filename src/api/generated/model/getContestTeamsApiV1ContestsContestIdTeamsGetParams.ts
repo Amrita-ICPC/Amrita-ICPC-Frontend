@@ -22,6 +22,10 @@ team_status?: TeamStatus | null;
  */
 approval_status?: TeamApprovalStatus | null;
 /**
+ * Filter by flagged status (true: flagged only, false: unflagged only)
+ */
+flagged?: boolean | null;
+/**
  * Field to sort by. Currently supports 'score'.
  */
 sort_by?: string | null;
