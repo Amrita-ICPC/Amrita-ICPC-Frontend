@@ -1,75 +1,55 @@
 export function StudentContestSkeleton() {
     return (
-        <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-card shadow-sm dark:border-white/5 dark:bg-slate-900/60 min-h-[16rem] animate-pulse">
-            <div className="flex flex-1 flex-col sm:flex-row">
-                {/* Image Section (Left) */}
-                <div className="relative h-40 w-full shrink-0 sm:h-auto sm:w-64 overflow-hidden border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-white/5 bg-slate-100 dark:bg-slate-800">
-                    {/* Run Status Badge placeholder */}
-                    <div className="absolute left-3 top-3 h-5 w-20 rounded-full bg-slate-200/60 dark:bg-slate-700/60" />
+        <div className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card shadow-sm dark:border-white/10 animate-pulse">
+            {/* Banner */}
+            <div className="relative flex min-h-[162px] flex-col border-b border-border bg-slate-100 px-7 py-6 dark:border-white/10 dark:bg-slate-800">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="h-7 w-24 rounded-full bg-slate-200/70 dark:bg-slate-700/60" />
+                    <div className="h-7 w-28 rounded-full bg-slate-200/70 dark:bg-slate-700/60" />
                 </div>
-
-                {/* Content Section (Right) */}
-                <div className="flex flex-1 flex-col p-5 sm:p-7">
-                    {/* Header: Title + Status */}
-                    <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-3">
-                            <div className="h-7 w-1/3 rounded bg-slate-200 dark:bg-slate-800" />
-                            <div className="h-5 w-16 rounded-full bg-slate-100/60 dark:bg-slate-800/60" />
-                        </div>
-                        <div className="h-4 w-2/3 rounded bg-slate-50 dark:bg-slate-800/30" />
-                    </div>
-
-                    {/* Metadata Row */}
-                    <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-                        {/* Start Time */}
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800" />
-                            <div className="flex flex-col gap-1">
-                                <div className="h-2 w-10 rounded bg-slate-50 dark:bg-slate-800/50" />
-                                <div className="h-3 w-24 rounded bg-slate-100 dark:bg-slate-800" />
-                            </div>
-                        </div>
-
-                        {/* Team Size */}
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800" />
-                            <div className="flex flex-col gap-1">
-                                <div className="h-2 w-10 rounded bg-slate-50 dark:bg-slate-800/50" />
-                                <div className="h-3.5 w-16 rounded bg-slate-100 dark:bg-slate-800" />
-                            </div>
-                        </div>
-
-                        {/* Approval */}
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800" />
-                            <div className="flex flex-col gap-1">
-                                <div className="h-2 w-10 rounded bg-slate-50 dark:bg-slate-800/50" />
-                                <div className="h-3.5 w-16 rounded bg-slate-100 dark:bg-slate-800" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Progress Section */}
-                    <div className="mt-7 flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 rounded-full bg-slate-100 dark:bg-slate-800" />
-                                <div className="h-3 w-32 rounded bg-slate-50 dark:bg-slate-800/50" />
-                            </div>
-                            <div className="h-3 w-16 rounded bg-slate-100 dark:bg-slate-800" />
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800" />
-                    </div>
-
-                    {/* Footer */}
-                    <div className="mt-auto pt-6 flex items-center justify-between border-t border-border/50">
-                        <div className="h-6 w-28 rounded-lg bg-slate-50 dark:bg-slate-800/40" />
-                        <div className="flex items-center gap-2.5">
-                            <div className="h-3 w-20 rounded bg-slate-100 dark:bg-slate-800" />
-                            <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700" />
-                        </div>
-                    </div>
+                <div className="mt-auto flex flex-col gap-2 pt-6">
+                    <div className="h-6 w-2/3 rounded bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-4 w-28 rounded bg-slate-200/70 dark:bg-slate-700/60" />
                 </div>
+            </div>
+
+            {/* Description */}
+            <div className="flex min-h-[60px] flex-col justify-center gap-2 border-b border-border px-7 py-3 dark:border-white/10">
+                <div className="h-3.5 w-full rounded bg-slate-100 dark:bg-slate-800" />
+                <div className="h-3.5 w-3/4 rounded bg-slate-50 dark:bg-slate-800/60" />
+            </div>
+
+            {/* Stats Row */}
+            <div className="flex min-h-[60px] items-center border-b border-border px-7 dark:border-white/10">
+                <div className="flex flex-1 items-center gap-2.5 pr-3">
+                    <div className="size-[18px] rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-3.5 w-16 rounded bg-slate-100 dark:bg-slate-800" />
+                </div>
+                <div className="h-5 w-px bg-border dark:bg-white/10" />
+                <div className="flex flex-1 items-center justify-center gap-2.5 px-3">
+                    <div className="size-[18px] rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-3.5 w-12 rounded bg-slate-100 dark:bg-slate-800" />
+                </div>
+                <div className="h-5 w-px bg-border dark:bg-white/10" />
+                <div className="flex flex-1 items-center justify-end gap-2.5 pl-3">
+                    <div className="size-[18px] rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-3.5 w-14 rounded bg-slate-100 dark:bg-slate-800" />
+                </div>
+            </div>
+
+            {/* Capacity */}
+            <div className="flex min-h-[60px] flex-col justify-center border-b border-border px-7 py-3 dark:border-white/10">
+                <div className="flex items-center justify-between">
+                    <div className="h-3 w-20 rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-4 w-14 rounded bg-slate-100 dark:bg-slate-800" />
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800" />
+            </div>
+
+            {/* Footer */}
+            <div className="flex flex-1 items-center justify-between px-7 py-4">
+                <div className="h-3.5 w-24 rounded bg-slate-100 dark:bg-slate-800" />
+                <div className="h-9 w-20 rounded-lg bg-slate-200 dark:bg-slate-700" />
             </div>
         </div>
     );

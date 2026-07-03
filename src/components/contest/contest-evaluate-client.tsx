@@ -34,7 +34,6 @@ import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
@@ -102,9 +101,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
         },
     });
 
-    const total = status?.total_submissions ?? 0;
-    const processed = status?.processed_submissions ?? 0;
-    const progress = total > 0 ? Math.round((processed / total) * 100) : 0;
     const evaluationActive = status?.status === "PENDING" || status?.status === "RUNNING";
 
     return (
@@ -134,6 +130,12 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                 >
                                     {isPublished ? "Published" : "Draft"}
                                 </Badge>
+                                {evaluationActive && (
+                                    <Badge className="border-transparent bg-primary/10 text-primary hover:bg-primary/10">
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                        Evaluation in progress
+                                    </Badge>
+                                )}
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -183,24 +185,6 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     tone="amber"
                                 />
                             </div>
-                            {(evaluationActive || status?.status === "COMPLETED") && (
-                                <div className="max-w-xl space-y-2 rounded-xl border border-indigo-500/15 bg-background/50 p-3 backdrop-blur-sm">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="font-medium">
-                                            {status?.status === "COMPLETED"
-                                                ? "Evaluation complete"
-                                                : "Processing submissions"}
-                                        </span>
-                                        <span className="tabular-nums text-muted-foreground">
-                                            {processed} / {total}
-                                        </span>
-                                    </div>
-                                    <Progress
-                                        value={status?.status === "COMPLETED" ? 100 : progress}
-                                        className="h-1.5"
-                                    />
-                                </div>
-                            )}
                         </div>
 
                         <div className="space-y-3">
@@ -208,10 +192,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                 <EvaluationDialog
                                     contestId={contestId}
                                     trigger={
-                                        <Button
-                                            className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-                                            disabled={evaluationActive}
-                                        >
+                                        <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
                                             {evaluationActive ? (
                                                 <Loader2 className="h-4 w-4 animate-spin" />
                                             ) : (

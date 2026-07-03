@@ -69,14 +69,14 @@ export function StudentContestClient({ initialParams }: StudentContestClientProp
                 error={error}
                 onRetry={refetch}
                 loadingComponent={
-                    <div className="grid grid-cols-1 gap-6">
-                        {Array.from({ length: 4 }).map((_, i) => (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, i) => (
                             <StudentContestSkeleton key={i} />
                         ))}
                     </div>
                 }
             >
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {contests.length > 0 ? (
                         contests.map((contest) => (
                             <StudentContestCard key={contest.id} contest={contest} />

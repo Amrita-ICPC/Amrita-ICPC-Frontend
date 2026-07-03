@@ -1,12 +1,12 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, Clock, Loader2, Sparkles, Trophy, Users } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Users } from "lucide-react";
 import { Download, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { TeamApprovalStatus, TeamStatus } from "@/api/generated/model";
+import { TeamStatus } from "@/api/generated/model";
 import {
     getGetStudentContestByIdApiV1StudentsContestsContestIdGetQueryKey,
     getGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGetQueryKey,
@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 import { StudentImportTeamDialog } from "./student-import-team-dialog";
 import { CreateContestTeamDialog, YourTeamCard } from "./your-team-card";
@@ -56,161 +55,6 @@ interface ContestTeamCardsProps {
         contest_mode?: string;
         registration_end?: string | null;
     };
-}
-
-// ─── Registration Progress Card ───────────────────────────────────────────────
-function TeamRegistrationProgressCard({ participation }: { participation: any }) {
-    if (!participation || !participation.team) {
-        return null;
-    }
-
-    const team = participation.team;
-    const minTeamSize = team.min_team_size ?? 1;
-    const maxTeamSize = team.max_team_size ?? 1;
-    const memberCount = team.member_count ?? 0;
-    const membersList = team.members ?? [];
-
-    const minSizeMet = memberCount >= minTeamSize;
-    const confirmedCount = membersList.filter((m: any) => m.confirmed).length;
-    const totalCount = membersList.length;
-    const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
-    const isApproved = team.team_approval_status === TeamApprovalStatus.APPROVED;
-    const isTeamConfirmed = team.team_status === TeamStatus.CONFIRMED;
-    const requirements = [minSizeMet, allConfirmed, isTeamConfirmed, isApproved];
-    const completedCount = requirements.filter(Boolean).length;
-    const completionPercentage = (completedCount / requirements.length) * 100;
-
-    return (
-        <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
-            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30">
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                    Registration Progress
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="p-5 space-y-5">
-                {/* Completion Indicator */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                        <span className="text-muted-foreground uppercase tracking-wider text-[10px]">
-                            Formation Status
-                        </span>
-                        <span className="text-primary font-black text-sm">
-                            {Math.round(completionPercentage)}%
-                        </span>
-                    </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                        <div
-                            className="bg-primary h-full rounded-full transition-all duration-500"
-                            style={{ width: `${completionPercentage}%` }}
-                        />
-                    </div>
-                </div>
-
-                {/* Checklist Rules */}
-                <div className="space-y-3 pt-1">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">
-                        Requirements Checklist
-                    </span>
-                    <div className="space-y-2.5">
-                        {/* Requirement 1: Min Size */}
-                        <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
-                            {minSizeMet ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                            ) : (
-                                <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col leading-tight">
-                                <span
-                                    className={cn(
-                                        "text-xs font-bold",
-                                        minSizeMet ? "text-foreground" : "text-muted-foreground",
-                                    )}
-                                >
-                                    Minimum size met ({minTeamSize} members)
-                                </span>
-                                <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
-                                    Current size: {memberCount} of {maxTeamSize} max
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Requirement 2: Confirmed Members */}
-                        <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
-                            {allConfirmed ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                            ) : (
-                                <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col leading-tight">
-                                <span
-                                    className={cn(
-                                        "text-xs font-bold",
-                                        allConfirmed ? "text-foreground" : "text-muted-foreground",
-                                    )}
-                                >
-                                    All members joined
-                                </span>
-                                <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
-                                    Confirmed: {confirmedCount} of {totalCount} members
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Requirement 3: Team Confirmed */}
-                        <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
-                            {isTeamConfirmed ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                            ) : (
-                                <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col leading-tight">
-                                <span
-                                    className={cn(
-                                        "text-xs font-bold",
-                                        isTeamConfirmed
-                                            ? "text-foreground"
-                                            : "text-muted-foreground",
-                                    )}
-                                >
-                                    Team confirmed
-                                </span>
-                                <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
-                                    {isTeamConfirmed
-                                        ? "Team is locked and finalised"
-                                        : "Waiting for leader to confirm the team"}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Requirement 4: Instructor Approval */}
-                        <div className="flex items-start gap-3 p-2.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
-                            {isApproved ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                            ) : (
-                                <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col leading-tight">
-                                <span
-                                    className={cn(
-                                        "text-xs font-bold",
-                                        isApproved ? "text-foreground" : "text-muted-foreground",
-                                    )}
-                                >
-                                    Instructor approval
-                                </span>
-                                <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
-                                    {isApproved
-                                        ? "Approved and ready to play"
-                                        : "Awaiting approval review"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
 }
 
 function formatRegisteredAt(dateStr?: string) {
@@ -278,15 +122,15 @@ function IndividualRegistrationStatusCard({
 
     return (
         <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
-            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30">
+            <CardHeader className="pb-3 border-b border-border/50 bg-muted/40">
                 <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 animate-pulse" />
+                    <CheckCircle2 className="h-4 w-4 text-success animate-pulse" />
                     Registration Status
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
                 <div className="flex flex-col items-center justify-center text-center py-4 gap-2">
-                    <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-2">
+                    <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center text-success mb-2">
                         <CheckCircle2 className="h-6 w-6 stroke-[2.5]" />
                     </div>
                     <h4 className="text-base font-bold text-foreground flex items-center gap-1.5 justify-center">
@@ -297,7 +141,7 @@ function IndividualRegistrationStatusCard({
                     </p>
                 </div>
 
-                <div className="space-y-1.5 p-3.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
+                <div className="space-y-1.5 p-3.5 border border-border/40 bg-muted/30 rounded-xl">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">
                         Registered At
                     </span>
@@ -403,14 +247,14 @@ function IndividualNotRegisteredCard({ contest, contestId }: { contest: any; con
 
     return (
         <Card className="shadow-sm border-border/60 overflow-hidden bg-card">
-            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30 flex flex-row items-center justify-between">
+            <CardHeader className="pb-3 border-b border-border/50 bg-muted/40 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" />
                     Registration Status
                 </CardTitle>
                 <Badge
                     variant="outline"
-                    className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-rose-500/10 text-rose-600 border-rose-500/20"
+                    className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-destructive/10 text-destructive border-destructive/20"
                 >
                     Not Registered
                 </Badge>
@@ -504,94 +348,6 @@ function IndividualNotRegisteredCard({ contest, contestId }: { contest: any; con
                         </DialogContent>
                     </Dialog>
                 </div>
-            </CardContent>
-        </Card>
-    );
-}
-
-// ─── Overall Registrations Progress Card (exported for the detail page) ───────
-interface OverallRegistrationProgressCardProps {
-    contest:
-        | {
-              teams_count?: number;
-              max_teams?: number | null;
-          }
-        | null
-        | undefined;
-}
-
-export function OverallRegistrationProgressCard({ contest }: OverallRegistrationProgressCardProps) {
-    if (!contest) return null;
-
-    const teamCount = contest.teams_count ?? 0;
-    const maxTeams = contest.max_teams;
-    const hasLimit = maxTeams !== null && maxTeams !== undefined && maxTeams > 0;
-    const fillPercentage = hasLimit ? Math.min(100, Math.max(0, (teamCount / maxTeams) * 100)) : 0;
-    const slotsRemaining = hasLimit ? Math.max(0, maxTeams - teamCount) : 0;
-
-    return (
-        <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
-            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-amber-500 animate-bounce" />
-                    Overall Registrations
-                </CardTitle>
-                {hasLimit ? (
-                    <Badge
-                        variant="outline"
-                        className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
-                    >
-                        {slotsRemaining} Slots Left
-                    </Badge>
-                ) : (
-                    <Badge
-                        variant="outline"
-                        className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400"
-                    >
-                        Open Slots
-                    </Badge>
-                )}
-            </CardHeader>
-            <CardContent className="p-5 space-y-4">
-                {hasLimit ? (
-                    <div className="space-y-3">
-                        <div className="flex items-baseline justify-between">
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-black text-foreground tracking-tight">
-                                    {teamCount}
-                                </span>
-                                <span className="text-sm font-bold text-muted-foreground">
-                                    / {maxTeams} Teams
-                                </span>
-                            </div>
-                            <span className="text-xs font-bold text-muted-foreground">
-                                {Math.round(fillPercentage)}% Filled
-                            </span>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden border border-border/50">
-                            <div
-                                className="bg-primary h-full rounded-full transition-all duration-500"
-                                style={{ width: `${fillPercentage}%` }}
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-4 p-3.5 border border-border/40 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                            <Users className="h-5 w-5" />
-                        </div>
-                        <div className="flex flex-col leading-tight">
-                            <span className="text-2xl font-black text-foreground tracking-tight">
-                                {teamCount}
-                            </span>
-                            <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mt-0.5">
-                                Active Teams Registered
-                            </span>
-                        </div>
-                    </div>
-                )}
             </CardContent>
         </Card>
     );
@@ -707,24 +463,18 @@ export function ContestTeamCards({
         }
 
         return (
-            <>
-                {/* Your Team card — shown FIRST */}
-                <YourTeamCard
-                    team={team}
-                    contestName={contest.name}
-                    contestId={contestId ?? ""}
-                    currentUserId={currentUserId}
-                    onConfirmTeam={handleConfirmTeam}
-                    isConfirming={isUpdatingStatus}
-                    onCancelTeam={handleCancelTeam}
-                    isCancelling={isUpdatingStatus}
-                    onEditTeam={(newName) => handleEditTeam(newName)}
-                    isEditingTeam={isEditingTeam}
-                />
-
-                {/* Registration Progress card — shown BELOW */}
-                <TeamRegistrationProgressCard participation={participation} />
-            </>
+            <YourTeamCard
+                team={team}
+                contestName={contest.name}
+                contestId={contestId ?? ""}
+                currentUserId={currentUserId}
+                onConfirmTeam={handleConfirmTeam}
+                isConfirming={isUpdatingStatus}
+                onCancelTeam={handleCancelTeam}
+                isCancelling={isUpdatingStatus}
+                onEditTeam={(newName) => handleEditTeam(newName)}
+                isEditingTeam={isEditingTeam}
+            />
         );
     }
 
@@ -734,14 +484,14 @@ export function ContestTeamCards({
     }
     return (
         <Card className="shadow-sm border-border/60 overflow-hidden bg-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50 bg-muted/40">
                 <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" />
                     Team Status
                 </CardTitle>
                 <Badge
                     variant="outline"
-                    className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-rose-500/10 text-rose-600 border-rose-500/20"
+                    className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-destructive/10 text-destructive border-destructive/20"
                 >
                     Not Registered
                 </Badge>

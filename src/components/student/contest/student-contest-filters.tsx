@@ -74,13 +74,13 @@ export function StudentContestFilters() {
     };
 
     return (
-        <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center">
+        <div className="flex w-full flex-col gap-4 rounded-2xl border border-primary/15 bg-card p-3 shadow-xs lg:flex-row lg:items-center dark:border-white/10">
             <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
                 <Input
                     type="search"
                     placeholder="Search by contest name..."
-                    className="pl-9 h-10 border-slate-200/60 dark:border-white/10 dark:bg-slate-900/50"
+                    className="h-10 border-primary/15 bg-background/80 pl-9 shadow-xs placeholder:text-muted-foreground/70 focus-visible:border-primary/35 focus-visible:ring-primary/15"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -88,10 +88,10 @@ export function StudentContestFilters() {
 
             <div className="flex flex-wrap items-center gap-3">
                 {/* Team Size Range */}
-                <div className="flex items-center gap-2 bg-slate-50 dark:bg-white/5 p-1 rounded-lg border border-slate-200/60 dark:border-white/10">
+                <div className="flex items-center gap-2 rounded-lg border border-primary/15 bg-background/80 p-1">
                     <div className="flex items-center gap-1.5 px-2">
-                        <Users className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <Users className="h-3.5 w-3.5 text-primary/70" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                             Team
                         </span>
                     </div>
@@ -118,7 +118,7 @@ export function StudentContestFilters() {
 
                 {/* Run Status Select */}
                 <Select value={initialRunStatus} onValueChange={handleRunStatusChange}>
-                    <SelectTrigger className="w-[130px] h-10 border-slate-200/60 dark:border-white/10 dark:bg-slate-900/50">
+                    <SelectTrigger className="h-10 w-[130px] border-primary/15 bg-background/80 shadow-xs focus:ring-primary/15">
                         <SelectValue placeholder="Run Status" />
                     </SelectTrigger>
                     <SelectContent>

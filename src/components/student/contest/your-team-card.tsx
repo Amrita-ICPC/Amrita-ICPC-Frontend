@@ -79,20 +79,17 @@ function TeamStatusBadge({ status }: { status: string }) {
     const styles: Record<string, { label: string; className: string; icon: React.ElementType }> = {
         DRAFT: {
             label: "Draft",
-            className:
-                "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400",
+            className: "bg-warning/10 text-warning border-warning/20",
             icon: Clock,
         },
         CONFIRMED: {
             label: "Confirmed",
-            className:
-                "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400",
+            className: "bg-success/10 text-success border-success/20",
             icon: Lock,
         },
         DISQUALIFIED: {
             label: "Disqualified",
-            className:
-                "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:bg-rose-500/20 dark:text-rose-400",
+            className: "bg-destructive/10 text-destructive border-destructive/20",
             icon: ShieldX,
         },
     };
@@ -114,25 +111,92 @@ function TeamStatusBadge({ status }: { status: string }) {
     );
 }
 
+// ─── Registration Checklist ────────────────────────────────────────────────────
+function RegistrationChecklist({ team }: { team: TeamParticipationStatus }) {
+    const minSizeMet = team.member_count >= team.min_team_size;
+    const confirmedCount = team.members.filter((m) => m.confirmed).length;
+    const totalCount = team.members.length;
+    const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
+    const isApproved = team.team_approval_status === "APPROVED";
+    const isTeamConfirmed = team.team_status === "CONFIRMED";
+
+    const items = [
+        {
+            done: minSizeMet,
+            label: `Minimum size met (${team.min_team_size} members)`,
+            detail: `Current size: ${team.member_count} of ${team.max_team_size} max`,
+        },
+        {
+            done: allConfirmed,
+            label: "All members joined",
+            detail: `Confirmed: ${confirmedCount} of ${totalCount} members`,
+        },
+        {
+            done: isTeamConfirmed,
+            label: "Team confirmed",
+            detail: isTeamConfirmed
+                ? "Team is locked and finalised"
+                : "Waiting for leader to confirm the team",
+        },
+        {
+            done: isApproved,
+            label: "Instructor approval",
+            detail: isApproved ? "Approved and ready to play" : "Awaiting approval review",
+        },
+    ];
+
+    return (
+        <div className="space-y-2.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">
+                Registration Checklist
+            </span>
+            <div className="space-y-2">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className="flex items-start gap-3 p-2.5 border border-border/40 bg-muted/20 rounded-xl"
+                    >
+                        {item.done ? (
+                            <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                        ) : (
+                            <Clock className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex flex-col leading-tight">
+                            <span
+                                className={cn(
+                                    "text-xs font-bold",
+                                    item.done ? "text-foreground" : "text-muted-foreground",
+                                )}
+                            >
+                                {item.label}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
+                                {item.detail}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 // ─── Approval-Status Badge ────────────────────────────────────────────────────
 function ApprovalStatusBadge({ status }: { status: string }) {
     const styles: Record<string, { label: string; className: string; icon: React.ElementType }> = {
         WAITING: {
             label: "Pending Review",
-            className:
-                "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400",
+            className: "bg-warning/10 text-warning border-warning/20",
             icon: Hourglass,
         },
         APPROVED: {
             label: "Approved",
-            className:
-                "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400",
+            className: "bg-success/10 text-success border-success/20",
             icon: ShieldCheck,
         },
         REJECTED: {
             label: "Rejected",
-            className:
-                "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:bg-rose-500/20 dark:text-rose-400",
+            className: "bg-destructive/10 text-destructive border-destructive/20",
             icon: ShieldX,
         },
     };
@@ -193,9 +257,9 @@ export function YourTeamCard({
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
     return (
-        <Card className="border-border/60 shadow-sm overflow-hidden bg-card">
+        <Card className="border-border/60 shadow-sm overflow-hidden bg-card gap-3">
             {/* Header row */}
-            <CardHeader className="pb-3 border-b border-border/50 bg-slate-50/50 dark:bg-slate-900/30">
+            <CardHeader className="!pb-3 border-b border-border/50 bg-muted/40">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                     <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                         <Users className="h-4 w-4 text-primary" />
@@ -208,7 +272,7 @@ export function YourTeamCard({
                 </div>
             </CardHeader>
 
-            <CardContent className="p-5 space-y-5">
+            <CardContent className="p-5 pt-3 space-y-5">
                 <div className="space-y-1">
                     {/* Team name */}
                     <div className="flex items-center gap-2">
@@ -216,7 +280,7 @@ export function YourTeamCard({
                             {team.name}
                         </h3>
                         {/* Edit team — leader only, DRAFT only */}
-                        {isLeader && onEditTeam && (
+                        {isLeader && !isConfirmedTeam && onEditTeam && (
                             <EditTeamNameDialog
                                 currentName={team.name}
                                 onSave={onEditTeam}
@@ -297,8 +361,8 @@ export function YourTeamCard({
                                         className={cn(
                                             "text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0",
                                             member.confirmed
-                                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                                : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+                                                ? "bg-success/10 text-success border-success/10"
+                                                : "bg-muted text-muted-foreground border-border",
                                         )}
                                     >
                                         {member.confirmed ? "Joined" : "Pending"}
@@ -317,6 +381,9 @@ export function YourTeamCard({
                         ))}
                     </div>
                 </div>
+
+                {/* Registration checklist — folded in from the standalone progress card */}
+                {teamStatus !== "CANCELLED" && <RegistrationChecklist team={team} />}
 
                 {/* Action Buttons */}
                 {(isLeader || isDraft) && (
@@ -354,7 +421,7 @@ export function YourTeamCard({
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 )}
-                                {(isDraft || isConfirmedTeam) && onCancelTeam && (
+                                {isDraft && onCancelTeam && (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button
@@ -390,8 +457,8 @@ export function YourTeamCard({
                         )}
 
                         {!isLeader && isDraft && (
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-rose-500/5 border border-rose-500/20">
-                                <p className="text-xs font-bold text-rose-500">
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+                                <p className="text-xs font-bold text-destructive">
                                     Want to leave this team?
                                 </p>
                                 <Button
@@ -409,7 +476,7 @@ export function YourTeamCard({
                 )}
                 {teamStatus === "CANCELLED" && (
                     <div className="mt-6 pt-5 border-t border-border/50">
-                        <div className="flex flex-col items-center justify-center p-5 border border-dashed border-border/80 rounded-xl bg-slate-50/50 dark:bg-slate-950/10 text-center gap-3">
+                        <div className="flex flex-col items-center justify-center p-5 border border-dashed border-border/80 rounded-xl bg-muted/30 text-center gap-3">
                             <p className="text-xs font-semibold text-muted-foreground max-w-[280px]">
                                 This team has been cancelled. Create a new team to register and
                                 participate in the contest.
@@ -711,7 +778,7 @@ function MemberActionsDropdown({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 transition-all rounded-md cursor-pointer flex items-center justify-center"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-muted transition-all rounded-md cursor-pointer flex items-center justify-center"
                     >
                         <MoreVertical className="h-3.5 w-3.5" />
                     </Button>
@@ -730,9 +797,9 @@ function MemberActionsDropdown({
                             )}
                             <DropdownMenuItem
                                 onClick={() => setRemoveAlertOpen(true)}
-                                className="cursor-pointer flex items-center gap-2 text-xs font-semibold text-rose-600 focus:text-rose-700 focus:bg-rose-500/10"
+                                className="cursor-pointer flex items-center gap-2 text-xs font-semibold text-destructive focus:text-destructive focus:bg-destructive/10"
                             >
-                                <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                 {member.confirmed ? "Remove Member" : "Cancel Invitation"}
                             </DropdownMenuItem>
                         </>
@@ -741,9 +808,9 @@ function MemberActionsDropdown({
                     {isCurrentUser && isLeader && (
                         <DropdownMenuItem
                             onClick={() => setLeaveAlertOpen(true)}
-                            className="cursor-pointer flex items-center gap-2 text-xs font-semibold text-rose-600 focus:text-rose-700 focus:bg-rose-500/10"
+                            className="cursor-pointer flex items-center gap-2 text-xs font-semibold text-destructive focus:text-destructive focus:bg-destructive/10"
                         >
-                            <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                            <LogOut className="h-3.5 w-3.5 text-destructive" />
                             Leave Team
                         </DropdownMenuItem>
                     )}
@@ -856,7 +923,7 @@ function TransferLeadershipDialog({
                             handleTransfer();
                         }}
                         disabled={isPending}
-                        className="bg-amber-600 hover:bg-amber-500 text-white font-bold"
+                        className="bg-warning hover:bg-warning/90 text-warning-foreground font-bold"
                     >
                         {isPending ? "Transferring..." : "Yes, Transfer Leadership"}
                     </AlertDialogAction>
@@ -930,7 +997,7 @@ function RemoveMemberDialog({
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle className="flex items-center gap-2">
-                        <Trash2 className="h-5 w-5 text-rose-500" />
+                        <Trash2 className="h-5 w-5 text-destructive" />
                         {member.confirmed ? "Remove Team Member?" : "Cancel Invitation?"}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
@@ -957,7 +1024,7 @@ function RemoveMemberDialog({
                             handleRemove();
                         }}
                         disabled={isPending}
-                        className="bg-rose-600 hover:bg-rose-500 text-white font-bold"
+                        className="bg-destructive hover:bg-destructive/90 text-white font-bold"
                     >
                         {isPending
                             ? member.confirmed
@@ -1030,7 +1097,7 @@ function LeaveTeamDialog({
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle className="flex items-center gap-2">
-                        <LogOut className="h-5 w-5 text-rose-500" />
+                        <LogOut className="h-5 w-5 text-destructive" />
                         Leave Team?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
@@ -1047,7 +1114,7 @@ function LeaveTeamDialog({
                             handleLeave();
                         }}
                         disabled={isPending}
-                        className="bg-rose-600 hover:bg-rose-500 text-white font-bold"
+                        className="bg-destructive hover:bg-destructive/90 text-white font-bold"
                     >
                         {isPending ? "Leaving..." : "Yes, Leave Team"}
                     </AlertDialogAction>
@@ -1262,11 +1329,11 @@ function ContestTeamInviteDialog({
                                             className={cn(
                                                 "flex items-center justify-between p-3 border rounded-xl transition-all duration-200 bg-card",
                                                 student.isInTeam
-                                                    ? "border-emerald-500/20 bg-emerald-500/[0.02]"
+                                                    ? "border-success/20 bg-success/[0.02]"
                                                     : student.isAlreadyInvited || isInvitedLocally
-                                                      ? "border-indigo-500/20 bg-indigo-500/[0.02]"
+                                                      ? "border-info/20 bg-info/[0.02]"
                                                       : student.isInContest
-                                                        ? "opacity-60 bg-slate-50 dark:bg-slate-900/40 border-border/60"
+                                                        ? "opacity-60 bg-muted/40 border-border/60"
                                                         : "border-border/60 hover:border-primary/30",
                                             )}
                                         >
@@ -1289,7 +1356,7 @@ function ContestTeamInviteDialog({
                                                         {student.isLeader && (
                                                             <Badge
                                                                 variant="outline"
-                                                                className="text-[8px] font-bold uppercase tracking-wider text-indigo-500 border-indigo-500/25 bg-indigo-500/10 py-0 px-1.5 h-3.5"
+                                                                className="text-[8px] font-bold uppercase tracking-wider text-contrast border-contrast/25 bg-contrast/10 py-0 px-1.5 h-3.5"
                                                             >
                                                                 Leader
                                                             </Badge>
@@ -1299,7 +1366,7 @@ function ContestTeamInviteDialog({
                                                             !student.isAlreadyInvited && (
                                                                 <Badge
                                                                     variant="outline"
-                                                                    className="text-[8px] font-bold uppercase tracking-wider text-amber-500 border-amber-500/25 bg-amber-500/10 py-0 px-1.5 h-3.5"
+                                                                    className="text-[8px] font-bold uppercase tracking-wider text-warning border-warning/25 bg-warning/10 py-0 px-1.5 h-3.5"
                                                                 >
                                                                     Already Registered
                                                                 </Badge>
@@ -1315,7 +1382,7 @@ function ContestTeamInviteDialog({
                                                 {student.isInTeam ? (
                                                     <Badge
                                                         variant="outline"
-                                                        className="text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border-emerald-500/20 py-0.5 px-2 flex items-center gap-1"
+                                                        className="text-[9px] font-black uppercase tracking-wider bg-success/10 text-success border-success/20 py-0.5 px-2 flex items-center gap-1"
                                                     >
                                                         <UserCheck className="h-3 w-3 stroke-[2.5]" />
                                                         In Team
@@ -1323,7 +1390,7 @@ function ContestTeamInviteDialog({
                                                 ) : student.isAlreadyInvited || isInvitedLocally ? (
                                                     <Badge
                                                         variant="outline"
-                                                        className="text-[9px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border-indigo-500/20 py-0.5 px-2 flex items-center gap-1"
+                                                        className="text-[9px] font-black uppercase tracking-wider bg-info/10 text-info border-info/20 py-0.5 px-2 flex items-center gap-1"
                                                     >
                                                         <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
                                                         Invited
@@ -1331,7 +1398,7 @@ function ContestTeamInviteDialog({
                                                 ) : student.isInContest ? (
                                                     <Badge
                                                         variant="outline"
-                                                        className="text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border-amber-500/20 py-0.5 px-2 flex items-center gap-1"
+                                                        className="text-[9px] font-black uppercase tracking-wider bg-warning/10 text-warning border-warning/20 py-0.5 px-2 flex items-center gap-1"
                                                     >
                                                         <AlertCircle className="h-3 w-3" />
                                                         Registered
