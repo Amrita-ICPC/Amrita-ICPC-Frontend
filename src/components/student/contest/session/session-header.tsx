@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { isDarkTheme } from "@/lib/theme-config";
 
 interface SessionHeaderProps {
     contestName: string;
@@ -52,7 +53,7 @@ export function SessionHeader({
         setMounted(true);
     }, []);
 
-    const isDark = resolvedTheme === "dark";
+    const isDark = isDarkTheme(resolvedTheme);
 
     return (
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-6 text-slate-800 dark:text-white">
