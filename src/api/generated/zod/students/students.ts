@@ -27,6 +27,7 @@ export const GetStudentContestsApiV1StudentsContestsGetQueryParams = zod.object(
   "page": zod.number().min(1).default(getStudentContestsApiV1StudentsContestsGetQueryPageDefault).describe('Page number'),
   "page_size": zod.number().min(1).max(getStudentContestsApiV1StudentsContestsGetQueryPageSizeMax).default(getStudentContestsApiV1StudentsContestsGetQueryPageSizeDefault).describe('Items per page'),
   "registered": zod.union([zod.boolean(),zod.null()]).optional(),
+  "results_published": zod.union([zod.boolean(),zod.null()]).optional(),
   "min_team_size": zod.union([zod.number().min(1),zod.null()]).optional(),
   "max_team_size": zod.union([zod.number().min(1),zod.null()]).optional()
 })

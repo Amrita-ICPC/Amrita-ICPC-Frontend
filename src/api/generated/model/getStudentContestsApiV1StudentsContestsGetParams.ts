@@ -23,6 +23,7 @@ page?: number;
  */
 page_size?: number;
 registered?: boolean | null;
+results_published?: boolean | null;
 min_team_size?: number | null;
 max_team_size?: number | null;
 };
