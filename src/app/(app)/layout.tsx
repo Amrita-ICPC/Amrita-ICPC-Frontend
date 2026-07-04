@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import AuthGuard from "@/components/global/auth-guard";
 import { Header } from "@/components/global/header";
 import Sidenavbar from "@/components/global/sidenavbar";
 import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user || session.error) {
         redirect("/auth/login");
     }
 
@@ -45,9 +46,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <main className="flex-1 overflow-y-auto bg-background">
                     <div className="mx-auto max-w-7xl px-6 py-5">
                         <div className="mb-6">
-                            <StudentRouteEnforcer isStudent={isStudent}>
-                                {children}
-                            </StudentRouteEnforcer>
+                            <AuthGuard>
+                                <StudentRouteEnforcer isStudent={isStudent}>
+                                    {children}
+                                </StudentRouteEnforcer>
+                            </AuthGuard>
                         </div>
                     </div>
                 </main>
