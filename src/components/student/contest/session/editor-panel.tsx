@@ -30,6 +30,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isDarkTheme } from "@/lib/theme-config";
 import { cn } from "@/lib/utils";
 
 export const LANGUAGES = [
@@ -227,7 +228,7 @@ export function EditorPanel({
         }
     }, [runResult]);
 
-    const currentTheme = mounted && resolvedTheme === "light" ? "light" : "vs-dark";
+    const currentTheme = mounted && isDarkTheme(resolvedTheme) ? "vs-dark" : "light";
 
     const hasRunningSubmission = submissions.some((s) => {
         const statusStr = (s.status as string) || "";

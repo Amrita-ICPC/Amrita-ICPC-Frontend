@@ -72,7 +72,7 @@ export function AppearanceSection() {
 
     return (
         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_36px_-28px_rgba(18,43,102,0.7)]">
-            <div className="flex items-center gap-2 border-b border-[#203a80]/25 bg-[#13285e] px-5 py-3 text-white dark:border-white/10 dark:bg-[#0f214d]">
+            <div className="flex items-center gap-2 border-b border-primary/20 bg-primary px-5 py-3 text-primary-foreground">
                 <Palette className="h-4.5 w-4.5" />
                 <h2 className="text-sm font-semibold tracking-wide">Appearance</h2>
             </div>

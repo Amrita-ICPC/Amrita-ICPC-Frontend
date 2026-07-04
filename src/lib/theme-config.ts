@@ -70,3 +70,7 @@ export const THEMES: ThemeDefinition[] = [
 ];
 
 export const THEME_IDS = THEMES.map((t) => t.id);
+
+export function isDarkTheme(theme?: string) {
+    return THEMES.some((item) => item.id === theme && item.group === "dark");
+}

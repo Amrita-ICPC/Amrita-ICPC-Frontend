@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isDarkTheme } from "@/lib/theme-config";
 
 export function MetricTile({ label, value }: { label: string; value: string | number }) {
     return (
@@ -197,7 +198,7 @@ export function SourceCodeViewer({ code, language }: { code: string; language: s
                     height="100%"
                     language={monacoLanguage}
                     value={code}
-                    theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
+                    theme={isDarkTheme(resolvedTheme) ? "vs-dark" : "light"}
                     options={{
                         readOnly: true,
                         domReadOnly: true,

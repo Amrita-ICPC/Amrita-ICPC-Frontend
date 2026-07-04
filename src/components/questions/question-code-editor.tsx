@@ -21,6 +21,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isDarkTheme } from "@/lib/theme-config";
 import { cn } from "@/lib/utils";
 
 import { Label } from "../ui/label";
@@ -63,7 +64,7 @@ export function QuestionCodeEditor({
     allowedLanguages = [],
 }: QuestionCodeEditorProps) {
     const { resolvedTheme } = useTheme();
-    const monacoTheme = resolvedTheme === "dark" ? "vs-dark" : "vs";
+    const monacoTheme = isDarkTheme(resolvedTheme) ? "vs-dark" : "vs";
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const { mutateAsync: runDraft, isPending: running } =
         useTestDraftCodeApiV1QuestionsTestDraftPost();
