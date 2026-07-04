@@ -4,11 +4,9 @@ import {
     Activity,
     AlertCircle,
     ArrowRight,
-    Bookmark,
     Calendar,
     CheckCircle2,
     Clock,
-    Share2,
     Shield,
     Sparkles,
     Trophy,
@@ -412,22 +410,6 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                             RUN_STATUS_STYLES.UPCOMING)}
                                         glow
                                     />
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-9 w-9 rounded-full border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
-                                        >
-                                            <Share2 className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-9 w-9 rounded-full border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
-                                        >
-                                            <Bookmark className="h-4 w-4" />
-                                        </Button>
-                                    </div>
                                 </div>
 
                                 <div className="relative mt-8">
