@@ -1,7 +1,16 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, HelpCircle, Loader2, Search, Users, Zap } from "lucide-react";
+import {
+    AlertTriangle,
+    CheckCircle2,
+    HelpCircle,
+    Loader2,
+    RotateCcw,
+    Search,
+    Users,
+    Zap,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -96,7 +105,7 @@ export function EvaluationDialog({
     const mutation = useEvaluateContestApiV1ContestsContestIdEvaluationPost({
         mutation: {
             onSuccess: async () => {
-                toast.success("Evaluation started");
+                toast.success(active ? "Evaluation restarted" : "Evaluation started");
                 await queryClient.invalidateQueries({
                     queryKey:
                         getGetEvaluationStatusApiV1ContestsContestIdEvaluationGetQueryKey(
@@ -132,12 +141,8 @@ export function EvaluationDialog({
             <DialogTrigger asChild>
                 {trigger ?? (
                     <Button>
-                        {active ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Zap className="h-4 w-4" />
-                        )}
-                        {active ? "Evaluating" : "Evaluate"}
+                        {active ? <RotateCcw className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                        {active ? "Restart evaluation" : "Evaluate"}
                     </Button>
                 )}
             </DialogTrigger>
@@ -181,6 +186,20 @@ export function EvaluationDialog({
                                 {processed} / {total} submissions evaluated
                             </span>
                             <span>{percentage}%</span>
+                        </div>
+                    </div>
+                )}
+                {active && (
+                    <div className="flex gap-3 rounded-xl border border-warning/25 bg-warning/5 p-4 text-sm">
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                        <div>
+                            <p className="font-medium text-foreground">
+                                Restart the active evaluation?
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                Starting again will override the currently running evaluation with
+                                the scope selected below.
+                            </p>
                         </div>
                     </div>
                 )}
@@ -256,17 +275,23 @@ export function EvaluationDialog({
                     size="lg"
                     onClick={start}
                     disabled={
-                        active ||
-                        mutation.isPending ||
-                        (scope !== EvaluationScope.ALL && selected.size === 0)
+                        mutation.isPending || (scope !== EvaluationScope.ALL && selected.size === 0)
                     }
                 >
-                    {active || mutation.isPending ? (
+                    {mutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : active ? (
+                        <RotateCcw className="h-4 w-4" />
                     ) : (
                         <Zap className="h-4 w-4" />
                     )}
-                    {active ? "Evaluation in progress" : "Start evaluation"}
+                    {mutation.isPending
+                        ? active
+                            ? "Restarting evaluation"
+                            : "Starting evaluation"
+                        : active
+                          ? "Restart evaluation"
+                          : "Start evaluation"}
                 </Button>
             </DialogContent>
         </Dialog>

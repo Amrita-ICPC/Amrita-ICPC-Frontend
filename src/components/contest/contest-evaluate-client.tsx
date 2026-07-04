@@ -9,6 +9,7 @@ import {
     FileCheck2,
     Loader2,
     Pencil,
+    RotateCcw,
     Send,
     ShieldAlert,
     Timer,
@@ -194,11 +195,11 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                                     trigger={
                                         <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
                                             {evaluationActive ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                <RotateCcw className="h-4 w-4" />
                                             ) : (
                                                 <Zap className="h-4 w-4" />
                                             )}
-                                            {evaluationActive ? "Evaluating" : "Evaluate"}
+                                            {evaluationActive ? "Restart evaluation" : "Evaluate"}
                                         </Button>
                                     }
                                 />
