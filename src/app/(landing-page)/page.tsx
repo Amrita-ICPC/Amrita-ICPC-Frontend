@@ -1,3 +1,5 @@
+import "./landing.css";
+
 import { redirect } from "next/navigation";
 
 import { AlgorithmMarquee } from "@/components/landing/algorithm-marquee";
