@@ -370,7 +370,7 @@ export function StudentDashboardClient({ firstName }: { firstName: string }) {
                             </CardDescription>
                             <CardAction>
                                 <Button asChild variant="ghost" size="sm">
-                                    <Link href="/student/contest">
+                                    <Link href="/student/my-contests">
                                         View all <ArrowRight />
                                     </Link>
                                 </Button>

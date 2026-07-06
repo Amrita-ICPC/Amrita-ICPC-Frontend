@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    CalendarCheck2,
     Database,
     FileCode2,
     LayoutDashboard,
@@ -18,6 +19,12 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/contest", label: "Contests", icon: Trophy },
+    {
+        href: "/student/my-contests",
+        label: "My Contests",
+        icon: CalendarCheck2,
+        hideForStaff: true,
+    },
     { href: "/teams", label: "Teams", icon: Users, hideForStaff: true },
     { href: "/banks", label: "Question Banks", icon: Database, hideForStudent: true },
     {

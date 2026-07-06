@@ -27,6 +27,7 @@ import { getDefaultRoute } from "@/lib/auth/utils";
 
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard: "Dashboard",
+    "my-contests": "My Contests",
     contest: "Contests",
     create: "Create",
     teams: "Teams",
