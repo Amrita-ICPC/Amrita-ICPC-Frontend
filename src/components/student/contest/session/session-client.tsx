@@ -2,7 +2,15 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, ChevronLeft, CircleDot, Loader2 } from "lucide-react";
+import {
+    CheckCircle2,
+    ChevronLeft,
+    Circle,
+    CircleDot,
+    Loader2,
+    PanelLeftClose,
+    PanelLeftOpen,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -74,7 +82,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const [editorCode, setEditorCode] = useState<string>("");
     const [loadedKey, setLoadedKey] = useState<string>("");
     const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
+    const [isQuestionNavCollapsed, setIsQuestionNavCollapsed] = useState(false);
     const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState<boolean>(false);
 
     // Console tab state
@@ -535,75 +543,168 @@ export function SessionClient({ contestId }: SessionClientProps) {
             <SessionHeader
                 contestName={contest?.name || "Contest"}
                 timeLeft={timeLeft}
-                solvedCount={questionsList.filter((q) => q.solved).length}
-                totalQuestions={questionsList.length}
-                score={0}
-                penalty={0}
-                hasExtraTime={!!runtimeSession?.team_progress?.has_extra_time}
-                showLeaderboardDuringContest={!!contest?.show_leaderboard_during_contest}
-                isLeaderboardOpen={isLeaderboardOpen}
-                setIsLeaderboardOpen={setIsLeaderboardOpen}
                 onFinish={handleFinishSession}
                 isFinishing={finishSessionMutation.isPending}
             />
 
-            {/* Questions Tab Selector */}
-            <div
-                className="h-11 shrink-0 overflow-x-auto overflow-y-hidden overscroll-x-contain border-b border-border bg-slate-100 px-6 dark:bg-[#090d16]"
-                onWheel={(event) => {
-                    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-                        event.currentTarget.scrollLeft += event.deltaY;
-                    }
-                }}
-            >
-                <div className="flex h-full min-w-max items-center gap-2">
-                    {questionsList.map((q, idx) => {
-                        const isSelected = activeQuestionId === q.id;
-                        return (
-                            <button
-                                key={q.id}
-                                onClick={(event) => {
-                                    setActiveQuestionId(q.id);
-                                    event.currentTarget.scrollIntoView({
-                                        behavior: "smooth",
-                                        block: "nearest",
-                                        inline: "nearest",
-                                    });
-                                }}
-                                className={cn(
-                                    "relative flex h-full shrink-0 items-center px-4 text-xs font-bold whitespace-nowrap outline-none transition-all",
-                                    isSelected
-                                        ? "border-b-2 border-indigo-500 text-indigo-600 dark:text-white"
-                                        : q.solved
-                                          ? "text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
-                                          : q.attempted
-                                            ? "text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
-                                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
-                                )}
-                                title={
-                                    q.solved
-                                        ? "Solved"
-                                        : q.attempted
-                                          ? "Attempted — not solved yet"
-                                          : "Not attempted"
-                                }
-                            >
-                                <div className="flex items-center gap-1.5">
-                                    {q.solved ? (
-                                        <CheckCircle2 className="h-3.5 w-3.5 fill-emerald-500/10 text-emerald-500" />
-                                    ) : q.attempted ? (
-                                        <CircleDot className="h-3.5 w-3.5 text-amber-500" />
-                                    ) : null}
-                                    <span>Problem {String.fromCharCode(65 + idx)}</span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
             {/* Main Area: Split Screen Workspace */}
             <div className="flex-1 min-h-0 flex overflow-hidden relative bg-background">
+                <aside
+                    className={cn(
+                        "flex shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200",
+                        isQuestionNavCollapsed ? "w-16" : "w-64",
+                    )}
+                >
+                    <div
+                        className={cn(
+                            "flex h-11 shrink-0 items-center border-b border-border px-3",
+                            isQuestionNavCollapsed ? "justify-center" : "justify-between",
+                        )}
+                    >
+                        {!isQuestionNavCollapsed && (
+                            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                Questions
+                            </span>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7"
+                            onClick={() => setIsQuestionNavCollapsed((collapsed) => !collapsed)}
+                            title={
+                                isQuestionNavCollapsed ? "Expand questions" : "Collapse questions"
+                            }
+                        >
+                            {isQuestionNavCollapsed ? (
+                                <PanelLeftOpen className="size-4" />
+                            ) : (
+                                <PanelLeftClose className="size-4" />
+                            )}
+                        </Button>
+                    </div>
+
+                    <div className="flex-1 space-y-1 overflow-y-auto p-2">
+                        {questionsList.map((question, index) => {
+                            const isSelected = activeQuestionId === question.id;
+                            const status = question.solved
+                                ? "Finished"
+                                : question.attempted
+                                  ? "Attempting"
+                                  : "Unanswered";
+                            const questionWithTitle = question as typeof question & {
+                                title?: string;
+                                question_title?: string;
+                                name?: string;
+                                question?: { title?: string };
+                            };
+                            const questionTitle =
+                                questionWithTitle.title ||
+                                questionWithTitle.question_title ||
+                                questionWithTitle.name ||
+                                questionWithTitle.question?.title ||
+                                `Question ${index + 1}`;
+
+                            return (
+                                <button
+                                    key={question.id}
+                                    type="button"
+                                    onClick={() => setActiveQuestionId(question.id)}
+                                    title={`${questionTitle} · ${status}`}
+                                    className={cn(
+                                        "flex w-full items-center rounded-lg text-left transition-colors",
+                                        isQuestionNavCollapsed
+                                            ? "h-10 justify-center px-1"
+                                            : "min-h-12 gap-3 px-3 py-2",
+                                        isSelected
+                                            ? "bg-primary/10 ring-1 ring-primary/30"
+                                            : "hover:bg-muted/60",
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                                            question.solved
+                                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                                : question.attempted
+                                                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                                                  : "bg-muted text-muted-foreground",
+                                        )}
+                                    >
+                                        {index + 1}
+                                    </span>
+                                    {!isQuestionNavCollapsed && (
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block truncate text-xs font-semibold">
+                                                {questionTitle}
+                                            </span>
+                                            <span
+                                                className={cn(
+                                                    "block text-[10px]",
+                                                    question.solved
+                                                        ? "text-emerald-600 dark:text-emerald-400"
+                                                        : question.attempted
+                                                          ? "text-amber-600 dark:text-amber-400"
+                                                          : "text-muted-foreground",
+                                                )}
+                                            >
+                                                {status}
+                                            </span>
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="shrink-0 space-y-2 border-t border-border p-3">
+                        {[
+                            {
+                                label: "Finished",
+                                count: questionsList.filter((question) => question.solved).length,
+                                icon: CheckCircle2,
+                                color: "text-emerald-500",
+                            },
+                            {
+                                label: "Attempting",
+                                count: questionsList.filter(
+                                    (question) => question.attempted && !question.solved,
+                                ).length,
+                                icon: CircleDot,
+                                color: "text-amber-500",
+                            },
+                            {
+                                label: "Unanswered",
+                                count: questionsList.filter((question) => !question.attempted)
+                                    .length,
+                                icon: Circle,
+                                color: "text-muted-foreground",
+                            },
+                        ].map(({ label, count, icon: Icon, color }) => (
+                            <div
+                                key={label}
+                                className={cn(
+                                    "flex items-center text-[10px] text-muted-foreground",
+                                    isQuestionNavCollapsed ? "justify-center gap-1" : "gap-2",
+                                )}
+                                title={`${label}: ${count}`}
+                            >
+                                <Icon className={cn("size-3.5 shrink-0", color)} />
+                                {isQuestionNavCollapsed ? (
+                                    <>
+                                        <span className="font-bold text-foreground">{count}</span>
+                                        <span className="sr-only">{label}</span>
+                                    </>
+                                ) : (
+                                    <span className="flex flex-1 justify-between gap-2">
+                                        <span>{label}</span>
+                                        <strong className="text-foreground">{count}</strong>
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+
                 {/* Problem Viewer Wrapper */}
                 {leftWidth > 0 && (
                     <div

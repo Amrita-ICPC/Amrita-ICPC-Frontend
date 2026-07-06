@@ -12,6 +12,8 @@
 export interface StudentContestQuestionResponse {
   /** The ID of the question */
   id: string;
+  /** The title of the question */
+  title: string;
   /** Whether the student has attempted the question */
   attempted: boolean;
   /** Whether the student has solved the question */
