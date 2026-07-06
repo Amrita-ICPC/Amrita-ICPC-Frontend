@@ -66,7 +66,7 @@ export default function ContestQuestionEditorPage({
             },
         });
 
-        router.push(`/contest/${contestId}/questions`);
+        router.push(`/contest/${contestId}`);
     };
     const updateMutation = useUpdateContestQuestion({
         mutation: {
@@ -86,7 +86,7 @@ export default function ContestQuestionEditorPage({
             questionId: questionId!,
             data: payload,
         });
-        router.push(`/contest/${contestId}/questions`);
+        router.push(`/contest/${contestId}`);
         router.refresh();
     };
 
@@ -94,7 +94,7 @@ export default function ContestQuestionEditorPage({
         createQuestionMutation.isPending || addQuestionMutation.isPending;
     const isSavingUpdateQuestion = updateMutation.isPending;
 
-    if (!isEdit) {
+    if (questionId === "new") {
         return (
             <QuestionEditorShell
                 mode="create"
@@ -110,6 +110,7 @@ export default function ContestQuestionEditorPage({
             mode="update"
             contestId={contestId}
             questionId={questionId}
+            initialPreview={!isEdit}
             form={form}
             onSave={onUpdate}
             isSaving={isSavingUpdateQuestion}

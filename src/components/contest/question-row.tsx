@@ -2,6 +2,7 @@
 
 import { Edit, GripVertical, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { PaginationResponse, QuestionListSummaryResponse } from "@/api/generated/model";
 import { Badge } from "@/components/ui/badge";
@@ -41,10 +42,19 @@ export function QuestionRow({
     canReorder = true,
     onRemove,
 }: QuestionRowProps) {
+    const router = useRouter();
+    const previewHref = `/contest/${contestId}/questions/${question.id}`;
+
     return (
         <div
+            onClick={(event) => {
+                if (isDragging || isOverlay) return;
+                const target = event.target as HTMLElement;
+                if (target.closest("a, button, [role='checkbox'], [data-row-action]")) return;
+                router.push(previewHref);
+            }}
             className={cn(
-                "group grid grid-cols-[48px_100px_1fr_120px_200px_110px] items-center gap-4 bg-card px-6 py-5",
+                "group grid cursor-pointer grid-cols-[48px_100px_1fr_120px_200px_110px] items-center gap-4 bg-card px-6 py-5",
                 !isDragging && !isOverlay && "transition-colors duration-200",
                 isDragging && !isOverlay && "opacity-20 bg-muted/50",
                 isOverlay &&
@@ -58,6 +68,7 @@ export function QuestionRow({
             </div>
             <div className="flex items-center gap-3">
                 <div
+                    data-row-action
                     className={cn(
                         "p-1 hover:bg-muted/40 rounded-md transition-colors",
                         !canReorder
@@ -82,9 +93,12 @@ export function QuestionRow({
                 </span>
             </div>
             <div className="flex flex-col min-w-0">
-                <span className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors duration-200">
+                <Link
+                    href={previewHref}
+                    className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors duration-200"
+                >
                     {question.title}
-                </span>
+                </Link>
             </div>
             <div className="flex justify-center">
                 <Badge

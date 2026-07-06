@@ -252,9 +252,7 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
             toast.success(
                 `${selectedQuestions.length} questions imported from ${Object.keys(selectedByBank).length} banks`,
             );
-            router.push(
-                destination === "bank" ? `/banks/${targetId}` : `/contest/${targetId}/questions`,
-            );
+            router.push(destination === "bank" ? `/banks/${targetId}` : `/contest/${targetId}`);
         } catch {
             toast.error("Some questions could not be imported. Please try again.");
         } finally {
@@ -262,8 +260,7 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
         }
     };
 
-    const backHref =
-        destination === "bank" ? `/banks/${targetId}` : `/contest/${targetId}/questions`;
+    const backHref = destination === "bank" ? `/banks/${targetId}` : `/contest/${targetId}`;
 
     return (
         <div className="flex min-h-[calc(100vh-8rem)] flex-col gap-4">

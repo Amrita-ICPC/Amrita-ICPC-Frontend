@@ -65,13 +65,18 @@ export function Header() {
 
     const segmentsWithIndex = segments.map((seg, index) => ({ seg, originalIndex: index }));
 
-    // Filter out redundant UUIDs in nested paths (e.g. /contest/[id]/questions/[id]/edit)
+    // Questions are managed inside bank/contest details, so don't expose a
+    // nonexistent standalone questions listing in the breadcrumb hierarchy.
     const filteredSegments = segmentsWithIndex.filter(({ seg, originalIndex }) => {
         const prev = segments[originalIndex - 1];
         const next = segments[originalIndex + 1];
 
-        // If this is a question UUID and there's a next segment (like edit), skip it
-        if (isUUID(seg) && prev === "questions" && next) {
+        if (
+            seg === "questions" &&
+            next &&
+            isUUID(prev) &&
+            (segments[0] === "banks" || segments[0] === "contest")
+        ) {
             return false;
         }
         return true;
@@ -87,7 +92,12 @@ export function Header() {
     } else {
         crumbs = filteredSegments.map(({ seg, originalIndex }, i) => {
             const href = "/" + segments.slice(0, originalIndex + 1).join("/");
-            const label = segmentLabel(seg);
+            const isQuestion = segments[originalIndex - 1] === "questions";
+            const label = isQuestion
+                ? seg === "new"
+                    ? "New Question"
+                    : "Question Details"
+                : segmentLabel(seg);
             const isLast = i === filteredSegments.length - 1;
             return { href, label, isLast };
         });

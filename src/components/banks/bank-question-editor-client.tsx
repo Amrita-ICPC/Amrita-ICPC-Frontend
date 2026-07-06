@@ -101,7 +101,7 @@ export default function BankQuestionEditorClient({
         createQuestionMutation.isPending || addQuestionMutation.isPending;
     const isSavingUpdateQuestion = updateMutation.isPending;
 
-    if (!isEdit) {
+    if (!questionId) {
         return (
             <QuestionEditorShell
                 mode="create"
@@ -118,6 +118,7 @@ export default function BankQuestionEditorClient({
             mode="update"
             bankId={bankId}
             questionId={questionId}
+            initialPreview={!isEdit}
             form={form}
             onSave={onUpdate}
             isSaving={isSavingUpdateQuestion}

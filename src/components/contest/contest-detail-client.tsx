@@ -339,7 +339,11 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                     </div>
 
                     <Card className="overflow-hidden border-border/60 p-0">
-                        <Tabs defaultValue="questions" className="gap-0">
+                        <Tabs
+                            id="questions"
+                            defaultValue="questions"
+                            className="gap-0 scroll-mt-20"
+                        >
                             <div className="border-b border-border/60 bg-primary/5 p-4">
                                 <TabsList className="grid h-auto w-full max-w-xl grid-cols-2 rounded-xl bg-muted/60 p-1.5">
                                     <TabsTrigger
