@@ -1737,6 +1737,7 @@ export const GetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetRespon
   "data": zod.union([zod.object({
   "questions": zod.array(zod.object({
   "id": zod.uuid().describe('The ID of the question'),
+  "title": zod.string().describe('The title of the question'),
   "attempted": zod.boolean().describe('Whether the student has attempted the question'),
   "solved": zod.boolean().describe('Whether the student has solved the question'),
   "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
