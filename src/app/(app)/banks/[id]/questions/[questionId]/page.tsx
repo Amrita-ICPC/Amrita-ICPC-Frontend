@@ -17,23 +17,11 @@ export default async function BankQuestionPage({
 
     const isEdit = isEditMode(edit);
 
-    if (questionId === "new" || isEdit) {
-        return (
-            <BankQuestionEditorClient
-                bankId={id}
-                questionId={questionId === "new" ? undefined : questionId}
-                isEdit={isEdit}
-            />
-        );
-    }
-
     return (
-        <div className="mx-auto w-full max-w-6xl">
-            <h1 className="text-2xl font-bold">Question View</h1>
-            <p className="text-muted-foreground mt-2">
-                Viewing question {questionId} in bank {id}
-            </p>
-            {/* TODO: Add BankQuestionViewClient if needed */}
-        </div>
+        <BankQuestionEditorClient
+            bankId={id}
+            questionId={questionId === "new" ? undefined : questionId}
+            isEdit={isEdit}
+        />
     );
 }

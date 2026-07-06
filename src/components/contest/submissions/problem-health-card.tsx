@@ -47,7 +47,7 @@ export function ProblemHealthCard({ problems, contestId }: ProblemHealthCardProp
                     Problem Health
                 </CardTitle>
                 <Link
-                    href={`/contest/${contestId}/questions`}
+                    href={`/contest/${contestId}#questions`}
                     className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-violet-500 transition-colors"
                 >
                     View All Problems

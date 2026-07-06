@@ -17,13 +17,5 @@ export default async function QuestionsPage({
 
     const isEdit = isEditMode(edit);
 
-    if (questionId == "new" || isEdit) {
-        return <ContestQuestionEditorPage contestId={id} questionId={questionId} isEdit={isEdit} />;
-    }
-
-    return (
-        <div>
-            Question ID: {questionId} for Contest ID: {id}
-        </div>
-    );
+    return <ContestQuestionEditorPage contestId={id} questionId={questionId} isEdit={isEdit} />;
 }

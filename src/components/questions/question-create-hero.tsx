@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface QuestionCreateHeroProps {
-    title?: string;
     description?: string;
     backUrl: string;
     onPreview: () => void;
@@ -17,7 +16,6 @@ interface QuestionCreateHeroProps {
 }
 
 export function QuestionCreateHero({
-    title = "Create Question",
     description = "Configure the metadata and requirements for your new programming challenge.",
     backUrl,
     onPreview,
@@ -27,8 +25,7 @@ export function QuestionCreateHero({
 }: QuestionCreateHeroProps) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
-            <div className="space-y-1">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+            <div>
                 <p className="text-xs text-muted-foreground">{description}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">

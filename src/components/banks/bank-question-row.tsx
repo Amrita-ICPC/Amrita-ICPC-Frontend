@@ -2,6 +2,7 @@
 
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { QuestionListSummaryResponse } from "@/api/generated/model";
 import { Badge } from "@/components/ui/badge";
@@ -29,10 +30,18 @@ export function BankQuestionRow({
     toggleSelection,
     onRemove,
 }: BankQuestionRowProps) {
+    const router = useRouter();
+    const previewHref = `/banks/${bankId}/questions/${question.id}`;
+
     return (
         <div
+            onClick={(event) => {
+                const target = event.target as HTMLElement;
+                if (target.closest("a, button, [role='checkbox'], [data-row-action]")) return;
+                router.push(previewHref);
+            }}
             className={cn(
-                "group grid grid-cols-[48px_1fr_120px_200px_110px] items-center gap-4 bg-card px-6 py-5 transition-colors duration-200",
+                "group grid cursor-pointer grid-cols-[48px_1fr_120px_200px_110px] items-center gap-4 bg-card px-6 py-5 transition-colors duration-200",
                 isSelected && "bg-primary/10 border-l-2 border-l-primary",
                 !isSelected && "hover:bg-muted/25",
             )}
@@ -42,7 +51,7 @@ export function BankQuestionRow({
             </div>
             <div className="flex flex-col min-w-0">
                 <Link
-                    href={`/banks/${bankId}/questions/${question.id}`}
+                    href={previewHref}
                     className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors duration-200"
                 >
                     {question.title}

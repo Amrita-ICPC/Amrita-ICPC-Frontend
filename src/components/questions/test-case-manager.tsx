@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface TestCase {
@@ -117,8 +118,6 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
     };
 
     const activeTestCase = sortedTestCases.find((tc) => tc.id === activeId);
-    const activeOriginalIndex = sortedTestCases.findIndex((tc) => tc.id === activeId);
-
     return (
         <div className="w-full flex flex-col h-full">
             {/* Single White Card Wrapping the whole Test Case manager */}
@@ -241,31 +240,35 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                     <div className="flex-1 flex flex-col p-6 bg-card overflow-y-auto">
                         {activeTestCase ? (
                             <div className="flex-1 flex flex-col h-full space-y-6 max-w-4xl min-h-0">
-                                {/* Top Row: Name, Weight/Points & Hidden Switch */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                                    <div className="space-y-1.5 md:col-span-1">
-                                        <Label className="text-xs font-semibold text-muted-foreground">
-                                            Test Case Name
-                                        </Label>
-                                        <Input
-                                            value={activeTestCase.name || ""}
-                                            placeholder={`Sample Test Case ${activeOriginalIndex + 1}`}
-                                            onChange={(e) =>
-                                                updateTestCase(activeTestCase.id, {
-                                                    name: e.target.value,
-                                                })
-                                            }
-                                            className="bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg"
-                                        />
-                                    </div>
-
-                                    {/* Weight Field (Required field requested by User) */}
-                                    <div className="space-y-1.5 md:col-span-1">
-                                        <Label className="text-xs font-semibold text-muted-foreground">
-                                            Weight / Points
-                                        </Label>
+                                {/* Top Row: Weight/Points & Hidden Switch */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center gap-1.5">
+                                            <Label className="text-xs font-semibold text-muted-foreground">
+                                                Weight / Points
+                                            </Label>
+                                            <TooltipProvider delayDuration={200}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            aria-label="About test case weight"
+                                                            className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                                        >
+                                                            <Info className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="max-w-72">
+                                                        Sets how much this test case contributes to
+                                                        the question&apos;s total score relative to
+                                                        the other test cases.
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
                                         <Input
                                             type="number"
+                                            min={0}
                                             value={activeTestCase.weight ?? 1}
                                             placeholder="1"
                                             onChange={(e) =>
@@ -275,9 +278,13 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                             }
                                             className="bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg"
                                         />
+                                        <p className="text-[10px] leading-relaxed text-muted-foreground">
+                                            This test case&apos;s share of the question score.
+                                            Higher weight means it contributes more points.
+                                        </p>
                                     </div>
 
-                                    <div className="flex items-center gap-2 pb-2 justify-end md:col-span-1">
+                                    <div className="flex items-center gap-2 pb-2 justify-end">
                                         <Switch
                                             checked={activeTestCase.is_hidden}
                                             onCheckedChange={(val) =>

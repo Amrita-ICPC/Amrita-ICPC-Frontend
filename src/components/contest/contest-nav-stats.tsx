@@ -75,7 +75,7 @@ export function ContestNavStats({ contest }: ContestNavStatsProps) {
                     icon={Users}
                 />
                 <NavStatTile
-                    href={`/contest/${contest.id}/questions`}
+                    href={`/contest/${contest.id}#questions`}
                     value={contest.question_count ?? 0}
                     label="Questions"
                     icon={FileCode2}

@@ -51,6 +51,7 @@ export interface QuestionEditorShellProps {
     form: ReturnType<typeof useQuestionForm>;
     onSave: () => void;
     isSaving: boolean;
+    initialPreview?: boolean;
 }
 
 export function QuestionEditorShell({
@@ -61,6 +62,7 @@ export function QuestionEditorShell({
     form,
     onSave,
     isSaving,
+    initialPreview = false,
 }: QuestionEditorShellProps) {
     const { metadata, content, code, testCases, initializeForm } = form;
 
@@ -112,7 +114,7 @@ export function QuestionEditorShell({
     }));
 
     // View State
-    const [isPreviewMode, setIsPreviewMode] = useState(false);
+    const [isPreviewMode, setIsPreviewMode] = useState(initialPreview);
 
     const editor = useEditorContext();
     const [activeTab, setActiveTab] = useState("description");
@@ -150,11 +152,7 @@ export function QuestionEditorShell({
         },
     });
 
-    const backUrl = contestId
-        ? `/contest/${contestId}/questions`
-        : bankId
-          ? `/banks/${bankId}`
-          : "/";
+    const backUrl = contestId ? `/contest/${contestId}` : bankId ? `/banks/${bankId}` : "/";
 
     // Step validity checks
     const isStepValid = (stepId: EditorStep): boolean => {
@@ -227,7 +225,6 @@ export function QuestionEditorShell({
                 {/* 1. Sticky Header */}
                 <div className="sticky top-0 z-30 flex min-h-[72px] items-center justify-between border-b border-border/60 bg-card px-6 py-3">
                     <QuestionCreateHero
-                        title={mode === "update" ? "Update Question" : "Create Question"}
                         description={
                             mode === "update"
                                 ? "Edit the metadata and requirements for this programming challenge."
