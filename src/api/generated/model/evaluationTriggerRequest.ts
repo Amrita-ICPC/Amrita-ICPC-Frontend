@@ -25,4 +25,6 @@ export interface EvaluationTriggerRequest {
   question_ids?: string[] | null;
   /** Contest team member ids to evaluate (required for STUDENTS) */
   student_ids?: string[] | null;
+  /** If True, submissions already evaluated within scope are reset (status and per-testcase output/error cleared) before evaluation, so every submission in scope is re-run. If False, only submissions that have never been evaluated (status is None) are evaluated. */
+  is_override?: boolean;
 }

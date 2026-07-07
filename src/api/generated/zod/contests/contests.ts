@@ -1833,11 +1833,17 @@ export const CancelContestApiV1ContestsContestIdCancelPostResponse = zod.object(
 /**
  * Trigger re-evaluation of submissions in a contest.
 
-By default (scope=ALL) every submission in the contest is re-evaluated.
-Pass scope=TEAMS with team_ids to only re-evaluate specific teams'
-submissions, scope=QUESTIONS with question_ids to only re-evaluate
-specific questions' submissions, or scope=STUDENTS with student_ids
-(contest team member ids) to only re-evaluate specific students' submissions.
+By default (scope=ALL) only submissions that have never been evaluated
+(status is None) are evaluated. Pass scope=TEAMS with team_ids to only
+evaluate specific teams' submissions, scope=QUESTIONS with question_ids
+to only evaluate specific questions' submissions, or scope=STUDENTS with
+student_ids (contest team member ids) to only evaluate specific students'
+submissions.
+
+Pass is_override=True to force every submission in scope to be re-run,
+including ones that already have a verdict - their status and per-testcase
+output/error are reset to None (committed before dispatch) and then
+evaluated fresh.
 
 Args:
     request (Request): Framework context.
@@ -1854,14 +1860,16 @@ export const EvaluateContestApiV1ContestsContestIdEvaluationPostParams = zod.obj
   "contest_id": zod.uuid()
 })
 
-export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyDefault = { scope: "ALL" } as const;
+export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyDefault = { scope: "ALL", is_override: false } as const;
 export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyScopeDefault = `ALL`;
+export const evaluateContestApiV1ContestsContestIdEvaluationPostBodyIsOverrideDefault = false;
 
 export const EvaluateContestApiV1ContestsContestIdEvaluationPostBody = zod.object({
   "scope": zod.enum(['ALL', 'TEAMS', 'QUESTIONS', 'STUDENTS']).default(evaluateContestApiV1ContestsContestIdEvaluationPostBodyScopeDefault).describe('What to evaluate: ALL\/TEAMS\/QUESTIONS\/STUDENTS'),
   "team_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team ids to evaluate (required for TEAMS)'),
   "question_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Question ids to evaluate (required for QUESTIONS)'),
-  "student_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team member ids to evaluate (required for STUDENTS)')
+  "student_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional().describe('Contest team member ids to evaluate (required for STUDENTS)'),
+  "is_override": zod.boolean().default(evaluateContestApiV1ContestsContestIdEvaluationPostBodyIsOverrideDefault).describe('If True, submissions already evaluated within scope are reset (status and per-testcase output\/error cleared) before evaluation, so every submission in scope is re-run. If False, only submissions that have never been evaluated (status is None) are evaluated.')
 }).default(evaluateContestApiV1ContestsContestIdEvaluationPostBodyDefault).describe('Request body for triggering a contest evaluation.\n\n``scope`` selects what gets (re-)evaluated:\n- ALL: every submission in the contest.\n- TEAMS: only submissions from the given ``team_ids``.\n- QUESTIONS: only submissions for the given ``question_ids``.\n- STUDENTS: only submissions from the given ``student_ids`` (contest team member ids).')
 
 /**
