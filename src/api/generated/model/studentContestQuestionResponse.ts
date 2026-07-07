@@ -5,6 +5,7 @@
  * A backend tool for Amrita ICPC Coding Platform
  * OpenAPI spec version: 1.0.0
  */
+import type { ContestQuestionStatus } from './contestQuestionStatus';
 
 /**
  * Schema for a contest question in student view.
@@ -14,10 +15,8 @@ export interface StudentContestQuestionResponse {
   id: string;
   /** The title of the question */
   title: string;
-  /** Whether the student has attempted the question */
-  attempted: boolean;
-  /** Whether the student has solved the question */
-  solved: boolean;
+  /** The status of the question (unviewed, viewed, submitted) */
+  status: ContestQuestionStatus;
   /** Maximum submissions allowed for this question */
   max_submission?: number | null;
 }

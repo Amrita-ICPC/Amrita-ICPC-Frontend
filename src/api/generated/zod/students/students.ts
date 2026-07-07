@@ -1738,8 +1738,7 @@ export const GetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetRespon
   "questions": zod.array(zod.object({
   "id": zod.uuid().describe('The ID of the question'),
   "title": zod.string().describe('The title of the question'),
-  "attempted": zod.boolean().describe('Whether the student has attempted the question'),
-  "solved": zod.boolean().describe('Whether the student has solved the question'),
+  "status": zod.enum(['unviewed', 'viewed', 'submitted']).describe('The status of the question (unviewed, viewed, submitted)'),
   "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
 }).describe('Schema for a contest question in student view.')).describe('List of questions in the contest')
 }).describe('Schema for a list of contest questions in student view.'),zod.null()]).optional(),
