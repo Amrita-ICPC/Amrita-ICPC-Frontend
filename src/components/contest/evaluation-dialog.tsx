@@ -36,7 +36,9 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function EvaluationDialog({
@@ -55,6 +57,7 @@ export function EvaluationDialog({
     const [scope, setScope] = useState<EvaluationScope>(defaultScope);
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<Set<string>>(new Set(defaultIds));
+    const [isOverride, setIsOverride] = useState(false);
     const statusQuery = useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet(contestId, {
         query: {
             refetchInterval: (query) => {
@@ -118,7 +121,12 @@ export function EvaluationDialog({
     });
     const total = status?.total_submissions ?? 0;
     const processed = status?.processed_submissions ?? 0;
-    const percentage = total > 0 ? Math.round((processed / total) * 100) : 0;
+    const percentage =
+        status?.status === "COMPLETED"
+            ? 100
+            : total > 0
+              ? Math.round((processed / total) * 100)
+              : 0;
     const toggle = (id: string) =>
         setSelected((current) => {
             const next = new Set(current);
@@ -133,6 +141,7 @@ export function EvaluationDialog({
                 team_ids: scope === EvaluationScope.TEAMS ? [...selected] : undefined,
                 question_ids: scope === EvaluationScope.QUESTIONS ? [...selected] : undefined,
                 student_ids: scope === EvaluationScope.STUDENTS ? [...selected] : undefined,
+                is_override: isOverride,
             },
         });
 
@@ -171,35 +180,12 @@ export function EvaluationDialog({
                                 {status.status}
                             </span>
                         </div>
-                        <Progress
-                            value={
-                                active
-                                    ? percentage
-                                    : status.status === "COMPLETED"
-                                      ? 100
-                                      : percentage
-                            }
-                            className="mt-3 h-2"
-                        />
+                        <Progress value={percentage} className="mt-3 h-2" />
                         <div className="mt-2 flex justify-between text-xs text-muted-foreground">
                             <span>
                                 {processed} / {total} submissions evaluated
                             </span>
                             <span>{percentage}%</span>
-                        </div>
-                    </div>
-                )}
-                {active && (
-                    <div className="flex gap-3 rounded-xl border border-warning/25 bg-warning/5 p-4 text-sm">
-                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
-                        <div>
-                            <p className="font-medium text-foreground">
-                                Restart the active evaluation?
-                            </p>
-                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                Starting again will override the currently running evaluation with
-                                the scope selected below.
-                            </p>
                         </div>
                     </div>
                 )}
@@ -230,6 +216,38 @@ export function EvaluationDialog({
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
+                <div className="flex items-start justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-4">
+                    <div className="space-y-1">
+                        <Label htmlFor="evaluation-override" className="font-medium">
+                            Override existing evaluations
+                        </Label>
+                        <p className="max-w-lg text-xs leading-5 text-muted-foreground">
+                            Re-run submissions that already have a verdict. Their current status and
+                            test-case output will be cleared before evaluation. Leave this off to
+                            evaluate only submissions without a status.
+                        </p>
+                    </div>
+                    <Switch
+                        id="evaluation-override"
+                        checked={isOverride}
+                        onCheckedChange={setIsOverride}
+                        aria-label="Override existing evaluations"
+                    />
+                </div>
+                {isOverride && (
+                    <div className="flex gap-3 rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm">
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                        <div>
+                            <p className="font-medium text-foreground">
+                                Existing evaluation results will be cleared
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                All existing verdicts and test-case output within the selected scope
+                                will be removed before those submissions are evaluated again.
+                            </p>
+                        </div>
+                    </div>
+                )}
                 {scope === EvaluationScope.ALL ? (
                     <p className="rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground">
                         Evaluate every submitted solution across all teams and questions.
