@@ -111,6 +111,7 @@ export * from './contestInfoForInvitation';
 export * from './contestMode';
 export * from './contestQuestionResponse';
 export * from './contestQuestionsListResponse';
+export * from './contestQuestionStatus';
 export * from './contestResultsResponse';
 export * from './contestRunStatus';
 export * from './contestRuntimeDetails';

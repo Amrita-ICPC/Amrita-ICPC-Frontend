@@ -97,6 +97,31 @@ export function SessionClient({ contestId }: SessionClientProps) {
         setRunResult(null);
     }, [activeQuestionId]);
 
+    // Update active question status to "viewed" in React Query cache immediately without refetching
+    useEffect(() => {
+        if (!activeQuestionId) return;
+
+        const queryKey =
+            getGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetQueryKey(contestId);
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+            if (!oldData?.data?.questions) return oldData;
+            return {
+                ...oldData,
+                data: {
+                    ...oldData.data,
+                    questions: oldData.data.questions.map((q: any) => {
+                        if (q.id === activeQuestionId) {
+                            if (q.status === "unviewed" || !q.status) {
+                                return { ...q, status: "viewed" };
+                            }
+                        }
+                        return q;
+                    }),
+                },
+            };
+        });
+    }, [activeQuestionId, contestId, queryClient]);
+
     // Dynamic width and height limits sizing state
     const [leftWidth, setLeftWidth] = useState<number>(50); // initial percentage (50% left, 50% right)
     const [prevLeftWidth, setPrevLeftWidth] = useState<number>(50);
@@ -495,6 +520,27 @@ export function SessionClient({ contestId }: SessionClientProps) {
                                 activeQuestionId,
                             ),
                     });
+
+                    // Update cache for the questions list: set status to 'submitted' immediately
+                    const queryKey =
+                        getGetContestQuestionsApiV1StudentsContestsContestIdQuestionsGetQueryKey(
+                            contestId,
+                        );
+                    queryClient.setQueryData(queryKey, (oldData: any) => {
+                        if (!oldData?.data?.questions) return oldData;
+                        return {
+                            ...oldData,
+                            data: {
+                                ...oldData.data,
+                                questions: oldData.data.questions.map((q: any) => {
+                                    if (q.id === activeQuestionId) {
+                                        return { ...q, status: "submitted" };
+                                    }
+                                    return q;
+                                }),
+                            },
+                        };
+                    });
                 },
                 onError: (err: any) => {
                     console.error("Submit error:", err);
@@ -586,11 +632,12 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     <div className="flex-1 space-y-1 overflow-y-auto p-2">
                         {questionsList.map((question, index) => {
                             const isSelected = activeQuestionId === question.id;
-                            const status = question.solved
-                                ? "Finished"
-                                : question.attempted
-                                  ? "Attempting"
-                                  : "Unanswered";
+                            const status =
+                                question.status === "submitted"
+                                    ? "Submitted"
+                                    : question.status === "viewed"
+                                      ? "Viewed"
+                                      : "Unviewed";
                             const questionWithTitle = question as typeof question & {
                                 title?: string;
                                 question_title?: string;
@@ -623,9 +670,9 @@ export function SessionClient({ contestId }: SessionClientProps) {
                                     <span
                                         className={cn(
                                             "flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                                            question.solved
+                                            question.status === "submitted"
                                                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                                                : question.attempted
+                                                : question.status === "viewed"
                                                   ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                                                   : "bg-muted text-muted-foreground",
                                         )}
@@ -640,9 +687,9 @@ export function SessionClient({ contestId }: SessionClientProps) {
                                             <span
                                                 className={cn(
                                                     "block text-[10px]",
-                                                    question.solved
+                                                    question.status === "submitted"
                                                         ? "text-emerald-600 dark:text-emerald-400"
-                                                        : question.attempted
+                                                        : question.status === "viewed"
                                                           ? "text-amber-600 dark:text-amber-400"
                                                           : "text-muted-foreground",
                                                 )}
@@ -659,23 +706,27 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     <div className="shrink-0 space-y-2 border-t border-border p-3">
                         {[
                             {
-                                label: "Finished",
-                                count: questionsList.filter((question) => question.solved).length,
+                                label: "Submitted",
+                                count: questionsList.filter(
+                                    (question) => question.status === "submitted",
+                                ).length,
                                 icon: CheckCircle2,
                                 color: "text-emerald-500",
                             },
                             {
-                                label: "Attempting",
+                                label: "Viewed",
                                 count: questionsList.filter(
-                                    (question) => question.attempted && !question.solved,
+                                    (question) => question.status === "viewed",
                                 ).length,
                                 icon: CircleDot,
                                 color: "text-amber-500",
                             },
                             {
-                                label: "Unanswered",
-                                count: questionsList.filter((question) => !question.attempted)
-                                    .length,
+                                label: "Unviewed",
+                                count: questionsList.filter(
+                                    (question) =>
+                                        question.status === "unviewed" || !question.status,
+                                ).length,
                                 icon: Circle,
                                 color: "text-muted-foreground",
                             },
