@@ -410,6 +410,81 @@ export const useCreatePlatformLanguageApiV1QuestionsLanguagesPlatformPost = <TEr
       return useMutation(getCreatePlatformLanguageApiV1QuestionsLanguagesPlatformPostMutationOptions(options), queryClient);
     }
     /**
+ * Delete a platform language mapping.
+
+Args:
+    request: FastAPI request object.
+    language_id: The ID of the platform language to delete.
+    current_user: Authenticated admin claims.
+    service: Injected QuestionService.
+
+Returns:
+    API response indicating successful deletion.
+
+Raises:
+    LanguageNotFoundError: If the language does not exist.
+    InvalidQuestionError: If the language is in use and cannot be deleted.
+ * @summary Delete Platform Language
+ */
+export const deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete = (
+    languageId: number,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponse>(
+      {url: `/api/v1/questions/languages/platform/${languageId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>, TError,{languageId: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>, TError,{languageId: number}, TContext> => {
+
+const mutationKey = ['deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>, {languageId: number}> = (props) => {
+          const {languageId} = props ?? {};
+
+          return  deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete(languageId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>>
+
+    export type DeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Delete Platform Language
+ */
+export const useDeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>, TError,{languageId: number}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDelete>>,
+        TError,
+        {languageId: number},
+        TContext
+      > => {
+      return useMutation(getDeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
  * List all tags with optional search.
  * @summary Get Tags
  */

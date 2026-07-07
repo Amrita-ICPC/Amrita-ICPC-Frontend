@@ -2,6 +2,7 @@
 
 import {
     CalendarCheck2,
+    Code2,
     Database,
     FileCode2,
     LayoutDashboard,
@@ -40,6 +41,7 @@ const NAV_ITEMS = [
 const ADMIN_ITEMS = [
     { href: "/users", label: "Users", icon: UserRoundCog },
     { href: "/groups", label: "Groups", icon: UsersRound },
+    { href: "/languages", label: "Languages", icon: Code2 },
 ];
 
 interface NavLinksProps {
