@@ -107,7 +107,7 @@ export function EditorPanel({
     submissionsCount,
 }: EditorPanelProps) {
     const activeLang = LANGUAGES.find((l) => l.id === selectedLanguageId);
-    const { resolvedTheme } = useTheme();
+    const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [activeTestCaseIdx, setActiveTestCaseIdx] = useState<number>(0);
 
@@ -228,7 +228,8 @@ export function EditorPanel({
         }
     }, [runResult]);
 
-    const currentTheme = mounted && isDarkTheme(resolvedTheme) ? "vs-dark" : "light";
+    const currentTheme =
+        mounted && isDarkTheme(theme === "system" ? resolvedTheme : theme) ? "vs-dark" : "light";
 
     const hasRunningSubmission = submissions.some((s) => {
         const statusStr = (s.status as string) || "";

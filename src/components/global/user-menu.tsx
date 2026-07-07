@@ -14,7 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { THEMES } from "@/lib/theme-config";
+import { isDarkTheme } from "@/lib/theme-config";
 
 function initials(name?: string | null, email?: string | null) {
     const s = name || email || "U";
@@ -30,13 +30,13 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ name, email }: UserMenuProps) {
-    const { resolvedTheme, setTheme } = useTheme();
+    const { theme, resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => setMounted(true), []);
 
-    const isDark = mounted ? THEMES.find((t) => t.id === resolvedTheme)?.group === "dark" : false;
+    const isDark = mounted ? isDarkTheme(theme === "system" ? resolvedTheme : theme) : false;
 
     return (
         <DropdownMenu>

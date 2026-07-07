@@ -29,7 +29,7 @@ export function SessionHeader({
     onFinish,
     isFinishing,
 }: SessionHeaderProps) {
-    const { resolvedTheme, setTheme } = useTheme();
+    const { theme, resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
 
@@ -37,7 +37,7 @@ export function SessionHeader({
         setMounted(true);
     }, []);
 
-    const isDark = isDarkTheme(resolvedTheme);
+    const isDark = isDarkTheme(theme === "system" ? resolvedTheme : theme);
 
     return (
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-6 text-slate-800 dark:text-white">

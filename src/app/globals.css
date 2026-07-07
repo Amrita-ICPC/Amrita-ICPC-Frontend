@@ -108,14 +108,14 @@
     --chart-5: oklch(0.704 0.191 22.216);
 
     /* Sidebar */
-    --sidebar: #0a1330;
-    --sidebar-foreground: #eef2ff;
-    --sidebar-primary: #6f97ff;
-    --sidebar-primary-foreground: #0a1330;
-    --sidebar-accent: #182c60;
-    --sidebar-accent-foreground: #eef2ff;
-    --sidebar-border: rgb(255 255 255 / 10%);
-    --sidebar-ring: #6f97ff;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #1b243b;
+    --sidebar-primary: #2d4fa6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #edf1f8;
+    --sidebar-accent-foreground: #2d4fa6;
+    --sidebar-border: #d9e1ee;
+    --sidebar-ring: #2d4fa6;
 }
 
 /* Dark mode — deep slate, tuned for card/border separation */
@@ -220,14 +220,14 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    --sidebar: #092619;
-    --sidebar-foreground: #e7f7ed;
-    --sidebar-primary: #35b779;
-    --sidebar-primary-foreground: #061a11;
-    --sidebar-accent: #164c31;
-    --sidebar-accent-foreground: #effbf3;
-    --sidebar-border: rgb(190 242 208 / 14%);
-    --sidebar-ring: #35b779;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #1a2b20;
+    --sidebar-primary: #1f7a4d;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #eaf2ea;
+    --sidebar-accent-foreground: #1f7a4d;
+    --sidebar-border: #d7e4d8;
+    --sidebar-ring: #1f7a4d;
 }
 
 /* Rose — warm-accented light palette */
@@ -275,14 +275,14 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    --sidebar: #32101c;
-    --sidebar-foreground: #fdeef3;
-    --sidebar-primary: #e65f84;
-    --sidebar-primary-foreground: #32101c;
-    --sidebar-accent: #5a1d32;
-    --sidebar-accent-foreground: #fff1f5;
-    --sidebar-border: rgb(253 205 218 / 14%);
-    --sidebar-ring: #e65f84;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #2b1c22;
+    --sidebar-primary: #b8375a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f6eced;
+    --sidebar-accent-foreground: #b8375a;
+    --sidebar-border: #ecdadf;
+    --sidebar-ring: #b8375a;
 }
 
 /* Midnight — deep violet-blue dark palette */

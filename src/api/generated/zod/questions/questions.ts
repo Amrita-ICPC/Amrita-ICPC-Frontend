@@ -177,6 +177,50 @@ export const CreatePlatformLanguageApiV1QuestionsLanguagesPlatformPostBody = zod
 })
 
 /**
+ * Delete a platform language mapping.
+
+Args:
+    request: FastAPI request object.
+    language_id: The ID of the platform language to delete.
+    current_user: Authenticated admin claims.
+    service: Injected QuestionService.
+
+Returns:
+    API response indicating successful deletion.
+
+Raises:
+    LanguageNotFoundError: If the language does not exist.
+    InvalidQuestionError: If the language is in use and cannot be deleted.
+ * @summary Delete Platform Language
+ */
+export const DeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteParams = zod.object({
+  "language_id": zod.number()
+})
+
+export const deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseSuccessDefault = true;
+export const deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseStatusDefault = 200;
+export const deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseMessageDefault = `Success`;
+
+export const DeletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponse = zod.object({
+  "success": zod.boolean().default(deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseSuccessDefault),
+  "status": zod.number().default(deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseStatusDefault),
+  "message": zod.string().default(deletePlatformLanguageApiV1QuestionsLanguagesPlatformLanguageIdDeleteResponseMessageDefault),
+  "data": zod.union([zod.unknown(),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * List all tags with optional search.
  * @summary Get Tags
  */
