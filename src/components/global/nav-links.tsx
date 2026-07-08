@@ -6,7 +6,6 @@ import {
     Database,
     FileCode2,
     LayoutDashboard,
-    Settings,
     Trophy,
     UserRoundCog,
     Users,
@@ -35,7 +34,6 @@ const NAV_ITEMS = [
         hideForStaff: true,
         hideForStudent: true,
     },
-    { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 const ADMIN_ITEMS = [

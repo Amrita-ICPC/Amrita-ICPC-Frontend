@@ -433,6 +433,7 @@ export const ListAudienceUsersApiV1AudiencesAudienceIdUsersGetResponse = zod.obj
   "role": zod.enum(['student', 'instructor', 'admin', 'manager']).describe('Enumeration of user roles within the ICPC backend system.\n\nDefines the hierarchical roles that control access permissions\nand determine what actions users can perform.\n\nAttributes:\n    student: Regular students who can participate in contests and join teams.\n    instructor: Instructors who can create and manage contests for their courses.\n    admin: System administrators with full access to all system features.\n    manager: Organizational managers with elevated permissions across contests.'),
   "gender": zod.union([zod.string(),zod.null()]).optional(),
   "dob": zod.union([zod.iso.date(),zod.null()]).optional(),
+  "theme": zod.union([zod.string(),zod.null()]).optional(),
   "created_at": zod.iso.datetime({"offset":true}),
   "last_updated": zod.iso.datetime({"offset":true}),
   "audience_links": zod.array(zod.object({

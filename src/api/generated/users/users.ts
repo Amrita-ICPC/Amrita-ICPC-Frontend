@@ -28,12 +28,14 @@ import type {
   APIResponseListStudentUserSearchResponse,
   APIResponseListUserInvitationResponse,
   APIResponseListUserResponse,
+  APIResponseUserSettingsResponse,
   ExceptionResponse,
   GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetParams,
   HTTPValidationError,
   ListStudentsApiV1UsersStudentsGetParams,
   ListUsersApiV1UsersGetParams,
   UserProfile,
+  UserSettingsUpdate,
   UserSyncResponse
 } from '../model';
 
@@ -230,6 +232,70 @@ export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awa
 
 
 /**
+ * Update settings/preferences (e.g. theme) for the currently authenticated user.
+ * @summary Update current user's settings
+ */
+export const updateMySettingsApiV1UsersMeSettingsPatch = (
+    userSettingsUpdate: UserSettingsUpdate,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseUserSettingsResponse>(
+      {url: `/api/v1/users/me/settings`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: userSettingsUpdate, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateMySettingsApiV1UsersMeSettingsPatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>, TError,{data: UserSettingsUpdate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>, TError,{data: UserSettingsUpdate}, TContext> => {
+
+const mutationKey = ['updateMySettingsApiV1UsersMeSettingsPatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>, {data: UserSettingsUpdate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateMySettingsApiV1UsersMeSettingsPatch(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMySettingsApiV1UsersMeSettingsPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>>
+    export type UpdateMySettingsApiV1UsersMeSettingsPatchMutationBody = UserSettingsUpdate
+    export type UpdateMySettingsApiV1UsersMeSettingsPatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Update current user's settings
+ */
+export const useUpdateMySettingsApiV1UsersMeSettingsPatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>, TError,{data: UserSettingsUpdate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateMySettingsApiV1UsersMeSettingsPatch>>,
+        TError,
+        {data: UserSettingsUpdate},
+        TContext
+      > => {
+      return useMutation(getUpdateMySettingsApiV1UsersMeSettingsPatchMutationOptions(options), queryClient);
+    }
+    /**
  * Synchronize Keycloak users with the local database.
 
 Only administrators can trigger this operation. This endpoint fetches all users
