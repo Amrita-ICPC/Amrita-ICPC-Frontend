@@ -12,6 +12,7 @@ import {
     ListChecks,
     Trophy,
 } from "lucide-react";
+import type { ComponentPropsWithoutRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
@@ -76,6 +77,14 @@ export function ProblemPreview({
         blockquote: ({ ...props }) => (
             <blockquote
                 className="border-l-4 border-primary/30 pl-4 italic my-6 text-muted-foreground"
+                {...props}
+            />
+        ),
+        img: ({ alt, ...props }: ComponentPropsWithoutRef<"img">) => (
+            <img
+                alt={alt ?? ""}
+                className="my-6 max-w-full rounded-xl border border-border/60 bg-muted/20 shadow-sm"
+                loading="lazy"
                 {...props}
             />
         ),
