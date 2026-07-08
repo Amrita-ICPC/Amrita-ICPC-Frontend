@@ -107,15 +107,15 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    /* Sidebar */
-    --sidebar: #ffffff;
-    --sidebar-foreground: #1b243b;
-    --sidebar-primary: #2d4fa6;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #edf1f8;
-    --sidebar-accent-foreground: #2d4fa6;
-    --sidebar-border: #d9e1ee;
-    --sidebar-ring: #2d4fa6;
+    /* Sidebar — dark navy variant of the theme's blue accent */
+    --sidebar: #0a1330;
+    --sidebar-foreground: #eef2ff;
+    --sidebar-primary: #6f97ff;
+    --sidebar-primary-foreground: #0a0f1e;
+    --sidebar-accent: #24356e;
+    --sidebar-accent-foreground: #eef2ff;
+    --sidebar-border: rgb(255 255 255 / 10%);
+    --sidebar-ring: #6f97ff;
 }
 
 /* Dark mode — deep slate, tuned for card/border separation */
@@ -220,14 +220,15 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    --sidebar: #ffffff;
-    --sidebar-foreground: #1a2b20;
-    --sidebar-primary: #1f7a4d;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #eaf2ea;
-    --sidebar-accent-foreground: #1f7a4d;
-    --sidebar-border: #d7e4d8;
-    --sidebar-ring: #1f7a4d;
+    /* Sidebar — dark green variant of the theme's forest accent */
+    --sidebar: #0c1f16;
+    --sidebar-foreground: #e6f5ea;
+    --sidebar-primary: #34d399;
+    --sidebar-primary-foreground: #06150d;
+    --sidebar-accent: #163826;
+    --sidebar-accent-foreground: #e6f5ea;
+    --sidebar-border: rgb(255 255 255 / 10%);
+    --sidebar-ring: #34d399;
 }
 
 /* Rose — warm-accented light palette */
@@ -275,14 +276,15 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    --sidebar: #ffffff;
-    --sidebar-foreground: #2b1c22;
-    --sidebar-primary: #b8375a;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f6eced;
-    --sidebar-accent-foreground: #b8375a;
-    --sidebar-border: #ecdadf;
-    --sidebar-ring: #b8375a;
+    /* Sidebar — dark rose variant of the theme's rose accent */
+    --sidebar: #241019;
+    --sidebar-foreground: #fbe4ec;
+    --sidebar-primary: #e8628c;
+    --sidebar-primary-foreground: #22101a;
+    --sidebar-accent: #3a1a29;
+    --sidebar-accent-foreground: #fbe4ec;
+    --sidebar-border: rgb(255 255 255 / 10%);
+    --sidebar-ring: #e8628c;
 }
 
 /* Midnight — deep violet-blue dark palette */
