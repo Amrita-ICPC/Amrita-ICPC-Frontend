@@ -14,7 +14,7 @@ import {
     X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -110,7 +110,10 @@ function AddLanguageDialog({ open, onOpenChange }: AddLanguageDialogProps) {
         },
     });
 
-    const selectedJudge0Id = form.watch("judge0_language_id");
+    const selectedJudge0Id = useWatch({
+        control: form.control,
+        name: "judge0_language_id",
+    });
     const selectedJudge0Language = judge0Languages.find((lang) => lang.id === selectedJudge0Id);
 
     const { mutate: createLanguage, isPending } =
