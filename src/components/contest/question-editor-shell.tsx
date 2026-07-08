@@ -351,8 +351,8 @@ export function QuestionEditorShell({
 
                                         {/* STEP: STATEMENT */}
                                         {activeStep === "statement" && (
-                                            <div className="w-full pb-4 flex flex-col h-[550px]">
-                                                <div className="flex-1 min-h-0 bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden flex flex-col">
+                                            <div className="w-full pb-4 flex flex-col min-h-[550px]">
+                                                <div className="bg-card rounded-xl border border-border/60 shadow-sm flex flex-col">
                                                     <QuestionArchitectureSection
                                                         activeTab={activeTab}
                                                         onTabChange={setActiveTab}

@@ -2,6 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
+import { mergeAttributes, Node } from "@tiptap/core";
 import CodeBlock from "@tiptap/extension-code-block";
 import Link from "@tiptap/extension-link";
 import Mathematics from "@tiptap/extension-mathematics";
@@ -13,19 +14,24 @@ import {
     Code,
     Heading1,
     Heading2,
+    ImagePlus,
     Italic,
     Link as LinkIcon,
     List,
     ListOrdered,
+    Loader2,
     Redo,
     Sigma,
     Strikethrough,
     Terminal,
     Undo,
 } from "lucide-react";
-import { createContext, ReactNode, useContext } from "react";
+import type { ChangeEvent } from "react";
+import { createContext, ReactNode, useContext, useRef } from "react";
+import { toast } from "sonner";
 import { Markdown } from "tiptap-markdown";
 
+import { useUploadImageApiV1UploadPost } from "@/api/generated/images/images";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,6 +40,58 @@ import { cn } from "@/lib/utils";
 import { MathSymbolPicker } from "../questions/math-symbol-picker";
 
 const EditorContext = createContext<Editor | null | undefined>(undefined);
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+const Image = Node.create({
+    name: "image",
+
+    inline: true,
+    group: "inline",
+    draggable: true,
+
+    addAttributes() {
+        return {
+            src: {
+                default: null,
+            },
+            alt: {
+                default: null,
+            },
+            title: {
+                default: null,
+            },
+        };
+    },
+
+    parseHTML() {
+        return [{ tag: "img[src]" }];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return [
+            "img",
+            mergeAttributes(HTMLAttributes, {
+                class: "my-4 inline-block max-w-full rounded-lg border border-border/60 bg-muted/20 shadow-sm",
+                loading: "lazy",
+            }),
+        ];
+    },
+
+    addStorage() {
+        return {
+            markdown: {
+                serialize(state: any, node: any) {
+                    const { src, alt, title } = node.attrs;
+                    const safeAlt = state.esc(alt ?? "");
+                    const safeSrc = state.esc(src ?? "");
+                    const safeTitle = title ? ` ${state.quote(title)}` : "";
+
+                    state.write(`![${safeAlt}](${safeSrc}${safeTitle})`);
+                },
+            },
+        };
+    },
+});
 
 export function EditorProvider({ children }: { children: ReactNode }) {
     const editor = useEditor({
@@ -49,6 +107,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
                     class: "text-primary underline underline-offset-4 cursor-pointer",
                 },
             }),
+            Image,
             Placeholder.configure({
                 placeholder: "Write something amazing...",
             }),
@@ -61,7 +120,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         ],
         editorProps: {
             attributes: {
-                class: "prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-bold prose-a:text-primary focus:outline-none max-w-none p-6 [&_ul]:list-disc [&_ol]:list-decimal prose-p:my-4 prose-p:leading-relaxed whitespace-pre-wrap min-h-[650px]",
+                class: "prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-bold prose-a:text-primary focus:outline-none max-w-none p-6 [&_ul]:list-disc [&_ol]:list-decimal prose-p:my-4 prose-p:leading-relaxed whitespace-pre-wrap min-h-[650px] [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:shadow-sm",
             },
         },
         immediatelyRender: false,
@@ -123,6 +182,8 @@ const ToolbarButton = ({
 
 export function TiptapToolbar() {
     const editor = useEditorContext();
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const uploadImage = useUploadImageApiV1UploadPost();
 
     if (!editor) return null;
 
@@ -137,8 +198,77 @@ export function TiptapToolbar() {
         editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
     };
 
+    const insertImage = (src: string, alt?: string, title?: string) => {
+        editor
+            .chain()
+            .focus()
+            .insertContent({
+                type: "image",
+                attrs: {
+                    src,
+                    alt: alt || "Question image",
+                    title: title || null,
+                },
+            })
+            .run();
+    };
+
+    const insertImageFromUrl = () => {
+        const url = window.prompt("Image URL");
+        if (!url) return;
+
+        const alt = window.prompt("Alt text", "Question image") ?? "Question image";
+        insertImage(url, alt);
+    };
+
+    const handleImageFile = async (file: File) => {
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please choose an image file");
+            return;
+        }
+
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+            toast.error("Image must be 5MB or smaller");
+            return;
+        }
+
+        try {
+            const response = await uploadImage.mutateAsync({ data: { file } });
+            const url = response.data?.url;
+
+            if (!url) {
+                toast.error("Upload completed, but no image URL was returned");
+                return;
+            }
+
+            const alt = file.name
+                .replace(/\.[^.]+$/, "")
+                .replace(/[-_]+/g, " ")
+                .trim();
+            insertImage(url, alt || "Question image", file.name);
+            toast.success("Image added to the statement");
+        } catch {
+            toast.error("Could not upload image");
+        }
+    };
+
+    const handleImageInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+
+        await handleImageFile(file);
+    };
+
     return (
         <div className="flex flex-wrap items-center gap-1 p-2 border-b border-border/40 bg-muted/20">
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={handleImageInputChange}
+            />
             <div className="flex items-center gap-1 pr-2 border-r border-border/40">
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
@@ -219,6 +349,21 @@ export function TiptapToolbar() {
                     kbd="⌘⌥C"
                 >
                     <Terminal className="h-4 w-4" />
+                </ToolbarButton>
+
+                <ToolbarButton
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadImage.isPending}
+                    title={uploadImage.isPending ? "Uploading image" : "Upload Image"}
+                >
+                    {uploadImage.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <ImagePlus className="h-4 w-4" />
+                    )}
+                </ToolbarButton>
+                <ToolbarButton onClick={insertImageFromUrl} title="Insert Image URL">
+                    <ImagePlus className="h-4 w-4" />
                 </ToolbarButton>
 
                 <Tooltip>

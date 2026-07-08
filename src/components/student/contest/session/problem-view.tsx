@@ -2,6 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
+import type { ComponentPropsWithoutRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
@@ -88,6 +89,14 @@ const markdownComponents = {
     blockquote: ({ ...props }) => (
         <blockquote
             className="border-l-4 border-indigo-550/30 pl-4 italic my-3.5 text-xs text-slate-500 dark:text-slate-400"
+            {...props}
+        />
+    ),
+    img: ({ alt, ...props }: ComponentPropsWithoutRef<"img">) => (
+        <img
+            alt={alt ?? ""}
+            className="my-4 max-w-full rounded-lg border border-slate-200 bg-slate-100 object-contain shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
+            loading="lazy"
             {...props}
         />
     ),
