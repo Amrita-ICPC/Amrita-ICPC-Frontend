@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { Clock, Loader2, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { isDarkTheme } from "@/lib/theme-config";
-import { usePersistedTheme } from "@/lib/use-persisted-theme";
+import { useContestSessionAppearance } from "@/lib/providers/contest-session-appearance-provider";
 
 interface SessionHeaderProps {
     contestName: string;
@@ -29,15 +27,8 @@ export function SessionHeader({
     onFinish,
     isFinishing,
 }: SessionHeaderProps) {
-    const { theme, resolvedTheme, setPersistedTheme } = usePersistedTheme();
-    const [mounted, setMounted] = useState(false);
+    const { isDark, toggleSessionTheme } = useContestSessionAppearance();
     const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    const isDark = isDarkTheme(theme === "system" ? resolvedTheme : theme);
 
     return (
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-6 text-slate-800 dark:text-white">
@@ -62,17 +53,15 @@ export function SessionHeader({
                 </div>
 
                 {/* Theme Switcher Button */}
-                {mounted && (
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                        onClick={() => setPersistedTheme(isDark ? "light" : "dark")}
-                        title={`Switch to ${isDark ? "light" : "dark"} mode`}
-                    >
-                        {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                    </Button>
-                )}
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                    onClick={toggleSessionTheme}
+                    title={`Switch this session to ${isDark ? "light" : "dark"} mode`}
+                >
+                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
 
                 {/* Finish Session Confirmation Dialog */}
                 <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
