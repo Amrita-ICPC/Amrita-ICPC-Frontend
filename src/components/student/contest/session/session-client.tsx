@@ -40,6 +40,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { useContestSessionAppearance } from "@/lib/providers/contest-session-appearance-provider";
 import { useContestSession } from "@/lib/providers/contest-session-provider";
 import { useSessionTimer } from "@/lib/providers/session-timer-provider";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ interface SessionClientProps {
 export function SessionClient({ contestId }: SessionClientProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { isDark } = useContestSessionAppearance();
 
     // 1. Core Queries
     const { data: contestRes, isLoading: isContestLoading } =
@@ -584,7 +586,12 @@ export function SessionClient({ contestId }: SessionClientProps) {
     const isSubmitDisabled = (!isImmediate && hasAlreadySubmitted) || hasReachedSubmissionLimit;
 
     return (
-        <div className="fixed inset-0 z-50 bg-background text-foreground flex flex-col font-sans select-none">
+        <div
+            className={cn(
+                "fixed inset-0 z-50 flex flex-col bg-slate-50 font-sans text-slate-900 select-none dark:bg-[#090d16] dark:text-slate-100",
+                isDark && "dark",
+            )}
+        >
             {/* Header */}
             <SessionHeader
                 contestName={contest?.name || "Contest"}

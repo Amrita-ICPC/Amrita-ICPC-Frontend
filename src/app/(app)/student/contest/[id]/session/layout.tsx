@@ -6,6 +6,7 @@ import { use, useEffect } from "react";
 import { toast } from "sonner";
 
 import { useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet } from "@/api/generated/students/students";
+import { ContestSessionAppearanceProvider } from "@/lib/providers/contest-session-appearance-provider";
 import { ContestSessionProvider } from "@/lib/providers/contest-session-provider";
 import { SessionTimerProvider } from "@/lib/providers/session-timer-provider";
 
@@ -58,8 +59,10 @@ export default function SessionLayout({ children, params }: LayoutProps) {
     }
 
     return (
-        <ContestSessionProvider contestId={id}>
-            <SessionTimerProvider contestId={id}>{children}</SessionTimerProvider>
-        </ContestSessionProvider>
+        <ContestSessionAppearanceProvider>
+            <ContestSessionProvider contestId={id}>
+                <SessionTimerProvider contestId={id}>{children}</SessionTimerProvider>
+            </ContestSessionProvider>
+        </ContestSessionAppearanceProvider>
     );
 }

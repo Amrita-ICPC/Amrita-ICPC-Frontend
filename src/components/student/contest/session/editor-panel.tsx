@@ -19,7 +19,6 @@ import {
     TerminalSquare,
     XCircle,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { StudentCodeRunResponse } from "@/api/generated/model";
@@ -30,7 +29,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { isDarkTheme } from "@/lib/theme-config";
+import { useContestSessionAppearance } from "@/lib/providers/contest-session-appearance-provider";
 import { cn } from "@/lib/utils";
 
 export const LANGUAGES = [
@@ -107,7 +106,7 @@ export function EditorPanel({
     submissionsCount,
 }: EditorPanelProps) {
     const activeLang = LANGUAGES.find((l) => l.id === selectedLanguageId);
-    const { theme, resolvedTheme } = useTheme();
+    const { editorTheme } = useContestSessionAppearance();
     const [mounted, setMounted] = useState(false);
     const [activeTestCaseIdx, setActiveTestCaseIdx] = useState<number>(0);
 
@@ -228,8 +227,7 @@ export function EditorPanel({
         }
     }, [runResult]);
 
-    const currentTheme =
-        mounted && isDarkTheme(theme === "system" ? resolvedTheme : theme) ? "vs-dark" : "light";
+    const currentTheme = mounted ? editorTheme : "light";
 
     const hasRunningSubmission = submissions.some((s) => {
         const statusStr = (s.status as string) || "";
