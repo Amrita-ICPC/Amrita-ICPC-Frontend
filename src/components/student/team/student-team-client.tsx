@@ -8,6 +8,7 @@ import type { GetMyTeamsApiV1StudentsTeamsGetParams } from "@/api/generated/mode
 import { useGetMyTeamsApiV1StudentsTeamsGet } from "@/api/generated/students/students";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { ViewMode } from "@/components/shared/view-toggle";
 
 import { StudentTeamCard, StudentTeamRowItem } from "./student-team-card";
@@ -189,16 +190,11 @@ export function StudentTeamClient({ initialParams }: StudentTeamClientProps) {
                     )
                 ) : (
                     /* EMPTY STATE */
-                    <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/60 bg-card p-12 text-center">
-                        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
-                            <Users className="h-6 w-6 text-primary" />
-                        </div>
-                        <h3 className="text-sm font-bold text-foreground">No Teams Found</h3>
-                        <p className="text-xs text-muted-foreground max-w-sm font-semibold leading-normal">
-                            No teams match your selected filters. Try adjusting your search term or
-                            clearing the filters.
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Users}
+                        title="No teams found"
+                        description="No teams match your selected filters. Try adjusting your search term or clearing the filters."
+                    />
                 )}
 
                 {/* PAGINATION CONTROL ROW */}

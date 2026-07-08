@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import * as React from "react";
 
 import type { StudentMemberQuestionAnalytics } from "@/api/generated/model/studentMemberQuestionAnalytics";
@@ -17,6 +17,7 @@ import {
     statusLabel,
     statusTone,
 } from "@/components/contest/team-member-analytics/member-detail-utils";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -292,8 +293,12 @@ export function MemberQuestionReview({
     if (!questions.length) {
         return (
             <Card className="border-border/70">
-                <CardContent className="flex min-h-[260px] items-center justify-center p-8 text-center text-muted-foreground">
-                    No question analytics are available for this member.
+                <CardContent className="p-0">
+                    <EmptyState
+                        icon={FileText}
+                        title="No question analytics available"
+                        description="Question-level activity will appear here after evaluation."
+                    />
                 </CardContent>
             </Card>
         );
@@ -344,12 +349,12 @@ export function MemberQuestionReview({
                             Failed to load submissions for this question.
                         </div>
                     ) : submissions.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-border/70 p-8 text-center">
-                            <p className="font-medium">No submissions for this question</p>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Once you submit a response, it will appear here.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={FileText}
+                            title="No submissions for this question"
+                            description="Once you submit a response, it will appear here."
+                            compact
+                        />
                     ) : (
                         <div className="space-y-3">
                             {submissions.map((submission) => (

@@ -27,6 +27,7 @@ import {
     useSyncKeycloakUsersApiV1UsersSyncKeycloakUsersPost,
 } from "@/api/generated/users/users";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -298,13 +299,11 @@ export function UsersClient() {
                             </Button>
                         </div>
                     ) : users.length === 0 ? (
-                        <div className="flex min-h-[240px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                            <UserRound className="size-9 opacity-40" />
-                            <p className="text-sm font-medium">No users found</p>
-                            <p className="max-w-sm text-center text-xs">
-                                Adjust the filters or sync users from Keycloak.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={UserRound}
+                            title="No users found"
+                            description="Adjust the filters or sync users from Keycloak."
+                        />
                     ) : (
                         <div className="rounded-lg border">
                             <Table>

@@ -28,6 +28,7 @@ import {
 } from "@/api/generated/audiences/audiences";
 import { type AudienceResponse, AudienceType } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -352,13 +353,12 @@ export function GroupsClient() {
                             </Button>
                         </div>
                     ) : groups.length === 0 ? (
-                        <div className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                            <Users className="size-9 opacity-40" />
-                            <p className="text-sm font-medium">No groups found</p>
-                            <p className="max-w-sm text-center text-xs">
-                                Create a group, then open it to add people.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={Users}
+                            title="No groups found"
+                            description="Create a group, then open it to add people."
+                            compact
+                        />
                     ) : (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {groups.map((group) => (

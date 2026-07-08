@@ -23,6 +23,7 @@ import {
 import type { AudienceResponse } from "@/api/generated/model";
 import { AudienceType } from "@/api/generated/model/audienceType";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -456,10 +457,12 @@ export function AudiencesClient() {
                     Failed to load audiences.
                 </div>
             ) : audiences.length === 0 ? (
-                <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                    <Users className="h-8 w-8 opacity-40" />
-                    <p className="text-sm">No audiences yet. Create one to get started.</p>
-                </div>
+                <EmptyState
+                    icon={Users}
+                    title="No audiences yet"
+                    description="Create an audience to organize users and contest access."
+                    compact
+                />
             ) : (
                 <div className="space-y-3">
                     <div className="rounded-lg border">

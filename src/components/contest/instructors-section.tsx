@@ -5,6 +5,7 @@ import { Loader2, Mail, Search, ShieldCheck, Trash2, UserCog, UserPlus, Users } 
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -217,12 +218,13 @@ export function InstructorsSection({ contestId }: InstructorsSectionProps) {
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-4 py-24">
-                                        <div className="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center border border-dashed border-border/60">
-                                            <Users className="h-7 w-7 opacity-30" />
-                                        </div>
-                                        <p className="text-sm font-medium">No users found</p>
-                                    </div>
+                                    <EmptyState
+                                        className="m-4"
+                                        icon={Users}
+                                        title="No users found"
+                                        description="Users matching your search will appear here."
+                                        compact
+                                    />
                                 )}
                             </ScrollArea>
                         </AsyncStateHandler>

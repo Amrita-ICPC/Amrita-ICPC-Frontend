@@ -15,6 +15,7 @@ import { useState } from "react";
 import type { QuestionListSummaryResponse } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -218,15 +219,12 @@ export function BankQuestionsTable({ bankId }: BankQuestionsTableProps) {
                     onRetry={refetch}
                 >
                     {questions.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                            <FileCode2 className="h-16 w-16 opacity-20 mb-4" />
-                            <h3 className="text-lg font-bold text-foreground">
-                                No questions found
-                            </h3>
-                            <p className="text-sm max-w-xs text-center mt-1 text-muted-foreground">
-                                Try adjusting your search or filters.
-                            </p>
-                        </div>
+                        <EmptyState
+                            className="m-6"
+                            icon={FileCode2}
+                            title="No questions found"
+                            description="Try adjusting your search or filters, or add questions to this bank."
+                        />
                     ) : (
                         <>
                             <div className="grid grid-cols-[48px_1fr_120px_200px_110px] items-center gap-4 border-b border-border/60 bg-muted/40 px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">

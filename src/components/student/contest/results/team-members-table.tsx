@@ -8,6 +8,7 @@ import {
     formatDateTime,
     numberValue,
 } from "@/components/contest/team-member-analytics/member-detail-utils";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -47,15 +48,13 @@ export function TeamMembersTable({
 
     if (!members.length) {
         return (
-            <Card className="border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/20 shadow-xs">
-                <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
-                    <Users className="h-10 w-10 opacity-40" />
-                    <div>
-                        <p className="font-medium text-foreground">No member results found</p>
-                        <p className="text-sm">
-                            Member activity will appear once results are available.
-                        </p>
-                    </div>
+            <Card className="border-border/70 bg-card shadow-sm">
+                <CardContent className="p-0">
+                    <EmptyState
+                        icon={Users}
+                        title="No member results found"
+                        description="Member activity will appear once results are available."
+                    />
                 </CardContent>
             </Card>
         );

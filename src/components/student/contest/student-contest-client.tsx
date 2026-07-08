@@ -1,5 +1,6 @@
 "use client";
 
+import { Trophy } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type {
@@ -9,6 +10,7 @@ import type {
 import { useGetStudentContestsApiV1StudentsContestsGet } from "@/api/generated/students/students";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { EmptyState } from "@/components/shared/empty-state";
 
 import { StudentContestCard } from "./student-contest-card";
 import { StudentContestFilters } from "./student-contest-filters";
@@ -82,9 +84,12 @@ export function StudentContestClient({ initialParams }: StudentContestClientProp
                             <StudentContestCard key={contest.id} contest={contest} />
                         ))
                     ) : (
-                        <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                            No contests found. Try adjusting your filters.
-                        </div>
+                        <EmptyState
+                            className="col-span-full"
+                            icon={Trophy}
+                            title="No contests available"
+                            description="No contests match your filters right now. Try changing the search or status filter."
+                        />
                     )}
                 </div>
 

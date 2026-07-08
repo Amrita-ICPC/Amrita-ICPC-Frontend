@@ -34,6 +34,7 @@ import {
 } from "@/api/generated/model";
 import { useListUsersApiV1UsersGet } from "@/api/generated/users/users";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -535,13 +536,12 @@ function GroupMembers({ group }: { group: AudienceResponse }) {
                             </Button>
                         </div>
                     ) : users.length === 0 ? (
-                        <div className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                            <Users className="size-9 opacity-40" />
-                            <p className="text-sm font-medium">No users in this group</p>
-                            <p className="max-w-sm text-center text-xs">
-                                Search people on the right and add multiple users at once.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={Users}
+                            title="No users in this group"
+                            description="Search people on the right and add multiple users at once."
+                            compact
+                        />
                     ) : (
                         <div className="rounded-lg border">
                             <Table>

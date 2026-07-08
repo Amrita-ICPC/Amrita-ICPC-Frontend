@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { useGetStudentContestLeaderboardApiV1StudentsContestsContestIdLeaderboardGet } from "@/api/generated/students/students";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -84,13 +85,12 @@ export function ResultsLeaderboardTable({ contestId }: ResultsLeaderboardTablePr
                         </span>
                     </div>
                 ) : !standings.length ? (
-                    <div className="flex flex-col items-center justify-center gap-2 py-16 text-center text-muted-foreground">
-                        <Trophy className="mb-2 h-10 w-10 text-muted-foreground/30" />
-                        <span className="text-sm font-semibold">No standings available yet</span>
-                        <p className="max-w-sm text-xs text-muted-foreground/85">
-                            Standings will appear once teams begin submitting solutions.
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Trophy}
+                        title="No standings available yet"
+                        description="Standings will appear once teams begin submitting solutions."
+                        compact
+                    />
                 ) : (
                     <>
                         <div className="overflow-x-auto">

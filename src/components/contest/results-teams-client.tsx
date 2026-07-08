@@ -17,6 +17,7 @@ import {
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
 } from "@/api/generated/teams/teams";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -233,10 +234,13 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                         Could not load contest teams.
                     </div>
                 ) : visibleTeams.length === 0 ? (
-                    <div className="flex min-h-52 flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <Users className="h-8 w-8 opacity-40" />
-                        <p className="text-sm">No teams match this search.</p>
-                    </div>
+                    <EmptyState
+                        className="m-4"
+                        icon={Users}
+                        title="No teams found"
+                        description="No teams match the current search or filters."
+                        compact
+                    />
                 ) : (
                     <Table>
                         <TableHeader className="bg-muted/20">

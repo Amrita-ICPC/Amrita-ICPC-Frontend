@@ -18,6 +18,7 @@ import {
     useRejectTeamApiV1ContestsContestIdTeamsContestTeamIdRejectPatch,
 } from "@/api/generated/teams/teams";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -844,17 +845,26 @@ export function ContestTeamsClient({ contestId, embedded = false }: ContestTeams
                                 ) : teams.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={8} className="h-64">
-                                            <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                                                <Users className="h-10 w-10 opacity-30" />
-                                                <p className="text-[14px]">
-                                                    {search
-                                                        ? "No teams match your search."
-                                                        : "No teams registered for this contest."}
-                                                </p>
+                                            <div className="py-4">
+                                                <EmptyState
+                                                    icon={Users}
+                                                    title={
+                                                        search
+                                                            ? "No teams match your search"
+                                                            : "No teams registered"
+                                                    }
+                                                    description={
+                                                        search
+                                                            ? "Clear the search or try a different team name."
+                                                            : "Registered teams will appear here once students join the contest."
+                                                    }
+                                                    compact
+                                                />
                                                 {search && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
+                                                        className="mx-auto mt-4 flex"
                                                         onClick={() => setSearch("")}
                                                     >
                                                         Clear search
