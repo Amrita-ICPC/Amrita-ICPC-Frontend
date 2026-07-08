@@ -48,11 +48,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     <div className="w-full px-4 py-5 sm:px-6 lg:px-10 xl:px-12">
                         <div className="mb-6">
                             <AuthGuard>
-                                <StudentRouteEnforcer isStudent={isStudent}>
-                                    <UserThemeProvider userId={session.user.id}>
+                                <UserThemeProvider userId={session.user.id}>
+                                    <StudentRouteEnforcer isStudent={isStudent}>
                                         {children}
-                                    </UserThemeProvider>
-                                </StudentRouteEnforcer>
+                                    </StudentRouteEnforcer>
+                                </UserThemeProvider>
                             </AuthGuard>
                         </div>
                     </div>

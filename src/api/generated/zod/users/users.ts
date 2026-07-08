@@ -80,6 +80,35 @@ export const GetMyTeamInvitationsApiV1UsersMeTeamInvitationGetResponse = zod.obj
 })
 
 /**
+ * Get settings/preferences (e.g. theme) for the currently authenticated user.
+ * @summary Get current user's settings
+ */
+export const getMySettingsApiV1UsersMeSettingsGetResponseSuccessDefault = true;
+export const getMySettingsApiV1UsersMeSettingsGetResponseStatusDefault = 200;
+export const getMySettingsApiV1UsersMeSettingsGetResponseMessageDefault = `Success`;
+
+export const GetMySettingsApiV1UsersMeSettingsGetResponse = zod.object({
+  "success": zod.boolean().default(getMySettingsApiV1UsersMeSettingsGetResponseSuccessDefault),
+  "status": zod.number().default(getMySettingsApiV1UsersMeSettingsGetResponseStatusDefault),
+  "message": zod.string().default(getMySettingsApiV1UsersMeSettingsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "theme": zod.union([zod.string(),zod.null()]).optional()
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
  * Update settings/preferences (e.g. theme) for the currently authenticated user.
  * @summary Update current user's settings
  */

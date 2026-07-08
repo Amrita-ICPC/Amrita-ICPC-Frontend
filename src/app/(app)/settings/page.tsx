@@ -53,7 +53,7 @@ function SecurityNote() {
         <Card className="border-border/70 bg-card/95 py-0 shadow-sm">
             <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-5">
                 <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                         <KeyRound className="h-5 w-5" />
                     </div>
                     <div>
@@ -63,9 +63,9 @@ function SecurityNote() {
                 </div>
             </CardHeader>
             <CardContent className="p-5">
-                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-start gap-3">
-                        <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                         <div>
                             <p className="text-sm font-semibold text-foreground">
                                 Managed by Keycloak SSO
@@ -158,7 +158,7 @@ export default async function SettingsPage() {
                 <main className="space-y-6">
                     <AppearanceSection />
 
-                    {!isStudent && (
+                    {!isStudent && process.env.NODE_ENV !== "production" && (
                         <Card className="border-border/70 bg-card/95 py-0 shadow-sm">
                             <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-5">
                                 <div className="flex items-start gap-3">
