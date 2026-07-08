@@ -44,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <div className="flex flex-1 flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto bg-background">
-                    <div className="mx-auto max-w-7xl px-6 py-5">
+                    <div className="w-full px-4 py-5 sm:px-6 lg:px-10 xl:px-12">
                         <div className="mb-6">
                             <AuthGuard>
                                 <StudentRouteEnforcer isStudent={isStudent}>
