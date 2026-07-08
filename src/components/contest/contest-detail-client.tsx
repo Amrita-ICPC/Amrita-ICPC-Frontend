@@ -495,6 +495,15 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 />
                                 <Separator className="my-0.5 bg-border/40" />
                                 <InfoRow
+                                    label="Question Order"
+                                    value={
+                                        contest.shuffle_questions
+                                            ? "Shuffled per participant"
+                                            : "Fixed order"
+                                    }
+                                />
+                                <Separator className="my-0.5 bg-border/40" />
+                                <InfoRow
                                     label="Evaluation Mode"
                                     value={
                                         <Badge

@@ -507,12 +507,22 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                 >
                                     <div className="space-y-3">
                                         {questions.map((question) => (
-                                            <button
+                                            <div
                                                 key={question.id}
-                                                type="button"
+                                                role="button"
+                                                tabIndex={0}
                                                 onClick={() => toggleQuestion(question)}
+                                                onKeyDown={(event) => {
+                                                    if (
+                                                        event.key === "Enter" ||
+                                                        event.key === " "
+                                                    ) {
+                                                        event.preventDefault();
+                                                        toggleQuestion(question);
+                                                    }
+                                                }}
                                                 className={cn(
-                                                    "flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-all",
+                                                    "flex w-full cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                                                     selected[question.id]
                                                         ? "border-primary/50 bg-primary/5 shadow-sm"
                                                         : "border-border/60 hover:border-primary/30 hover:bg-muted/30",
@@ -521,6 +531,8 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                                 <Checkbox
                                                     checked={Boolean(selected[question.id])}
                                                     className="mt-0.5"
+                                                    onClick={(event) => event.stopPropagation()}
+                                                    onCheckedChange={() => toggleQuestion(question)}
                                                 />
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-medium leading-snug">
@@ -548,7 +560,7 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                                         ))}
                                                     </div>
                                                 </div>
-                                            </button>
+                                            </div>
                                         ))}
                                         {!questions.length && (
                                             <EmptyState

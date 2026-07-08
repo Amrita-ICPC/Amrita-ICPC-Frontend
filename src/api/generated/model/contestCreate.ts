@@ -62,6 +62,8 @@ export interface ContestCreate {
   show_leaderboard?: boolean;
   /** Whether a team's own submissions are visible once results are published */
   show_team_submissions?: boolean;
+  /** Whether each student sees the contest questions in a randomized order */
+  shuffle_questions?: boolean;
   /** List of audience IDs to link to this contest */
   audience_ids?: string[];
 }

@@ -119,6 +119,7 @@ const formSchema = z
         contest_mode: z.enum([ContestMode.individual, ContestMode.team]).optional(),
         show_leaderboard_during_contest: z.boolean().optional(),
         evaluate_on_submit: z.boolean().optional(),
+        shuffle_questions: z.boolean().optional(),
         participation_type: z
             .enum([
                 ContestTeamParticipationType.LEADER_ONLY,
@@ -196,6 +197,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             contest_mode: initialData?.contest_mode ?? ContestMode.individual,
             show_leaderboard_during_contest: initialData?.show_leaderboard_during_contest ?? true,
             evaluate_on_submit: initialData?.evaluate_on_submit ?? true,
+            shuffle_questions: initialData?.shuffle_questions ?? false,
             participation_type:
                 initialData?.participation_type ?? ContestTeamParticipationType.LEADER_ONLY,
             max_submission_per_question: initialData?.max_submission_per_question ?? undefined,
@@ -315,6 +317,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                     contest_mode: values.contest_mode,
                     show_leaderboard_during_contest: values.show_leaderboard_during_contest,
                     evaluate_on_submit: values.evaluate_on_submit,
+                    shuffle_questions: values.shuffle_questions,
                     participation_type:
                         values.contest_mode === ContestMode.team ? values.participation_type : null,
                     max_submission_per_question: values.max_submission_per_question ?? null,
@@ -351,6 +354,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                     contest_mode: values.contest_mode,
                     show_leaderboard_during_contest: values.show_leaderboard_during_contest,
                     evaluate_on_submit: values.evaluate_on_submit ?? true,
+                    shuffle_questions: values.shuffle_questions ?? false,
                     participation_type:
                         values.contest_mode === ContestMode.team
                             ? (values.participation_type ?? undefined)
@@ -896,6 +900,33 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                                             checked={field.value ?? true}
                                                             onCheckedChange={field.onChange}
                                                             aria-label="Evaluate submissions immediately"
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-4">
+                                                <div className="space-y-1">
+                                                    <Label
+                                                        htmlFor="shuffle_questions"
+                                                        className="font-semibold"
+                                                    >
+                                                        Shuffle questions
+                                                    </Label>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Randomize the question order separately for
+                                                        each participant.
+                                                    </p>
+                                                </div>
+                                                <Controller
+                                                    control={control}
+                                                    name="shuffle_questions"
+                                                    render={({ field }) => (
+                                                        <Switch
+                                                            id="shuffle_questions"
+                                                            checked={field.value ?? false}
+                                                            onCheckedChange={field.onChange}
+                                                            aria-label="Shuffle questions for participants"
                                                         />
                                                     )}
                                                 />

@@ -46,6 +46,7 @@ export const createContestApiV1ContestsPostBodyMaxSubmissionPerQuestionOneExclus
 
 export const createContestApiV1ContestsPostBodyShowLeaderboardDefault = false;
 export const createContestApiV1ContestsPostBodyShowTeamSubmissionsDefault = false;
+export const createContestApiV1ContestsPostBodyShuffleQuestionsDefault = false;
 
 export const CreateContestApiV1ContestsPostBody = zod.object({
   "name": zod.string().min(1).max(createContestApiV1ContestsPostBodyNameMax).describe('Contest name'),
@@ -70,6 +71,7 @@ export const CreateContestApiV1ContestsPostBody = zod.object({
   "max_submission_per_question": zod.union([zod.number().gt(createContestApiV1ContestsPostBodyMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
   "show_leaderboard": zod.boolean().default(createContestApiV1ContestsPostBodyShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
   "show_team_submissions": zod.boolean().default(createContestApiV1ContestsPostBodyShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().default(createContestApiV1ContestsPostBodyShuffleQuestionsDefault).describe('Whether each student sees the contest questions in a randomized order'),
   "audience_ids": zod.array(zod.uuid()).optional().describe('List of audience IDs to link to this contest')
 }).describe('Schema for creating a contest.')
 
@@ -160,7 +162,8 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "question_count": zod.number().min(getAllContestsApiV1ContestsGetResponseDataOneContestsItemQuestionCountMin).default(getAllContestsApiV1ContestsGetResponseDataOneContestsItemQuestionCountDefault).describe('Number of questions in the contest'),
   "team_count": zod.number().min(getAllContestsApiV1ContestsGetResponseDataOneContestsItemTeamCountMin).default(getAllContestsApiV1ContestsGetResponseDataOneContestsItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)'),
   "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
-  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published')
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().describe('Whether each student sees the contest questions in a randomized order')
 }).describe('Schema for contest summary response (List view).')),
   "total_count": zod.number().default(getAllContestsApiV1ContestsGetResponseDataOneTotalCountDefault).describe('Total number of contests'),
   "live_count": zod.number().default(getAllContestsApiV1ContestsGetResponseDataOneLiveCountDefault).describe('Number of live contests'),
@@ -264,7 +267,8 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "question_count": zod.number().min(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneContestsItemQuestionCountMin).default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneContestsItemQuestionCountDefault).describe('Number of questions in the contest'),
   "team_count": zod.number().min(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneContestsItemTeamCountMin).default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneContestsItemTeamCountDefault).describe('Number of teams in the contest (confirmed and approved)'),
   "show_leaderboard": zod.boolean().describe('Whether the leaderboard is visible once results are published'),
-  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published')
+  "show_team_submissions": zod.boolean().describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().describe('Whether each student sees the contest questions in a randomized order')
 }).describe('Schema for contest summary response (List view).')),
   "total_count": zod.number().default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneTotalCountDefault).describe('Total number of contests'),
   "live_count": zod.number().default(getDeletedContestsApiV1ContestsDeletedGetResponseDataOneLiveCountDefault).describe('Number of live contests'),
@@ -328,6 +332,7 @@ export const getContestApiV1ContestsContestIdGetResponseDataOneMaxSubmissionPerQ
 
 export const getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDefault = false;
 export const getContestApiV1ContestsContestIdGetResponseDataOneShowTeamSubmissionsDefault = false;
+export const getContestApiV1ContestsContestIdGetResponseDataOneShuffleQuestionsDefault = false;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountDefault = 0;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamCountMin = 0;
 
@@ -369,6 +374,7 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "max_submission_per_question": zod.union([zod.number().gt(getContestApiV1ContestsContestIdGetResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
   "show_leaderboard": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
   "show_team_submissions": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneShuffleQuestionsDefault).describe('Whether each student sees the contest questions in a randomized order'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -463,7 +469,8 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "evaluate_on_submit": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether to evaluate submissions immediately on submit'),
   "max_submission_per_question": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed per question'),
   "show_leaderboard": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether the leaderboard is visible once results are published'),
-  "show_team_submissions": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether a team\'s own submissions are visible once results are published')
+  "show_team_submissions": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether each student sees the contest questions in a randomized order')
 }).describe('Schema for updating a contest.')
 
 export const updateContestApiV1ContestsContestIdPatchResponseSuccessDefault = true;
@@ -486,6 +493,7 @@ export const updateContestApiV1ContestsContestIdPatchResponseDataOneMaxSubmissio
 
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDefault = false;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowTeamSubmissionsDefault = false;
+export const updateContestApiV1ContestsContestIdPatchResponseDataOneShuffleQuestionsDefault = false;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountDefault = 0;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamCountMin = 0;
 
@@ -527,6 +535,7 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "max_submission_per_question": zod.union([zod.number().gt(updateContestApiV1ContestsContestIdPatchResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
   "show_leaderboard": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
   "show_team_submissions": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneShuffleQuestionsDefault).describe('Whether each student sees the contest questions in a randomized order'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -1305,6 +1314,7 @@ export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxSu
 
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDefault = false;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowTeamSubmissionsDefault = false;
+export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShuffleQuestionsDefault = false;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountDefault = 0;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamCountMin = 0;
 
@@ -1346,6 +1356,7 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "max_submission_per_question": zod.union([zod.number().gt(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxSubmissionPerQuestionOneExclusiveMin),zod.null()]).optional().describe('Maximum submissions allowed per question'),
   "show_leaderboard": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDefault).describe('Whether the leaderboard is visible once results are published'),
   "show_team_submissions": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowTeamSubmissionsDefault).describe('Whether a team\'s own submissions are visible once results are published'),
+  "shuffle_questions": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShuffleQuestionsDefault).describe('Whether each student sees the contest questions in a randomized order'),
   "id": zod.uuid().describe('Contest ID'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Contest temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
