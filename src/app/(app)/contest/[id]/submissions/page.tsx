@@ -3,14 +3,10 @@ import AccessDenied from "@/components/global/access-denied";
 import AuthGuard from "@/components/global/auth-guard";
 import { Roles } from "@/lib/auth/utils";
 
-type SearchParams = Record<string, string | string[] | undefined>;
-
 export default async function ContestSubmissionsPage({
     params,
-    searchParams,
 }: {
     params: Promise<{ id: string }>;
-    searchParams?: Promise<SearchParams>;
 }) {
     const { id } = await params;
 
