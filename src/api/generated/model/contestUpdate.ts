@@ -58,4 +58,6 @@ export interface ContestUpdate {
   show_leaderboard?: boolean | null;
   /** Whether a team's own submissions are visible once results are published */
   show_team_submissions?: boolean | null;
+  /** Whether each student sees the contest questions in a randomized order */
+  shuffle_questions?: boolean | null;
 }

@@ -65,6 +65,8 @@ export interface ContestDetailResponse {
   show_leaderboard?: boolean;
   /** Whether a team's own submissions are visible once results are published */
   show_team_submissions?: boolean;
+  /** Whether each student sees the contest questions in a randomized order */
+  shuffle_questions?: boolean;
   /** Contest ID */
   id: string;
   /** Contest lifecycle status */
