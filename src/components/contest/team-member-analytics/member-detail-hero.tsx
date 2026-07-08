@@ -132,8 +132,8 @@ export function MemberVerdictAnalytics({ member }: { member: ContestTeamMemberDe
                     No submissions yet.
                 </div>
             ) : (
-                <div className="mt-3 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
-                    <div className="flex flex-col gap-1.5 order-2 sm:order-1">
+                <div className="mt-3 grid gap-6 lg:grid-cols-[minmax(360px,670px)_340px] lg:items-center lg:justify-start xl:gap-10">
+                    <div className="order-2 flex flex-col gap-1.5 sm:order-1">
                         <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5 text-sm">
                             <span className="text-muted-foreground">Total</span>
                             <span className="font-semibold tabular-nums text-foreground">
@@ -161,7 +161,7 @@ export function MemberVerdictAnalytics({ member }: { member: ContestTeamMemberDe
                     </div>
                     <ChartContainer
                         config={chartConfig}
-                        className="order-1 mx-auto h-[300px] w-[300px] max-w-full shrink-0 sm:h-[340px] sm:w-[340px] lg:order-2 [&_.recharts-pie-label-text]:fill-foreground"
+                        className="order-1 mx-auto h-[300px] w-[300px] max-w-full shrink-0 sm:h-[340px] sm:w-[340px] lg:order-2 lg:mx-0 [&_.recharts-pie-label-text]:fill-foreground"
                         initialDimension={{ width: 340, height: 340 }}
                     >
                         <PieChart>
