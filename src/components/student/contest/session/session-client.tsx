@@ -12,6 +12,7 @@ import {
     PanelLeftOpen,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -55,6 +56,8 @@ interface SessionClientProps {
 
 export function SessionClient({ contestId }: SessionClientProps) {
     const router = useRouter();
+    const { data: session } = useSession();
+    const userId = session?.user?.id;
     const queryClient = useQueryClient();
     const { isDark } = useContestSessionAppearance();
 
@@ -269,13 +272,13 @@ export function SessionClient({ contestId }: SessionClientProps) {
 
     // Sync workspace or starter code in Monaco
     useEffect(() => {
-        if (!activeQuestionId || !isWorkspaceLoaded || !questionDetails) return;
+        if (!activeQuestionId || !isWorkspaceLoaded || !questionDetails || !userId) return;
 
         // Check if we need to load the question workspace for the first time
         const hasLoadedQuestion = loadedKey.startsWith(`${activeQuestionId}_`);
 
         // Check local backup first
-        const key = `contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
+        const key = `user:${userId}:contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
         let localBackupCode: string | null = null;
         try {
             const localBackup = localStorage.getItem(key);
@@ -344,6 +347,7 @@ export function SessionClient({ contestId }: SessionClientProps) {
         selectedLanguageId,
         contestId,
         questionDetails,
+        userId,
     ]);
 
     // 4. Save Code Mutation & Debounce Auto-Save
@@ -388,11 +392,12 @@ export function SessionClient({ contestId }: SessionClientProps) {
             editorCode === undefined ||
             editorCode === null ||
             !activeQuestionId ||
-            loadedKey !== currentKey
+            loadedKey !== currentKey ||
+            !userId
         )
             return;
 
-        const key = `contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
+        const key = `user:${userId}:contest:${contestId}:question:${activeQuestionId}:lang:${selectedLanguageId}`;
         localStorage.setItem(
             key,
             JSON.stringify({
@@ -400,7 +405,15 @@ export function SessionClient({ contestId }: SessionClientProps) {
                 savedAt: Date.now(),
             }),
         );
-    }, [editorCode, contestId, activeQuestionId, selectedLanguageId, loadedKey, currentKey]);
+    }, [
+        editorCode,
+        contestId,
+        activeQuestionId,
+        selectedLanguageId,
+        loadedKey,
+        currentKey,
+        userId,
+    ]);
 
     const handleManualSave = () => {
         if (!activeQuestionId) return;
