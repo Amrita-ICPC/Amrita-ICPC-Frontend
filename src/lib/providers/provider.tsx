@@ -25,7 +25,6 @@ export default function Provider({ children }: ProviderProps) {
                         defaultTheme="system"
                         enableSystem
                         themes={THEME_IDS}
-                        disableTransitionOnChange
                     >
                         <TooltipProvider>{children}</TooltipProvider>
                         <Toaster richColors closeButton />

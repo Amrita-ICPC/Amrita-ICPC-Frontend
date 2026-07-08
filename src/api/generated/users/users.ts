@@ -232,6 +232,99 @@ export function useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet<TData = Awa
 
 
 /**
+ * Get settings/preferences (e.g. theme) for the currently authenticated user.
+ * @summary Get current user's settings
+ */
+export const getMySettingsApiV1UsersMeSettingsGet = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseUserSettingsResponse>(
+      {url: `/api/v1/users/me/settings`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMySettingsApiV1UsersMeSettingsGetQueryKey = () => {
+    return [
+    `/api/v1/users/me/settings`
+    ] as const;
+    }
+
+
+export const getGetMySettingsApiV1UsersMeSettingsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError = ExceptionResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMySettingsApiV1UsersMeSettingsGetQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>> = ({ signal }) => getMySettingsApiV1UsersMeSettingsGet(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMySettingsApiV1UsersMeSettingsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>>
+export type GetMySettingsApiV1UsersMeSettingsGetQueryError = ExceptionResponse
+
+
+export function useGetMySettingsApiV1UsersMeSettingsGet<TData = Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError = ExceptionResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMySettingsApiV1UsersMeSettingsGet<TData = Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError = ExceptionResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMySettingsApiV1UsersMeSettingsGet<TData = Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError = ExceptionResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current user's settings
+ */
+
+export function useGetMySettingsApiV1UsersMeSettingsGet<TData = Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError = ExceptionResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySettingsApiV1UsersMeSettingsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMySettingsApiV1UsersMeSettingsGetQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Update settings/preferences (e.g. theme) for the currently authenticated user.
  * @summary Update current user's settings
  */
