@@ -2,7 +2,6 @@
 
 import { BookOpen, CalendarDays, Crown, Edit, HelpCircle, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -38,7 +37,6 @@ function formatDate(value?: string | null) {
 
 export function BankCard({ bank }: BankCardProps) {
     const router = useRouter();
-    const { data: session } = useSession();
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [updateOpen, setUpdateOpen] = useState(false);
 
@@ -54,7 +52,7 @@ export function BankCard({ bank }: BankCardProps) {
 
     const isDeleting = deleteMutation.isPending;
     const questionCount = bank.total_questions_count ?? 0;
-    const isOwner = !!session?.user?.id && session.user.id === bank.created_by;
+    const isOwner = !!bank.is_owner;
 
     return (
         <div

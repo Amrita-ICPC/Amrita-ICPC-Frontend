@@ -71,6 +71,7 @@ export const getAllBanksApiV1BanksGetResponseDataOneItemNameMax = 255;
 
 export const getAllBanksApiV1BanksGetResponseDataOneItemDescriptionOneMax = 5000;
 
+export const getAllBanksApiV1BanksGetResponseDataOneItemIsOwnerDefault = false;
 export const getAllBanksApiV1BanksGetResponseDataOneItemTotalQuestionsCountDefault = 0;
 
 export const GetAllBanksApiV1BanksGetResponse = zod.object({
@@ -82,6 +83,7 @@ export const GetAllBanksApiV1BanksGetResponse = zod.object({
   "description": zod.union([zod.string().max(getAllBanksApiV1BanksGetResponseDataOneItemDescriptionOneMax),zod.null()]).optional().describe('Bank description'),
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
+  "is_owner": zod.boolean().default(getAllBanksApiV1BanksGetResponseDataOneItemIsOwnerDefault).describe('Whether the current user is the owner of the bank'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
   "total_questions_count": zod.number().default(getAllBanksApiV1BanksGetResponseDataOneItemTotalQuestionsCountDefault).describe('Total number of questions in the bank')
@@ -133,6 +135,7 @@ export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemNameMax = 255
 
 export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemDescriptionOneMax = 5000;
 
+export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemIsOwnerDefault = false;
 export const getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemTotalQuestionsCountDefault = 0;
 
 export const GetDeletedBanksApiV1BanksDeletedGetResponse = zod.object({
@@ -144,6 +147,7 @@ export const GetDeletedBanksApiV1BanksDeletedGetResponse = zod.object({
   "description": zod.union([zod.string().max(getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemDescriptionOneMax),zod.null()]).optional().describe('Bank description'),
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
+  "is_owner": zod.boolean().default(getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemIsOwnerDefault).describe('Whether the current user is the owner of the bank'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
   "total_questions_count": zod.number().default(getDeletedBanksApiV1BanksDeletedGetResponseDataOneItemTotalQuestionsCountDefault).describe('Total number of questions in the bank')
@@ -186,6 +190,7 @@ export const getBankApiV1BanksBankIdGetResponseDataOneNameMax = 255;
 
 export const getBankApiV1BanksBankIdGetResponseDataOneDescriptionOneMax = 5000;
 
+export const getBankApiV1BanksBankIdGetResponseDataOneIsOwnerDefault = false;
 export const getBankApiV1BanksBankIdGetResponseDataOneTotalQuestionsCountDefault = 0;
 export const getBankApiV1BanksBankIdGetResponseDataOneEasyQuestionsCountDefault = 0;
 export const getBankApiV1BanksBankIdGetResponseDataOneMediumQuestionsCountDefault = 0;
@@ -201,6 +206,7 @@ export const GetBankApiV1BanksBankIdGetResponse = zod.object({
   "description": zod.union([zod.string().max(getBankApiV1BanksBankIdGetResponseDataOneDescriptionOneMax),zod.null()]).optional().describe('Bank description'),
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
+  "is_owner": zod.boolean().default(getBankApiV1BanksBankIdGetResponseDataOneIsOwnerDefault).describe('Whether the current user is the owner of the bank'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
   "total_questions_count": zod.number().default(getBankApiV1BanksBankIdGetResponseDataOneTotalQuestionsCountDefault).describe('Total number of questions in the bank'),
@@ -387,6 +393,7 @@ export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneNameMax = 255;
 
 export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneDescriptionOneMax = 5000;
 
+export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneIsOwnerDefault = false;
 export const restoreBankApiV1BanksBankIdRestorePostResponseDataOneTotalQuestionsCountDefault = 0;
 
 export const RestoreBankApiV1BanksBankIdRestorePostResponse = zod.object({
@@ -398,6 +405,7 @@ export const RestoreBankApiV1BanksBankIdRestorePostResponse = zod.object({
   "description": zod.union([zod.string().max(restoreBankApiV1BanksBankIdRestorePostResponseDataOneDescriptionOneMax),zod.null()]).optional().describe('Bank description'),
   "id": zod.uuid().describe('Bank ID'),
   "created_by": zod.uuid().describe('Creator user ID'),
+  "is_owner": zod.boolean().default(restoreBankApiV1BanksBankIdRestorePostResponseDataOneIsOwnerDefault).describe('Whether the current user is the owner of the bank'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Creation time'),
   "updated_at": zod.iso.datetime({"offset":true}).describe('Last update time'),
   "total_questions_count": zod.number().default(restoreBankApiV1BanksBankIdRestorePostResponseDataOneTotalQuestionsCountDefault).describe('Total number of questions in the bank')

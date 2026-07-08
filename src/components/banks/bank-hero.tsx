@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -70,7 +69,6 @@ function MetaCell({
 
 export function BankHero({ bank }: BankHeroProps) {
     const router = useRouter();
-    const { data: session } = useSession();
     const queryClient = useQueryClient();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -88,7 +86,7 @@ export function BankHero({ bank }: BankHeroProps) {
         },
     });
 
-    const isOwner = !!session?.user?.id && session.user.id === bank.created_by;
+    const isOwner = !!bank.is_owner;
 
     const formattedDate = new Date(bank.created_at).toLocaleDateString(undefined, {
         month: "short",

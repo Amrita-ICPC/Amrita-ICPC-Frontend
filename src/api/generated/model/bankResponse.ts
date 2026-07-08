@@ -24,6 +24,8 @@ export interface BankResponse {
   id: string;
   /** Creator user ID */
   created_by: string;
+  /** Whether the current user is the owner of the bank */
+  is_owner?: boolean;
   /** Creation time */
   created_at: string;
   /** Last update time */
