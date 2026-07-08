@@ -2,7 +2,6 @@
 "use client";
 
 import { Clock, Loader2, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { isDarkTheme } from "@/lib/theme-config";
+import { usePersistedTheme } from "@/lib/use-persisted-theme";
 
 interface SessionHeaderProps {
     contestName: string;
@@ -29,7 +29,7 @@ export function SessionHeader({
     onFinish,
     isFinishing,
 }: SessionHeaderProps) {
-    const { theme, resolvedTheme, setTheme } = useTheme();
+    const { theme, resolvedTheme, setPersistedTheme } = usePersistedTheme();
     const [mounted, setMounted] = useState(false);
     const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
 
@@ -67,7 +67,7 @@ export function SessionHeader({
                         variant="outline"
                         size="icon"
                         className="h-8 w-8 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                        onClick={() => setTheme(isDark ? "light" : "dark")}
+                        onClick={() => setPersistedTheme(isDark ? "light" : "dark")}
                         title={`Switch to ${isDark ? "light" : "dark"} mode`}
                     >
                         {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

@@ -7,6 +7,7 @@ import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
 import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute, UserType } from "@/lib/auth/utils";
 import { logger } from "@/lib/logger";
+import { UserThemeProvider } from "@/lib/providers/user-theme-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                         <div className="mb-6">
                             <AuthGuard>
                                 <StudentRouteEnforcer isStudent={isStudent}>
-                                    {children}
+                                    <UserThemeProvider userId={session.user.id}>
+                                        {children}
+                                    </UserThemeProvider>
                                 </StudentRouteEnforcer>
                             </AuthGuard>
                         </div>

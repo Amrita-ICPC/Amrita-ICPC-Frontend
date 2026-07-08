@@ -1,10 +1,8 @@
 "use client";
 
-import { LogOut, Moon, Settings, Sun } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 import {
     DropdownMenu,
@@ -14,7 +12,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { isDarkTheme } from "@/lib/theme-config";
 
 function initials(name?: string | null, email?: string | null) {
     const s = name || email || "U";
@@ -30,14 +27,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ name, email }: UserMenuProps) {
-    const { theme, resolvedTheme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    useEffect(() => setMounted(true), []);
-
-    const isDark = mounted ? isDarkTheme(theme === "system" ? resolvedTheme : theme) : false;
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -61,14 +50,6 @@ export function UserMenu({ name, email }: UserMenuProps) {
                 </DropdownMenuLabel>
 
                 <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                    onClick={() => setTheme(isDark ? "light" : "dark")}
-                    className="cursor-pointer"
-                >
-                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                    <span>{isDark ? "Light mode" : "Dark mode"}</span>
-                </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
                     <Link href="/settings">

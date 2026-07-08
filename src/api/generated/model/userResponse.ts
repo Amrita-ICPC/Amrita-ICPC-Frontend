@@ -17,6 +17,7 @@ export interface UserResponse {
   role: UserRole;
   gender?: string | null;
   dob?: string | null;
+  theme?: string | null;
   created_at: string;
   last_updated: string;
   audience_links?: AudienceBasicInfo[];
