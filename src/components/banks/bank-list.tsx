@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useGetAllBanksApiV1BanksGet } from "@/api/generated/banks/banks";
 import { BankSortBy } from "@/api/generated/model/bankSortBy";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,19 +167,15 @@ export function BankList() {
                     </div>
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/60 bg-muted/5 p-6 text-center shadow-sm">
-                    <div className="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center border border-dashed border-border/60">
-                        <Database className="size-8 opacity-30 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-base font-semibold">No banks found</p>
-                        <p className="max-w-sm text-center text-sm text-muted-foreground">
-                            {searchQuery
-                                ? "Try a different search term to find what you're looking for."
-                                : "Create your first question bank to get started building your collection."}
-                        </p>
-                    </div>
-                </div>
+                <EmptyState
+                    icon={Database}
+                    title="No question banks found"
+                    description={
+                        searchQuery
+                            ? "Try a different search term to find the bank you need."
+                            : "Create your first question bank to start building a reusable question collection."
+                    }
+                />
             ) : view === "grid" ? (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {filtered.map((bank) => (

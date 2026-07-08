@@ -32,6 +32,7 @@ import {
     getGetMyTeamInvitationsApiV1UsersMeTeamInvitationGetQueryKey,
     useGetMyTeamInvitationsApiV1UsersMeTeamInvitationGet,
 } from "@/api/generated/users/users";
+import { EmptyState as PlatformEmptyState } from "@/components/shared/empty-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -620,22 +621,19 @@ function EmptyPanel({
     compact?: boolean;
 }) {
     return (
-        <div
-            className={cn(
-                "flex flex-col items-center justify-center rounded-xl border border-dashed px-5 text-center",
-                compact ? "min-h-40" : "min-h-64",
-            )}
-        >
-            <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <Icon className="size-4" />
-            </div>
-            <p className="text-sm font-semibold">{title}</p>
-            <p className="mt-1 max-w-xs text-xs leading-5 text-muted-foreground">{description}</p>
-            {action && (
-                <Button asChild variant="outline" size="sm" className="mt-4">
-                    <Link href={action.href}>{action.label}</Link>
-                </Button>
-            )}
-        </div>
+        <PlatformEmptyState
+            icon={Icon}
+            title={title}
+            description={description}
+            compact={compact}
+            className={compact ? "min-h-40" : "min-h-64"}
+            action={
+                action ? (
+                    <Button asChild variant="outline" size="sm">
+                        <Link href={action.href}>{action.label}</Link>
+                    </Button>
+                ) : undefined
+            }
+        />
     );
 }

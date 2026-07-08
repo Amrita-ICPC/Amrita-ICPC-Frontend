@@ -26,6 +26,7 @@ import {
     useGetJudge0LanguagesApiV1QuestionsLanguagesJudge0Get,
     useGetPlatformLanguagesApiV1QuestionsLanguagesPlatformGet,
 } from "@/api/generated/questions/questions";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -435,15 +436,16 @@ export function LanguagesClient() {
                             </Button>
                         </div>
                     ) : filteredLanguages.length === 0 ? (
-                        <div className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                            <Code2 className="size-9 opacity-40" />
-                            <p className="text-sm font-medium">No programming languages found</p>
-                            <p className="max-w-sm text-center text-xs">
-                                {languages.length === 0
+                        <EmptyState
+                            icon={Code2}
+                            title="No programming languages found"
+                            description={
+                                languages.length === 0
                                     ? "Add a programming language from Judge0 to get started."
-                                    : "Try a different search term."}
-                            </p>
-                        </div>
+                                    : "Try a different search term."
+                            }
+                            compact
+                        />
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredLanguages.map((language) => (

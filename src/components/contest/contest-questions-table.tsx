@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PaginationResponse, QuestionListSummaryResponse } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { SortableList } from "@/components/shared/sortable-list";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -431,15 +432,11 @@ export function ContestQuestionsTable({
                     </SortableList>
 
                     {orderedQuestions.length === 0 && !isLoading && (
-                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-muted-foreground">
-                            <FileCode2 className="h-16 w-16 opacity-20 mb-4" />
-                            <h3 className="text-lg font-bold text-foreground">
-                                No questions found
-                            </h3>
-                            <p className="text-sm max-w-xs text-center mt-1 text-muted-foreground">
-                                Try adjusting your search or filters.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={FileCode2}
+                            title="No questions found"
+                            description="Try adjusting your search or filters, or import questions into this contest."
+                        />
                     )}
                     {/* Pagination Footer */}
                     {pagination && !embedded && (

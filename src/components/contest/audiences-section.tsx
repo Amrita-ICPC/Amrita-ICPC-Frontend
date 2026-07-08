@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -213,12 +214,13 @@ export function AudiencesSection({ contestId }: AudiencesSectionProps) {
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 space-y-4 py-24">
-                                        <div className="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center border border-dashed border-border/60">
-                                            <Layers className="h-7 w-7 opacity-30" />
-                                        </div>
-                                        <p className="text-sm font-medium">No audiences found</p>
-                                    </div>
+                                    <EmptyState
+                                        className="m-4"
+                                        icon={Layers}
+                                        title="No audiences found"
+                                        description="Audiences you can assign to this contest will appear here."
+                                        compact
+                                    />
                                 )}
                             </ScrollArea>
                         </AsyncStateHandler>

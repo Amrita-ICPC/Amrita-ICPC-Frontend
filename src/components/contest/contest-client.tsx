@@ -23,6 +23,7 @@ import type {
     GetAllContestsApiV1ContestsGetParams,
 } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
+import { EmptyState } from "@/components/shared/empty-state";
 import { StatCard } from "@/components/shared/stat-card";
 import { type ViewMode, ViewToggle } from "@/components/shared/view-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -316,9 +317,12 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                                 <ContestCard key={contest.id} contest={contest} />
                             ))
                         ) : (
-                            <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                                No contests found. Try adjusting your filters.
-                            </div>
+                            <EmptyState
+                                className="col-span-full"
+                                icon={Trophy}
+                                title="No contests found"
+                                description="Try adjusting your filters, or create a contest when you are ready."
+                            />
                         )}
                     </div>
                 ) : (
@@ -330,9 +334,11 @@ export function ContestClient({ initialParams }: ContestClientProps) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                                No contests found. Try adjusting your filters.
-                            </div>
+                            <EmptyState
+                                icon={Trophy}
+                                title="No contests found"
+                                description="Try adjusting your filters, or create a contest when you are ready."
+                            />
                         )}
                     </>
                 )}

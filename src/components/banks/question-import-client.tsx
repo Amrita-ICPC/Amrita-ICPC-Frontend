@@ -22,6 +22,7 @@ import { getBankQuestionsApiV1BanksBankIdQuestionsGet } from "@/api/generated/ba
 import type { BankResponse, QuestionListSummaryResponse } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -401,19 +402,12 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                 <Card className="min-w-0 border-border/60 py-0">
                     <CardContent className="flex flex-col gap-4 p-4">
                         {!activeBank ? (
-                            <div className="flex min-h-[560px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed text-center text-muted-foreground">
-                                <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                    <BookOpen className="size-8" />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-foreground">
-                                        Choose a question bank
-                                    </p>
-                                    <p className="text-sm">
-                                        Select a bank on the left to browse its questions.
-                                    </p>
-                                </div>
-                            </div>
+                            <EmptyState
+                                className="min-h-[560px]"
+                                icon={BookOpen}
+                                title="Choose a question bank"
+                                description="Select a bank on the left to browse its questions."
+                            />
                         ) : (
                             <>
                                 <div className="flex flex-col gap-3 border-b border-border/60 pb-4">
@@ -557,12 +551,12 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                             </button>
                                         ))}
                                         {!questions.length && (
-                                            <div className="flex min-h-[240px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-                                                <FileQuestion className="size-8" />
-                                                <p className="text-sm font-medium">
-                                                    No questions match these filters
-                                                </p>
-                                            </div>
+                                            <EmptyState
+                                                icon={FileQuestion}
+                                                title="No questions match these filters"
+                                                description="Try changing the search, difficulty, or tag filters."
+                                                compact
+                                            />
                                         )}
                                     </div>
                                 </AsyncStateHandler>

@@ -15,6 +15,7 @@ import {
 } from "@/api/generated/teams/teams";
 import { EvaluationDialog } from "@/components/contest/evaluation-dialog";
 import { TeamSubmissionBreakdownChart } from "@/components/contest/team-submission-breakdown-chart";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -138,14 +139,12 @@ function MembersTable({
     if (!members.length) {
         return (
             <Card className="rounded-2xl border-border/60 shadow-sm">
-                <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
-                    <Users className="h-10 w-10 opacity-40" />
-                    <div>
-                        <p className="font-medium text-foreground">No member analytics found</p>
-                        <p className="text-sm">
-                            Member activity will appear once analytics are available.
-                        </p>
-                    </div>
+                <CardContent className="p-0">
+                    <EmptyState
+                        icon={Users}
+                        title="No member analytics found"
+                        description="Member activity will appear once analytics are available."
+                    />
                 </CardContent>
             </Card>
         );
