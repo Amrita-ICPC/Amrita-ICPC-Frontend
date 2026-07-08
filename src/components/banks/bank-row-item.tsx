@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { BookOpen, CalendarDays, Crown, Edit, HelpCircle, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -30,7 +29,6 @@ interface BankRowItemProps {
 
 export function BankRowItem({ bank }: BankRowItemProps) {
     const router = useRouter();
-    const { data: session } = useSession();
     const queryClient = useQueryClient();
     const [updateOpen, setUpdateOpen] = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
@@ -61,7 +59,7 @@ export function BankRowItem({ bank }: BankRowItemProps) {
     });
 
     const questionCount = bank.total_questions_count ?? 0;
-    const isOwner = !!session?.user?.id && session.user.id === bank.created_by;
+    const isOwner = !!bank.is_owner;
 
     const handleRowClick = () => {
         router.push(`/banks/${bank.id}`);
