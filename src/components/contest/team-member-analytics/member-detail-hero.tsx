@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, CheckCircle2, Clock3, Flag, Mail, Timer, User } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import { Cell, Label, Pie, PieChart } from "recharts";
 
 import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
 import { EvaluationScope } from "@/api/generated/model/evaluationScope";
@@ -99,94 +99,134 @@ export function MemberVerdictAnalytics({ member }: { member: ContestTeamMemberDe
         { name: "Pending", value: numberValue(stats?.pending), fill: "hsl(215 16% 47%)" },
         { name: "System Error", value: numberValue(stats?.system_error), fill: "hsl(330 81% 60%)" },
     ];
-    const chartData = data.map((item) => ({
-        ...item,
-        shortLabel:
-            item.name === "Accepted"
-                ? "AC"
-                : item.name === "Wrong Answer"
-                  ? "WA"
-                  : item.name === "Runtime Error"
-                    ? "RE"
-                    : item.name === "Compilation Error"
-                      ? "CE"
-                      : item.name === "Time Limit"
-                        ? "TLE"
-                        : item.name === "Memory Limit"
-                          ? "MLE"
-                          : item.name === "System Error"
-                            ? "SE"
-                            : "Pending",
-    }));
+    const chartData = data
+        .map((item) => ({
+            ...item,
+            shortLabel:
+                item.name === "Accepted"
+                    ? "AC"
+                    : item.name === "Wrong Answer"
+                      ? "WA"
+                      : item.name === "Runtime Error"
+                        ? "RE"
+                        : item.name === "Compilation Error"
+                          ? "CE"
+                          : item.name === "Time Limit"
+                            ? "TLE"
+                            : item.name === "Memory Limit"
+                              ? "MLE"
+                              : item.name === "System Error"
+                                ? "SE"
+                                : "Pending",
+        }))
+        .filter((item) => item.value > 0);
 
     return (
         <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-            <div className="flex flex-wrap items-center gap-2">
-                <h2 className="mr-1 font-semibold">Verdict analytics</h2>
-                <Badge variant="outline" className="border-border/60 bg-muted/40">
-                    <span className="font-semibold">{total}</span> Total
-                </Badge>
-                {data.map((item) => (
-                    <Badge
-                        key={item.name}
-                        variant="outline"
-                        className="border-border/60 bg-background"
-                    >
-                        <span
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: item.fill }}
-                        />
-                        {item.name}{" "}
-                        <span className="font-semibold">
-                            {item.value}
-                            {item.name === "Accepted" ? ` · ${acceptance}%` : ""}
-                        </span>
-                    </Badge>
-                ))}
-            </div>
+            <h2 className="font-semibold">Verdict analytics</h2>
             <p className="mt-1 text-sm text-muted-foreground">
                 Submission outcomes across this member&apos;s evaluated attempts.
             </p>
-            <ChartContainer
-                config={chartConfig}
-                className="mt-3 h-[280px] w-full"
-                initialDimension={{ width: 760, height: 280 }}
-            >
-                <BarChart data={chartData} margin={{ top: 12, right: 8, left: -16, bottom: 0 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="4 4" />
-                    <XAxis dataKey="shortLabel" tickLine={false} axisLine={false} tickMargin={10} />
-                    <YAxis
-                        allowDecimals={false}
-                        domain={[0, (max: number) => Math.max(1, max)]}
-                        tickLine={false}
-                        axisLine={false}
-                        width={34}
-                    />
-                    <ChartTooltip
-                        cursor={{ fill: "var(--muted)", opacity: 0.45 }}
-                        content={
-                            <ChartTooltipContent
-                                hideLabel
-                                formatter={(value, _name, item) => (
-                                    <>
-                                        <span className="text-muted-foreground">
-                                            {item.payload?.name}
-                                        </span>
-                                        <span className="ml-auto font-mono font-medium">
-                                            {Number(value)} submissions
-                                        </span>
-                                    </>
-                                )}
-                            />
-                        }
-                    />
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={44}>
-                        {chartData.map((item) => (
-                            <Cell key={item.name} fill={item.fill} />
+            {total === 0 ? (
+                <div className="mt-3 flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+                    No submissions yet.
+                </div>
+            ) : (
+                <div className="mt-3 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+                    <div className="flex flex-col gap-1.5 order-2 sm:order-1">
+                        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5 text-sm">
+                            <span className="text-muted-foreground">Total</span>
+                            <span className="font-semibold tabular-nums text-foreground">
+                                {total}
+                            </span>
+                        </div>
+                        {data.map((item) => (
+                            <div
+                                key={item.name}
+                                className="flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm hover:bg-muted/40"
+                            >
+                                <span className="flex min-w-0 items-center gap-2 text-foreground">
+                                    <span
+                                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                                        style={{ backgroundColor: item.fill }}
+                                    />
+                                    <span className="truncate">{item.name}</span>
+                                </span>
+                                <span className="shrink-0 font-semibold tabular-nums text-foreground">
+                                    {item.value}
+                                    {item.name === "Accepted" ? ` · ${acceptance}%` : ""}
+                                </span>
+                            </div>
                         ))}
-                    </Bar>
-                </BarChart>
-            </ChartContainer>
+                    </div>
+                    <ChartContainer
+                        config={chartConfig}
+                        className="order-1 mx-auto h-[300px] w-[300px] max-w-full shrink-0 sm:h-[340px] sm:w-[340px] lg:order-2 [&_.recharts-pie-label-text]:fill-foreground"
+                        initialDimension={{ width: 340, height: 340 }}
+                    >
+                        <PieChart>
+                            <ChartTooltip
+                                cursor={false}
+                                content={
+                                    <ChartTooltipContent
+                                        hideLabel
+                                        formatter={(value, _name, item) => (
+                                            <>
+                                                <span className="text-muted-foreground">
+                                                    {item.payload?.name}
+                                                </span>
+                                                <span className="ml-auto font-mono font-medium">
+                                                    {Number(value)} submissions
+                                                </span>
+                                            </>
+                                        )}
+                                    />
+                                }
+                            />
+                            <Pie
+                                data={chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={86}
+                                strokeWidth={5}
+                            >
+                                {chartData.map((item) => (
+                                    <Cell key={item.name} fill={item.fill} />
+                                ))}
+                                <Label
+                                    content={({ viewBox }) => {
+                                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                            return (
+                                                <text
+                                                    x={viewBox.cx}
+                                                    y={viewBox.cy}
+                                                    textAnchor="middle"
+                                                    dominantBaseline="middle"
+                                                >
+                                                    <tspan
+                                                        x={viewBox.cx}
+                                                        y={viewBox.cy}
+                                                        className="fill-foreground text-3xl font-bold font-sans"
+                                                    >
+                                                        {total.toLocaleString()}
+                                                    </tspan>
+                                                    <tspan
+                                                        x={viewBox.cx}
+                                                        y={(viewBox.cy || 0) + 24}
+                                                        className="fill-muted-foreground text-sm font-medium font-sans"
+                                                    >
+                                                        Submissions
+                                                    </tspan>
+                                                </text>
+                                            );
+                                        }
+                                    }}
+                                />
+                            </Pie>
+                        </PieChart>
+                    </ChartContainer>
+                </div>
+            )}
         </div>
     );
 }
