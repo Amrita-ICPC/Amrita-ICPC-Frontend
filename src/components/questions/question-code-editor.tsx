@@ -36,6 +36,57 @@ const LANGUAGES = [
 
 export type MonacoLanguage = (typeof LANGUAGES)[number];
 
+function extractExecutionError(err: unknown): string {
+    if (!err || typeof err !== "object") {
+        return "Execution failed. Check your code and test cases, then try again.";
+    }
+
+    const responseData = (err as { response?: { data?: unknown } }).response?.data;
+    if (!responseData || typeof responseData !== "object") {
+        return "Execution failed. Check your code and test cases, then try again.";
+    }
+
+    const data = responseData as {
+        message?: unknown;
+        detail?: unknown;
+        errors?: unknown;
+    };
+
+    if (typeof data.message === "string" && data.message.trim()) {
+        return data.message;
+    }
+
+    const detail = data.detail ?? data.errors;
+    if (Array.isArray(detail)) {
+        const messages = detail
+            .map((item) => {
+                if (!item || typeof item !== "object") return null;
+                const error = item as { loc?: unknown; msg?: unknown; message?: unknown };
+                const field = Array.isArray(error.loc)
+                    ? error.loc.filter((part) => part !== "body").join(" -> ")
+                    : null;
+                const message =
+                    typeof error.msg === "string"
+                        ? error.msg
+                        : typeof error.message === "string"
+                          ? error.message
+                          : null;
+                return message ? [field, message].filter(Boolean).join(": ") : null;
+            })
+            .filter(Boolean);
+
+        if (messages.length > 0) {
+            return messages.join("\n");
+        }
+    }
+
+    if (typeof detail === "string" && detail.trim()) {
+        return detail;
+    }
+
+    return "Execution failed. Check your code and test cases, then try again.";
+}
+
 interface QuestionCodeEditorProps {
     value: string;
     onChange: (value: string) => void;
@@ -93,20 +144,68 @@ export function QuestionCodeEditor({
 
     const handleRun = async () => {
         const currentContent = editorRef.current?.getValue() ?? value;
-        if (!currentContent.trim()) return;
 
         setExecError(null);
+        setLastResult(null);
+
+        const activeSolutionCode = title === "solution" ? currentContent : solutionCode;
+        const activeDriverCode = title === "driver" ? currentContent : driverCode;
+        const runnableTestCases = testCases.map((tc, index) => ({
+            index: index + 1,
+            input: tc.input ?? "",
+            expected_output: tc.output ?? "",
+        }));
+        const incompleteExpectedOutputs = runnableTestCases.filter(
+            (tc) => !tc.expected_output.trim(),
+        );
+
+        if (!currentContent.trim()) {
+            setExecError(
+                title === "driver"
+                    ? "Add driver code before running the tests."
+                    : title === "solution"
+                      ? "Add solution code before running the tests."
+                      : "Add code before running the tests.",
+            );
+            return;
+        }
+
+        if (!activeSolutionCode.trim()) {
+            setExecError("Add solution code before running the driver tests.");
+            return;
+        }
+
+        if (!activeDriverCode.trim()) {
+            setExecError("Add driver code before running the tests.");
+            return;
+        }
+
+        if (runnableTestCases.length === 0) {
+            setExecError("Add at least one test case before running the driver.");
+            return;
+        }
+
+        if (incompleteExpectedOutputs.length > 0) {
+            const labels = incompleteExpectedOutputs
+                .slice(0, 3)
+                .map((tc) => `Test Case ${tc.index}`)
+                .join(", ");
+            setExecError(
+                `${labels} ${incompleteExpectedOutputs.length === 1 ? "needs" : "need"} expected output before running.`,
+            );
+            return;
+        }
 
         try {
             const result = await runDraft({
                 data: {
                     language_id: language.id,
                     starter_code: title === "starter" ? currentContent : starterCode,
-                    solution_code: title === "solution" ? currentContent : solutionCode,
-                    driver_code: title === "driver" ? currentContent : driverCode,
-                    test_cases: testCases.map((tc) => ({
+                    solution_code: activeSolutionCode,
+                    driver_code: activeDriverCode,
+                    test_cases: runnableTestCases.map((tc) => ({
                         input: tc.input,
-                        expected_output: tc.output,
+                        expected_output: tc.expected_output,
                     })),
                 },
             });
@@ -114,10 +213,8 @@ export function QuestionCodeEditor({
             if (result.data) {
                 setLastResult(result.data);
             }
-        } catch (err: any) {
-            setExecError(
-                err.response?.data?.message || "Execution failed. Check your code for errors.",
-            );
+        } catch (err: unknown) {
+            setExecError(extractExecutionError(err));
         }
     };
 
@@ -272,7 +369,7 @@ export function QuestionCodeEditor({
                             {execError && (
                                 <div className="flex items-start gap-2.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs">
                                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                                    <span>{execError}</span>
+                                    <span className="whitespace-pre-line">{execError}</span>
                                 </div>
                             )}
 

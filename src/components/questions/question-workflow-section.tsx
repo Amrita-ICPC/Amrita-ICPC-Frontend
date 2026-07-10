@@ -31,8 +31,8 @@ interface QuestionWorkflowSectionProps {
 const CONFIG_TABS = [
     { id: "starter", label: "Starter Code", icon: Code },
     { id: "solution", label: "Reference Solution", icon: FileText },
-    { id: "testcases", label: "Test Cases", icon: Database },
     { id: "driver", label: "Driver Code", icon: FileText },
+    { id: "testcases", label: "Test Cases", icon: Database },
 ];
 
 export function QuestionWorkflowSection({
@@ -164,7 +164,16 @@ export function QuestionWorkflowSection({
                     </div>
                 ) : activeWorkflowStep === "testcases" ? (
                     <div className="max-w-6xl mx-auto">
-                        <TestCaseManager testCases={testCases} setTestCases={setTestCases} />
+                        <TestCaseManager
+                            testCases={testCases}
+                            setTestCases={setTestCases}
+                            executionContext={{
+                                languageId: workflowEditorLang.id,
+                                starterCode: starterCodes[workflowEditorLang.id] ?? "",
+                                solutionCode: solutionCodes[workflowEditorLang.id] ?? "",
+                                driverCode: driverCodes[workflowEditorLang.id] ?? "",
+                            }}
+                        />
                     </div>
                 ) : (
                     <div className="bg-card/10 border border-border/40 rounded-2xl p-12 text-center backdrop-blur-sm max-w-2xl mx-auto mt-20">

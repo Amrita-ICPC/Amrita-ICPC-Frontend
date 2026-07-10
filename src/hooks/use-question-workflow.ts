@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 
-export type WorkflowStep = "starter" | "solution" | "testcases" | "driver";
+export type WorkflowStep = "starter" | "solution" | "driver" | "testcases";
 
-export const STEPS: WorkflowStep[] = ["starter", "solution", "testcases", "driver"];
+export const STEPS: WorkflowStep[] = ["starter", "solution", "driver", "testcases"];
 
 interface UseQuestionWorkflowProps {
     starterCodes: Record<number, string>;

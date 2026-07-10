@@ -1,8 +1,19 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Database, Info, Plus, Trash2 } from "lucide-react";
+import {
+    AlertCircle,
+    ChevronDown,
+    ChevronUp,
+    Database,
+    Info,
+    Loader2,
+    Plus,
+    Trash2,
+    WandSparkles,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { useTestDraftCodeApiV1QuestionsTestDraftPost } from "@/api/generated/questions/questions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,9 +36,40 @@ export interface TestCase {
 interface TestCaseManagerProps {
     testCases: TestCase[];
     setTestCases: (testCases: TestCase[]) => void;
+    executionContext?: {
+        languageId: number;
+        starterCode?: string;
+        solutionCode?: string;
+        driverCode?: string;
+    };
 }
 
-export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProps) {
+function getDraftRunErrorMessage(error: unknown) {
+    const responseData = (
+        error as { response?: { data?: { message?: unknown; detail?: unknown } } }
+    )?.response?.data;
+
+    if (typeof responseData?.message === "string" && responseData.message.trim()) {
+        return responseData.message;
+    }
+
+    if (typeof responseData?.detail === "string" && responseData.detail.trim()) {
+        return responseData.detail;
+    }
+
+    return "Could not generate expected output. Check the solution and driver code.";
+}
+
+export function TestCaseManager({
+    testCases,
+    setTestCases,
+    executionContext,
+}: TestCaseManagerProps) {
+    const { mutateAsync: runDraft, isPending: isGeneratingOutput } =
+        useTestDraftCodeApiV1QuestionsTestDraftPost();
+    const [generatingCaseId, setGeneratingCaseId] = useState<string | null>(null);
+    const [generationError, setGenerationError] = useState<string | null>(null);
+
     // Sort test cases by order value
     const sortedTestCases = useMemo(() => {
         return [...testCases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -90,6 +132,71 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
     const activeTestCase =
         sortedTestCases.find((tc) => tc.id === activeId) ?? sortedTestCases[0] ?? null;
     const activeDisplayId = activeTestCase?.id ?? null;
+    const isGeneratingActiveCase =
+        !!activeTestCase && isGeneratingOutput && generatingCaseId === activeTestCase.id;
+
+    const handleGenerateExpectedOutput = async () => {
+        if (!activeTestCase) return;
+
+        setGenerationError(null);
+
+        if (!activeTestCase.input.trim()) {
+            setGenerationError("Add input before generating the expected output.");
+            return;
+        }
+
+        if (!executionContext?.solutionCode?.trim()) {
+            setGenerationError("Add solution code before generating expected output.");
+            return;
+        }
+
+        if (!executionContext?.driverCode?.trim()) {
+            setGenerationError("Add driver code before generating expected output.");
+            return;
+        }
+
+        setGeneratingCaseId(activeTestCase.id);
+
+        try {
+            const result = await runDraft({
+                data: {
+                    language_id: executionContext.languageId,
+                    starter_code: executionContext.starterCode ?? "",
+                    solution_code: executionContext.solutionCode,
+                    driver_code: executionContext.driverCode,
+                    test_cases: [
+                        {
+                            input: activeTestCase.input,
+                            expected_output: activeTestCase.output ?? "",
+                        },
+                    ],
+                },
+            });
+
+            const runResult = result.data?.testcases?.[0];
+            const generatedOutput = runResult?.stdout;
+
+            if (runResult?.stderr?.trim()) {
+                setGenerationError(runResult.stderr.trim());
+                return;
+            }
+
+            if (typeof generatedOutput !== "string") {
+                setGenerationError(
+                    runResult?.status
+                        ? `Run finished with status: ${runResult.status}`
+                        : "The run completed without output. Check the input and solution code.",
+                );
+                return;
+            }
+
+            updateTestCase(activeTestCase.id, { output: generatedOutput });
+        } catch (error) {
+            setGenerationError(getDraftRunErrorMessage(error));
+        } finally {
+            setGeneratingCaseId(null);
+        }
+    };
 
     return (
         <div className="w-full flex flex-col h-full">
@@ -123,7 +230,10 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                 return (
                                     <div
                                         key={tc.id}
-                                        onClick={() => setActiveId(tc.id)}
+                                        onClick={() => {
+                                            setActiveId(tc.id);
+                                            setGenerationError(null);
+                                        }}
                                         className={cn(
                                             "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors group",
                                             isActive
@@ -305,25 +415,67 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                             <Label className="text-xs font-semibold text-muted-foreground">
                                                 Expected Output
                                             </Label>
-                                            <TooltipProvider delayDuration={200}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <button
-                                                            type="button"
-                                                            aria-label="About expected output"
-                                                            className="text-muted-foreground/60 hover:text-foreground transition-colors"
-                                                        >
-                                                            <Info className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className="max-w-72">
-                                                        The output the solution must produce for the
-                                                        matching input. Whitespace should match the
-                                                        judge expectation.
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
+                                            <div className="flex items-center gap-2">
+                                                <TooltipProvider delayDuration={200}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <span className="inline-flex">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-7 gap-1.5 rounded-md border-primary/20 px-2.5 text-[10px] font-semibold text-primary hover:bg-primary/5 hover:text-primary"
+                                                                    disabled={
+                                                                        isGeneratingActiveCase
+                                                                    }
+                                                                    onClick={
+                                                                        handleGenerateExpectedOutput
+                                                                    }
+                                                                >
+                                                                    {isGeneratingActiveCase ? (
+                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    ) : (
+                                                                        <WandSparkles className="h-3 w-3" />
+                                                                    )}
+                                                                    Generate
+                                                                </Button>
+                                                            </span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-72">
+                                                            Runs the current solution and driver
+                                                            with this input, then fills Expected
+                                                            Output from the program output.
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                                <TooltipProvider delayDuration={200}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                aria-label="About expected output"
+                                                                className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                                            >
+                                                                <Info className="h-3.5 w-3.5" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-72">
+                                                            The output the solution must produce for
+                                                            the matching input. Whitespace should
+                                                            match the judge expectation.
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
                                         </div>
+                                        {generationError ? (
+                                            <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[10px] leading-relaxed text-red-600 dark:text-red-300">
+                                                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                                <span className="whitespace-pre-line">
+                                                    {generationError}
+                                                </span>
+                                            </div>
+                                        ) : null}
                                         <Textarea
                                             value={activeTestCase.output}
                                             onChange={(e) =>

@@ -21,7 +21,7 @@ import { AsyncStateHandler } from "../shared/async-state-handler";
 import { useEditorContext } from "../shared/TipTap";
 import { Skeleton } from "../ui/skeleton";
 
-const ALL_STEPS = ["details", "statement", "starter", "solution", "testcases", "driver"] as const;
+const ALL_STEPS = ["details", "statement", "starter", "solution", "driver", "testcases"] as const;
 type EditorStep = (typeof ALL_STEPS)[number];
 
 const STEP_GROUPS = [
@@ -37,8 +37,8 @@ const STEP_GROUPS = [
         steps: [
             { id: "starter", label: "Starter Code" },
             { id: "solution", label: "Solution" },
-            { id: "testcases", label: "Test Cases" },
             { id: "driver", label: "Driver Code" },
+            { id: "testcases", label: "Test Cases" },
         ],
     },
 ] as const;
@@ -421,6 +421,21 @@ export function QuestionEditorShell({
                                                 <TestCaseManager
                                                     testCases={testCases.testCases}
                                                     setTestCases={testCases.setTestCases}
+                                                    executionContext={{
+                                                        languageId: workflowEditorLang.id,
+                                                        starterCode:
+                                                            code.starterCodes[
+                                                                workflowEditorLang.id
+                                                            ] ?? "",
+                                                        solutionCode:
+                                                            code.solutionCodes[
+                                                                workflowEditorLang.id
+                                                            ] ?? "",
+                                                        driverCode:
+                                                            code.driverCodes[
+                                                                workflowEditorLang.id
+                                                            ] ?? "",
+                                                    }}
                                                 />
                                             </div>
                                         )}
