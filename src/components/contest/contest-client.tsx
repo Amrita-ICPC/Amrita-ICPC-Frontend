@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import {
     ArrowRight,
     Calendar,
@@ -207,6 +208,24 @@ function ListSkeleton() {
     );
 }
 
+function StatsSkeleton() {
+    return (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-3 w-24" />
+                            <Skeleton className="h-8 w-14" />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 interface ContestClientProps {
     initialParams: GetAllContestsApiV1ContestsGetParams;
 }
@@ -230,7 +249,12 @@ export function ContestClient({ initialParams }: ContestClientProps) {
             undefined,
     };
 
-    const { data, isLoading, isError, error, refetch } = useGetAllContestsApiV1ContestsGet(params);
+    const { data, isLoading, isError, error, refetch } = useGetAllContestsApiV1ContestsGet(params, {
+        query: {
+            placeholderData: keepPreviousData,
+        },
+    });
+    const isInitialLoading = isLoading && !data;
 
     const setPage = (newPage: number) => {
         const newParams = new URLSearchParams(searchParams.toString());
@@ -260,33 +284,32 @@ export function ContestClient({ initialParams }: ContestClientProps) {
 
     return (
         <div className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard
-                    icon={Trophy}
-                    label="Total Contests"
-                    value={isLoading ? "—" : contestStats.total}
-                    color="primary"
-                    themed
-                />
-                <StatCard
-                    icon={Radio}
-                    label="Live"
-                    value={isLoading ? "—" : contestStats.live}
-                    color="emerald"
-                />
-                <StatCard
-                    icon={CalendarClock}
-                    label="Upcoming"
-                    value={isLoading ? "—" : contestStats.upcoming}
-                    color="amber"
-                />
-                <StatCard
-                    icon={CheckCircle2}
-                    label="Completed"
-                    value={isLoading ? "—" : contestStats.completed}
-                    color="blue"
-                />
-            </div>
+            {isInitialLoading ? (
+                <StatsSkeleton />
+            ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <StatCard
+                        icon={Trophy}
+                        label="Total Contests"
+                        value={contestStats.total}
+                        color="primary"
+                        themed
+                    />
+                    <StatCard icon={Radio} label="Live" value={contestStats.live} color="emerald" />
+                    <StatCard
+                        icon={CalendarClock}
+                        label="Upcoming"
+                        value={contestStats.upcoming}
+                        color="amber"
+                    />
+                    <StatCard
+                        icon={CheckCircle2}
+                        label="Completed"
+                        value={contestStats.completed}
+                        color="blue"
+                    />
+                </div>
+            )}
 
             <div className="flex flex-col gap-3 rounded-2xl border border-primary/15 bg-gradient-to-r from-primary/10 via-card to-primary/5 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <ContestFilters />
@@ -294,7 +317,7 @@ export function ContestClient({ initialParams }: ContestClientProps) {
             </div>
 
             <AsyncStateHandler
-                isLoading={isLoading}
+                isLoading={isInitialLoading}
                 isError={isError}
                 error={error}
                 onRetry={refetch}
