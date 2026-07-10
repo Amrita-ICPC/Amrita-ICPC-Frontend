@@ -10,7 +10,6 @@ import {
     Globe,
     Loader2,
     Lock,
-    MoreVertical,
     Play,
     Trash2,
     UserCircle2,
@@ -29,12 +28,6 @@ import { useGetContestTeamsApiV1ContestsContestIdTeamsGet } from "@/api/generate
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -240,33 +233,19 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         </Button>
                                     )}
 
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-10 w-10 border-violet-300/30 bg-violet-400/20 text-violet-100 backdrop-blur-md hover:bg-violet-400/30 hover:text-white"
-                                            >
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48">
-                                            <DropdownMenuItem
-                                                className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                                                disabled={deleteMutation.isPending}
-                                                onClick={handleDeleteContest}
-                                            >
-                                                {deleteMutation.isPending ? (
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                )}
-                                                {deleteMutation.isPending
-                                                    ? "Deleting..."
-                                                    : "Delete Contest"}
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <Button
+                                        variant="outline"
+                                        className="h-10 border-red-300/35 bg-red-500/15 px-4 text-red-100 backdrop-blur-md hover:bg-red-500/25 hover:text-white"
+                                        disabled={deleteMutation.isPending}
+                                        onClick={handleDeleteContest}
+                                    >
+                                        {deleteMutation.isPending ? (
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                        )}
+                                        {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                                    </Button>
                                 </div>
                             </div>
 
