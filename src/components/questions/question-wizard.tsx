@@ -60,8 +60,8 @@ const STEPS = [
 const CONFIG_TABS = [
     { id: "starter_code", label: "Starter Code", icon: Code },
     { id: "reference_solution", label: "Reference Solution", icon: FileText },
-    { id: "test_cases", label: "Test Cases", icon: Database },
     { id: "driver_code", label: "Driver Code", icon: FileText },
+    { id: "test_cases", label: "Test Cases", icon: Database },
 ];
 
 interface QuestionWizardProps {

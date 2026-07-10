@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 const STEPS = [
     { id: "starter", label: "Starter Code", icon: Code2 },
     { id: "solution", label: "Solution Code", icon: Zap },
-    { id: "testcases", label: "Test Cases", icon: Beaker },
     { id: "driver", label: "Driver Code", icon: Terminal },
+    { id: "testcases", label: "Test Cases", icon: Beaker },
 ];
 
 interface QuestionWorkflowProps {
