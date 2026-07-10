@@ -29,6 +29,16 @@ import {
 import { type AudienceResponse, AudienceType } from "@/api/generated/model";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -255,6 +265,7 @@ export function GroupsClient() {
     const [search, setSearch] = useState(query);
     const [createOpen, setCreateOpen] = useState(false);
     const [editGroup, setEditGroup] = useState<AudienceResponse | null>(null);
+    const [deleteGroupTarget, setDeleteGroupTarget] = useState<AudienceResponse | null>(null);
     const debouncedSearch = useDebounce(search, 400);
 
     const page = Number.parseInt(searchParams.get("page") ?? "1", 10) || 1;
@@ -300,8 +311,7 @@ export function GroupsClient() {
     }, [debouncedSearch, query, updateParams]);
 
     function confirmDelete(group: AudienceResponse) {
-        if (!confirm(`Delete "${group.name}"? This will remove its membership links.`)) return;
-        deleteGroup({ audienceId: group.id });
+        setDeleteGroupTarget(group);
     }
 
     return (
@@ -437,6 +447,51 @@ export function GroupsClient() {
                 onOpenChange={(open) => !open && setEditGroup(null)}
                 group={editGroup}
             />
+
+            <AlertDialog
+                open={!!deleteGroupTarget}
+                onOpenChange={(open) => !open && setDeleteGroupTarget(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete &ldquo;{deleteGroupTarget?.name}&rdquo;?
+                            This will remove its membership links.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (deleteGroupTarget) {
+                                    deleteGroup(
+                                        {
+                                            audienceId: deleteGroupTarget.id,
+                                        },
+                                        {
+                                            onSuccess: () => {
+                                                setDeleteGroupTarget(null);
+                                            },
+                                        },
+                                    );
+                                }
+                            }}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting && (
+                                <Loader2
+                                    data-icon="inline-start"
+                                    className="mr-2 h-4 w-4 animate-spin"
+                                />
+                            )}
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
