@@ -1,19 +1,10 @@
 "use client";
 
-import { Bell, ChevronLeft, ChevronRight, Mail } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, LogOut, Mail, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { Fragment } from "react";
+import { signOut, useSession } from "next-auth/react";
 
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -23,89 +14,67 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getDefaultRoute } from "@/lib/auth/utils";
+import { getDefaultRoute, UserType } from "@/lib/auth/utils";
+import { cn } from "@/lib/utils";
 
-const SEGMENT_LABELS: Record<string, string> = {
-    dashboard: "Dashboard",
-    "my-contests": "My Contests",
-    contest: "Contests",
-    create: "Create",
-    teams: "Teams",
-    banks: "Question Banks",
-    questions: "Questions",
-    settings: "Settings",
-    users: "Users",
-    group: "Group",
-    groups: "Groups",
-    audiences: "Groups",
-};
+import { ADMIN_ITEMS, NAV_ITEMS } from "./nav-links";
 
-function isUUID(s: string) {
+function TopNavItem({
+    href,
+    label,
+    icon: Icon,
+}: {
+    href: string;
+    label: string;
+    icon: React.ElementType;
+}) {
+    const pathname = usePathname();
+    const active = pathname === href || pathname.startsWith(href + "/");
+
     return (
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ||
-        /^[0-9a-f]{24}$/i.test(s)
+        <Link
+            href={href}
+            className={cn(
+                "group flex h-9 items-center rounded-full px-2.5 transition-all duration-300 ease-in-out hover:bg-accent hover:text-accent-foreground",
+                active ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground",
+            )}
+        >
+            <Icon className={cn("h-4 w-4 shrink-0")} />
+            <span
+                className={cn(
+                    "overflow-hidden whitespace-nowrap text-sm font-medium transition-all duration-300 ease-in-out",
+                    active
+                        ? "ml-2 max-w-[120px] opacity-100"
+                        : "max-w-0 opacity-0 group-hover:ml-2 group-hover:max-w-[120px] group-hover:opacity-100",
+                )}
+            >
+                {label}
+            </span>
+        </Link>
     );
 }
 
-function segmentLabel(seg: string): string {
-    if (isUUID(seg)) {
-        return "Details";
-    }
-    return SEGMENT_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
-}
-
 export function Header() {
-    const pathname = usePathname();
     const router = useRouter();
     const { data: session } = useSession();
-    const isStudent = session?.user
-        ? getDefaultRoute(session.user) === "/student/dashboard"
-        : false;
-
-    const segments = pathname.split("/").filter(Boolean);
-
-    const segmentsWithIndex = segments.map((seg, index) => ({ seg, originalIndex: index }));
-
-    // Questions are managed inside bank/contest details, so don't expose a
-    // nonexistent standalone questions listing in the breadcrumb hierarchy.
-    const filteredSegments = segmentsWithIndex.filter(({ seg, originalIndex }) => {
-        const prev = segments[originalIndex - 1];
-        const next = segments[originalIndex + 1];
-
-        if (
-            seg === "questions" &&
-            next &&
-            isUUID(prev) &&
-            (segments[0] === "banks" || segments[0] === "contest")
-        ) {
-            return false;
-        }
-        return true;
-    });
-
-    let crumbs;
-    if (pathname === "/invitation") {
-        const dashboardHref = isStudent ? "/student/dashboard" : "/dashboard";
-        crumbs = [
-            { href: dashboardHref, label: "Dashboard", isLast: false },
-            { href: "/invitation", label: "Invitation", isLast: true },
-        ];
-    } else {
-        crumbs = filteredSegments.map(({ seg, originalIndex }, i) => {
-            const href = "/" + segments.slice(0, originalIndex + 1).join("/");
-            const isQuestion = segments[originalIndex - 1] === "questions";
-            const label = isQuestion
-                ? seg === "new"
-                    ? "New Question"
-                    : "Question Details"
-                : segmentLabel(seg);
-            const isLast = i === filteredSegments.length - 1;
-            return { href, label, isLast };
-        });
-    }
+    const user = session?.user;
+    const allRoles = [...(user?.roles ?? []), ...(user?.groups ?? [])];
+    const isAdmin = allRoles.some((r) => r.toLowerCase() === UserType.ADMIN.toLowerCase());
+    const isStudent = user ? getDefaultRoute(user) === "/student/dashboard" : false;
 
     return (
         <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-card/95 px-6 backdrop-blur-sm">
+            <div className="flex h-14 items-center border-r border-border pr-2 mr-1">
+                <div className="flex h-full w-16 items-center justify-start overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="ICPC Logo"
+                        className="-ml-3 h-20 w-auto max-w-none object-cover"
+                    />
+                </div>
+            </div>
+
             <div className="flex items-center gap-1">
                 <Button
                     variant="ghost"
@@ -129,98 +98,150 @@ export function Header() {
 
             <div className="h-4 w-px bg-border" />
 
-            <Breadcrumb>
-                <BreadcrumbList>
-                    {crumbs.map((crumb, i) => (
-                        <Fragment key={crumb.href}>
-                            {i > 0 && <BreadcrumbSeparator />}
-                            <BreadcrumbItem>
-                                {crumb.isLast ? (
-                                    <BreadcrumbPage className="font-medium text-foreground">
-                                        {crumb.label}
-                                    </BreadcrumbPage>
-                                ) : (
-                                    <BreadcrumbLink asChild>
-                                        <Link
-                                            href={crumb.href}
-                                            className="text-muted-foreground transition-colors hover:text-foreground"
-                                        >
-                                            {crumb.label}
-                                        </Link>
-                                    </BreadcrumbLink>
-                                )}
-                            </BreadcrumbItem>
-                        </Fragment>
-                    ))}
-                </BreadcrumbList>
-            </Breadcrumb>
+            <nav className="flex items-center gap-1 ml-2">
+                {NAV_ITEMS.filter((item) =>
+                    isStudent ? !item.hideForStudent : !item.hideForStaff,
+                ).map((item) => {
+                    let href = item.href;
+                    if (isStudent) {
+                        if (item.label === "Dashboard") href = "/student/dashboard";
+                        if (item.label === "Contests") href = "/student/contest";
+                        if (item.label === "Teams") href = "/student/teams";
+                    }
+                    return (
+                        <TopNavItem
+                            key={item.label}
+                            href={href}
+                            label={item.label}
+                            icon={item.icon}
+                        />
+                    );
+                })}
+                {isAdmin && (
+                    <>
+                        <div className="mx-2 h-4 w-px bg-border" />
+                        {ADMIN_ITEMS.map((item) => (
+                            <TopNavItem
+                                key={item.href}
+                                href={item.href}
+                                label={item.label}
+                                icon={item.icon}
+                            />
+                        ))}
+                    </>
+                )}
+            </nav>
 
             <div className="flex-1" />
 
-            {isStudent ? (
+            <div className="flex items-center gap-2 mr-2">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                    <Link href="/settings" title="Settings">
+                        <Settings className="h-5 w-5" />
+                    </Link>
+                </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
-                            aria-label="Notifications"
-                            title="Notifications"
+                            className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground"
+                            aria-label="User Menu"
+                            title="User Menu"
                         >
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-background animate-pulse" />
+                            <User className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-80">
-                        <DropdownMenuLabel className="font-semibold text-sm px-4 py-3">
-                            Notifications
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href="/invitation"
-                                className="flex items-start gap-3 p-3 cursor-pointer hover:bg-muted/50 focus:bg-muted/50 rounded-md transition-colors"
-                            >
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                    <Mail className="h-4 w-4" />
-                                </div>
-                                <div className="flex-1 space-y-1">
-                                    <p className="text-xs font-semibold text-foreground">
-                                        Team Invitation
-                                    </p>
-                                    <p className="text-[11px] text-muted-foreground leading-normal">
-                                        You have been invited to join a contest team. Click to
-                                        respond.
-                                    </p>
-                                </div>
-                            </Link>
+                    <DropdownMenuContent align="end" className="w-60 mb-1">
+                        <DropdownMenuItem
+                            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                            className="cursor-pointer group flex items-center justify-between p-3 focus:bg-destructive/10"
+                        >
+                            <div className="flex flex-col min-w-0 pr-4">
+                                <p className="text-sm font-medium truncate">
+                                    {user?.name || "ICPC User"}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                    {user?.email}
+                                </p>
+                            </div>
+                            <LogOut className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-destructive" />
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            ) : (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
-                            aria-label="Notifications"
-                            title="Notifications"
-                        >
-                            <Bell className="h-5 w-5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-80">
-                        <DropdownMenuLabel className="font-semibold text-sm px-4 py-3">
-                            Notifications
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <div className="flex flex-col items-center justify-center p-6 text-center">
-                            <p className="text-xs text-muted-foreground">No new notifications</p>
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )}
+
+                {isStudent ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+                                aria-label="Notifications"
+                                title="Notifications"
+                            >
+                                <Bell className="h-5 w-5" />
+                                <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-background animate-pulse" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-80">
+                            <DropdownMenuLabel className="font-semibold text-sm px-4 py-3">
+                                Notifications
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href="/invitation"
+                                    className="flex items-start gap-3 p-3 cursor-pointer hover:bg-muted/50 focus:bg-muted/50 rounded-md transition-colors"
+                                >
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Mail className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-xs font-semibold text-foreground">
+                                            Team Invitation
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground leading-normal">
+                                            You have been invited to join a contest team. Click to
+                                            respond.
+                                        </p>
+                                    </div>
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+                                aria-label="Notifications"
+                                title="Notifications"
+                            >
+                                <Bell className="h-5 w-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-80">
+                            <DropdownMenuLabel className="font-semibold text-sm px-4 py-3">
+                                Notifications
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <div className="flex flex-col items-center justify-center p-6 text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    No new notifications
+                                </p>
+                            </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </div>
         </header>
     );
 }
