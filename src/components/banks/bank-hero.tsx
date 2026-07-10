@@ -1,18 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-    BookOpen,
-    Calendar,
-    Copy,
-    Crown,
-    FileCode2,
-    MoreVertical,
-    Settings,
-    Share2,
-    Trash2,
-} from "lucide-react";
-import Link from "next/link";
+import { BookOpen, Calendar, Crown, Settings, Share2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,12 +19,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { allBanksKey, bankDetailKey, useSoftDeleteBank } from "@/query/bank-query";
 
 import { BankShareDialog } from "./bank-share-dialog";
@@ -122,13 +105,13 @@ export function BankHero({ bank }: BankHeroProps) {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                         <BankUpdateDialog
                             bank={bank as any}
                             trigger={
                                 <Button
                                     variant="outline"
-                                    className="h-10 border-white/15 bg-white/10 px-4 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
+                                    className="h-10 border-sky-300/25 bg-sky-400/15 px-4 text-sky-50 shadow-sm shadow-sky-950/20 backdrop-blur-md transition-all hover:border-sky-200/40 hover:bg-sky-300/25 hover:text-white focus-visible:ring-sky-300/35"
                                 >
                                     <Settings className="mr-1.5 size-3.5" />
                                     Edit
@@ -142,7 +125,7 @@ export function BankHero({ bank }: BankHeroProps) {
                                 trigger={
                                     <Button
                                         variant="outline"
-                                        className="h-10 border-white/15 bg-white/10 px-4 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
+                                        className="h-10 border-emerald-300/25 bg-emerald-400/15 px-4 text-emerald-50 shadow-sm shadow-emerald-950/20 backdrop-blur-md transition-all hover:border-emerald-200/40 hover:bg-emerald-300/25 hover:text-white focus-visible:ring-emerald-300/35"
                                     >
                                         <Share2 className="mr-1.5 size-3.5" />
                                         Access
@@ -150,39 +133,15 @@ export function BankHero({ bank }: BankHeroProps) {
                                 }
                             />
                         )}
+
                         <Button
-                            asChild
-                            className="h-10 border-0 px-4 font-semibold shadow-md shadow-black/20"
-                            style={{
-                                backgroundColor: "var(--contrast-accent)",
-                                color: "var(--contrast-foreground)",
-                            }}
+                            variant="outline"
+                            className="h-10 border-rose-300/25 bg-rose-500/15 px-4 text-rose-100 shadow-sm shadow-rose-950/20 backdrop-blur-md transition-all hover:border-rose-200/45 hover:bg-rose-400/25 hover:text-white focus-visible:ring-rose-300/35"
+                            onClick={() => setIsDeleteDialogOpen(true)}
                         >
-                            <Link href={`/banks/${bank.id}/import`}>
-                                <Copy className="mr-1.5 size-3.5" />
-                                Clone
-                            </Link>
+                            <Trash2 className="mr-1.5 size-3.5" />
+                            Delete
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 border-violet-300/30 bg-violet-400/20 text-violet-100 backdrop-blur-md hover:bg-violet-400/30 hover:text-white"
-                                >
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem
-                                    className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete Bank
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     </div>
                 </div>
 
@@ -195,14 +154,8 @@ export function BankHero({ bank }: BankHeroProps) {
                     </p>
                 )}
 
-                <div className="mt-8 grid max-w-4xl gap-3 sm:grid-cols-3">
+                <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
                     <MetaCell icon={Calendar} label="Created" value={formattedDate} />
-                    <MetaCell
-                        icon={FileCode2}
-                        label="Total Questions"
-                        value={bank.total_questions_count ?? 0}
-                        iconClass="text-emerald-400"
-                    />
                     <MetaCell
                         icon={Share2}
                         label="Active Shares"
