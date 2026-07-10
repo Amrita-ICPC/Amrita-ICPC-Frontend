@@ -20,6 +20,7 @@ import {
     useGetContestQuestionsApiV1ContestsContestIdQuestionsGet,
     useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet,
 } from "@/api/generated/contests/contests";
+import { ContestMode } from "@/api/generated/model";
 import { EvaluationScope } from "@/api/generated/model/evaluationScope";
 import {
     useGetContestStudentsApiV1ContestsContestIdStudentsGet,
@@ -46,18 +47,31 @@ export function EvaluationDialog({
     defaultScope = EvaluationScope.ALL,
     defaultIds = [],
     trigger,
+    contestMode,
+    onStarted,
 }: {
     contestId: string;
     defaultScope?: EvaluationScope;
     defaultIds?: string[];
     trigger?: React.ReactNode;
+    contestMode?: string | null;
+    onStarted?: () => void | Promise<void>;
 }) {
     const queryClient = useQueryClient();
+    const hideTeams = contestMode === ContestMode.individual;
+    const initialScope =
+        hideTeams && defaultScope === EvaluationScope.TEAMS
+            ? EvaluationScope.STUDENTS
+            : defaultScope;
     const [open, setOpen] = useState(false);
-    const [scope, setScope] = useState<EvaluationScope>(defaultScope);
+    const [scope, setScope] = useState<EvaluationScope>(initialScope);
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<Set<string>>(new Set(defaultIds));
     const [isOverride, setIsOverride] = useState(false);
+    const activeScope =
+        hideTeams && scope === EvaluationScope.TEAMS ? EvaluationScope.STUDENTS : scope;
+    const selectedIds = hideTeams && scope === EvaluationScope.TEAMS ? [] : [...selected];
+
     const statusQuery = useGetEvaluationStatusApiV1ContestsContestIdEvaluationGet(contestId, {
         query: {
             refetchInterval: (query) => {
@@ -72,39 +86,39 @@ export function EvaluationDialog({
     const teamsQuery = useGetContestTeamsApiV1ContestsContestIdTeamsGet(
         contestId,
         { search: search || undefined, page: 1, page_size: 20 },
-        { query: { enabled: open && scope === EvaluationScope.TEAMS } },
+        { query: { enabled: open && !hideTeams && activeScope === EvaluationScope.TEAMS } },
     );
     const questionsQuery = useGetContestQuestionsApiV1ContestsContestIdQuestionsGet(
         contestId,
         { search: search || undefined, page: 1, page_size: 20 },
-        { query: { enabled: open && scope === EvaluationScope.QUESTIONS } },
+        { query: { enabled: open && activeScope === EvaluationScope.QUESTIONS } },
     );
     const studentsQuery = useGetContestStudentsApiV1ContestsContestIdStudentsGet(
         contestId,
         { search: search || undefined, page: 1, page_size: 20 },
-        { query: { enabled: open && scope === EvaluationScope.STUDENTS } },
+        { query: { enabled: open && activeScope === EvaluationScope.STUDENTS } },
     );
     const options = useMemo(() => {
-        if (scope === EvaluationScope.TEAMS)
+        if (activeScope === EvaluationScope.TEAMS)
             return (teamsQuery.data?.data?.teams ?? []).map((item) => ({
                 id: item.id,
                 label: item.name,
                 detail: "Team",
             }));
-        if (scope === EvaluationScope.QUESTIONS)
+        if (activeScope === EvaluationScope.QUESTIONS)
             return (questionsQuery.data?.data?.questions ?? []).map((item) => ({
                 id: item.id,
                 label: item.title,
                 detail: item.difficulty,
             }));
-        if (scope === EvaluationScope.STUDENTS)
+        if (activeScope === EvaluationScope.STUDENTS)
             return (studentsQuery.data?.data ?? []).map((item) => ({
                 id: item.contest_team_member_id,
                 label: item.name,
                 detail: `${item.email} · ${item.team_name}`,
             }));
         return [];
-    }, [scope, teamsQuery.data, questionsQuery.data, studentsQuery.data]);
+    }, [activeScope, teamsQuery.data, questionsQuery.data, studentsQuery.data]);
     const mutation = useEvaluateContestApiV1ContestsContestIdEvaluationPost({
         mutation: {
             onSuccess: async () => {
@@ -115,6 +129,7 @@ export function EvaluationDialog({
                             contestId,
                         ),
                 });
+                await onStarted?.();
             },
             onError: () => toast.error("Could not start evaluation"),
         },
@@ -137,10 +152,10 @@ export function EvaluationDialog({
         mutation.mutate({
             contestId,
             data: {
-                scope,
-                team_ids: scope === EvaluationScope.TEAMS ? [...selected] : undefined,
-                question_ids: scope === EvaluationScope.QUESTIONS ? [...selected] : undefined,
-                student_ids: scope === EvaluationScope.STUDENTS ? [...selected] : undefined,
+                scope: activeScope,
+                team_ids: activeScope === EvaluationScope.TEAMS ? selectedIds : undefined,
+                question_ids: activeScope === EvaluationScope.QUESTIONS ? selectedIds : undefined,
+                student_ids: activeScope === EvaluationScope.STUDENTS ? selectedIds : undefined,
                 is_override: isOverride,
             },
         });
@@ -190,22 +205,31 @@ export function EvaluationDialog({
                     </div>
                 )}
                 <Tabs
-                    value={scope}
+                    value={activeScope}
                     onValueChange={(value) => {
-                        setScope(value as EvaluationScope);
+                        const nextScope = value as EvaluationScope;
+                        setScope(
+                            hideTeams && nextScope === EvaluationScope.TEAMS
+                                ? EvaluationScope.STUDENTS
+                                : nextScope,
+                        );
                         setSelected(new Set());
                         setSearch("");
                     }}
                 >
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList
+                        className={`grid w-full ${hideTeams ? "grid-cols-3" : "grid-cols-4"}`}
+                    >
                         <TabsTrigger value={EvaluationScope.ALL}>
                             <Zap className="h-4 w-4" />
                             All
                         </TabsTrigger>
-                        <TabsTrigger value={EvaluationScope.TEAMS}>
-                            <Users className="h-4 w-4" />
-                            Teams
-                        </TabsTrigger>
+                        {!hideTeams && (
+                            <TabsTrigger value={EvaluationScope.TEAMS}>
+                                <Users className="h-4 w-4" />
+                                Teams
+                            </TabsTrigger>
+                        )}
                         <TabsTrigger value={EvaluationScope.STUDENTS}>
                             <Users className="h-4 w-4" />
                             Students
@@ -248,7 +272,7 @@ export function EvaluationDialog({
                         </div>
                     </div>
                 )}
-                {scope === EvaluationScope.ALL ? (
+                {activeScope === EvaluationScope.ALL ? (
                     <p className="rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground">
                         Evaluate every submitted solution across all teams and questions.
                     </p>
@@ -259,7 +283,7 @@ export function EvaluationDialog({
                             <Input
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
-                                placeholder={`Search ${scope.toLowerCase()}...`}
+                                placeholder={`Search ${activeScope.toLowerCase()}...`}
                                 className="pl-9"
                             />
                         </div>
@@ -293,7 +317,8 @@ export function EvaluationDialog({
                     size="lg"
                     onClick={start}
                     disabled={
-                        mutation.isPending || (scope !== EvaluationScope.ALL && selected.size === 0)
+                        mutation.isPending ||
+                        (activeScope !== EvaluationScope.ALL && selectedIds.length === 0)
                     }
                 >
                     {mutation.isPending ? (

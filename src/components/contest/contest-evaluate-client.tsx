@@ -192,6 +192,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                             <div className="flex flex-wrap justify-end gap-2">
                                 <EvaluationDialog
                                     contestId={contestId}
+                                    contestMode={contest?.contest_mode}
                                     trigger={
                                         <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
                                             {evaluationActive ? (
@@ -272,7 +273,7 @@ export function ContestEvaluateClient({ contestId }: ContestEvaluateClientProps)
                 </section>
 
                 <div id="standings" className="scroll-mt-24">
-                    <ResultsTeamsClient contestId={contestId} />
+                    <ResultsTeamsClient contestId={contestId} contestMode={contest?.contest_mode} />
                 </div>
             </div>
         </AsyncStateHandler>

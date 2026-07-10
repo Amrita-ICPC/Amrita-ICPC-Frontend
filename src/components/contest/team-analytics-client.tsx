@@ -4,8 +4,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Ban, RefreshCw, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
+import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
+import { ContestMode } from "@/api/generated/model";
 import type { ContestTeamMemberAnalytics } from "@/api/generated/model/contestTeamMemberAnalytics";
 import { EvaluationScope } from "@/api/generated/model/evaluationScope";
 import {
@@ -302,6 +305,7 @@ function TeamAnalyticsError({ error, onRetry }: { error: unknown; onRetry: () =>
 export function TeamAnalyticsClient({ contestId, contestTeamId }: TeamAnalyticsClientProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
+    const contestQuery = useGetContestApiV1ContestsContestIdGet(contestId);
     const { data, isLoading, isError, error, refetch } =
         useGetContestTeamAnalyticsApiV1ContestsContestIdTeamsContestTeamIdAnalyticsGet(
             contestId,
@@ -325,8 +329,19 @@ export function TeamAnalyticsClient({ contestId, contestTeamId }: TeamAnalyticsC
         });
 
     const analytics = data?.data;
+    const members = analytics?.members ?? [];
+    const individualMemberId =
+        contestQuery.data?.data?.contest_mode === ContestMode.individual
+            ? members[0]?.contest_team_member_id
+            : undefined;
 
-    if (isLoading) {
+    useEffect(() => {
+        if (!individualMemberId) return;
+
+        router.replace(`/contest/${contestId}/evaluate/${contestTeamId}/${individualMemberId}`);
+    }, [contestId, contestTeamId, individualMemberId, router]);
+
+    if (isLoading || contestQuery.isLoading || individualMemberId) {
         return <TeamAnalyticsSkeleton />;
     }
 
@@ -334,7 +349,6 @@ export function TeamAnalyticsClient({ contestId, contestTeamId }: TeamAnalyticsC
         return <TeamAnalyticsError error={error} onRetry={() => void refetch()} />;
     }
 
-    const members = analytics.members ?? [];
     const flaggedMembers = members.filter((member) => member.is_flagged).length;
     const participatedMembers = members.filter((member) => member.is_participated).length;
 
@@ -364,6 +378,7 @@ export function TeamAnalyticsClient({ contestId, contestTeamId }: TeamAnalyticsC
                             <div className="flex shrink-0 gap-2">
                                 <EvaluationDialog
                                     contestId={contestId}
+                                    contestMode={contestQuery.data?.data?.contest_mode}
                                     defaultScope={EvaluationScope.TEAMS}
                                     defaultIds={[contestTeamId]}
                                 />

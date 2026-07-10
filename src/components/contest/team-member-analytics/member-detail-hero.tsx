@@ -21,6 +21,7 @@ import { formatDateTime, formatDuration, numberValue } from "./member-detail-uti
 interface MemberDetailHeroProps {
     member: ContestTeamMemberDetail;
     contestId: string;
+    contestMode?: string | null;
 }
 
 function initials(name: string) {
@@ -231,7 +232,7 @@ export function MemberVerdictAnalytics({ member }: { member: ContestTeamMemberDe
     );
 }
 
-export function MemberDetailHero({ member, contestId }: MemberDetailHeroProps) {
+export function MemberDetailHero({ member, contestId, contestMode }: MemberDetailHeroProps) {
     return (
         <Card className="rounded-2xl border-border/60 bg-card shadow-sm">
             <CardContent className="p-5">
@@ -253,6 +254,7 @@ export function MemberDetailHero({ member, contestId }: MemberDetailHeroProps) {
                                 <div className="ml-auto">
                                     <EvaluationDialog
                                         contestId={contestId}
+                                        contestMode={contestMode}
                                         defaultScope={EvaluationScope.STUDENTS}
                                         defaultIds={[member.contest_team_member_id]}
                                     />

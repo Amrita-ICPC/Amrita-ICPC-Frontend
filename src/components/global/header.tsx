@@ -6,6 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Fragment } from "react";
 
+import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
+import { ContestMode } from "@/api/generated/model";
+import { useGetStudentContestByIdApiV1StudentsContestsContestIdGet } from "@/api/generated/students/students";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -63,6 +66,35 @@ export function Header() {
         : false;
 
     const segments = pathname.split("/").filter(Boolean);
+    const adminContestId =
+        segments[0] === "contest" && isUUID(segments[1] ?? "") ? segments[1] : "";
+    const studentContestId =
+        segments[0] === "student" && segments[1] === "contest" && isUUID(segments[2] ?? "")
+            ? segments[2]
+            : "";
+    const isAdminMemberReviewPath =
+        !!adminContestId &&
+        segments[2] === "evaluate" &&
+        isUUID(segments[3] ?? "") &&
+        isUUID(segments[4] ?? "");
+    const isStudentMemberResultsPath =
+        !!studentContestId &&
+        segments[3] === "results" &&
+        segments[4] === "members" &&
+        isUUID(segments[5] ?? "");
+    const adminContestQuery = useGetContestApiV1ContestsContestIdGet(adminContestId, {
+        query: { enabled: isAdminMemberReviewPath },
+    });
+    const studentContestQuery = useGetStudentContestByIdApiV1StudentsContestsContestIdGet(
+        studentContestId,
+        {
+            query: { enabled: isStudentMemberResultsPath },
+        },
+    );
+    const isAdminIndividualReview =
+        adminContestQuery.data?.data?.contest_mode === ContestMode.individual;
+    const isStudentIndividualResults =
+        studentContestQuery.data?.data?.contest_mode === ContestMode.individual;
 
     const segmentsWithIndex = segments.map((seg, index) => ({ seg, originalIndex: index }));
 
@@ -80,6 +112,29 @@ export function Header() {
         ) {
             return false;
         }
+
+        if (
+            isAdminIndividualReview &&
+            segments[0] === "contest" &&
+            segments[2] === "evaluate" &&
+            originalIndex === 3 &&
+            isUUID(seg) &&
+            isUUID(next)
+        ) {
+            return false;
+        }
+
+        if (
+            isStudentIndividualResults &&
+            segments[0] === "student" &&
+            segments[1] === "contest" &&
+            segments[3] === "results" &&
+            seg === "members" &&
+            isUUID(next)
+        ) {
+            return false;
+        }
+
         return true;
     });
 
@@ -94,11 +149,34 @@ export function Header() {
         crumbs = filteredSegments.map(({ seg, originalIndex }, i) => {
             const href = "/" + segments.slice(0, originalIndex + 1).join("/");
             const isQuestion = segments[originalIndex - 1] === "questions";
+            const isMemberSubmissionReview =
+                segments[0] === "contest" &&
+                segments[2] === "evaluate" &&
+                originalIndex === 4 &&
+                isUUID(seg);
+            const isStudentMemberSubmissionReview =
+                segments[0] === "student" &&
+                segments[1] === "contest" &&
+                segments[3] === "results" &&
+                segments[4] === "members" &&
+                originalIndex === 5 &&
+                isUUID(seg);
+            const isContestDetailCrumb =
+                segments[0] === "contest" && originalIndex === 1 && isUUID(seg);
+            const isStudentContestDetailCrumb =
+                segments[0] === "student" &&
+                segments[1] === "contest" &&
+                originalIndex === 2 &&
+                isUUID(seg);
             const label = isQuestion
                 ? seg === "new"
                     ? "New Question"
                     : "Question Details"
-                : segmentLabel(seg);
+                : isMemberSubmissionReview || isStudentMemberSubmissionReview
+                  ? "Submissions"
+                  : isContestDetailCrumb || isStudentContestDetailCrumb
+                    ? "Contest"
+                    : segmentLabel(seg);
             const isLast = i === filteredSegments.length - 1;
             return { href, label, isLast };
         });
