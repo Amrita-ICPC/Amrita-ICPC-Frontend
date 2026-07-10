@@ -290,7 +290,7 @@ export function QuestionCodeEditor({
                                 ? results.map((res: any, idx: number) => (
                                       <div key={idx} className="space-y-2">
                                           <div className="flex items-center justify-between">
-                                              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                                                   Test Case #{idx + 1}
                                               </span>
                                               <div
@@ -312,37 +312,37 @@ export function QuestionCodeEditor({
 
                                           <div className="grid grid-cols-1 gap-2">
                                               <div className="space-y-1">
-                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-0.5">
+                                                  <span className="ml-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
                                                       Input
                                                   </span>
-                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[10px] text-slate-300 leading-tight border border-border/10">
+                                                  <pre className="whitespace-pre-wrap break-words rounded-lg border border-border/60 bg-muted/70 px-3 py-2 font-mono text-[10px] leading-tight text-foreground shadow-inner dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-100">
                                                       {testCases[idx]?.input?.trim() || "No input"}
                                                   </pre>
                                               </div>
                                               <div className="space-y-1">
-                                                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/30 ml-0.5">
+                                                  <span className="ml-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
                                                       Output
                                                   </span>
-                                                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-black/40 px-3 py-2 font-mono text-[10px] text-slate-300 leading-tight border border-border/10">
+                                                  <pre className="whitespace-pre-wrap break-words rounded-lg border border-border/60 bg-muted/70 px-3 py-2 font-mono text-[10px] leading-tight text-foreground shadow-inner dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-100">
                                                       {res.stdout?.trim() || "No output"}
                                                   </pre>
                                               </div>
                                               {!res.passed && (
                                                   <div className="space-y-1">
-                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-amber-500/40 ml-0.5">
+                                                      <span className="ml-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
                                                           Expected
                                                       </span>
-                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-amber-500/5 px-3 py-2 font-mono text-[10px] text-amber-200/60 leading-tight border border-amber-500/10">
+                                                      <pre className="whitespace-pre-wrap break-words rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 font-mono text-[10px] leading-tight text-amber-950 dark:text-amber-100">
                                                           {res.expected_output?.trim() || "None"}
                                                       </pre>
                                                   </div>
                                               )}
                                               {res.stderr && (
                                                   <div className="space-y-1">
-                                                      <span className="text-[9px] font-bold uppercase tracking-widest text-red-500/40 ml-0.5">
+                                                      <span className="ml-0.5 text-[9px] font-bold uppercase tracking-widest text-red-700 dark:text-red-300">
                                                           Error
                                                       </span>
-                                                      <pre className="whitespace-pre-wrap break-words rounded-lg bg-red-500/5 px-3 py-2 font-mono text-[10px] text-red-400/80 leading-tight border border-red-500/10">
+                                                      <pre className="whitespace-pre-wrap break-words rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 font-mono text-[10px] leading-tight text-red-950 dark:text-red-100">
                                                           {res.stderr}
                                                       </pre>
                                                   </div>
