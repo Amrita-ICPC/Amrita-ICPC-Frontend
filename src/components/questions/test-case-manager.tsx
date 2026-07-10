@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp, Database, Info, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,8 +28,6 @@ interface TestCaseManagerProps {
 }
 
 export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProps) {
-    const [activeTab, setActiveTab] = useState<"visible" | "hidden">("visible");
-
     // Sort test cases by order value
     const sortedTestCases = useMemo(() => {
         return [...testCases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -40,42 +39,16 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
         return initial ? initial.id : null;
     });
 
-    const visibleCases = sortedTestCases.filter((tc) => !tc.is_hidden);
-    const hiddenCases = sortedTestCases.filter((tc) => tc.is_hidden);
-
-    const filteredTestCases = useMemo(() => {
-        return sortedTestCases.filter((tc) =>
-            activeTab == "visible" ? !tc.is_hidden : tc.is_hidden,
-        );
-    }, [sortedTestCases, activeTab]);
-
-    const handleTabChange = (tab: "visible" | "hidden") => {
-        setActiveTab(tab);
-        const newFiltered = sortedTestCases.filter((tc) =>
-            tab === "visible" ? !tc.is_hidden : tc.is_hidden,
-        );
-        if (newFiltered.length > 0) {
-            // Find if there's already an active ID within the new list
-            const currentActiveInTab = newFiltered.find((tc) => tc.id === activeId);
-            if (!currentActiveInTab) {
-                setActiveId(newFiltered[0].id);
-            }
-        } else {
-            setActiveId(null);
-        }
-    };
-
-    const addTestCase = (isHidden: boolean = false) => {
+    const addTestCase = () => {
         const newTestCase: TestCase = {
             id: Math.random().toString(36).substr(2, 9),
             input: "",
             output: "",
-            is_hidden: isHidden,
+            is_hidden: false,
             weight: 1,
             order: testCases.length,
         };
         setTestCases([...testCases, newTestCase]);
-        setActiveTab(isHidden ? "hidden" : "visible");
         setActiveId(newTestCase.id);
     };
 
@@ -89,20 +62,17 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
             .map((tc, idx) => ({ ...tc, order: idx }));
         setTestCases(newTestCases);
         if (activeId === id) {
-            const currentTabCases = newTestCases.filter((tc) =>
-                activeTab === "visible" ? !tc.is_hidden : tc.is_hidden,
-            );
-            setActiveId(currentTabCases.length > 0 ? currentTabCases[0].id : null);
+            setActiveId(newTestCases.length > 0 ? newTestCases[0].id : null);
         }
     };
 
-    const moveTestCase = (filteredIndex: number, direction: "up" | "down") => {
-        const newFilteredIndex = direction === "up" ? filteredIndex - 1 : filteredIndex + 1;
-        if (newFilteredIndex < 0 || newFilteredIndex >= filteredTestCases.length) return;
+    const moveTestCase = (index: number, direction: "up" | "down") => {
+        const newIndex = direction === "up" ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= sortedTestCases.length) return;
 
         // Find corresponding items in the main testCases list
-        const item1 = filteredTestCases[filteredIndex];
-        const item2 = filteredTestCases[newFilteredIndex];
+        const item1 = sortedTestCases[index];
+        const item2 = sortedTestCases[newIndex];
 
         const updated = testCases.map((tc) => {
             if (tc.id === item1.id) {
@@ -117,7 +87,10 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
         setTestCases(updated);
     };
 
-    const activeTestCase = sortedTestCases.find((tc) => tc.id === activeId);
+    const activeTestCase =
+        sortedTestCases.find((tc) => tc.id === activeId) ?? sortedTestCases[0] ?? null;
+    const activeDisplayId = activeTestCase?.id ?? null;
+
     return (
         <div className="w-full flex flex-col h-full">
             {/* Single White Card Wrapping the whole Test Case manager */}
@@ -132,7 +105,7 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                     </div>
                     <Button
                         type="button"
-                        onClick={() => addTestCase(activeTab === "hidden")}
+                        onClick={addTestCase}
                         size="sm"
                         className="h-8 text-xs font-semibold px-4 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm"
                     >
@@ -140,43 +113,13 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                     </Button>
                 </div>
 
-                {/* 2. Tabs Row with Underline Border Indicator */}
-                <div className="flex items-end border-b border-border/40 px-6 bg-card shrink-0 pt-6">
-                    <div className="flex gap-6 -mb-[1px]">
-                        <button
-                            type="button"
-                            onClick={() => handleTabChange("visible")}
-                            className={cn(
-                                "bg-transparent rounded-none border-t-0 border-x-0 border-b-2 border-transparent pt-2 pb-2.5 px-1 font-bold text-xs cursor-pointer focus:outline-none transition-all",
-                                activeTab === "visible"
-                                    ? "border-[#2563eb] text-[#2563eb] dark:border-primary dark:text-primary"
-                                    : "text-muted-foreground hover:text-foreground hover:border-border/60",
-                            )}
-                        >
-                            Visible ({visibleCases.length})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleTabChange("hidden")}
-                            className={cn(
-                                "bg-transparent rounded-none border-t-0 border-x-0 border-b-2 border-transparent pt-2 pb-2.5 px-1 font-bold text-xs cursor-pointer focus:outline-none transition-all",
-                                activeTab === "hidden"
-                                    ? "border-[#2563eb] text-[#2563eb] dark:border-primary dark:text-primary"
-                                    : "text-muted-foreground hover:text-foreground hover:border-border/60",
-                            )}
-                        >
-                            Hidden ({hiddenCases.length})
-                        </button>
-                    </div>
-                </div>
-
-                {/* 3. Inner Split Layout */}
+                {/* 2. Inner Split Layout */}
                 <div className="flex flex-1 overflow-hidden min-h-0 bg-card">
                     {/* Left Sidebar List */}
                     <div className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/5">
                         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                            {filteredTestCases.map((tc, index) => {
-                                const isActive = activeId === tc.id;
+                            {sortedTestCases.map((tc, index) => {
+                                const isActive = activeDisplayId === tc.id;
                                 return (
                                     <div
                                         key={tc.id}
@@ -188,9 +131,22 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                 : "hover:bg-muted/50 text-foreground font-medium",
                                         )}
                                     >
-                                        <span className="text-xs truncate">
-                                            {tc.name || `Sample Test Case ${index + 1}`}
+                                        <span className="min-w-0 flex-1 truncate text-xs">
+                                            {tc.name || `Test Case ${index + 1}`}
                                         </span>
+                                        {tc.is_hidden ? (
+                                            <Badge
+                                                variant="outline"
+                                                className={cn(
+                                                    "ml-2 border-amber-300/70 bg-amber-50 px-2 py-0 text-[10px] font-semibold text-amber-700",
+                                                    "dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300",
+                                                    isActive &&
+                                                        "border-primary/30 bg-primary/15 text-primary dark:border-primary/40 dark:bg-primary/15 dark:text-primary",
+                                                )}
+                                            >
+                                                Hidden
+                                            </Badge>
+                                        ) : null}
                                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                             <Button
                                                 type="button"
@@ -209,7 +165,7 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                                 type="button"
                                                 variant="ghost"
                                                 size="icon"
-                                                disabled={index === filteredTestCases.length - 1}
+                                                disabled={index === sortedTestCases.length - 1}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     moveTestCase(index, "down");
@@ -228,10 +184,9 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                 type="button"
                                 variant="outline"
                                 className="w-full h-8 text-[11px] gap-1.5 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary border-dashed font-semibold rounded-lg cursor-pointer"
-                                onClick={() => addTestCase(activeTab === "hidden")}
+                                onClick={addTestCase}
                             >
-                                <Plus className="h-3 w-3" /> Add{" "}
-                                {activeTab === "hidden" ? "Hidden" : "Visible"} Test Case
+                                <Plus className="h-3 w-3" /> Add Test Case
                             </Button>
                         </div>
                     </div>
@@ -241,7 +196,7 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                         {activeTestCase ? (
                             <div className="flex-1 flex flex-col h-full space-y-6 max-w-4xl min-h-0">
                                 {/* Top Row: Weight/Points & Hidden Switch */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                                     <div className="space-y-1.5">
                                         <div className="flex items-center gap-1.5">
                                             <Label className="text-xs font-semibold text-muted-foreground">
@@ -284,19 +239,27 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                         </p>
                                     </div>
 
-                                    <div className="flex items-center gap-2 pb-2 justify-end">
-                                        <Switch
-                                            checked={activeTestCase.is_hidden}
-                                            onCheckedChange={(val) =>
-                                                updateTestCase(activeTestCase.id, {
-                                                    is_hidden: val,
-                                                })
-                                            }
-                                            className="scale-90"
-                                        />
-                                        <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
-                                            Hidden Test Case
-                                        </Label>
+                                    <div className="flex justify-start md:pt-0.5">
+                                        <div className="max-w-sm space-y-1.5 text-left">
+                                            <div className="flex items-center justify-start gap-3">
+                                                <Switch
+                                                    checked={activeTestCase.is_hidden}
+                                                    onCheckedChange={(val) =>
+                                                        updateTestCase(activeTestCase.id, {
+                                                            is_hidden: val,
+                                                        })
+                                                    }
+                                                    className="scale-90"
+                                                />
+                                                <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                                    Hidden Test Case
+                                                </Label>
+                                            </div>
+                                            <p className="text-[10px] leading-relaxed text-muted-foreground">
+                                                Turn on to use this case only for judging. Turn off
+                                                to show it to participants as a visible example.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -304,9 +267,26 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1 min-h-[280px]">
                                     <div className="flex flex-col space-y-1.5 h-full">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                                                Input <Info className="h-3.5 w-3.5 opacity-55" />
+                                            <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                                Input
                                             </Label>
+                                            <TooltipProvider delayDuration={200}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            aria-label="About test case input"
+                                                            className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                                        >
+                                                            <Info className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="max-w-72">
+                                                        The exact stdin passed to the submitted
+                                                        program for this test case.
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                         <Textarea
                                             value={activeTestCase.input}
@@ -322,10 +302,27 @@ export function TestCaseManager({ testCases, setTestCases }: TestCaseManagerProp
 
                                     <div className="flex flex-col space-y-1.5 h-full">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                                                Expected Output{" "}
-                                                <Info className="h-3.5 w-3.5 opacity-55" />
+                                            <Label className="text-xs font-semibold text-muted-foreground">
+                                                Expected Output
                                             </Label>
+                                            <TooltipProvider delayDuration={200}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            aria-label="About expected output"
+                                                            className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                                        >
+                                                            <Info className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="max-w-72">
+                                                        The output the solution must produce for the
+                                                        matching input. Whitespace should match the
+                                                        judge expectation.
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                         <Textarea
                                             value={activeTestCase.output}
