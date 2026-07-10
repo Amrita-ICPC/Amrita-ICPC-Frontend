@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { useEvaluateContestApiV1ContestsContestIdEvaluationPost } from "@/api/generated/contests/contests";
+import { ContestMode } from "@/api/generated/model";
+import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
 import { EvaluationScope } from "@/api/generated/model/evaluationScope";
 import { TeamApprovalStatus } from "@/api/generated/model/teamApprovalStatus";
 import { TeamStatus } from "@/api/generated/model/teamStatus";
@@ -16,6 +17,7 @@ import {
     useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
 } from "@/api/generated/teams/teams";
+import { EvaluationDialog } from "@/components/contest/evaluation-dialog";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -52,7 +54,16 @@ import {
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function ResultsTeamsClient({ contestId }: { contestId: string }) {
+interface ResultsTeamsClientProps {
+    contestId: string;
+    contestMode?: string | null;
+}
+
+type TeamMemberPreviewWithRouteId = NonNullable<ContestTeamResponse["members_preview"]>[number] & {
+    contest_team_member_id?: string;
+};
+
+export function ResultsTeamsClient({ contestId, contestMode }: ResultsTeamsClientProps) {
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("score_desc");
@@ -85,22 +96,6 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
             },
         });
 
-    const evaluateMutation = useEvaluateContestApiV1ContestsContestIdEvaluationPost({
-        mutation: {
-            onSuccess: async () => {
-                toast.success("Score computation started successfully!");
-                await queryClient.invalidateQueries({
-                    queryKey: getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId),
-                    exact: false,
-                });
-            },
-            onError: (error: any) => {
-                const msg = error?.response?.data?.message || "Could not start score computation";
-                toast.error(msg);
-            },
-        },
-    });
-
     const teams = teamsQuery.data?.data?.teams ?? [];
     const analyticsQueries = useQueries({
         queries: teams.map((team) => ({
@@ -130,36 +125,54 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
         });
     const isFlagFilterLoading = flaggedOnly && analyticsQueries.some((query) => query.isLoading);
     const pagination = teamsQuery.data?.pagination;
+    const isIndividualContest = contestMode === ContestMode.individual;
+    const entityLabel = isIndividualContest ? "student" : "team";
+    const entityLabelPlural = isIndividualContest ? "students" : "teams";
+    const reviewHref = (team: ContestTeamResponse) => {
+        const participant = team.members_preview?.[0] as TeamMemberPreviewWithRouteId | undefined;
+        const contestTeamMemberId = participant?.contest_team_member_id;
+
+        if (isIndividualContest && contestTeamMemberId) {
+            return `/contest/${contestId}/evaluate/${team.id}/${contestTeamMemberId}`;
+        }
+
+        return `/contest/${contestId}/evaluate/${team.id}`;
+    };
 
     return (
         <Card className="overflow-hidden border-border/60 shadow-sm">
             <CardHeader className="gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <CardTitle className="text-lg">Team results</CardTitle>
+                    <CardTitle className="text-lg">
+                        {isIndividualContest ? "Student results" : "Team results"}
+                    </CardTitle>
                     <CardDescription>
-                        Review approved and confirmed teams, their members, scores, and submissions.
+                        {isIndividualContest
+                            ? "Review each participant's score, activity, and submissions directly."
+                            : "Review approved and confirmed teams, their members, scores, and submissions."}
                     </CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button
-                        onClick={() =>
-                            evaluateMutation.mutate({
-                                contestId,
-                                data: {
-                                    scope: EvaluationScope.ALL,
-                                },
-                            })
+                    <EvaluationDialog
+                        contestId={contestId}
+                        contestMode={contestMode}
+                        defaultScope={EvaluationScope.ALL}
+                        onStarted={async () => {
+                            await queryClient.invalidateQueries({
+                                queryKey:
+                                    getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(
+                                        contestId,
+                                    ),
+                                exact: false,
+                            });
+                        }}
+                        trigger={
+                            <Button className="gap-1.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90">
+                                <Zap className="h-4 w-4" />
+                                Compute scores
+                            </Button>
                         }
-                        disabled={evaluateMutation.isPending}
-                        className="gap-1.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90"
-                    >
-                        {evaluateMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Zap className="h-4 w-4" />
-                        )}
-                        {evaluateMutation.isPending ? "Computing..." : "Compute scores"}
-                    </Button>
+                    />
                     <div className="flex w-fit items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
                         <Users className="h-4 w-4" />
                         <span className="font-semibold text-foreground">
@@ -167,7 +180,7 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                                 ? visibleTeams.length
                                 : (teamsQuery.data?.data?.total ?? teams.length)}
                         </span>
-                        teams in view
+                        {entityLabelPlural} in view
                     </div>
                 </div>
             </CardHeader>
@@ -182,7 +195,7 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                                 setSearch(event.target.value);
                                 setPage(1);
                             }}
-                            placeholder="Search by team name..."
+                            placeholder={`Search by ${entityLabel} name...`}
                             className="pl-9"
                         />
                     </div>
@@ -237,16 +250,20 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                     <EmptyState
                         className="m-4"
                         icon={Users}
-                        title="No teams found"
-                        description="No teams match the current search or filters."
+                        title={`No ${entityLabelPlural} found`}
+                        description={`No ${entityLabelPlural} match the current search or filters.`}
                         compact
                     />
                 ) : (
                     <Table>
                         <TableHeader className="bg-muted/20">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="h-12 min-w-56 px-5">Team</TableHead>
-                                <TableHead className="w-48">Members preview</TableHead>
+                                <TableHead className="h-12 min-w-56 px-5">
+                                    {isIndividualContest ? "Student" : "Team"}
+                                </TableHead>
+                                <TableHead className="w-48">
+                                    {isIndividualContest ? "Participant" : "Members preview"}
+                                </TableHead>
                                 <TableHead className="w-32">
                                     <button
                                         type="button"
@@ -273,7 +290,7 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                                 <TableRow key={team.id} className="group h-[76px]">
                                     <TableCell className="px-5">
                                         <Link
-                                            href={`/contest/${contestId}/evaluate/${team.id}`}
+                                            href={reviewHref(team)}
                                             className="flex items-center gap-3"
                                         >
                                             <Avatar className="h-10 w-10 border border-primary/15">
@@ -286,7 +303,9 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                                                     {team.name}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Contest team
+                                                    {isIndividualContest
+                                                        ? "Individual participant"
+                                                        : "Contest team"}
                                                 </p>
                                             </div>
                                         </Link>
@@ -384,11 +403,9 @@ export function ResultsTeamsClient({ contestId }: { contestId: string }) {
                                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                 asChild
                                             >
-                                                <Link
-                                                    href={`/contest/${contestId}/evaluate/${team.id}`}
-                                                >
+                                                <Link href={reviewHref(team)}>
                                                     <Eye className="h-4 w-4" />
-                                                    View
+                                                    {isIndividualContest ? "Submissions" : "View"}
                                                 </Link>
                                             </Button>
                                             {!disqualifiedOnly && (

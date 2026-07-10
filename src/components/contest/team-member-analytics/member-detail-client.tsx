@@ -3,6 +3,7 @@
 import { AlertCircle } from "lucide-react";
 import * as React from "react";
 
+import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
 import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
 import {
     useGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGet,
@@ -73,6 +74,7 @@ export function MemberDetailClient({
     contestTeamMemberId,
 }: MemberDetailClientProps) {
     const [selectedQuestionId, setSelectedQuestionId] = React.useState<string | null>(null);
+    const contestQuery = useGetContestApiV1ContestsContestIdGet(contestId);
     const {
         data: memberData,
         isLoading: isMemberLoading,
@@ -156,7 +158,11 @@ export function MemberDetailClient({
 
     return (
         <div className="space-y-6">
-            <MemberDetailHero member={member} contestId={contestId} />
+            <MemberDetailHero
+                member={member}
+                contestId={contestId}
+                contestMode={contestQuery.data?.data?.contest_mode}
+            />
 
             {hasNoProgress && (
                 <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">

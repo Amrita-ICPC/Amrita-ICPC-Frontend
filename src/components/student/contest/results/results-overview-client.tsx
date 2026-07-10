@@ -1,7 +1,10 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
+import { ContestMode } from "@/api/generated/model";
 import {
     useGetMyContestTeamResultsApiV1StudentsContestsContestIdResultsGet,
     useGetStudentContestByIdApiV1StudentsContestsContestIdGet,
@@ -16,6 +19,7 @@ interface ResultsOverviewClientProps {
 }
 
 export function ResultsOverviewClient({ contestId }: ResultsOverviewClientProps) {
+    const router = useRouter();
     const { data: contestData, isLoading: isContestLoading } =
         useGetStudentContestByIdApiV1StudentsContestsContestIdGet(contestId);
     const contest = contestData?.data;
@@ -25,8 +29,18 @@ export function ResultsOverviewClient({ contestId }: ResultsOverviewClientProps)
         useGetMyContestTeamResultsApiV1StudentsContestsContestIdResultsGet(contestId, {
             query: { enabled: resultsPublished },
         });
+    const individualMemberId =
+        contest?.contest_mode === ContestMode.individual
+            ? teamData?.data?.members?.[0]?.contest_team_member_id
+            : undefined;
 
-    if (isContestLoading) {
+    useEffect(() => {
+        if (!individualMemberId) return;
+
+        router.replace(`/student/contest/${contestId}/results/members/${individualMemberId}`);
+    }, [contestId, individualMemberId, router]);
+
+    if (isContestLoading || individualMemberId) {
         return (
             <div className="flex min-h-[320px] items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
