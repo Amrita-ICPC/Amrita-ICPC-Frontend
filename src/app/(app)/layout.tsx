@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import AuthGuard from "@/components/global/auth-guard";
 import { Header } from "@/components/global/header";
+import Sidenavbar from "@/components/global/sidenavbar";
 import StudentRouteEnforcer from "@/components/global/student-route-enforcer";
 import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute, UserType } from "@/lib/auth/utils";
@@ -38,8 +39,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
     const isStudent = getDefaultRoute(session.user) === "/student/dashboard";
 
+    const isAdmin = hasRole(UserType.ADMIN);
+
     return (
         <div className="flex h-screen overflow-hidden bg-background text-foreground">
+            <Sidenavbar />
             <div className="flex flex-1 flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto bg-background">

@@ -4,7 +4,16 @@ import { Bell, ChevronLeft, ChevronRight, LogOut, Mail, Settings, User } from "l
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import React from "react";
 
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -15,66 +24,20 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getDefaultRoute, UserType } from "@/lib/auth/utils";
-import { cn } from "@/lib/utils";
-
-import { ADMIN_ITEMS, NAV_ITEMS } from "./nav-links";
-
-function TopNavItem({
-    href,
-    label,
-    icon: Icon,
-}: {
-    href: string;
-    label: string;
-    icon: React.ElementType;
-}) {
-    const pathname = usePathname();
-    const active = pathname === href || pathname.startsWith(href + "/");
-
-    return (
-        <Link
-            href={href}
-            className={cn(
-                "group flex h-9 items-center rounded-full px-2.5 transition-all duration-300 ease-in-out hover:bg-accent hover:text-accent-foreground",
-                active ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground",
-            )}
-        >
-            <Icon className={cn("h-4 w-4 shrink-0")} />
-            <span
-                className={cn(
-                    "overflow-hidden whitespace-nowrap text-sm font-medium transition-all duration-300 ease-in-out",
-                    active
-                        ? "ml-2 max-w-[120px] opacity-100"
-                        : "max-w-0 opacity-0 group-hover:ml-2 group-hover:max-w-[120px] group-hover:opacity-100",
-                )}
-            >
-                {label}
-            </span>
-        </Link>
-    );
-}
 
 export function Header() {
     const router = useRouter();
+    const pathname = usePathname();
     const { data: session } = useSession();
     const user = session?.user;
     const allRoles = [...(user?.roles ?? []), ...(user?.groups ?? [])];
     const isAdmin = allRoles.some((r) => r.toLowerCase() === UserType.ADMIN.toLowerCase());
     const isStudent = user ? getDefaultRoute(user) === "/student/dashboard" : false;
 
+    const segments = pathname.split("/").filter(Boolean);
+
     return (
         <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-card/95 px-6 backdrop-blur-sm">
-            <div className="flex h-14 items-center border-r border-border pr-2 mr-1">
-                <div className="flex h-full w-16 items-center justify-start overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src="/logo.png"
-                        alt="ICPC Logo"
-                        className="-ml-3 h-20 w-auto max-w-none object-cover"
-                    />
-                </div>
-            </div>
-
             <div className="flex items-center gap-1">
                 <Button
                     variant="ghost"
@@ -96,85 +59,48 @@ export function Header() {
                 </Button>
             </div>
 
-            <div className="h-4 w-px bg-border" />
+            <div className="h-4 w-px bg-border mx-2" />
 
-            <nav className="flex items-center gap-1 ml-2">
-                {NAV_ITEMS.filter((item) =>
-                    isStudent ? !item.hideForStudent : !item.hideForStaff,
-                ).map((item) => {
-                    let href = item.href;
-                    if (isStudent) {
-                        if (item.label === "Dashboard") href = "/student/dashboard";
-                        if (item.label === "Contests") href = "/student/contest";
-                        if (item.label === "Teams") href = "/student/teams";
-                    }
-                    return (
-                        <TopNavItem
-                            key={item.label}
-                            href={href}
-                            label={item.label}
-                            icon={item.icon}
-                        />
-                    );
-                })}
-                {isAdmin && (
-                    <>
-                        <div className="mx-2 h-4 w-px bg-border" />
-                        {ADMIN_ITEMS.map((item) => (
-                            <TopNavItem
-                                key={item.href}
-                                href={item.href}
-                                label={item.label}
-                                icon={item.icon}
-                            />
-                        ))}
-                    </>
-                )}
-            </nav>
+            <Breadcrumb>
+                <BreadcrumbList>
+                    {segments.length > 0 && (
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link href={isStudent ? "/student/dashboard" : "/dashboard"}>
+                                    Dashboard
+                                </Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                    )}
+                    {segments.map((segment, index) => {
+                        if (segment === "dashboard" || segment === "student") return null;
+
+                        const isLast = index === segments.length - 1;
+                        const href = "/" + segments.slice(0, index + 1).join("/");
+                        const label =
+                            segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+
+                        return (
+                            <React.Fragment key={href}>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    {isLast ? (
+                                        <BreadcrumbPage>{label}</BreadcrumbPage>
+                                    ) : (
+                                        <BreadcrumbLink asChild>
+                                            <Link href={href}>{label}</Link>
+                                        </BreadcrumbLink>
+                                    )}
+                                </BreadcrumbItem>
+                            </React.Fragment>
+                        );
+                    })}
+                </BreadcrumbList>
+            </Breadcrumb>
 
             <div className="flex-1" />
 
             <div className="flex items-center gap-2 mr-2">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                    <Link href="/settings" title="Settings">
-                        <Settings className="h-5 w-5" />
-                    </Link>
-                </Button>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground"
-                            aria-label="User Menu"
-                            title="User Menu"
-                        >
-                            <User className="h-5 w-5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-60 mb-1">
-                        <DropdownMenuItem
-                            onClick={() => signOut({ callbackUrl: "/auth/login" })}
-                            className="cursor-pointer group flex items-center justify-between p-3 focus:bg-destructive/10"
-                        >
-                            <div className="flex flex-col min-w-0 pr-4">
-                                <p className="text-sm font-medium truncate">
-                                    {user?.name || "ICPC User"}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                    {user?.email}
-                                </p>
-                            </div>
-                            <LogOut className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-destructive" />
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
                 {isStudent ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -241,6 +167,41 @@ export function Header() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )}
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative h-9 w-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+                            aria-label="User Menu"
+                            title="User Menu"
+                        >
+                            <User className="h-5 w-5" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 mt-1">
+                        <DropdownMenuLabel className="font-normal">
+                            <p className="text-sm font-medium">{user?.name || "ICPC User"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/settings" className="cursor-pointer">
+                                <Settings className="h-4 w-4 mr-2" />
+                                <span>Settings</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                            <LogOut className="h-4 w-4 mr-2" />
+                            <span>Sign out</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
     );

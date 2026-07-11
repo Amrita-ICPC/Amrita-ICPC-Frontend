@@ -30,11 +30,11 @@ export function UserMenu({ name, email }: UserMenuProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/70">
+                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent p-2 text-left transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/70 overflow-hidden">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-[11px] font-semibold text-sidebar-accent-foreground">
                         {initials(name, email)}
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <p className="truncate text-xs font-medium text-sidebar-foreground">
                             {name || "ICPC User"}
                         </p>
