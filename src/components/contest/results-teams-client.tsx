@@ -6,9 +6,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+    getGetContestResultsApiV1ContestsContestIdResultsGetQueryKey,
+    useComputeTeamScoresApiV1ContestsContestIdScoresPost,
+} from "@/api/generated/contests/contests";
 import { ContestMode } from "@/api/generated/model";
 import type { ContestTeamResponse } from "@/api/generated/model/contestTeamResponse";
-import { EvaluationScope } from "@/api/generated/model/evaluationScope";
 import { TeamApprovalStatus } from "@/api/generated/model/teamApprovalStatus";
 import { TeamStatus } from "@/api/generated/model/teamStatus";
 import {
@@ -17,7 +20,6 @@ import {
     useDisqualifyTeamApiV1ContestsContestIdTeamsContestTeamIdDisqualifyPatch,
     useGetContestTeamsApiV1ContestsContestIdTeamsGet,
 } from "@/api/generated/teams/teams";
-import { EvaluationDialog } from "@/components/contest/evaluation-dialog";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -96,6 +98,31 @@ export function ResultsTeamsClient({ contestId, contestMode }: ResultsTeamsClien
             },
         });
 
+    const computeScoresMutation = useComputeTeamScoresApiV1ContestsContestIdScoresPost({
+        mutation: {
+            onSuccess: async () => {
+                toast.success("Scores computed successfully");
+                await Promise.all([
+                    queryClient.invalidateQueries({
+                        queryKey:
+                            getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(contestId),
+                        exact: false,
+                    }),
+                    queryClient.invalidateQueries({
+                        queryKey:
+                            getGetContestResultsApiV1ContestsContestIdResultsGetQueryKey(contestId),
+                        exact: false,
+                    }),
+                ]);
+            },
+            onError: (error) => {
+                const message =
+                    (error as any)?.response?.data?.message || "Could not compute scores";
+                toast.error(message);
+            },
+        },
+    });
+
     const teams = teamsQuery.data?.data?.teams ?? [];
     const analyticsQueries = useQueries({
         queries: teams.map((team) => ({
@@ -153,26 +180,18 @@ export function ResultsTeamsClient({ contestId, contestMode }: ResultsTeamsClien
                     </CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <EvaluationDialog
-                        contestId={contestId}
-                        contestMode={contestMode}
-                        defaultScope={EvaluationScope.ALL}
-                        onStarted={async () => {
-                            await queryClient.invalidateQueries({
-                                queryKey:
-                                    getGetContestTeamsApiV1ContestsContestIdTeamsGetQueryKey(
-                                        contestId,
-                                    ),
-                                exact: false,
-                            });
-                        }}
-                        trigger={
-                            <Button className="gap-1.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90">
-                                <Zap className="h-4 w-4" />
-                                Compute scores
-                            </Button>
-                        }
-                    />
+                    <Button
+                        className="gap-1.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90"
+                        onClick={() => computeScoresMutation.mutate({ contestId })}
+                        disabled={computeScoresMutation.isPending}
+                    >
+                        {computeScoresMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Zap className="h-4 w-4" />
+                        )}
+                        {computeScoresMutation.isPending ? "Computing..." : "Compute scores"}
+                    </Button>
                     <div className="flex w-fit items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
                         <Users className="h-4 w-4" />
                         <span className="font-semibold text-foreground">
