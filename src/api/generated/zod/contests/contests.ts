@@ -36,7 +36,6 @@ export const createContestApiV1ContestsPostBodyDescriptionOneMax = 5000;
 export const createContestApiV1ContestsPostBodyIsPublicDefault = false;
 export const createContestApiV1ContestsPostBodyMinTeamSizeDefault = 1;
 export const createContestApiV1ContestsPostBodyMaxTeamSizeDefault = 1;
-export const createContestApiV1ContestsPostBodyScoringTypeDefault = `AUTO`;
 export const createContestApiV1ContestsPostBodyTeamApprovalModeDefault = `AUTO_APPROVE`;
 export const createContestApiV1ContestsPostBodyContestModeDefault = `individual`;
 export const createContestApiV1ContestsPostBodyShowLeaderboardDuringContestDefault = false;
@@ -61,7 +60,6 @@ export const CreateContestApiV1ContestsPostBody = zod.object({
   "min_team_size": zod.number().default(createContestApiV1ContestsPostBodyMinTeamSizeDefault).describe('Minimum team size'),
   "max_team_size": zod.number().default(createContestApiV1ContestsPostBodyMaxTeamSizeDefault).describe('Maximum team size'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
-  "scoring_type": zod.enum(['AUTO', 'MANUAL', 'HYBRID']).default(createContestApiV1ContestsPostBodyScoringTypeDefault).describe('Scoring type'),
   "team_approval_mode": zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).default(createContestApiV1ContestsPostBodyTeamApprovalModeDefault).describe('How teams are approved in this contest'),
   "contest_mode": zod.enum(['individual', 'team']).default(createContestApiV1ContestsPostBodyContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
@@ -322,7 +320,6 @@ export const getContestApiV1ContestsContestIdGetResponseDataOneDescriptionOneMax
 export const getContestApiV1ContestsContestIdGetResponseDataOneIsPublicDefault = false;
 export const getContestApiV1ContestsContestIdGetResponseDataOneMinTeamSizeDefault = 1;
 export const getContestApiV1ContestsContestIdGetResponseDataOneMaxTeamSizeDefault = 1;
-export const getContestApiV1ContestsContestIdGetResponseDataOneScoringTypeDefault = `AUTO`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault = `individual`;
 export const getContestApiV1ContestsContestIdGetResponseDataOneShowLeaderboardDuringContestDefault = false;
@@ -364,7 +361,6 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "min_team_size": zod.number().default(getContestApiV1ContestsContestIdGetResponseDataOneMinTeamSizeDefault).describe('Minimum team size'),
   "max_team_size": zod.number().default(getContestApiV1ContestsContestIdGetResponseDataOneMaxTeamSizeDefault).describe('Maximum team size'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
-  "scoring_type": zod.enum(['AUTO', 'MANUAL', 'HYBRID']).default(getContestApiV1ContestsContestIdGetResponseDataOneScoringTypeDefault).describe('Scoring type'),
   "team_approval_mode": zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).default(getContestApiV1ContestsContestIdGetResponseDataOneTeamApprovalModeDefault).describe('How teams are approved in this contest'),
   "contest_mode": zod.enum(['individual', 'team']).default(getContestApiV1ContestsContestIdGetResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
@@ -460,7 +456,6 @@ export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "min_team_size": zod.union([zod.number(),zod.null()]).optional().describe('Minimum team size'),
   "max_team_size": zod.union([zod.number(),zod.null()]).optional().describe('Maximum team size'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
-  "scoring_type": zod.union([zod.enum(['AUTO', 'MANUAL', 'HYBRID']).describe('Enumeration of scoring methods for contest evaluation.\n\nDetermines how submissions are evaluated and scored during contests,\naffecting the judging workflow and result calculation.\n\nAttributes:\n    AUTO: Fully automatic scoring using predefined test cases and judges.\n    MANUAL: Human-reviewed scoring for subjective or complex evaluation.\n    HYBRID: Combined automatic and manual scoring for comprehensive assessment.'),zod.null()]).optional().describe('Scoring type'),
   "contest_mode": zod.union([zod.enum(['individual', 'team']).describe('Enumeration of team mode for a contest\n\nAttributes:\n    INDIVIDUAL: Each participant competes independently.\n    TEAM: Teams compete collaboratively.'),zod.null()]).optional().describe('Contest mode'),
   "team_approval_mode": zod.union([zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).describe('Enumeration of contest-level team approval modes.\n\nAttributes:\n    AUTO_APPROVE: Teams are approved automatically when created.\n    INSTRUCTOR_REVIEW: Teams are kept waiting until an instructor approves.'),zod.null()]).optional().describe('How teams are approved in this contest'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
@@ -483,7 +478,6 @@ export const updateContestApiV1ContestsContestIdPatchResponseDataOneDescriptionO
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneIsPublicDefault = false;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneMinTeamSizeDefault = 1;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneMaxTeamSizeDefault = 1;
-export const updateContestApiV1ContestsContestIdPatchResponseDataOneScoringTypeDefault = `AUTO`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault = `individual`;
 export const updateContestApiV1ContestsContestIdPatchResponseDataOneShowLeaderboardDuringContestDefault = false;
@@ -525,7 +519,6 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "min_team_size": zod.number().default(updateContestApiV1ContestsContestIdPatchResponseDataOneMinTeamSizeDefault).describe('Minimum team size'),
   "max_team_size": zod.number().default(updateContestApiV1ContestsContestIdPatchResponseDataOneMaxTeamSizeDefault).describe('Maximum team size'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
-  "scoring_type": zod.enum(['AUTO', 'MANUAL', 'HYBRID']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneScoringTypeDefault).describe('Scoring type'),
   "team_approval_mode": zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneTeamApprovalModeDefault).describe('How teams are approved in this contest'),
   "contest_mode": zod.enum(['individual', 'team']).default(updateContestApiV1ContestsContestIdPatchResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
@@ -1304,7 +1297,6 @@ export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneDescr
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneIsPublicDefault = false;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMinTeamSizeDefault = 1;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxTeamSizeDefault = 1;
-export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneScoringTypeDefault = `AUTO`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamApprovalModeDefault = `AUTO_APPROVE`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault = `individual`;
 export const restoreContestApiV1ContestsContestIdRestorePostResponseDataOneShowLeaderboardDuringContestDefault = false;
@@ -1346,7 +1338,6 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "min_team_size": zod.number().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMinTeamSizeDefault).describe('Minimum team size'),
   "max_team_size": zod.number().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneMaxTeamSizeDefault).describe('Maximum team size'),
   "rules": zod.union([zod.string(),zod.null()]).optional().describe('Contest rules'),
-  "scoring_type": zod.enum(['AUTO', 'MANUAL', 'HYBRID']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneScoringTypeDefault).describe('Scoring type'),
   "team_approval_mode": zod.enum(['AUTO_APPROVE', 'INSTRUCTOR_REVIEW']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneTeamApprovalModeDefault).describe('How teams are approved in this contest'),
   "contest_mode": zod.enum(['individual', 'team']).default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneContestModeDefault).describe('Contest mode (individual or team)'),
   "duration": zod.union([zod.number(),zod.null()]).optional().describe('Contest duration in seconds'),
@@ -1796,6 +1787,76 @@ export const GetContestAudiencesApiV1ContestsContestIdAudiencesGetResponse = zod
   "name": zod.string().describe('Audience name'),
   "audience_type": zod.enum(['class', 'department', 'batch', 'campus']).describe('Audience type')
 }).describe('Schema for audience information within a contest.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Update the score (marks/points) awarded for a question within a contest.
+
+Only the contest creator and assigned instructors/admins can perform this
+operation. The score must be a valid positive integer.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    question_id (UUID): The unique identifier of the question.
+    payload (UpdateContestQuestionScoreRequest): The new score value.
+    user_id (UUID): Authenticated user ID.
+    service (ContestQuestionService): Injected domain service.
+
+Returns:
+    APIResponse[ContestQuestionResponse]: The updated contest-question link.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    RequestValidationError: If the score is not a valid positive integer.
+    ContestNotFoundError: If the contest does not exist.
+    QuestionNotInContestError: If the question is not linked to the contest.
+    InvalidContestError: If the score fails business validation rules.
+ * @summary Update the score of a contest question
+ */
+export const UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchBodyScoreExclusiveMin = 0;
+
+
+
+export const UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchBody = zod.object({
+  "score": zod.number().gt(updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchBodyScoreExclusiveMin).describe('Points\/marks awarded for solving this question. Must be a positive integer.')
+}).describe('Schema for updating the score (marks\/points) of a contest question.')
+
+export const updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseSuccessDefault = true;
+export const updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseStatusDefault = 200;
+export const updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseMessageDefault = `Success`;
+
+export const UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponse = zod.object({
+  "success": zod.boolean().default(updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseSuccessDefault),
+  "status": zod.number().default(updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseStatusDefault),
+  "message": zod.string().default(updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "question_id": zod.uuid().describe('Question ID'),
+  "order": zod.number().describe('Position of the question in the contest'),
+  "duration": zod.union([zod.number(),zod.null()]).describe('Time allocated for this question in seconds'),
+  "score": zod.number().describe('Points awarded for solving this question'),
+  "max_submission": zod.union([zod.number(),zod.null()]).describe('Maximum submissions allowed for this question'),
+  "created_at": zod.iso.datetime({"offset":true}).describe('When question was added to contest'),
+  "created_by": zod.uuid().describe('User ID who added the question')
+}).describe('Schema for contest question response (detail view).'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),

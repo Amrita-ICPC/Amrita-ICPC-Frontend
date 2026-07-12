@@ -28,6 +28,7 @@ import type {
   APIResponse,
   APIResponseContestDashboardResponse,
   APIResponseContestDetailResponse,
+  APIResponseContestQuestionResponse,
   APIResponseContestQuestionsListResponse,
   APIResponseContestResultsResponse,
   APIResponseContestsListResponse,
@@ -57,7 +58,8 @@ import type {
   PublishResultsApiV1ContestsContestIdPublishResultsPostParams,
   QuestionUpdate,
   RemoveContestQuestionRequest,
-  ReorderContestQuestionsRequest
+  ReorderContestQuestionsRequest,
+  UpdateContestQuestionScoreRequest
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -2233,6 +2235,94 @@ export function useGetContestAudiencesApiV1ContestsContestIdAudiencesGet<TData =
 
 
 /**
+ * Update the score (marks/points) awarded for a question within a contest.
+
+Only the contest creator and assigned instructors/admins can perform this
+operation. The score must be a valid positive integer.
+
+Args:
+    request (Request): Framework context.
+    contest_id (UUID): The unique identifier of the contest.
+    question_id (UUID): The unique identifier of the question.
+    payload (UpdateContestQuestionScoreRequest): The new score value.
+    user_id (UUID): Authenticated user ID.
+    service (ContestQuestionService): Injected domain service.
+
+Returns:
+    APIResponse[ContestQuestionResponse]: The updated contest-question link.
+
+Raises:
+    UnauthorizedError: If the caller is not authenticated.
+    PermissionDeniedError: If the caller lacks update permission.
+    RequestValidationError: If the score is not a valid positive integer.
+    ContestNotFoundError: If the contest does not exist.
+    QuestionNotInContestError: If the question is not linked to the contest.
+    InvalidContestError: If the score fails business validation rules.
+ * @summary Update the score of a contest question
+ */
+export const updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch = (
+    contestId: string,
+    questionId: string,
+    updateContestQuestionScoreRequest: UpdateContestQuestionScoreRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseContestQuestionResponse>(
+      {url: `/api/v1/contests/${contestId}/questions/${questionId}/score`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateContestQuestionScoreRequest, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>, TError,{contestId: string;questionId: string;data: UpdateContestQuestionScoreRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>, TError,{contestId: string;questionId: string;data: UpdateContestQuestionScoreRequest}, TContext> => {
+
+const mutationKey = ['updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>, {contestId: string;questionId: string;data: UpdateContestQuestionScoreRequest}> = (props) => {
+          const {contestId,questionId,data} = props ?? {};
+
+          return  updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch(contestId,questionId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>>
+    export type UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchMutationBody = UpdateContestQuestionScoreRequest
+    export type UpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Update the score of a contest question
+ */
+export const useUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>, TError,{contestId: string;questionId: string;data: UpdateContestQuestionScoreRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch>>,
+        TError,
+        {contestId: string;questionId: string;data: UpdateContestQuestionScoreRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatchMutationOptions(options), queryClient);
+    }
+    /**
  * Cancel a contest.
  * @summary Cancel a contest
  */

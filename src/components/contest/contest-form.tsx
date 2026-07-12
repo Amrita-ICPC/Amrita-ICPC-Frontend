@@ -29,7 +29,6 @@ import type { ImageUploadResponse } from "@/api/generated/model";
 import {
     ContestMode,
     ContestTeamParticipationType,
-    ScoringType,
     TeamApprovalMode,
     UserRole,
 } from "@/api/generated/model";
@@ -112,7 +111,6 @@ const formSchema = z
         min_team_size: z.number().int().min(1).optional(),
         max_team_size: z.number().int().min(1).optional(),
         rules: z.string().optional(),
-        scoring_type: z.enum([ScoringType.AUTO, ScoringType.MANUAL, ScoringType.HYBRID]).optional(),
         team_approval_mode: z
             .enum([TeamApprovalMode.AUTO_APPROVE, TeamApprovalMode.INSTRUCTOR_REVIEW])
             .optional(),
@@ -192,7 +190,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             min_team_size: initialData?.min_team_size ?? 1,
             max_team_size: initialData?.max_team_size ?? 3,
             rules: initialData?.rules ?? "",
-            scoring_type: initialData?.scoring_type ?? ScoringType.AUTO,
             team_approval_mode: initialData?.team_approval_mode ?? TeamApprovalMode.AUTO_APPROVE,
             contest_mode: initialData?.contest_mode ?? ContestMode.individual,
             show_leaderboard_during_contest: initialData?.show_leaderboard_during_contest ?? true,
@@ -312,7 +309,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                     max_team_size:
                         values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
                     rules: values.rules?.trim() ? values.rules.trim() : null,
-                    scoring_type: values.scoring_type,
                     team_approval_mode: values.team_approval_mode,
                     contest_mode: values.contest_mode,
                     show_leaderboard_during_contest: values.show_leaderboard_during_contest,
@@ -349,7 +345,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                     max_team_size:
                         values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
                     rules: values.rules?.trim() ? values.rules.trim() : null,
-                    scoring_type: values.scoring_type,
                     team_approval_mode: values.team_approval_mode,
                     contest_mode: values.contest_mode,
                     show_leaderboard_during_contest: values.show_leaderboard_during_contest,
@@ -760,43 +755,6 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                                                         </p>
                                                     )}
                                                 </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label>Scoring type</Label>
-                                                <Controller
-                                                    control={control}
-                                                    name="scoring_type"
-                                                    render={({ field }) => (
-                                                        <Select
-                                                            value={field.value}
-                                                            onValueChange={(value) =>
-                                                                field.onChange(value)
-                                                            }
-                                                        >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select scoring" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem
-                                                                    value={ScoringType.AUTO}
-                                                                >
-                                                                    Auto
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    value={ScoringType.MANUAL}
-                                                                >
-                                                                    Manual
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    value={ScoringType.HYBRID}
-                                                                >
-                                                                    Hybrid
-                                                                </SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    )}
-                                                />
                                             </div>
 
                                             <div className="space-y-2">
