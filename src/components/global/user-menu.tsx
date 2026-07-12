@@ -12,6 +12,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 function initials(name?: string | null, email?: string | null) {
     const s = name || email || "U";
@@ -24,26 +26,50 @@ function initials(name?: string | null, email?: string | null) {
 interface UserMenuProps {
     name?: string | null;
     email?: string | null;
+    collapsed?: boolean;
 }
 
-export function UserMenu({ name, email }: UserMenuProps) {
+export function UserMenu({ name, email, collapsed = false }: UserMenuProps) {
+    const trigger = (
+        <button
+            aria-label="Open user menu"
+            className={cn(
+                "flex w-full items-center rounded-lg border border-transparent text-left transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/70",
+                collapsed ? "justify-center px-0 py-2" : "gap-2.5 px-2 py-2.5",
+            )}
+        >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-[11px] font-semibold text-sidebar-accent-foreground">
+                {initials(name, email)}
+            </div>
+            {!collapsed && (
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium text-sidebar-foreground">
+                        {name || "ICPC User"}
+                    </p>
+                    <p className="truncate text-[10px] text-sidebar-foreground/60">{email}</p>
+                </div>
+            )}
+        </button>
+    );
+
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2.5 text-left transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/70">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-[11px] font-semibold text-sidebar-accent-foreground">
-                        {initials(name, email)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-sidebar-foreground">
-                            {name || "ICPC User"}
-                        </p>
-                        <p className="truncate text-[10px] text-sidebar-foreground/60">{email}</p>
-                    </div>
-                </button>
-            </DropdownMenuTrigger>
+            {collapsed ? (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">{name || "ICPC User"}</TooltipContent>
+                </Tooltip>
+            ) : (
+                <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+            )}
 
-            <DropdownMenuContent side="top" align="start" className="w-56 mb-1">
+            <DropdownMenuContent
+                side="top"
+                align={collapsed ? "center" : "start"}
+                className="w-56 mb-1"
+            >
                 <DropdownMenuLabel className="font-normal">
                     <p className="text-sm font-medium">{name || "ICPC User"}</p>
                     <p className="text-xs text-muted-foreground truncate">{email}</p>

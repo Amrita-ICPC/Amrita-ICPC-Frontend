@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { getDefaultRoute, UserType } from "@/lib/auth/utils";
 
-import { NavLinks } from "./nav-links";
-import { UserMenu } from "./user-menu";
+import { SidenavbarClient } from "./sidenavbar-client";
 
 export default async function Sidenavbar() {
     const session = await auth();
@@ -12,29 +11,10 @@ export default async function Sidenavbar() {
     const isStudent = getDefaultRoute(user) === "/student/dashboard";
 
     return (
-        <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-            {/* Logo */}
-            <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground shadow-[0_0_0_1px_var(--sidebar-ring)]">
-                    IC
-                </div>
-                <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight text-sidebar-foreground">
-                        ICPC Platform
-                    </p>
-                    <p className="text-[10px] leading-tight text-sidebar-foreground/60">
-                        Amrita University
-                    </p>
-                </div>
-            </div>
-
-            {/* Nav */}
-            <NavLinks isAdmin={isAdmin} isStudent={isStudent} />
-
-            {/* User */}
-            <div className="border-t border-sidebar-border px-3 pb-4 pt-2">
-                <UserMenu name={user?.name} email={user?.email} />
-            </div>
-        </aside>
+        <SidenavbarClient
+            isAdmin={isAdmin}
+            isStudent={isStudent}
+            user={{ name: user?.name, email: user?.email }}
+        />
     );
 }

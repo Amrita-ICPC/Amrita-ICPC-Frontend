@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -45,44 +46,69 @@ const ADMIN_ITEMS = [
 interface NavLinksProps {
     isAdmin: boolean;
     isStudent?: boolean;
+    collapsed?: boolean;
 }
 
 function NavItem({
     href,
     label,
     icon: Icon,
+    collapsed = false,
 }: {
     href: string;
     label: string;
     icon: React.ElementType;
+    collapsed?: boolean;
 }) {
     const pathname = usePathname();
     const active = pathname === href || pathname.startsWith(href + "/");
+
+    const link = (
+        <Link
+            href={href}
+            aria-label={label}
+            className={cn(
+                "flex items-center rounded-lg text-sm transition-colors",
+                collapsed ? "h-10 justify-center px-0" : "gap-3 px-3 py-2",
+                active
+                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_var(--sidebar-border)]"
+                    : "text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
+            )}
+        >
+            <Icon
+                className={cn(
+                    "h-4 w-4 shrink-0",
+                    collapsed && "h-[18px] w-[18px]",
+                    active ? "opacity-100" : "opacity-70",
+                )}
+            />
+            {!collapsed && <span>{label}</span>}
+        </Link>
+    );
+
     return (
         <li>
-            <Link
-                href={href}
-                className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active
-                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_var(--sidebar-border)]"
-                        : "text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
-                )}
-            >
-                <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-70")} />
-                {label}
-            </Link>
+            {collapsed ? (
+                <Tooltip>
+                    <TooltipTrigger asChild>{link}</TooltipTrigger>
+                    <TooltipContent side="right">{label}</TooltipContent>
+                </Tooltip>
+            ) : (
+                link
+            )}
         </li>
     );
 }
 
-export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
+export function NavLinks({ isAdmin, isStudent, collapsed = false }: NavLinksProps) {
     return (
-        <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
+        <nav className={cn("flex-1 space-y-5 overflow-y-auto py-3", collapsed ? "px-2" : "px-2.5")}>
             <div>
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
-                    Menu
-                </p>
+                {!collapsed && (
+                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
+                        Menu
+                    </p>
+                )}
                 <ul className="space-y-0.5">
                     {NAV_ITEMS.filter((item) =>
                         isStudent ? !item.hideForStudent : !item.hideForStaff,
@@ -99,6 +125,7 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
                                 href={href}
                                 label={item.label}
                                 icon={item.icon}
+                                collapsed={collapsed}
                             />
                         );
                     })}
@@ -107,12 +134,14 @@ export function NavLinks({ isAdmin, isStudent }: NavLinksProps) {
 
             {isAdmin && (
                 <div>
-                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
-                        Admin
-                    </p>
+                    {!collapsed && (
+                        <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-ring/80">
+                            Admin
+                        </p>
+                    )}
                     <ul className="space-y-0.5">
                         {ADMIN_ITEMS.map((item) => (
-                            <NavItem key={item.href} {...item} />
+                            <NavItem key={item.href} {...item} collapsed={collapsed} />
                         ))}
                     </ul>
                 </div>
