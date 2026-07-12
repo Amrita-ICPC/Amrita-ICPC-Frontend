@@ -14,7 +14,11 @@ import { useGetQuestion } from "@/query/question-query";
 import { QuestionArchitectureSection } from "../questions/question-architecture-section";
 import { LANGUAGES, MonacoLanguage, QuestionCodeEditor } from "../questions/question-code-editor";
 import { QuestionCreateHero } from "../questions/question-create-hero";
-import { ProblemMetadataCard } from "../questions/question-metadata-card";
+import {
+    MAX_QUESTION_MARK,
+    MIN_QUESTION_MARK,
+    ProblemMetadataCard,
+} from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
 import { TestCaseManager } from "../questions/test-case-manager";
 import { AsyncStateHandler } from "../shared/async-state-handler";
@@ -164,7 +168,12 @@ export function QuestionEditorShell({
 
         switch (stepId) {
             case "details":
-                return !!metadata.title?.trim();
+                const isScoreValid =
+                    !contestId ||
+                    (metadata.score >= MIN_QUESTION_MARK &&
+                        metadata.score <= MAX_QUESTION_MARK &&
+                        Number.isInteger(metadata.score));
+                return !!metadata.title?.trim() && isScoreValid;
             case "statement":
                 return !!content.description?.trim();
             case "starter":
@@ -172,7 +181,12 @@ export function QuestionEditorShell({
             case "solution":
                 return !!code.solutionCodes[workflowEditorLang.id]?.trim();
             case "testcases":
-                return testCases.testCases.length > 0;
+                const testCasesValid = testCases.testCases.every((tc) => {
+                    const weightValid =
+                        tc.weight >= 0 && (!contestId || tc.weight <= metadata.score);
+                    return weightValid;
+                });
+                return testCases.testCases.length > 0 && testCasesValid;
             case "driver":
                 return !!code.driverCodes[workflowEditorLang.id]?.trim();
             default:
@@ -235,6 +249,7 @@ export function QuestionEditorShell({
                         isPreview={isPreviewMode}
                         onSave={onSave}
                         isSaving={isSaving}
+                        isSaveDisabled={!isStepValid("details")}
                     />
                 </div>
 
@@ -345,6 +360,7 @@ export function QuestionEditorShell({
                                                     }
                                                     tags={metadata.tags}
                                                     setTags={metadata.setTags}
+                                                    isContest={!!contestId}
                                                 />
                                             </div>
                                         )}
@@ -436,6 +452,8 @@ export function QuestionEditorShell({
                                                                 workflowEditorLang.id
                                                             ] ?? "",
                                                     }}
+                                                    questionScore={metadata.score}
+                                                    isContest={!!contestId}
                                                 />
                                             </div>
                                         )}
@@ -463,7 +481,9 @@ export function QuestionEditorShell({
                                                 type="button"
                                                 onClick={handleNext}
                                                 disabled={
-                                                    currentIdx === ALL_STEPS.length - 1 && isSaving
+                                                    (currentIdx === ALL_STEPS.length - 1 &&
+                                                        isSaving) ||
+                                                    !isStepValid(activeStep)
                                                 }
                                                 className="gap-1.5 h-9 text-xs px-5 rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm"
                                             >

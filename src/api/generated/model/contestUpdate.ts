@@ -7,7 +7,6 @@
  */
 import type { ContestMode } from './contestMode';
 import type { ContestTeamParticipationType } from './contestTeamParticipationType';
-import type { ScoringType } from './scoringType';
 import type { TeamApprovalMode } from './teamApprovalMode';
 
 /**
@@ -38,8 +37,6 @@ export interface ContestUpdate {
   max_team_size?: number | null;
   /** Contest rules */
   rules?: string | null;
-  /** Scoring type */
-  scoring_type?: ScoringType | null;
   /** Contest mode */
   contest_mode?: ContestMode | null;
   /** How teams are approved in this contest */

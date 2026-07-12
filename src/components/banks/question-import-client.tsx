@@ -76,9 +76,16 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
     const [isSelectingAll, setIsSelectingAll] = useState(false);
     const pageSize = 10;
 
+    const debouncedBankSearch = useDebounce(bankSearch, 400);
     const debouncedSearch = useDebounce(search, 400);
     const debouncedTopic = useDebounce(topic, 400);
-    const { data: banksData, isLoading: banksLoading } = useGetAllBanks({ page_size: 100 });
+    const { data: banksData, isLoading: banksLoading } = useGetAllBanks(
+        {
+            page_size: 100,
+            search: debouncedBankSearch || undefined,
+        },
+        { query: { placeholderData: keepPreviousData } },
+    );
     const banks = useMemo(
         () =>
             ((banksData?.data ?? []) as BankResponse[]).filter(
@@ -86,9 +93,7 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
             ),
         [banksData?.data, destination, targetId],
     );
-    const visibleBanks = banks.filter((bank) =>
-        bank.name.toLowerCase().includes(bankSearch.toLowerCase()),
-    );
+    const visibleBanks = banks;
     const activeBank = banks.find((bank) => bank.id === activeBankId);
 
     const { data, isLoading, isError, error, refetch } = useGetBankQuestions(

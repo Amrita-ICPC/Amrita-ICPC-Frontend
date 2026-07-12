@@ -452,19 +452,6 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                 />
                                 <Separator className="my-0.5 bg-border/40" />
                                 <InfoRow
-                                    label="Scoring"
-                                    value={
-                                        <Badge
-                                            variant="outline"
-                                            className="border-border/60 text-xs"
-                                        >
-                                            {contest.scoring_type ?? "—"}
-                                        </Badge>
-                                    }
-                                />
-                                <Separator className="my-0.5 bg-border/40" />
-                                <Separator className="my-0.5 bg-border/40" />
-                                <InfoRow
                                     label="During Contest"
                                     value={
                                         contest.show_leaderboard_during_contest

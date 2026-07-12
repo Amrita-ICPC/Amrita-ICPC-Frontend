@@ -23,6 +23,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { tagKeys, useCreateTag, usePlatformLanguages, useTags } from "@/query/contest-query";
 
+export const MIN_QUESTION_MARK = 0;
+export const MAX_QUESTION_MARK = 10000;
+
 interface ProblemMetadataCardProps {
     title: string;
     setTitle: (val: string) => void;
@@ -42,6 +45,7 @@ interface ProblemMetadataCardProps {
     setTags: (val: string[]) => void;
     maxSubmission: string;
     setMaxSubmission: (val: string) => void;
+    isContest?: boolean;
 }
 
 const DIFFICULTY_OPTIONS = [
@@ -84,6 +88,7 @@ export function ProblemMetadataCard({
     setAllowedLanguages,
     tags,
     setTags,
+    isContest = true,
 }: ProblemMetadataCardProps) {
     const queryClient = useQueryClient();
     const { data: languagesData } = usePlatformLanguages();
@@ -202,53 +207,74 @@ export function ProblemMetadataCard({
                 {/* 3. Numerical Metrics Rows */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Score */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Score / Points <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            value={score}
-                            onChange={(e) => setScore(Number(e.target.value))}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Points awarded for a correct solution.
-                        </p>
-                    </div>
+                    {isContest && (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Score / Points <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={score}
+                                onChange={(e) => setScore(Number(e.target.value))}
+                                className={cn(
+                                    "bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg",
+                                    (score < MIN_QUESTION_MARK || score > MAX_QUESTION_MARK) &&
+                                        "border-destructive focus:border-destructive",
+                                )}
+                            />
+                            {score < MIN_QUESTION_MARK && (
+                                <p className="text-[11px] text-destructive font-medium">
+                                    Score must be at least {MIN_QUESTION_MARK}.
+                                </p>
+                            )}
+                            {score > MAX_QUESTION_MARK && (
+                                <p className="text-[11px] text-destructive font-medium">
+                                    Score cannot exceed {MAX_QUESTION_MARK}.
+                                </p>
+                            )}
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                                Points awarded for a correct solution.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Duration */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Duration (minutes)
-                        </Label>
-                        <Input
-                            placeholder="e.g. 120"
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Suggested duration for the challenge.
-                        </p>
-                    </div>
+                    {isContest && (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Duration (minutes)
+                            </Label>
+                            <Input
+                                placeholder="e.g. 120"
+                                value={duration}
+                                onChange={(e) => setDuration(e.target.value)}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                                Suggested duration for the challenge.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Max Submissions */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Max Submissions
-                        </Label>
-                        <Input
-                            placeholder="e.g. 5"
-                            type="number"
-                            value={maxSubmission}
-                            onChange={(e) => setMaxSubmission(e.target.value)}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum submissions allowed for this question. Leave blank for no limit.
-                        </p>
-                    </div>
+                    {isContest && (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Max Submissions
+                            </Label>
+                            <Input
+                                placeholder="e.g. 5"
+                                type="number"
+                                value={maxSubmission}
+                                onChange={(e) => setMaxSubmission(e.target.value)}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                                Maximum submissions allowed for this question. Leave blank for no
+                                limit.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Time Limit */}
                     <div className="space-y-1.5">

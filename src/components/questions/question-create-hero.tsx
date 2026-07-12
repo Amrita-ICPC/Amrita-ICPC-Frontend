@@ -13,6 +13,7 @@ interface QuestionCreateHeroProps {
     isPreview?: boolean;
     onSave?: () => void;
     isSaving?: boolean;
+    isSaveDisabled?: boolean;
 }
 
 export function QuestionCreateHero({
@@ -22,6 +23,7 @@ export function QuestionCreateHero({
     isPreview = false,
     onSave,
     isSaving = false,
+    isSaveDisabled = false,
 }: QuestionCreateHeroProps) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
@@ -57,7 +59,7 @@ export function QuestionCreateHero({
                     size="sm"
                     className="shadow-sm gap-1.5 h-9 text-xs px-5 rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer"
                     onClick={onSave}
-                    disabled={isSaving}
+                    disabled={isSaving || isSaveDisabled}
                 >
                     <Save className="h-3.5 w-3.5" />
                     Save

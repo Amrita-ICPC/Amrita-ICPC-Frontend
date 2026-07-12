@@ -34,7 +34,7 @@ import { axiosWithAuth } from '../../../lib/api-client';
 
 
 /**
- * Get full details for a single submission.
+ * Staff-only. Exposes full submission detail including source code; students must use the scoped /students/... submission endpoints instead.
  * @summary Get submission detail
  */
 export const getSubmissionDetailApiV1SubmissionsSubmissionIdGet = (
@@ -127,7 +127,7 @@ export function useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet<TData = Aw
 
 
 /**
- * Get paginated testcase results for a submission.
+ * Staff-only. Exposes hidden testcase input/expected output for review purposes; must never be reachable by students.
  * @summary Get submission testcase results
  */
 export const getSubmissionTestcasesApiV1SubmissionsSubmissionIdTestcasesGet = (

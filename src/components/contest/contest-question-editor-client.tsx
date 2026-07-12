@@ -8,6 +8,7 @@ import {
     contestQuestionsKey,
     useAddQuestionToContest,
     useUpdateContestQuestion,
+    useUpdateContestQuestionScore,
 } from "@/query/contest-query";
 import { useCreateQuestion } from "@/query/question-query";
 
@@ -80,11 +81,18 @@ export default function ContestQuestionEditorPage({
         },
     });
 
+    const updateScoreMutation = useUpdateContestQuestionScore();
+
     const onUpdate = async () => {
         await updateMutation.mutateAsync({
             contestId,
             questionId: questionId!,
             data: payload,
+        });
+        await updateScoreMutation.mutateAsync({
+            contestId,
+            questionId: questionId!,
+            data: { score: payload.score },
         });
         router.push(`/contest/${contestId}`);
         router.refresh();

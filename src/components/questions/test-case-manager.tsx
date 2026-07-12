@@ -42,6 +42,8 @@ interface TestCaseManagerProps {
         solutionCode?: string;
         driverCode?: string;
     };
+    questionScore?: number;
+    isContest?: boolean;
 }
 
 function getDraftRunErrorMessage(error: unknown) {
@@ -64,6 +66,8 @@ export function TestCaseManager({
     testCases,
     setTestCases,
     executionContext,
+    questionScore = 100,
+    isContest = true,
 }: TestCaseManagerProps) {
     const { mutateAsync: runDraft, isPending: isGeneratingOutput } =
         useTestDraftCodeApiV1QuestionsTestDraftPost();
@@ -334,6 +338,11 @@ export function TestCaseManager({
                                         <Input
                                             type="number"
                                             min={0}
+                                            max={
+                                                isContest && questionScore !== undefined
+                                                    ? questionScore
+                                                    : undefined
+                                            }
                                             value={activeTestCase.weight ?? 1}
                                             placeholder="1"
                                             onChange={(e) =>
@@ -341,8 +350,28 @@ export function TestCaseManager({
                                                     weight: Number(e.target.value),
                                                 })
                                             }
-                                            className="bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg"
+                                            className={cn(
+                                                "bg-background border-border/60 h-9 font-medium text-xs focus-visible:ring-primary/50 rounded-lg",
+                                                (activeTestCase.weight < 0 ||
+                                                    (isContest &&
+                                                        questionScore !== undefined &&
+                                                        activeTestCase.weight > questionScore)) &&
+                                                    "border-destructive focus-visible:ring-destructive",
+                                            )}
                                         />
+                                        {activeTestCase.weight < 0 && (
+                                            <p className="text-[11px] text-destructive font-medium mt-1">
+                                                Weight must be at least 0.
+                                            </p>
+                                        )}
+                                        {isContest &&
+                                            questionScore !== undefined &&
+                                            activeTestCase.weight > questionScore && (
+                                                <p className="text-[11px] text-destructive font-medium mt-1">
+                                                    Weight cannot exceed the allotted mark (
+                                                    {questionScore}).
+                                                </p>
+                                            )}
                                         <p className="text-[10px] leading-relaxed text-muted-foreground">
                                             This test case&apos;s share of the question score.
                                             Higher weight means it contributes more points.

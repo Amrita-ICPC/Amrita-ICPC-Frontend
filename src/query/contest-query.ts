@@ -19,6 +19,7 @@ export {
 export { useListUserAudiencesApiV1AudiencesMyGet as useMyAudiences } from "@/api/generated/audiences/audiences";
 export { useAddQuestionToContestApiV1ContestsContestIdQuestionsPost as useAddQuestionToContest } from "@/api/generated/contests/contests";
 export { useUpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch as useUpdateContestQuestion } from "@/api/generated/contests/contests";
+export { useUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch as useUpdateContestQuestionScore } from "@/api/generated/contests/contests";
 export { useReorderContestQuestionsApiV1ContestsContestIdQuestionsReorderPatch as useReorderContestQuestions } from "@/api/generated/contests/contests";
 export { useRemoveQuestionFromContestApiV1ContestsContestIdQuestionsDelete as useRemoveQuestionsFromContest } from "@/api/generated/contests/contests";
 export { useCloneQuestionsFromBankApiV1ContestsContestIdQuestionsCloneFromBankPost as useCloneQuestionsFromBank } from "@/api/generated/contests/contests";
