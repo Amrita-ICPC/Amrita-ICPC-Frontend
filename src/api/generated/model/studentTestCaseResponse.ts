@@ -6,8 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface StudentTemplateResponse {
-  language_id: number;
-  starter_code: string;
-  solution_code?: string | null;
+export interface StudentTestCaseResponse {
+  id: string;
+  input: string;
+  output: string;
+  is_hidden: boolean;
+  weight: number;
+  order: number;
 }

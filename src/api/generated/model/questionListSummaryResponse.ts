@@ -36,4 +36,8 @@ export interface QuestionListSummaryResponse {
   created_by: string;
   created_at: string;
   updated_at: string;
+  /** The maximum score/points allocated to this question in this contest */
+  max_score?: number | null;
+  /** The score obtained by the student for this question in this contest */
+  obtained_score?: number | null;
 }

@@ -7,6 +7,7 @@
  */
 import type { QuestionDifficulty } from './questionDifficulty';
 import type { StudentTemplateResponse } from './studentTemplateResponse';
+import type { StudentTestCaseResponse } from './studentTestCaseResponse';
 import type { TagResponse } from './tagResponse';
 
 export interface StudentQuestionDetailResponse {
@@ -19,6 +20,9 @@ export interface StudentQuestionDetailResponse {
   allowed_languages?: string[];
   tags?: TagResponse[];
   templates?: StudentTemplateResponse[];
+  testcases?: StudentTestCaseResponse[];
   /** Maximum submissions allowed for this question */
   max_submission?: number | null;
+  /** True when viewed after contest results were published (practice mode) */
+  is_practice?: boolean;
 }
