@@ -152,7 +152,7 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                         <div className="pointer-events-none absolute -left-16 -top-36 size-[28rem] rounded-full bg-primary/45 blur-3xl" />
                         <div className="pointer-events-none absolute -bottom-40 right-1/4 size-80 rounded-full bg-primary/25 blur-3xl" />
                         <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_center,white_1px,transparent_1.3px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
-                        <Code2 className="pointer-events-none absolute -bottom-16 -right-5 size-56 rotate-[-5deg] text-white/[0.07]" />
+                        <Code2 className="pointer-events-none absolute -bottom-16 -right-5 size-56 rotate-[-5deg] text-white/[0.07] dark:text-white/[0.14]" />
                         {contest.image && (
                             <div
                                 className="absolute inset-0 opacity-10 bg-cover bg-center"

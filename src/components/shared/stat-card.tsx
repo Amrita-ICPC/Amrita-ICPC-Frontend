@@ -56,16 +56,16 @@ export function StatCard({
         >
             <Card
                 className={cn(
-                    "group relative overflow-hidden transition-all duration-300 hover:shadow-2xl",
+                    "group relative overflow-hidden transition-all duration-300 hover:shadow-2xl dark:bg-card dark:bg-none dark:shadow-sm dark:hover:shadow-md",
                     themed
-                        ? "border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-card hover:border-primary/35 hover:shadow-primary/10"
+                        ? "border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-card hover:border-primary/35 hover:shadow-primary/10 dark:border-primary/25 dark:hover:border-primary/40"
                         : surfaceMap[color],
                     !themed && glowMap[color],
                 )}
             >
                 <div
                     className={cn(
-                        "absolute -right-6 -top-6 h-24 w-24 rounded-full blur-3xl opacity-20",
+                        "absolute -right-6 -top-6 h-24 w-24 rounded-full blur-3xl opacity-20 dark:hidden",
                         themed ? "bg-contrast" : colorMap[color].split(" ")[0],
                     )}
                 />
