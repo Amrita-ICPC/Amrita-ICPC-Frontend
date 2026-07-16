@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CheckCircle2, Clock3, Flag, Mail, Timer, User } from "lucide-react";
+import { Award, CalendarClock, CheckCircle2, Clock3, Flag, Mail, Timer, User } from "lucide-react";
 import { Cell, Label, Pie, PieChart } from "recharts";
 
 import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
@@ -53,6 +53,7 @@ function HeroInfoTile({
                     label === "Extra Time" && "bg-amber-500/10 text-amber-700 dark:text-amber-300",
                     label === "Remaining" &&
                         "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+                    label === "Score" && "bg-primary/10 text-primary",
                 )}
             >
                 <Icon className="h-4 w-4" />
@@ -300,7 +301,12 @@ export function MemberDetailHero({ member, contestId, contestMode }: MemberDetai
                         </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                        <HeroInfoTile
+                            label="Score"
+                            value={numberValue(member.score)}
+                            icon={Award}
+                        />
                         <HeroInfoTile
                             label="Started"
                             value={formatDateTime(member.started_at)}

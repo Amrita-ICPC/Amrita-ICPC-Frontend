@@ -1,12 +1,23 @@
 "use client";
 
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Award, ChevronDown, ChevronRight, FileText, Loader2, Save } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
 
+import {
+    getGetContestQuestionsApiV1ContestsContestIdQuestionsGetQueryKey,
+    useUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch,
+} from "@/api/generated/contests/contests";
 import type { ContestTeamMemberQuestionAnalytics } from "@/api/generated/model/contestTeamMemberQuestionAnalytics";
 import type { ContestTeamMemberQuestionSubmissionItem } from "@/api/generated/model/contestTeamMemberQuestionSubmissionItem";
 import { useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet } from "@/api/generated/submissions/submissions";
-import { useGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet } from "@/api/generated/teams/teams";
+import {
+    getGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetQueryKey,
+    getGetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetQueryKey,
+    getGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetQueryKey,
+    useGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet,
+} from "@/api/generated/teams/teams";
 import {
     MetricTile,
     SourceCodeViewer,
@@ -16,9 +27,11 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toApiError } from "@/lib/api/error";
 import { cn } from "@/lib/utils";
 
 import {
@@ -36,8 +49,14 @@ interface MemberQuestionReviewProps {
     contestTeamId: string;
     contestTeamMemberId: string;
     questions: ContestTeamMemberQuestionAnalytics[];
+    questionMarks: Record<string, QuestionMarks>;
     selectedQuestionId: string | null;
     onSelectQuestion: (questionId: string) => void;
+}
+
+interface QuestionMarks {
+    obtainedScore: number;
+    maxScore: number;
 }
 
 function questionStatus(question: ContestTeamMemberQuestionAnalytics) {
@@ -50,10 +69,14 @@ function QuestionNavigator({
     questions,
     selectedQuestionId,
     onSelectQuestion,
+    questionMarks,
+    updatedMaxScores,
 }: {
     questions: ContestTeamMemberQuestionAnalytics[];
     selectedQuestionId: string | null;
     onSelectQuestion: (questionId: string) => void;
+    questionMarks: Record<string, QuestionMarks>;
+    updatedMaxScores: Record<string, number>;
 }) {
     return (
         <Card className="border-border/70 bg-card shadow-sm">
@@ -67,6 +90,9 @@ function QuestionNavigator({
                         {questions.map((question, index) => {
                             const active = question.question_id === selectedQuestionId;
                             const status = questionStatus(question);
+                            const marks = questionMarks[question.question_id];
+                            const maxScore =
+                                updatedMaxScores[question.question_id] ?? marks?.maxScore;
 
                             return (
                                 <Button
@@ -99,6 +125,11 @@ function QuestionNavigator({
                                                     {numberValue(question.total_submission)}{" "}
                                                     submissions
                                                 </span>
+                                                <span className="ml-auto shrink-0 font-semibold text-foreground">
+                                                    {marks
+                                                        ? `${marks.obtainedScore} / ${maxScore}`
+                                                        : "— / —"}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -113,14 +144,152 @@ function QuestionNavigator({
     );
 }
 
+function ScoreEditor({
+    contestId,
+    contestTeamId,
+    contestTeamMemberId,
+    questionId,
+    obtainedScore,
+    maxScore,
+    onMaxScoreUpdated,
+}: {
+    contestId: string;
+    contestTeamId: string;
+    contestTeamMemberId: string;
+    questionId: string;
+    obtainedScore: number;
+    maxScore: number;
+    onMaxScoreUpdated: (score: number) => void;
+}) {
+    const queryClient = useQueryClient();
+    const [draft, setDraft] = React.useState(maxScore > 0 ? maxScore.toString() : "");
+    const parsedScore = Number(draft);
+    const isPositiveInteger = Number.isInteger(parsedScore) && parsedScore > 0;
+    const isAtLeastObtained = isPositiveInteger && parsedScore >= obtainedScore;
+    const isValidScore = isPositiveInteger && isAtLeastObtained;
+    const hasChanged = isValidScore && parsedScore !== maxScore;
+
+    const mutation =
+        useUpdateContestQuestionScoreApiV1ContestsContestIdQuestionsQuestionIdScorePatch({
+            mutation: {
+                onSuccess: async (response) => {
+                    const updatedScore = response.data?.score ?? parsedScore;
+                    setDraft(updatedScore.toString());
+                    onMaxScoreUpdated(updatedScore);
+                    toast.success("Question marks updated");
+
+                    await Promise.all([
+                        queryClient.invalidateQueries({
+                            queryKey:
+                                getGetContestQuestionsApiV1ContestsContestIdQuestionsGetQueryKey(
+                                    contestId,
+                                ),
+                        }),
+                        queryClient.invalidateQueries({
+                            queryKey:
+                                getGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGetQueryKey(
+                                    contestId,
+                                    contestTeamId,
+                                    contestTeamMemberId,
+                                ),
+                        }),
+                        queryClient.invalidateQueries({
+                            queryKey:
+                                getGetContestTeamMemberQuestionsApiV1ContestsTeamContestTeamIdMembersContestTeamMemberIdQuestionsGetQueryKey(
+                                    contestTeamId,
+                                    contestTeamMemberId,
+                                ),
+                        }),
+                        queryClient.invalidateQueries({
+                            queryKey:
+                                getGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGetQueryKey(
+                                    contestId,
+                                    contestTeamId,
+                                    contestTeamMemberId,
+                                    questionId,
+                                ),
+                        }),
+                    ]);
+                },
+                onError: (error) => {
+                    toast.error(toApiError(error).message || "Could not update question marks");
+                },
+            },
+        });
+
+    const submit = (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!hasChanged || mutation.isPending) return;
+        mutation.mutate({ contestId, questionId, data: { score: parsedScore } });
+    };
+
+    return (
+        <form onSubmit={submit} className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase text-primary">
+                        <Award className="h-3.5 w-3.5" />
+                        Score
+                    </div>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                        {obtainedScore} <span className="text-muted-foreground">/</span> {maxScore}
+                    </p>
+                </div>
+            </div>
+            <label
+                htmlFor={`max-score-${questionId}`}
+                className="mt-3 block text-[11px] font-medium text-muted-foreground"
+            >
+                Maximum marks
+            </label>
+            <div className="mt-2 flex items-center gap-2">
+                <Input
+                    id={`max-score-${questionId}`}
+                    type="number"
+                    min={Math.max(1, obtainedScore)}
+                    step={1}
+                    inputMode="numeric"
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="Enter marks"
+                    className="h-9 min-w-0 bg-background font-semibold tabular-nums"
+                />
+                <Button
+                    type="submit"
+                    size="icon"
+                    className="h-9 w-9 shrink-0"
+                    disabled={!hasChanged || mutation.isPending}
+                    aria-label="Save question marks"
+                >
+                    {mutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <Save className="h-4 w-4" />
+                    )}
+                </Button>
+            </div>
+            {draft && !isPositiveInteger ? (
+                <p className="mt-1.5 text-xs text-destructive">Enter a positive whole number.</p>
+            ) : draft && !isAtLeastObtained ? (
+                <p className="mt-1.5 text-xs text-destructive">
+                    Maximum marks cannot be lower than the student&apos;s {obtainedScore} earned
+                    marks.
+                </p>
+            ) : null}
+        </form>
+    );
+}
+
 function QuestionSummary({
     question,
     total,
     accepted,
+    scoreEditor,
 }: {
     question: ContestTeamMemberQuestionAnalytics;
     total: number;
     accepted: number;
+    scoreEditor: React.ReactNode;
 }) {
     return (
         <div className="rounded-lg border border-border/70 bg-muted/20 p-4">
@@ -148,7 +317,7 @@ function QuestionSummary({
                         Review submissions, source code, and testcase results for this question.
                     </p>
                 </div>
-                <div className="grid min-w-64 grid-cols-2 gap-3">
+                <div className="grid min-w-64 grid-cols-2 gap-3 xl:grid-cols-3">
                     <div className="rounded-lg border border-border/70 bg-background p-3">
                         <p className="text-[11px] font-semibold uppercase text-muted-foreground">
                             Submissions
@@ -163,6 +332,7 @@ function QuestionSummary({
                             {accepted}
                         </p>
                     </div>
+                    <div className="col-span-2 xl:col-span-1">{scoreEditor}</div>
                 </div>
             </div>
         </div>
@@ -171,10 +341,12 @@ function QuestionSummary({
 
 function SubmissionCard({
     submission,
+    maxScore,
     expanded,
     onToggle,
 }: {
     submission: ContestTeamMemberQuestionSubmissionItem;
+    maxScore: number;
     expanded: boolean;
     onToggle: () => void;
 }) {
@@ -221,7 +393,9 @@ function SubmissionCard({
                 <div className="grid grid-cols-3 gap-3 text-sm sm:min-w-72">
                     <div>
                         <p className="text-[11px] uppercase text-muted-foreground">Score</p>
-                        <p className="font-bold tabular-nums">{numberValue(submission.score)}</p>
+                        <p className="font-bold tabular-nums">
+                            {numberValue(submission.score)} / {maxScore}
+                        </p>
                     </div>
                     <div>
                         <p className="text-[11px] uppercase text-muted-foreground">Runtime</p>
@@ -302,6 +476,7 @@ export function MemberQuestionReview({
     contestTeamId,
     contestTeamMemberId,
     questions,
+    questionMarks,
     selectedQuestionId,
     onSelectQuestion,
 }: MemberQuestionReviewProps) {
@@ -311,6 +486,7 @@ export function MemberQuestionReview({
         questionId: string;
         submissionId: string;
     } | null>(null);
+    const [updatedMaxScores, setUpdatedMaxScores] = React.useState<Record<string, number>>({});
 
     const { data, isLoading, isError } =
         useGetContestTeamMemberQuestionSubmissionsApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet(
@@ -343,6 +519,12 @@ export function MemberQuestionReview({
     const accepted = numberValue(
         questionSubmissionData?.statistics?.accepted ?? selectedQuestion.accepted_submission,
     );
+    const selectedMarks = questionMarks[selectedQuestion.question_id] ?? {
+        obtainedScore: 0,
+        maxScore: 0,
+    };
+    const selectedMaxScore =
+        updatedMaxScores[selectedQuestion.question_id] ?? selectedMarks.maxScore;
 
     return (
         <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -350,6 +532,8 @@ export function MemberQuestionReview({
                 questions={questions}
                 selectedQuestionId={selectedQuestion.question_id}
                 onSelectQuestion={onSelectQuestion}
+                questionMarks={questionMarks}
+                updatedMaxScores={updatedMaxScores}
             />
 
             <Card className="border-border/70 bg-card shadow-sm">
@@ -364,6 +548,23 @@ export function MemberQuestionReview({
                         question={selectedQuestion}
                         total={total}
                         accepted={accepted}
+                        scoreEditor={
+                            <ScoreEditor
+                                key={`${selectedQuestion.question_id}:${selectedMaxScore}`}
+                                contestId={contestId}
+                                contestTeamId={contestTeamId}
+                                contestTeamMemberId={contestTeamMemberId}
+                                questionId={selectedQuestion.question_id}
+                                obtainedScore={selectedMarks.obtainedScore}
+                                maxScore={selectedMaxScore}
+                                onMaxScoreUpdated={(newScore) =>
+                                    setUpdatedMaxScores((current) => ({
+                                        ...current,
+                                        [selectedQuestion.question_id]: newScore,
+                                    }))
+                                }
+                            />
+                        }
                     />
 
                     {isLoading ? (
@@ -389,6 +590,7 @@ export function MemberQuestionReview({
                                 <SubmissionCard
                                     key={submission.submission_id}
                                     submission={submission}
+                                    maxScore={selectedMaxScore}
                                     expanded={
                                         expandedSubmission?.questionId ===
                                             selectedQuestion.question_id &&

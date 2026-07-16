@@ -3,7 +3,10 @@
 import { AlertCircle } from "lucide-react";
 import * as React from "react";
 
-import { useGetContestApiV1ContestsContestIdGet } from "@/api/generated/contests/contests";
+import {
+    useGetContestApiV1ContestsContestIdGet,
+    useGetContestQuestionsApiV1ContestsContestIdQuestionsGet,
+} from "@/api/generated/contests/contests";
 import type { ContestTeamMemberDetail } from "@/api/generated/model/contestTeamMemberDetail";
 import {
     useGetContestTeamMemberDetailApiV1ContestsContestIdTeamsContestTeamIdMembersContestTeamMemberIdGet,
@@ -75,6 +78,11 @@ export function MemberDetailClient({
 }: MemberDetailClientProps) {
     const [selectedQuestionId, setSelectedQuestionId] = React.useState<string | null>(null);
     const contestQuery = useGetContestApiV1ContestsContestIdGet(contestId);
+    const marksQuery = useGetContestQuestionsApiV1ContestsContestIdQuestionsGet(contestId, {
+        contest_team_member_id: contestTeamMemberId,
+        page: 1,
+        page_size: 100,
+    });
     const {
         data: memberData,
         isLoading: isMemberLoading,
@@ -129,19 +137,34 @@ export function MemberDetailClient({
           ? fallbackMember
           : undefined;
     const questions = hasNoProgress ? [] : (questionsData?.data ?? []);
+    const questionMarks = Object.fromEntries(
+        (marksQuery.data?.data?.questions ?? []).map((question) => [
+            question.id,
+            {
+                obtainedScore: numberValue(question.obtained_score),
+                maxScore: numberValue(question.max_score),
+            },
+        ]),
+    );
     const effectiveSelectedQuestionId = questions.some(
         (question) => question.question_id === selectedQuestionId,
     )
         ? selectedQuestionId
         : (questions[0]?.question_id ?? null);
 
-    if (isMemberLoading || isQuestionsLoading || (hasNoProgress && teamMembersQuery.isLoading)) {
+    if (
+        isMemberLoading ||
+        isQuestionsLoading ||
+        marksQuery.isLoading ||
+        (hasNoProgress && teamMembersQuery.isLoading)
+    ) {
         return <LoadingState />;
     }
 
     if (
         (isMemberError && !memberProgressNotFound) ||
         (isQuestionsError && !questionProgressNotFound) ||
+        marksQuery.isError ||
         !member
     ) {
         return (
@@ -149,6 +172,7 @@ export function MemberDetailClient({
                 onRetry={() => {
                     void refetchMember();
                     void refetchQuestions();
+                    void marksQuery.refetch();
                 }}
             />
         );
@@ -197,6 +221,7 @@ export function MemberDetailClient({
                 contestTeamId={contestTeamId}
                 contestTeamMemberId={contestTeamMemberId}
                 questions={questions}
+                questionMarks={questionMarks}
                 selectedQuestionId={effectiveSelectedQuestionId}
                 onSelectQuestion={setSelectedQuestionId}
             />
