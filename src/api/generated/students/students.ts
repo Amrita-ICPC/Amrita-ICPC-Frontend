@@ -39,6 +39,7 @@ import type {
   APIResponseStudentMemberDetail,
   APIResponseStudentMemberQuestionSubmissions,
   APIResponseStudentQuestionDetailResponse,
+  APIResponseStudentSubmissionDetailResponse,
   APIResponseStudentSubmissionResponse,
   APIResponseStudentTeamAnalytics,
   APIResponseStudentTeamCardResponse,
@@ -2915,6 +2916,202 @@ export function useGetContestQuestionDetailsApiV1StudentsContestsContestIdQuesti
 
 
 /**
+ * Retrieve questions for a contest in practice mode. Only available once
+the contest's results have been published, for students who participated.
+ * @summary Get practice questions for a contest after results are published
+ */
+export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet = (
+    contestId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentContestQuestionsListResponse>(
+      {url: `/api/v1/students/contests/${contestId}/practice/questions`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryKey = (contestId: string,) => {
+    return [
+    `/api/v1/students/contests/${contestId}/practice/questions`
+    ] as const;
+    }
+
+
+export const getGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryOptions = <TData = Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryKey(contestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>> = ({ signal }) => getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet(contestId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>>
+export type GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet<TData = Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet<TData = Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet<TData = Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get practice questions for a contest after results are published
+ */
+
+export function useGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet<TData = Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetQueryOptions(contestId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Retrieve full details of a specific question, including testcases and
+per-language reference solutions, for practice. Only available once the
+contest's results have been published, for students who participated.
+ * @summary Get contest question details with solution for practice
+ */
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet = (
+    contestId: string,
+    questionId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentQuestionDetailResponse>(
+      {url: `/api/v1/students/contests/${contestId}/practice/questions/${questionId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryKey = (contestId: string,
+    questionId: string,) => {
+    return [
+    `/api/v1/students/contests/${contestId}/practice/questions/${questionId}`
+    ] as const;
+    }
+
+
+export const getGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryKey(contestId,questionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>> = ({ signal }) => getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet(contestId,questionId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined && questionId !== null && questionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>>
+export type GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet<TData = Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    questionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet<TData = Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet<TData = Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get contest question details with solution for practice
+ */
+
+export function useGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet<TData = Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetQueryOptions(contestId,questionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Retrieve the saved workspace (programming language, source code) for a question.
  * @summary Get workspace code for a question
  */
@@ -3304,6 +3501,122 @@ export function useGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestions
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuestionIdSubmissionsGetQueryOptions(contestId,questionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Retrieve full details for a student's own (or team's) specific submission.
+
+Only accessible by students enrolled in the contest whose team owns the submission.
+
+Args:
+    request: Framework context
+    contest_id: The unique identifier of the contest
+    submission_id: The unique identifier of the submission
+    user_id: Authenticated user ID
+    service: Injected student contest question service
+
+Returns:
+    Standardized response with submission details
+
+Raises:
+    SubmissionNotFoundError: when submission doesn't exist
+    PermissionDeniedError: when user lacks permission
+ * @summary Get submission detail for student
+ */
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet = (
+    contestId: string,
+    submissionId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseStudentSubmissionDetailResponse>(
+      {url: `/api/v1/students/contests/${contestId}/submissions/${submissionId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryKey = (contestId: string,
+    submissionId: string,) => {
+    return [
+    `/api/v1/students/contests/${contestId}/submissions/${submissionId}`
+    ] as const;
+    }
+
+
+export const getGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(contestId: string,
+    submissionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryKey(contestId,submissionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>> = ({ signal }) => getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet(contestId,submissionId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: contestId !== null && contestId !== undefined && submissionId !== null && submissionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>>
+export type GetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryError = ExceptionResponse | HTTPValidationError
+
+
+export function useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet<TData = Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    submissionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet<TData = Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    submissionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet<TData = Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    submissionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get submission detail for student
+ */
+
+export function useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet<TData = Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError = ExceptionResponse | HTTPValidationError>(
+ contestId: string,
+    submissionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetQueryOptions(contestId,submissionId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

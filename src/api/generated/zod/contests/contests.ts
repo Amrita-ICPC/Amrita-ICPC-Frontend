@@ -755,20 +755,26 @@ export const GetContestResultsApiV1ContestsContestIdResultsGetResponse = zod.obj
 /**
  * Get paginated contest questions.
 
+Only accessible by the contest creator, assigned instructors, or administrators.
+
 Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    search (str): Optional search term for question title.
-    difficulty (str): Optional difficulty filter.
-    language_id (int): Optional language filter.
-    tag_id (UUID): Optional tag filter.
-    page (int): Page number (starts from 1).
-    page_size (int): Number of questions per page.
-    service (ContestQuestionService): Injected domain service.
-    user_id (UUID): Authenticated user ID.
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    search: Optional search term for question title.
+    difficulty: Optional difficulty filter.
+    language_id: Optional language filter.
+    tag_id: Optional tag filter.
+    tag_name: Optional tag name filter.
+    sort_by: Optional sort by field.
+    sort_order: Sort order.
+    page: Page number (starts from 1).
+    page_size: Number of questions per page.
+    contest_team_member_id: Optional UUID of the student to fetch marks for.
+    service: Injected domain service.
+    user_id: Authenticated user ID.
 
 Returns:
-    APIResponse: Standardized response with list of questions and pagination state.
+    Standardized response with list of questions and pagination state.
  * @summary Get contest questions
  */
 export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetParams = zod.object({
@@ -795,7 +801,8 @@ export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetQueryParams = 
   "sort_by": zod.union([zod.string(),zod.null()]).optional().describe('Sort by field (e.g., \'difficulty\')'),
   "sort_order": zod.string().regex(getContestQuestionsApiV1ContestsContestIdQuestionsGetQuerySortOrderRegExp).default(getContestQuestionsApiV1ContestsContestIdQuestionsGetQuerySortOrderDefault).describe('Sort order'),
   "page": zod.number().min(1).default(getContestQuestionsApiV1ContestsContestIdQuestionsGetQueryPageDefault).describe('Page number (starts from 1)'),
-  "page_size": zod.number().min(1).max(getContestQuestionsApiV1ContestsContestIdQuestionsGetQueryPageSizeMax).default(getContestQuestionsApiV1ContestsContestIdQuestionsGetQueryPageSizeDefault).describe('Number of questions per page')
+  "page_size": zod.number().min(1).max(getContestQuestionsApiV1ContestsContestIdQuestionsGetQueryPageSizeMax).default(getContestQuestionsApiV1ContestsContestIdQuestionsGetQueryPageSizeDefault).describe('Number of questions per page'),
+  "contest_team_member_id": zod.union([zod.uuid(),zod.null()]).optional().describe('Optional UUID of the student\/member to fetch marks for')
 })
 
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseSuccessDefault = true;
@@ -835,7 +842,9 @@ export const GetContestQuestionsApiV1ContestsContestIdQuestionsGetResponse = zod
   "testcase_count": zod.number().default(getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneQuestionsItemTestcaseCountDefault).describe('Number of testcases'),
   "created_by": zod.uuid(),
   "created_at": zod.iso.datetime({"offset":true}),
-  "updated_at": zod.iso.datetime({"offset":true})
+  "updated_at": zod.iso.datetime({"offset":true}),
+  "max_score": zod.union([zod.number(),zod.null()]).optional().describe('The maximum score\/points allocated to this question in this contest'),
+  "obtained_score": zod.union([zod.number(),zod.null()]).optional().describe('The score obtained by the student for this question in this contest')
 })),
   "easy_count": zod.number().default(getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneEasyCountDefault).describe('Number of easy questions in the contest'),
   "medium_count": zod.number().default(getContestQuestionsApiV1ContestsContestIdQuestionsGetResponseDataOneMediumCountDefault).describe('Number of medium questions in the contest'),

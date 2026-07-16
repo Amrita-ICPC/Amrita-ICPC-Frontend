@@ -836,20 +836,26 @@ export function useGetContestResultsApiV1ContestsContestIdResultsGet<TData = Awa
 /**
  * Get paginated contest questions.
 
+Only accessible by the contest creator, assigned instructors, or administrators.
+
 Args:
-    request (Request): Framework context.
-    contest_id (UUID): The unique identifier of the contest.
-    search (str): Optional search term for question title.
-    difficulty (str): Optional difficulty filter.
-    language_id (int): Optional language filter.
-    tag_id (UUID): Optional tag filter.
-    page (int): Page number (starts from 1).
-    page_size (int): Number of questions per page.
-    service (ContestQuestionService): Injected domain service.
-    user_id (UUID): Authenticated user ID.
+    request: Framework context.
+    contest_id: The unique identifier of the contest.
+    search: Optional search term for question title.
+    difficulty: Optional difficulty filter.
+    language_id: Optional language filter.
+    tag_id: Optional tag filter.
+    tag_name: Optional tag name filter.
+    sort_by: Optional sort by field.
+    sort_order: Sort order.
+    page: Page number (starts from 1).
+    page_size: Number of questions per page.
+    contest_team_member_id: Optional UUID of the student to fetch marks for.
+    service: Injected domain service.
+    user_id: Authenticated user ID.
 
 Returns:
-    APIResponse: Standardized response with list of questions and pagination state.
+    Standardized response with list of questions and pagination state.
  * @summary Get contest questions
  */
 export const getContestQuestionsApiV1ContestsContestIdQuestionsGet = (

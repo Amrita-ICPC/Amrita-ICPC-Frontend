@@ -48,4 +48,8 @@ page?: number;
  * @maximum 100
  */
 page_size?: number;
+/**
+ * Optional UUID of the student/member to fetch marks for
+ */
+contest_team_member_id?: string | null;
 };

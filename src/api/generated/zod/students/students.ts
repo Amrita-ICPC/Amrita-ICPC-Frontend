@@ -1771,7 +1771,7 @@ export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQue
 export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseMessageDefault = `Success`;
 export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
 
-
+export const getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseDataOneIsPracticeDefault = false;
 
 export const GetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponse = zod.object({
   "success": zod.boolean().default(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseSuccessDefault),
@@ -1791,9 +1791,122 @@ export const GetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQue
 })).optional(),
   "templates": zod.array(zod.object({
   "language_id": zod.number(),
-  "starter_code": zod.string()
+  "starter_code": zod.string(),
+  "solution_code": zod.union([zod.string(),zod.null()]).optional()
 })).optional(),
+  "testcases": zod.array(zod.object({
+  "id": zod.uuid(),
+  "input": zod.string(),
+  "output": zod.string(),
+  "is_hidden": zod.boolean(),
+  "weight": zod.number(),
+  "order": zod.number()
+})).optional(),
+  "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question'),
+  "is_practice": zod.boolean().default(getContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQuestionIdGetResponseDataOneIsPracticeDefault).describe('True when viewed after contest results were published (practice mode)')
+}),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve questions for a contest in practice mode. Only available once
+the contest's results have been published, for students who participated.
+ * @summary Get practice questions for a contest after results are published
+ */
+export const GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetParams = zod.object({
+  "contest_id": zod.uuid()
+})
+
+export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseSuccessDefault = true;
+export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseStatusDefault = 200;
+export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseMessageDefault = `Success`;
+
+export const GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "questions": zod.array(zod.object({
+  "id": zod.uuid().describe('The ID of the question'),
+  "title": zod.string().describe('The title of the question'),
+  "status": zod.enum(['unviewed', 'viewed', 'submitted']).describe('The status of the question (unviewed, viewed, submitted)'),
   "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question')
+}).describe('Schema for a contest question in student view.')).describe('List of questions in the contest')
+}).describe('Schema for a list of contest questions in student view.'),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve full details of a specific question, including testcases and
+per-language reference solutions, for practice. Only available once the
+contest's results have been published, for students who participated.
+ * @summary Get contest question details with solution for practice
+ */
+export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "question_id": zod.uuid()
+})
+
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseSuccessDefault = true;
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseStatusDefault = 200;
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseMessageDefault = `Success`;
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
+
+export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneIsPracticeDefault = false;
+
+export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseStatusDefault),
+  "message": zod.string().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "id": zod.uuid(),
+  "title": zod.string(),
+  "question_text": zod.string(),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Enumeration of question difficulty levels for contest problems.\n\nUsed to categorize problems by their complexity and expected\nsolving time to help with contest balancing and participant preparation.\n\nAttributes:\n    EASY: Basic problems suitable for beginners, typically solvable in 15-30 minutes.\n    MEDIUM: Intermediate problems requiring algorithmic thinking, 30-60 minutes.\n    HARD: Advanced problems demanding complex algorithms, 60+ minutes.'),
+  "time_limit_ms": zod.number(),
+  "memory_limit_mb": zod.number(),
+  "allowed_languages": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.object({
+  "name": zod.string().max(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneTagsItemNameMax).describe('The name of the tag'),
+  "id": zod.uuid()
+})).optional(),
+  "templates": zod.array(zod.object({
+  "language_id": zod.number(),
+  "starter_code": zod.string(),
+  "solution_code": zod.union([zod.string(),zod.null()]).optional()
+})).optional(),
+  "testcases": zod.array(zod.object({
+  "id": zod.uuid(),
+  "input": zod.string(),
+  "output": zod.string(),
+  "is_hidden": zod.boolean(),
+  "weight": zod.number(),
+  "order": zod.number()
+})).optional(),
+  "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question'),
+  "is_practice": zod.boolean().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneIsPracticeDefault).describe('True when viewed after contest results were published (practice mode)')
 }),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
@@ -1994,6 +2107,78 @@ export const GetQuestionSubmissionsApiV1StudentsContestsContestIdQuestionsQuesti
   "total_testcases": zod.number().describe('Total number of test cases for the question'),
   "created_at": zod.iso.datetime({"offset":true}).describe('Timestamp when the submission was created')
 }).describe('Response schema for a contest question submission.')),zod.null()]).optional(),
+  "pagination": zod.union([zod.object({
+  "total": zod.number(),
+  "page": zod.number(),
+  "page_size": zod.number(),
+  "total_pages": zod.number(),
+  "has_next": zod.boolean(),
+  "has_previous": zod.boolean()
+}),zod.null()]).optional(),
+  "meta": zod.object({
+  "request_id": zod.string(),
+  "timestamp": zod.iso.datetime({"offset":true})
+})
+})
+
+/**
+ * Retrieve full details for a student's own (or team's) specific submission.
+
+Only accessible by students enrolled in the contest whose team owns the submission.
+
+Args:
+    request: Framework context
+    contest_id: The unique identifier of the contest
+    submission_id: The unique identifier of the submission
+    user_id: Authenticated user ID
+    service: Injected student contest question service
+
+Returns:
+    Standardized response with submission details
+
+Raises:
+    SubmissionNotFoundError: when submission doesn't exist
+    PermissionDeniedError: when user lacks permission
+ * @summary Get submission detail for student
+ */
+export const GetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetParams = zod.object({
+  "contest_id": zod.uuid(),
+  "submission_id": zod.uuid()
+})
+
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseSuccessDefault = true;
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseStatusDefault = 200;
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseMessageDefault = `Success`;
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseDataOnePassedTestcasesDefault = 0;
+export const getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseDataOneTotalTestcasesDefault = 0;
+
+export const GetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseStatusDefault),
+  "message": zod.string().default(getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseMessageDefault),
+  "data": zod.union([zod.object({
+  "submission_id": zod.uuid(),
+  "question": zod.object({
+  "id": zod.uuid(),
+  "title": zod.string()
+}).describe('Question details for a submission detail response.'),
+  "submitted_by": zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}).describe('User details for a submission detail response.'),
+  "status": zod.union([zod.enum(['SYSTEM_ERROR', 'AC', 'WA', 'TLE', 'RE', 'CE', 'MLE']).describe('Enumeration of submission evaluation statuses.\n\nRepresents the lifecycle and final verdict of a code submission\nduring online judging.\n\nAttributes:\n    AC: Accepted; all test cases passed.\n    WA: Wrong Answer; one or more test cases failed.\n    TLE: Time Limit Exceeded during execution.\n    RE: Runtime Error occurred while running the submission.\n    CE: Compilation Error prevented execution.\n    MLE: Memory Limit Exceeded during execution.'),zod.null()]).optional(),
+  "score": zod.number(),
+  "language": zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}).describe('Language details for a submission detail response.'),
+  "submitted_at": zod.iso.datetime({"offset":true}),
+  "execution_time_ms": zod.union([zod.number(),zod.null()]).optional(),
+  "memory_kb": zod.union([zod.number(),zod.null()]).optional(),
+  "passed_testcases": zod.number().default(getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseDataOnePassedTestcasesDefault),
+  "total_testcases": zod.number().default(getStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGetResponseDataOneTotalTestcasesDefault),
+  "source_code": zod.string()
+}).describe('Detailed submission response for student review.'),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),
   "page": zod.number(),
