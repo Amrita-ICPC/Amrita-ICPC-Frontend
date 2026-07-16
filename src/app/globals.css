@@ -118,32 +118,33 @@
     --sidebar-ring: #6f97ff;
 }
 
-/* Dark mode — deep slate, tuned for card/border separation */
+/* Dark mode — neutral slate surfaces with the platform's blue brand accent */
 .dark {
     --radius: 0.5rem;
 
-    --background: #0a0f1e;
-    --foreground: #eef2ff;
+    --background: oklch(0.129 0.042 264.695);
+    --foreground: oklch(0.984 0.003 247.858);
 
-    --card: #161f38;
-    --card-foreground: #eef2ff;
+    --card: oklch(0.208 0.042 265.755);
+    --card-foreground: oklch(0.984 0.003 247.858);
 
-    --popover: #161f38;
-    --popover-foreground: #eef2ff;
+    --popover: oklch(0.208 0.042 265.755);
+    --popover-foreground: oklch(0.984 0.003 247.858);
 
+    /* Keep the Amrita ICPC blue identity on the neutral dark foundation. */
     --primary: #6f97ff;
-    --primary-foreground: #0a0f1e;
+    --primary-foreground: oklch(0.208 0.042 265.755);
     --contrast-accent: #f59e0b;
     --contrast-foreground: #171007;
 
-    --secondary: #202b4d;
-    --secondary-foreground: #eef2ff;
+    --secondary: oklch(0.279 0.041 260.031);
+    --secondary-foreground: oklch(0.984 0.003 247.858);
 
-    --muted: #1c2645;
-    --muted-foreground: #b3bcd6;
+    --muted: oklch(0.279 0.041 260.031);
+    --muted-foreground: oklch(0.704 0.04 256.788);
 
-    --accent: #24356e;
-    --accent-foreground: #b7cbff;
+    --accent: oklch(0.279 0.041 260.031);
+    --accent-foreground: oklch(0.984 0.003 247.858);
 
     --destructive: #f37f7f;
     --success: #34d399;
@@ -153,8 +154,8 @@
     --info: #60a5fa;
     --info-foreground: #07162e;
 
-    --border: rgb(255 255 255 / 20%);
-    --input: rgb(255 255 255 / 24%);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
     --ring: #6f97ff;
 
     /* Status chart colours */
@@ -164,14 +165,14 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.704 0.191 22.216);
 
-    /* Sidebar — matches landing page's "Algorithm Mesh" palette */
-    --sidebar: #0a1330;
-    --sidebar-foreground: #eef2ff;
+    /* Sidebar follows the same surface ladder and remains dark. */
+    --sidebar: oklch(0.208 0.042 265.755);
+    --sidebar-foreground: oklch(0.984 0.003 247.858);
     --sidebar-primary: #6f97ff;
-    --sidebar-primary-foreground: #0a0f1e;
-    --sidebar-accent: #24356e;
-    --sidebar-accent-foreground: #eef2ff;
-    --sidebar-border: rgb(255 255 255 / 10%);
+    --sidebar-primary-foreground: oklch(0.208 0.042 265.755);
+    --sidebar-accent: oklch(0.279 0.041 260.031);
+    --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+    --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: #6f97ff;
 }
 

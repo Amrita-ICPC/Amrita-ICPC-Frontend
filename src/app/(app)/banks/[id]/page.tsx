@@ -16,9 +16,5 @@ export const metadata: Metadata = {
 export default async function BankPage({ params }: BankPageProps) {
     const { id } = await params;
 
-    return (
-        <div className="mx-auto w-full max-w-7xl">
-            <BankDetailClient bankId={id} />
-        </div>
-    );
+    return <BankDetailClient bankId={id} />;
 }

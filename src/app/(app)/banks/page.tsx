@@ -4,8 +4,8 @@ import { BankStats } from "@/components/banks/bank-stats";
 
 export default function BanksPage() {
     return (
-        <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
-            <div className="flex items-center justify-between border-b border-primary/15 pb-6 mt-2">
+        <div className="flex h-full flex-col space-y-6">
+            <div className="flex items-center justify-between border-b border-primary/15 pb-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
                         Question Banks
