@@ -1,12 +1,17 @@
 "use client";
 
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { BookOpen, ChevronDown, ChevronRight, Code2, FileText } from "lucide-react";
 import * as React from "react";
 
 import type { StudentMemberQuestionAnalytics } from "@/api/generated/model/studentMemberQuestionAnalytics";
+import type { StudentQuestionDetailResponse } from "@/api/generated/model/studentQuestionDetailResponse";
 import type { StudentSubmissionItem } from "@/api/generated/model/studentSubmissionItem";
-import { useGetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet } from "@/api/generated/students/students";
-import { useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet } from "@/api/generated/submissions/submissions";
+import type { StudentTemplateResponse } from "@/api/generated/model/studentTemplateResponse";
+import {
+    useGetContestTeamMemberQuestionSubmissionsApiV1StudentsContestsContestIdResultsMembersContestTeamMemberIdQuestionsQuestionIdSubmissionsGet,
+    useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet,
+} from "@/api/generated/students/students";
 import { MetricTile, SourceCodeViewer } from "@/components/contest/shared/submission-viewers";
 import {
     difficultyTone,
@@ -18,11 +23,20 @@ import {
     statusTone,
 } from "@/components/contest/team-member-analytics/member-detail-utils";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ProblemView } from "@/components/student/contest/session/problem-view";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { axiosWithAuth } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
 interface MemberQuestionReviewProps {
@@ -162,19 +176,193 @@ function QuestionSummary({
     );
 }
 
+interface PublishedSolutionTemplate extends StudentTemplateResponse {
+    solution_code?: string | null;
+    language_name?: string | null;
+    monaco_language?: string | null;
+    language?: string | { name?: string; monaco_language?: string | null } | null;
+}
+
+type PublishedQuestionDetail = StudentQuestionDetailResponse & {
+    templates?: PublishedSolutionTemplate[];
+    solutions?: PublishedSolutionTemplate[];
+};
+
+interface PublishedQuestionDetailApiResponse {
+    data?: PublishedQuestionDetail | null;
+}
+
+const FALLBACK_LANGUAGES: Record<number, { label: string; monaco: string }> = {
+    50: { label: "C (GCC)", monaco: "c" },
+    54: { label: "C++ (GCC)", monaco: "cpp" },
+    62: { label: "Java", monaco: "java" },
+    71: { label: "Python 3", monaco: "python" },
+};
+
+function templateLanguage(template: PublishedSolutionTemplate) {
+    const nestedLanguage =
+        typeof template.language === "object" && template.language !== null
+            ? template.language
+            : undefined;
+    const label =
+        template.language_name ??
+        (typeof template.language === "string" ? template.language : nestedLanguage?.name) ??
+        FALLBACK_LANGUAGES[template.language_id]?.label ??
+        `Language ${template.language_id}`;
+    const monaco =
+        template.monaco_language ??
+        nestedLanguage?.monaco_language ??
+        FALLBACK_LANGUAGES[template.language_id]?.monaco ??
+        label;
+
+    return { label, monaco };
+}
+
+function PublishedQuestionSolution({
+    contestId,
+    questionId,
+}: {
+    contestId: string;
+    questionId: string;
+}) {
+    const [open, setOpen] = React.useState(false);
+    const [selectedLanguageId, setSelectedLanguageId] = React.useState<number | null>(null);
+    const { data, isLoading, isError } = useQuery({
+        queryKey: [`/api/v1/students/contests/${contestId}/results/questions/${questionId}`],
+        queryFn: ({ signal }) =>
+            axiosWithAuth<PublishedQuestionDetailApiResponse>({
+                url: `/api/v1/students/contests/${contestId}/results/questions/${questionId}`,
+                method: "GET",
+                signal,
+            }),
+        enabled: open,
+    });
+    const detail = data?.data;
+    const solutionTemplates = React.useMemo(() => {
+        const templates = detail?.solutions ?? detail?.templates ?? [];
+        return templates.filter((template) => Boolean(template.solution_code?.trim()));
+    }, [detail]);
+    const activeTemplate =
+        solutionTemplates.find((template) => template.language_id === selectedLanguageId) ??
+        solutionTemplates[0];
+    const activeLanguage = activeTemplate ? templateLanguage(activeTemplate) : null;
+
+    return (
+        <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+            <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setOpen((current) => !current)}
+                className="h-auto w-full justify-between rounded-none px-4 py-3 text-left hover:bg-muted/30"
+            >
+                <span className="inline-flex items-center gap-2 font-semibold">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    Question &amp; Reference Solution
+                </span>
+                {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+
+            {open ? (
+                <div className="space-y-4 border-t border-border/70 p-4">
+                    {isLoading ? (
+                        <div className="space-y-3">
+                            <Skeleton className="h-72 rounded-xl" />
+                            <Skeleton className="h-80 rounded-xl" />
+                        </div>
+                    ) : isError || !detail ? (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                            Failed to load the published question and reference solution.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="overflow-hidden rounded-xl border border-border/70">
+                                <div className="border-b border-border/70 bg-muted/30 px-4 py-3">
+                                    <p className="font-semibold">Question</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Published problem statement and constraints.
+                                    </p>
+                                </div>
+                                <div className="h-[520px]">
+                                    <ProblemView questionDetails={detail} isLoading={false} />
+                                </div>
+                            </div>
+
+                            {activeTemplate && activeLanguage ? (
+                                <div className="space-y-3">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <p className="flex items-center gap-2 font-semibold">
+                                                <Code2 className="h-4 w-4 text-primary" />
+                                                Reference Solution
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                Switch languages to compare official solutions.
+                                            </p>
+                                        </div>
+                                        <Select
+                                            value={String(activeTemplate.language_id)}
+                                            onValueChange={(value) =>
+                                                setSelectedLanguageId(Number(value))
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full sm:w-52">
+                                                <SelectValue placeholder="Select language" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {solutionTemplates.map((template) => (
+                                                    <SelectItem
+                                                        key={template.language_id}
+                                                        value={String(template.language_id)}
+                                                    >
+                                                        {templateLanguage(template).label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <SourceCodeViewer
+                                        title="Reference Solution"
+                                        code={activeTemplate.solution_code ?? ""}
+                                        language={activeLanguage.monaco}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-border/70 p-6 text-center">
+                                    <Code2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                                    <p className="mt-2 font-semibold">
+                                        No reference solution published
+                                    </p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        The question is available, but it has no published solution
+                                        code.
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            ) : null}
+        </div>
+    );
+}
+
 function SubmissionCard({
+    contestId,
     submission,
     expanded,
     onToggle,
 }: {
+    contestId: string;
     submission: StudentSubmissionItem;
     expanded: boolean;
     onToggle: () => void;
 }) {
-    const { data, isLoading, isError } = useGetSubmissionDetailApiV1SubmissionsSubmissionIdGet(
-        submission.submission_id,
-        { query: { enabled: expanded } },
-    );
+    const { data, isLoading, isError } =
+        useGetStudentSubmissionDetailApiV1StudentsContestsContestIdSubmissionsSubmissionIdGet(
+            contestId,
+            submission.submission_id,
+            { query: { enabled: expanded } },
+        );
     const detail = data?.data;
 
     return (
@@ -338,6 +526,12 @@ export function MemberQuestionReview({
                         accepted={accepted}
                     />
 
+                    <PublishedQuestionSolution
+                        key={selectedQuestion.question_id}
+                        contestId={contestId}
+                        questionId={selectedQuestion.question_id}
+                    />
+
                     {isLoading ? (
                         <div className="space-y-3">
                             {Array.from({ length: 3 }).map((_, index) => (
@@ -360,6 +554,7 @@ export function MemberQuestionReview({
                             {submissions.map((submission) => (
                                 <SubmissionCard
                                     key={submission.submission_id}
+                                    contestId={contestId}
                                     submission={submission}
                                     expanded={expandedSubmissionId === submission.submission_id}
                                     onToggle={() => {
