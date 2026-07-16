@@ -150,7 +150,15 @@ export function TestCaseViewer({ submissionId, open }: { submissionId: string; o
     );
 }
 
-export function SourceCodeViewer({ code, language }: { code: string; language: string }) {
+export function SourceCodeViewer({
+    code,
+    language,
+    title = "Source Code",
+}: {
+    code: string;
+    language: string;
+    title?: string;
+}) {
     const { resolvedTheme } = useTheme();
     const normalizedLanguage = language.toLowerCase();
     const monacoLanguage = normalizedLanguage.includes("python")
@@ -182,7 +190,7 @@ export function SourceCodeViewer({ code, language }: { code: string; language: s
                     </div>
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                         <Code2 className="h-4 w-4 text-primary" />
-                        Source Code
+                        {title}
                     </div>
                 </div>
                 <Badge
