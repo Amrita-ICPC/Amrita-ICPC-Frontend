@@ -16,9 +16,21 @@ const nextConfig: NextConfig = {
             },
             {
                 protocol: "http",
+                hostname: "10.10.10.23",
+                port: "8000",
+                pathname: "/api/v1/images/**",
+            },
+            {
+                protocol: "http",
                 hostname: "localhost",
                 port: "9000",
                 pathname: "/**",
+            },
+            {
+                protocol: "http",
+                hostname: "localhost",
+                port: "8000",
+                pathname: "/api/v1/images/**",
             },
         ],
     },
