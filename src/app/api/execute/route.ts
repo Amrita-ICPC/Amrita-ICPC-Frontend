@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const JUDGE0_URL = process.env.JUDGE0_API_URL ?? "http://10.10.10.23:2358";
+const JUDGE0_URL = process.env.JUDGE0_API_URL ?? "http://icpc-judge0-server:2358";
+const JUDGE0_API_KEY = process.env.JUDGE0_API_KEY;
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
     const { source_code, language_id, stdin } = body;
 
     if (!source_code || !language_id) {
-        return NextResponse.json({ error: "source_code and language_id required" }, { status: 400 });
+        return NextResponse.json(
+            { error: "source_code and language_id required" },
+            { status: 400 },
+        );
     }
 
     try {
         const res = await fetch(`${JUDGE0_URL}/submissions?wait=true&base64_encoded=false`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...(JUDGE0_API_KEY ? { "X-Auth-Token": JUDGE0_API_KEY } : {}),
+            },
             body: JSON.stringify({ source_code, language_id, stdin: stdin ?? "" }),
         });
 
