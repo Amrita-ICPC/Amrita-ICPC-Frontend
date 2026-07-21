@@ -41,6 +41,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { handleApiError } from "@/lib/handle-api-error";
 import { useContestSessionAppearance } from "@/lib/providers/contest-session-appearance-provider";
 import { useContestSession } from "@/lib/providers/contest-session-provider";
 import { useSessionTimer } from "@/lib/providers/session-timer-provider";
@@ -438,9 +439,13 @@ export function SessionClient({ contestId }: SessionClientProps) {
         useRunStudentCodeApiV1StudentsContestsContestIdQuestionsQuestionIdRunPost();
 
     const submitMutation =
-        useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost();
+        useSubmitContestQuestionApiV1StudentsContestsContestIdQuestionsQuestionIdSubmitPost({
+            mutation: { meta: { suppressGlobalError: true } },
+        });
 
-    const finishSessionMutation = useFinishContestSessionApiV1StudentsContestsContestIdFinishPost();
+    const finishSessionMutation = useFinishContestSessionApiV1StudentsContestsContestIdFinishPost({
+        mutation: { meta: { suppressGlobalError: true } },
+    });
 
     const handleFinishSession = () => {
         finishSessionMutation.mutate(
@@ -462,12 +467,10 @@ export function SessionClient({ contestId }: SessionClientProps) {
                     });
                     router.push(`/student/contest/${contestId}`);
                 },
-                onError: (err: any) => {
-                    console.error("Finish session error:", err);
+                onError: (error) => {
+                    console.error("Finish session error:", error);
                     toast.error(
-                        err?.response?.data?.message ||
-                            err?.message ||
-                            "Failed to finish contest session",
+                        handleApiError(error).message || "Failed to finish contest session",
                     );
                 },
             },
@@ -557,11 +560,9 @@ export function SessionClient({ contestId }: SessionClientProps) {
                         };
                     });
                 },
-                onError: (err: any) => {
-                    console.error("Submit error:", err);
-                    toast.error(
-                        err?.response?.data?.message || err?.message || "Failed to submit code",
-                    );
+                onError: (error) => {
+                    console.error("Submit error:", error);
+                    toast.error(handleApiError(error).message || "Failed to submit code");
                 },
             },
         );

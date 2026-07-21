@@ -25,6 +25,11 @@ import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    getContestSessionUnavailableMessage,
+    isContestSessionCompleted,
+} from "@/lib/contest-session-status";
+import { handleApiError } from "@/lib/handle-api-error";
 import { toast } from "@/lib/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -338,14 +343,13 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
 
     const startMutation = useStartContestSessionApiV1StudentsContestsContestIdStartPost({
         mutation: {
+            meta: { suppressGlobalError: true },
             onSuccess: () => {
                 toast.success("Contest session started successfully");
                 router.push(`/student/contest/${contestId}/session`);
             },
-            onError: (err: any) => {
-                toast.error(
-                    err.response?.data?.message || err.message || "Failed to start contest session",
-                );
+            onError: (error) => {
+                toast.error(handleApiError(error).message || "Failed to start contest session");
             },
         },
     });
@@ -366,7 +370,10 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
             : "Not Scheduled";
 
     const canStart = !!participation?.session?.can_start;
-    const effectiveReason = participation?.session?.reason;
+    const isSessionCompleted = isContestSessionCompleted(participation?.session);
+    const effectiveReason = canStart
+        ? null
+        : getContestSessionUnavailableMessage(participation?.session);
     const effectiveRunStatus = contest?.run_status || "UPCOMING";
 
     return (
@@ -645,6 +652,15 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                 }
 
                                 if (effectiveRunStatus === "LIVE") {
+                                    if (isSessionCompleted) {
+                                        return {
+                                            title: "Contest Submitted",
+                                            icon: CheckCircle2,
+                                            iconClass: "text-success",
+                                            bgClass:
+                                                "bg-gradient-to-r from-success/10 to-success/5 border-b border-success/20",
+                                        };
+                                    }
                                     if (participation?.session?.already_started && canStart) {
                                         return {
                                             title: "Session in Progress",
@@ -819,23 +835,38 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                     >
                                                         {startMutation.isPending
                                                             ? "Loading..."
-                                                            : participation?.session
-                                                                    ?.already_started
-                                                              ? "Resume Contest"
-                                                              : "Start Contest"}
+                                                            : isSessionCompleted
+                                                              ? "Contest Submitted"
+                                                              : participation?.session
+                                                                      ?.already_started
+                                                                ? "Resume Contest"
+                                                                : "Start Contest"}
                                                         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                                                     </Button>
                                                 )}
 
                                                 {/* If start is blocked, explain why */}
                                                 {!canStart && effectiveReason && (
-                                                    <div className="flex gap-3 p-3.5 rounded-2xl border border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10">
-                                                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                    <div
+                                                        className={cn(
+                                                            "flex gap-3 p-3.5 rounded-2xl border",
+                                                            isSessionCompleted
+                                                                ? "border-success/20 bg-success/5 text-success dark:bg-success/10"
+                                                                : "border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10",
+                                                        )}
+                                                    >
+                                                        {isSessionCompleted ? (
+                                                            <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                                                        ) : (
+                                                            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                        )}
                                                         <div className="flex flex-col gap-0.5">
                                                             <span className="text-xs font-bold leading-tight">
-                                                                Access Blocked
+                                                                {isSessionCompleted
+                                                                    ? "Already Submitted"
+                                                                    : "Access Blocked"}
                                                             </span>
-                                                            <span className="text-[11px] text-destructive/80 leading-normal font-medium">
+                                                            <span className="text-[11px] opacity-80 leading-normal font-medium">
                                                                 {effectiveReason}
                                                             </span>
                                                         </div>
