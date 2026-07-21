@@ -14,6 +14,7 @@ interface TanstackQueryProviderProps {
 type MutationMeta = {
     successMessage?: string;
     invalidateKeys?: QueryKey[];
+    suppressGlobalError?: boolean;
 };
 
 export default function TanstackQueryProvider({ children }: TanstackQueryProviderProps) {
@@ -36,9 +37,19 @@ export default function TanstackQueryProvider({ children }: TanstackQueryProvide
                     }
                 },
 
-                onError: (error) => {
+                onError: (error, _variables, _context, mutation) => {
+                    const meta = mutation.options.meta as MutationMeta | undefined;
+                    if (meta?.suppressGlobalError) return;
+
                     const apiError = handleApiError(error);
-                    toast.error(apiError.message);
+                    const detailMessages = apiError.errors
+                        .map((detail) => detail.message)
+                        .filter((message) => message !== apiError.message);
+                    toast.error(apiError.message, {
+                        description: detailMessages.length
+                            ? detailMessages.slice(0, 3).join(" • ")
+                            : undefined,
+                    });
                 },
             }),
 

@@ -57,6 +57,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/use-debounce";
+import { handleApiError } from "@/lib/handle-api-error";
+import { toast } from "@/lib/hooks/use-toast";
 import {
     contestDetailKey,
     contestKeys,
@@ -141,6 +143,33 @@ const formSchema = z
     );
 
 type FormValues = z.infer<typeof formSchema>;
+
+const CONTEST_FORM_FIELDS = new Set<keyof FormValues>([
+    "name",
+    "description",
+    "start_time",
+    "end_time",
+    "registration_start",
+    "registration_end",
+    "duration",
+    "max_teams",
+    "min_team_size",
+    "max_team_size",
+    "max_submission_per_question",
+]);
+
+function inferContestField(field: string | undefined, message: string): keyof FormValues | null {
+    const normalizedField = field?.split(".").at(-1) as keyof FormValues | undefined;
+    if (normalizedField && CONTEST_FORM_FIELDS.has(normalizedField)) return normalizedField;
+
+    const normalizedMessage = message.toLowerCase();
+    if (normalizedMessage.includes("registration start")) return "registration_start";
+    if (normalizedMessage.includes("registration end")) return "registration_end";
+    if (normalizedMessage.includes("start time")) return "start_time";
+    if (normalizedMessage.includes("end time")) return "end_time";
+    if (normalizedMessage.includes("duration")) return "duration";
+    return null;
+}
 
 export interface ContestFormProps {
     initialData?: ContestDetailResponse;
@@ -256,6 +285,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             meta: {
                 successMessage: "Contest created successfully",
                 invalidateKeys: [contestKeys()],
+                suppressGlobalError: true,
             },
         },
     });
@@ -264,6 +294,7 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
             meta: {
                 successMessage: "Contest updated successfully",
                 invalidateKeys: [contestKeys(), contestDetailKey(contestId!)],
+                suppressGlobalError: true,
             },
         },
     });
@@ -286,96 +317,137 @@ export function ContestForm({ initialData, contestId }: ContestFormProps) {
                 return;
             }
 
-            if (initialData && contestId) {
-                const payload: ContestUpdate = {
-                    name: values.name,
-                    description: values.description?.trim() ? values.description.trim() : null,
-                    image: values.image ?? null,
-                    is_public: values.is_public,
-                    start_time: toUtcIsoString(values.start_time),
-                    end_time: toUtcIsoString(values.end_time),
-                    registration_start: values.registration_start?.trim()
-                        ? toUtcIsoString(values.registration_start)
-                        : null,
-                    registration_end: values.registration_end?.trim()
-                        ? toUtcIsoString(values.registration_end)
-                        : null,
-                    duration: Number.isFinite(values.duration ?? NaN)
-                        ? values.duration! * 60
-                        : null,
-                    max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
-                    min_team_size:
-                        values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
-                    max_team_size:
-                        values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
-                    rules: values.rules?.trim() ? values.rules.trim() : null,
-                    team_approval_mode: values.team_approval_mode,
-                    contest_mode: values.contest_mode,
-                    show_leaderboard_during_contest: values.show_leaderboard_during_contest,
-                    evaluate_on_submit: values.evaluate_on_submit,
-                    shuffle_questions: values.shuffle_questions,
-                    participation_type:
-                        values.contest_mode === ContestMode.team ? values.participation_type : null,
-                    max_submission_per_question: values.max_submission_per_question ?? null,
-                };
-                await updateContestMutation.mutateAsync({
-                    contestId,
-                    data: payload,
-                });
-            } else {
-                const payload: ContestCreate = {
-                    name: values.name,
-                    description: values.description?.trim() ? values.description.trim() : null,
-                    image: values.image ?? null,
-                    is_public: values.is_public,
-                    start_time: toUtcIsoString(values.start_time),
-                    end_time: toUtcIsoString(values.end_time),
-                    registration_start: values.registration_start?.trim()
-                        ? toUtcIsoString(values.registration_start)
-                        : null,
-                    registration_end: values.registration_end?.trim()
-                        ? toUtcIsoString(values.registration_end)
-                        : null,
-                    duration: Number.isFinite(values.duration ?? NaN)
-                        ? values.duration! * 60
-                        : null,
-                    max_teams: Number.isFinite(values.max_teams ?? NaN) ? values.max_teams! : null,
-                    min_team_size:
-                        values.contest_mode === ContestMode.individual ? 1 : values.min_team_size,
-                    max_team_size:
-                        values.contest_mode === ContestMode.individual ? 1 : values.max_team_size,
-                    rules: values.rules?.trim() ? values.rules.trim() : null,
-                    team_approval_mode: values.team_approval_mode,
-                    contest_mode: values.contest_mode,
-                    show_leaderboard_during_contest: values.show_leaderboard_during_contest,
-                    evaluate_on_submit: values.evaluate_on_submit ?? true,
-                    shuffle_questions: values.shuffle_questions ?? false,
-                    participation_type:
-                        values.contest_mode === ContestMode.team
-                            ? (values.participation_type ?? undefined)
-                            : undefined,
-                    max_submission_per_question: values.max_submission_per_question ?? null,
-                    audience_ids: values.is_public ? [] : (values.audience_ids ?? []),
-                };
-                const createdContest = await createContestMutation.mutateAsync({ data: payload });
-                const createdData = createdContest.data;
-                const createdContestId =
-                    createdData &&
-                    typeof createdData === "object" &&
-                    "id" in createdData &&
-                    typeof createdData.id === "string"
-                        ? createdData.id
-                        : null;
-                if (createdContestId && values.instructor_ids?.length) {
-                    await assignInstructorsMutation.mutateAsync({
-                        contestId: createdContestId,
-                        data: { instructor_ids: values.instructor_ids },
+            try {
+                if (initialData && contestId) {
+                    const payload: ContestUpdate = {
+                        name: values.name,
+                        description: values.description?.trim() ? values.description.trim() : null,
+                        image: values.image ?? null,
+                        is_public: values.is_public,
+                        start_time: toUtcIsoString(values.start_time),
+                        end_time: toUtcIsoString(values.end_time),
+                        registration_start: values.registration_start?.trim()
+                            ? toUtcIsoString(values.registration_start)
+                            : null,
+                        registration_end: values.registration_end?.trim()
+                            ? toUtcIsoString(values.registration_end)
+                            : null,
+                        duration: Number.isFinite(values.duration ?? NaN)
+                            ? values.duration! * 60
+                            : null,
+                        max_teams: Number.isFinite(values.max_teams ?? NaN)
+                            ? values.max_teams!
+                            : null,
+                        min_team_size:
+                            values.contest_mode === ContestMode.individual
+                                ? 1
+                                : values.min_team_size,
+                        max_team_size:
+                            values.contest_mode === ContestMode.individual
+                                ? 1
+                                : values.max_team_size,
+                        rules: values.rules?.trim() ? values.rules.trim() : null,
+                        team_approval_mode: values.team_approval_mode,
+                        contest_mode: values.contest_mode,
+                        show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                        evaluate_on_submit: values.evaluate_on_submit,
+                        shuffle_questions: values.shuffle_questions,
+                        participation_type:
+                            values.contest_mode === ContestMode.team
+                                ? values.participation_type
+                                : null,
+                        max_submission_per_question: values.max_submission_per_question ?? null,
+                    };
+                    await updateContestMutation.mutateAsync({
+                        contestId,
+                        data: payload,
                     });
+                } else {
+                    const payload: ContestCreate = {
+                        name: values.name,
+                        description: values.description?.trim() ? values.description.trim() : null,
+                        image: values.image ?? null,
+                        is_public: values.is_public,
+                        start_time: toUtcIsoString(values.start_time),
+                        end_time: toUtcIsoString(values.end_time),
+                        registration_start: values.registration_start?.trim()
+                            ? toUtcIsoString(values.registration_start)
+                            : null,
+                        registration_end: values.registration_end?.trim()
+                            ? toUtcIsoString(values.registration_end)
+                            : null,
+                        duration: Number.isFinite(values.duration ?? NaN)
+                            ? values.duration! * 60
+                            : null,
+                        max_teams: Number.isFinite(values.max_teams ?? NaN)
+                            ? values.max_teams!
+                            : null,
+                        min_team_size:
+                            values.contest_mode === ContestMode.individual
+                                ? 1
+                                : values.min_team_size,
+                        max_team_size:
+                            values.contest_mode === ContestMode.individual
+                                ? 1
+                                : values.max_team_size,
+                        rules: values.rules?.trim() ? values.rules.trim() : null,
+                        team_approval_mode: values.team_approval_mode,
+                        contest_mode: values.contest_mode,
+                        show_leaderboard_during_contest: values.show_leaderboard_during_contest,
+                        evaluate_on_submit: values.evaluate_on_submit ?? true,
+                        shuffle_questions: values.shuffle_questions ?? false,
+                        participation_type:
+                            values.contest_mode === ContestMode.team
+                                ? (values.participation_type ?? undefined)
+                                : undefined,
+                        max_submission_per_question: values.max_submission_per_question ?? null,
+                        audience_ids: values.is_public ? [] : (values.audience_ids ?? []),
+                    };
+                    const createdContest = await createContestMutation.mutateAsync({
+                        data: payload,
+                    });
+                    const createdData = createdContest.data;
+                    const createdContestId =
+                        createdData &&
+                        typeof createdData === "object" &&
+                        "id" in createdData &&
+                        typeof createdData.id === "string"
+                            ? createdData.id
+                            : null;
+                    if (createdContestId && values.instructor_ids?.length) {
+                        await assignInstructorsMutation.mutateAsync({
+                            contestId: createdContestId,
+                            data: { instructor_ids: values.instructor_ids },
+                        });
+                    }
                 }
-            }
 
-            router.push("/contest");
-            router.refresh();
+                router.push("/contest");
+                router.refresh();
+            } catch (error) {
+                const apiError = handleApiError(error);
+                let hasFieldError = false;
+
+                for (const detail of apiError.errors) {
+                    const field = inferContestField(detail.field, detail.message);
+                    if (!field) continue;
+                    setError(field, { type: "server", message: detail.message });
+                    hasFieldError = true;
+                }
+
+                if (!hasFieldError) {
+                    const field = inferContestField(undefined, apiError.message);
+                    if (field) {
+                        setError(field, { type: "server", message: apiError.message });
+                        hasFieldError = true;
+                    }
+                }
+
+                if (hasFieldError) setActiveFormTab("details");
+                toast.error(initialData ? "Could not update contest" : "Could not create contest", {
+                    description: apiError.message,
+                });
+            }
         },
         (validationErrors) =>
             setActiveFormTab(validationErrors.audience_ids ? "access" : "details"),
