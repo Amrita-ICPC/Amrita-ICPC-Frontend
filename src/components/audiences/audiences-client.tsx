@@ -24,6 +24,16 @@ import type { AudienceResponse } from "@/api/generated/model";
 import { AudienceType } from "@/api/generated/model/audienceType";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -407,6 +417,7 @@ export function AudiencesClient() {
     const [createOpen, setCreateOpen] = useState(false);
     const [editAudience, setEditAudience] = useState<AudienceResponse | null>(null);
     const [selectedAudience, setSelectedAudience] = useState<AudienceResponse | null>(null);
+    const [deleteAudienceTarget, setDeleteAudienceTarget] = useState<AudienceResponse | null>(null);
 
     const page = parseInt(searchParams.get("page") || "1");
 
@@ -417,27 +428,24 @@ export function AudiencesClient() {
     const audiences = data?.data ?? [];
     const pagination = data?.pagination;
 
-    const { mutate: deleteAudience } = useDeleteAudienceApiV1AudiencesAudienceIdDelete({
-        mutation: {
-            onSuccess: () => {
-                toast.success("Audience deleted");
-                setSelectedAudience(null);
-                queryClient.invalidateQueries({
-                    queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
-                });
+    const { mutate: deleteAudience, isPending: isDeletingAudience } =
+        useDeleteAudienceApiV1AudiencesAudienceIdDelete({
+            mutation: {
+                onSuccess: () => {
+                    toast.success("Audience deleted");
+                    setSelectedAudience(null);
+                    setDeleteAudienceTarget(null);
+                    queryClient.invalidateQueries({
+                        queryKey: getListAudiencesApiV1AudiencesGetQueryKey(),
+                    });
+                },
+                onError: (err: unknown) => {
+                    const msg = (err as { response?: { data?: { message?: string } } })?.response
+                        ?.data?.message;
+                    toast.error(msg || "Failed to delete audience");
+                },
             },
-            onError: (err: unknown) => {
-                const msg = (err as { response?: { data?: { message?: string } } })?.response?.data
-                    ?.message;
-                toast.error(msg || "Failed to delete audience");
-            },
-        },
-    });
-
-    function handleDelete(audience: AudienceResponse) {
-        if (!confirm(`Delete "${audience.name}"? This cannot be undone.`)) return;
-        deleteAudience({ audienceId: audience.id });
-    }
+        });
 
     return (
         <div className="space-y-4">
@@ -531,7 +539,10 @@ export function AudiencesClient() {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                    onClick={() => handleDelete(audience)}
+                                                    onClick={() =>
+                                                        setDeleteAudienceTarget(audience)
+                                                    }
+                                                    aria-label={`Delete ${audience.name}`}
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
@@ -574,6 +585,39 @@ export function AudiencesClient() {
                     audience={editAudience}
                 />
             )}
+
+            <AlertDialog
+                open={!!deleteAudienceTarget}
+                onOpenChange={(open) => !open && setDeleteAudienceTarget(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Delete &quot;{deleteAudienceTarget?.name}&quot;?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This audience and its membership list will be removed. Private contest
+                            access that depends on this audience may be affected. This action cannot
+                            be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeletingAudience}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={isDeletingAudience}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                if (deleteAudienceTarget) {
+                                    deleteAudience({ audienceId: deleteAudienceTarget.id });
+                                }
+                            }}
+                        >
+                            {isDeletingAudience ? "Deleting..." : "Delete Audience"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
