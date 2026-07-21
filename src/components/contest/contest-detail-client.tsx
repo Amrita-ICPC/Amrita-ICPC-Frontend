@@ -25,6 +25,17 @@ import {
 } from "@/api/generated/contests/contests";
 import type { ContestDetailResponse } from "@/api/generated/model";
 import { useGetContestTeamsApiV1ContestsContestIdTeamsGet } from "@/api/generated/teams/teams";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -233,19 +244,53 @@ export function ContestDetailClient({ contestId }: ContestDetailClientProps) {
                                         </Button>
                                     )}
 
-                                    <Button
-                                        variant="outline"
-                                        className="h-10 border-red-300/35 bg-red-500/15 px-4 text-red-100 backdrop-blur-md hover:bg-red-500/25 hover:text-white"
-                                        disabled={deleteMutation.isPending}
-                                        onClick={handleDeleteContest}
-                                    >
-                                        {deleteMutation.isPending ? (
-                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                        ) : (
-                                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                                        )}
-                                        {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="h-10 border-red-300/35 bg-red-500/15 px-4 text-red-100 backdrop-blur-md hover:bg-red-500/25 hover:text-white"
+                                                disabled={deleteMutation.isPending}
+                                            >
+                                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                                Delete
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Delete &quot;{contest.name}&quot;?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will move the contest to the trash and make
+                                                    it unavailable to participants. Existing teams,
+                                                    questions, submissions, and results may be
+                                                    affected.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel
+                                                    disabled={deleteMutation.isPending}
+                                                >
+                                                    Cancel
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                    disabled={deleteMutation.isPending}
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        handleDeleteContest();
+                                                    }}
+                                                >
+                                                    {deleteMutation.isPending ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : null}
+                                                    {deleteMutation.isPending
+                                                        ? "Deleting..."
+                                                        : "Delete Contest"}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </div>
 
