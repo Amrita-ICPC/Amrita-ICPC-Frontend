@@ -609,6 +609,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                                     output: "",
                                                                     is_hidden: false,
                                                                     weight: 1,
+                                                                    is_ordered: true,
                                                                 });
                                                                 setActiveTestCase(
                                                                     testcaseFields.length,
@@ -677,6 +678,7 @@ export function QuestionWizard({ bankId, onSuccess }: QuestionWizardProps) {
                                                                         output: "",
                                                                         is_hidden: false,
                                                                         weight: 1,
+                                                                        is_ordered: true,
                                                                     });
                                                                     setActiveTestCase(
                                                                         testcaseFields.length,

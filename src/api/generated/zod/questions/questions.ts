@@ -28,6 +28,7 @@ Raises:
  */
 export const createQuestionApiV1QuestionsPostBodyTitleMax = 255;
 
+export const createQuestionApiV1QuestionsPostBodyQuestionTypeDefault = `STANDARD`;
 export const createQuestionApiV1QuestionsPostBodyTimeLimitMsExclusiveMin = 0;
 
 export const createQuestionApiV1QuestionsPostBodyMemoryLimitMbExclusiveMin = 0;
@@ -37,6 +38,7 @@ export const createQuestionApiV1QuestionsPostBodyTestcasesItemWeightDefault = 1;
 
 export const createQuestionApiV1QuestionsPostBodyTestcasesItemOrderOneMin = 0;
 
+export const createQuestionApiV1QuestionsPostBodyTestcasesItemIsOrderedDefault = true;
 export const createQuestionApiV1QuestionsPostBodyTemplatesItemLanguageIdExclusiveMin = 0;
 
 
@@ -45,16 +47,18 @@ export const CreateQuestionApiV1QuestionsPostBody = zod.object({
   "title": zod.string().max(createQuestionApiV1QuestionsPostBodyTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "question_type": zod.enum(['STANDARD', 'SQL']).default(createQuestionApiV1QuestionsPostBodyQuestionTypeDefault).describe('Execution model: STANDARD (stdin\/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation.'),
   "time_limit_ms": zod.number().gt(createQuestionApiV1QuestionsPostBodyTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
   "memory_limit_mb": zod.number().gt(createQuestionApiV1QuestionsPostBodyMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
   "allowed_languages": zod.array(zod.number()).describe('List of allowed platform language IDs'),
   "tag_ids": zod.array(zod.uuid()).optional().describe('List of tag IDs associated with the question'),
   "testcases": zod.array(zod.object({
-  "input": zod.string(),
-  "output": zod.string(),
+  "input": zod.string().describe('Stdin for STANDARD questions; database fixture SQL (schema + seed data) for SQL questions'),
+  "output": zod.string().describe('Expected stdout for STANDARD questions; expected result set (SQLite \'.mode list\' text) for SQL questions'),
   "is_hidden": zod.boolean().default(createQuestionApiV1QuestionsPostBodyTestcasesItemIsHiddenDefault),
   "weight": zod.number().min(1).default(createQuestionApiV1QuestionsPostBodyTestcasesItemWeightDefault),
-  "order": zod.union([zod.number().min(createQuestionApiV1QuestionsPostBodyTestcasesItemOrderOneMin),zod.null()]).optional()
+  "order": zod.union([zod.number().min(createQuestionApiV1QuestionsPostBodyTestcasesItemOrderOneMin),zod.null()]).optional(),
+  "is_ordered": zod.boolean().default(createQuestionApiV1QuestionsPostBodyTestcasesItemIsOrderedDefault).describe('SQL questions only: whether row order in `output` must match exactly, vs. comparing rows as an unordered set')
 })).describe('List of testcases with input\/output and visibility'),
   "templates": zod.array(zod.object({
   "language_id": zod.number().gt(createQuestionApiV1QuestionsPostBodyTemplatesItemLanguageIdExclusiveMin),
@@ -373,10 +377,12 @@ export const getQuestionApiV1QuestionsQuestionIdGetResponseStatusDefault = 200;
 export const getQuestionApiV1QuestionsQuestionIdGetResponseMessageDefault = `Success`;
 export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTitleMax = 255;
 
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneQuestionTypeDefault = `STANDARD`;
 export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin = 0;
 
 export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin = 0;
 
+export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTestcasesItemIsOrderedDefault = true;
 export const getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
 
 
@@ -389,6 +395,7 @@ export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.object({
   "title": zod.string().max(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "question_type": zod.enum(['STANDARD', 'SQL']).default(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneQuestionTypeDefault).describe('Execution model: STANDARD (stdin\/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation.'),
   "time_limit_ms": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
   "memory_limit_mb": zod.number().gt(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
   "id": zod.uuid(),
@@ -401,7 +408,8 @@ export const GetQuestionApiV1QuestionsQuestionIdGetResponse = zod.object({
   "output": zod.string(),
   "is_hidden": zod.boolean(),
   "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
+  "order": zod.union([zod.number(),zod.null()]),
+  "is_ordered": zod.boolean().default(getQuestionApiV1QuestionsQuestionIdGetResponseDataOneTestcasesItemIsOrderedDefault)
 })).optional(),
   "templates": zod.array(zod.object({
   "id": zod.union([zod.uuid(),zod.null()]).optional(),
@@ -462,6 +470,7 @@ export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemWeig
 
 export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin = 0;
 
+export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemIsOrderedDefault = true;
 export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTemplatesOneItemLanguageIdExclusiveMin = 0;
 
 export const updateQuestionApiV1QuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin = 0;
@@ -479,11 +488,12 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchBody = zod.object({
   "allowed_languages": zod.union([zod.array(zod.number()),zod.null()]).optional(),
   "tag_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional(),
   "testcases": zod.union([zod.array(zod.object({
-  "input": zod.string(),
-  "output": zod.string(),
+  "input": zod.string().describe('Stdin for STANDARD questions; database fixture SQL (schema + seed data) for SQL questions'),
+  "output": zod.string().describe('Expected stdout for STANDARD questions; expected result set (SQLite \'.mode list\' text) for SQL questions'),
   "is_hidden": zod.boolean().default(updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemIsHiddenDefault),
   "weight": zod.number().min(1).default(updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemWeightDefault),
-  "order": zod.union([zod.number().min(updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin),zod.null()]).optional()
+  "order": zod.union([zod.number().min(updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin),zod.null()]).optional(),
+  "is_ordered": zod.boolean().default(updateQuestionApiV1QuestionsQuestionIdPatchBodyTestcasesOneItemIsOrderedDefault).describe('SQL questions only: whether row order in `output` must match exactly, vs. comparing rows as an unordered set')
 })),zod.null()]).optional(),
   "templates": zod.union([zod.array(zod.object({
   "language_id": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchBodyTemplatesOneItemLanguageIdExclusiveMin),
@@ -501,10 +511,12 @@ export const updateQuestionApiV1QuestionsQuestionIdPatchResponseStatusDefault = 
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseMessageDefault = `Success`;
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTitleMax = 255;
 
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneQuestionTypeDefault = `STANDARD`;
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin = 0;
 
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin = 0;
 
+export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTestcasesItemIsOrderedDefault = true;
 export const updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTagsItemNameMax = 100;
 
 
@@ -517,6 +529,7 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.object({
   "title": zod.string().max(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "question_type": zod.enum(['STANDARD', 'SQL']).default(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneQuestionTypeDefault).describe('Execution model: STANDARD (stdin\/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation.'),
   "time_limit_ms": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
   "memory_limit_mb": zod.number().gt(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
   "id": zod.uuid(),
@@ -529,7 +542,8 @@ export const UpdateQuestionApiV1QuestionsQuestionIdPatchResponse = zod.object({
   "output": zod.string(),
   "is_hidden": zod.boolean(),
   "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
+  "order": zod.union([zod.number(),zod.null()]),
+  "is_ordered": zod.boolean().default(updateQuestionApiV1QuestionsQuestionIdPatchResponseDataOneTestcasesItemIsOrderedDefault)
 })).optional(),
   "templates": zod.array(zod.object({
   "id": zod.union([zod.uuid(),zod.null()]).optional(),
@@ -622,6 +636,7 @@ export const testDraftCodeApiV1QuestionsTestDraftPostBodyLanguageIdExclusiveMin 
 
 export const testDraftCodeApiV1QuestionsTestDraftPostBodyStarterCodeDefault = ``;
 export const testDraftCodeApiV1QuestionsTestDraftPostBodyDriverCodeDefault = ``;
+export const testDraftCodeApiV1QuestionsTestDraftPostBodyTestCasesItemIsOrderedDefault = true;
 
 
 export const TestDraftCodeApiV1QuestionsTestDraftPostBody = zod.object({
@@ -631,8 +646,9 @@ export const TestDraftCodeApiV1QuestionsTestDraftPostBody = zod.object({
   "driver_code": zod.string().default(testDraftCodeApiV1QuestionsTestDraftPostBodyDriverCodeDefault).describe('Boilerplate to execute the solution'),
   "test_cases": zod.array(zod.object({
   "input": zod.string().describe('Standard input for the test case'),
-  "expected_output": zod.string().describe('Expected standard output for comparison')
-}).describe('Ephemeral test case for draft testing.')).min(1).describe('List of test cases to run against')
+  "expected_output": zod.string().describe('Expected standard output for comparison'),
+  "is_ordered": zod.boolean().default(testDraftCodeApiV1QuestionsTestDraftPostBodyTestCasesItemIsOrderedDefault).describe('SQL drafts only: whether row order in expected_output must match exactly')
+}).describe('Ephemeral test case for draft testing.\n\nFor SQL drafts (``language_id`` matching the configured Judge0 SQLite\nlanguage), ``input`` is the database fixture SQL and ``expected_output``\nis the expected result set, mirroring ``TestCase`` for SQL questions.')).min(1).describe('List of test cases to run against')
 }).describe('Request to test a draft question with custom test cases.')
 
 export const testDraftCodeApiV1QuestionsTestDraftPostResponseSuccessDefault = true;

@@ -205,6 +205,7 @@ export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcas
 
 export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemOrderOneMin = 0;
 
+export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemIsOrderedDefault = true;
 export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTemplatesOneItemLanguageIdExclusiveMin = 0;
 
 export const updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTimeLimitMsOneExclusiveMin = 0;
@@ -222,11 +223,12 @@ export const UpdateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBody = zod.
   "allowed_languages": zod.union([zod.array(zod.number()),zod.null()]).optional(),
   "tag_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional(),
   "testcases": zod.union([zod.array(zod.object({
-  "input": zod.string(),
-  "output": zod.string(),
+  "input": zod.string().describe('Stdin for STANDARD questions; database fixture SQL (schema + seed data) for SQL questions'),
+  "output": zod.string().describe('Expected stdout for STANDARD questions; expected result set (SQLite \'.mode list\' text) for SQL questions'),
   "is_hidden": zod.boolean().default(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemIsHiddenDefault),
   "weight": zod.number().min(1).default(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemWeightDefault),
-  "order": zod.union([zod.number().min(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemOrderOneMin),zod.null()]).optional()
+  "order": zod.union([zod.number().min(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemOrderOneMin),zod.null()]).optional(),
+  "is_ordered": zod.boolean().default(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTestcasesOneItemIsOrderedDefault).describe('SQL questions only: whether row order in `output` must match exactly, vs. comparing rows as an unordered set')
 })),zod.null()]).optional(),
   "templates": zod.union([zod.array(zod.object({
   "language_id": zod.number().gt(updateBankQuestionApiV1BanksBankIdQuestionsQuestionIdPutBodyTemplatesOneItemLanguageIdExclusiveMin),

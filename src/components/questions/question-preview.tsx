@@ -18,6 +18,8 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
+import { QuestionType } from "@/api/generated/model/questionType";
+import { SqlResultTable } from "@/components/shared/sql-result-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -29,6 +31,7 @@ import { type TestCase } from "./test-case-manager";
 interface ProblemPreviewProps {
     title: string;
     difficulty: string;
+    questionType?: QuestionType;
     timeLimit: number;
     memoryLimit: number;
     score: number;
@@ -44,6 +47,7 @@ interface ProblemPreviewProps {
 export function ProblemPreview({
     title,
     difficulty,
+    questionType,
     timeLimit,
     memoryLimit,
     score,
@@ -55,6 +59,8 @@ export function ProblemPreview({
     testCases = [],
     onBack,
 }: ProblemPreviewProps) {
+    const isSql = questionType === QuestionType.SQL;
+
     const markdownComponents = {
         h1: ({ ...props }) => (
             <h1 className="text-2xl font-bold mt-8 mb-4 border-b pb-2" {...props} />
@@ -129,14 +135,18 @@ export function ProblemPreview({
                         <Trophy className="h-4 w-4 text-amber-500" />
                         <span className="font-medium text-foreground/70">{score} Points</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-                        <Clock className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-foreground/70">{timeLimit}ms</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-                        <Database className="h-4 w-4 text-emerald-500" />
-                        <span className="font-medium text-foreground/70">{memoryLimit}MB</span>
-                    </div>
+                    {!isSql && (
+                        <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
+                            <Clock className="h-4 w-4 text-blue-500" />
+                            <span className="font-medium text-foreground/70">{timeLimit}ms</span>
+                        </div>
+                    )}
+                    {!isSql && (
+                        <div className="flex items-center gap-2 text-sm bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
+                            <Database className="h-4 w-4 text-emerald-500" />
+                            <span className="font-medium text-foreground/70">{memoryLimit}MB</span>
+                        </div>
+                    )}
                     <Badge
                         className={cn(
                             "rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-wider",
@@ -269,22 +279,33 @@ export function ProblemPreview({
                                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                             Example #{idx + 1}
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div
+                                            className={cn(
+                                                "grid grid-cols-1 gap-4",
+                                                !isSql && "md:grid-cols-2",
+                                            )}
+                                        >
+                                            {!isSql && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
+                                                        Input
+                                                    </Label>
+                                                    <pre className="bg-muted/50 p-4 rounded-2xl border border-border/40 font-mono text-sm min-h-[80px]">
+                                                        {tc.input || "No input"}
+                                                    </pre>
+                                                </div>
+                                            )}
                                             <div className="space-y-2">
                                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
-                                                    Input
+                                                    {isSql ? "Expected Result" : "Expected Output"}
                                                 </Label>
-                                                <pre className="bg-muted/50 p-4 rounded-2xl border border-border/40 font-mono text-sm min-h-[80px]">
-                                                    {tc.input || "No input"}
-                                                </pre>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-2">
-                                                    Expected Output
-                                                </Label>
-                                                <pre className="bg-primary/5 p-4 rounded-2xl border border-primary/10 font-mono text-sm min-h-[80px]">
-                                                    {tc.output || "No output"}
-                                                </pre>
+                                                {isSql ? (
+                                                    <SqlResultTable text={tc.output} />
+                                                ) : (
+                                                    <pre className="bg-primary/5 p-4 rounded-2xl border border-primary/10 font-mono text-sm min-h-[80px]">
+                                                        {tc.output || "No output"}
+                                                    </pre>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

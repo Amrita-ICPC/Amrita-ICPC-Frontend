@@ -14,6 +14,7 @@ import {
 import { useMemo, useState } from "react";
 
 import { useTestDraftCodeApiV1QuestionsTestDraftPost } from "@/api/generated/questions/questions";
+import { SqlResultTable } from "@/components/shared/sql-result-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SQL_LANGUAGE_ID } from "@/constant/question-template";
 import { cn } from "@/lib/utils";
 
 export interface TestCase {
@@ -31,6 +33,8 @@ export interface TestCase {
     is_hidden: boolean;
     weight: number;
     order: number;
+    /** SQL questions only: whether row order in `output` must match exactly. */
+    is_ordered?: boolean;
 }
 
 interface TestCaseManagerProps {
@@ -41,6 +45,12 @@ interface TestCaseManagerProps {
         starterCode?: string;
         solutionCode?: string;
         driverCode?: string;
+    };
+    isSql?: boolean;
+    sqlContext?: {
+        schema: string;
+        seed: string;
+        solutionCode: string;
     };
     questionScore?: number;
     isContest?: boolean;
@@ -66,6 +76,8 @@ export function TestCaseManager({
     testCases,
     setTestCases,
     executionContext,
+    isSql = false,
+    sqlContext,
     questionScore = 100,
     isContest = true,
 }: TestCaseManagerProps) {
@@ -93,6 +105,7 @@ export function TestCaseManager({
             is_hidden: false,
             weight: 1,
             order: testCases.length,
+            is_ordered: true,
         };
         setTestCases([...testCases, newTestCase]);
         setActiveId(newTestCase.id);
@@ -143,6 +156,61 @@ export function TestCaseManager({
         if (!activeTestCase) return;
 
         setGenerationError(null);
+
+        if (isSql) {
+            if (!sqlContext?.schema?.trim()) {
+                setGenerationError("Add a schema before generating the expected result.");
+                return;
+            }
+            if (!sqlContext?.solutionCode?.trim()) {
+                setGenerationError("Add a solution query before generating the expected result.");
+                return;
+            }
+
+            setGeneratingCaseId(activeTestCase.id);
+
+            try {
+                const result = await runDraft({
+                    data: {
+                        language_id: SQL_LANGUAGE_ID,
+                        starter_code: "",
+                        solution_code: sqlContext.solutionCode,
+                        driver_code: "",
+                        test_cases: [
+                            {
+                                input: `${sqlContext.schema}\n${sqlContext.seed}`,
+                                expected_output: activeTestCase.output ?? "",
+                                is_ordered: activeTestCase.is_ordered ?? true,
+                            },
+                        ],
+                    },
+                });
+
+                const runResult = result.data?.testcases?.[0];
+                const generatedOutput = runResult?.stdout;
+
+                if (runResult?.stderr?.trim()) {
+                    setGenerationError(runResult.stderr.trim());
+                    return;
+                }
+
+                if (typeof generatedOutput !== "string") {
+                    setGenerationError(
+                        runResult?.status
+                            ? `Run finished with status: ${runResult.status}`
+                            : "The run completed without output. Check the schema, seed, and solution query.",
+                    );
+                    return;
+                }
+
+                updateTestCase(activeTestCase.id, { output: generatedOutput });
+            } catch (error) {
+                setGenerationError(getDraftRunErrorMessage(error));
+            } finally {
+                setGeneratingCaseId(null);
+            }
+            return;
+        }
 
         if (!activeTestCase.input.trim()) {
             setGenerationError("Add input before generating the expected output.");
@@ -379,70 +447,105 @@ export function TestCaseManager({
                                     </div>
 
                                     <div className="flex justify-start md:pt-0.5">
-                                        <div className="max-w-sm space-y-1.5 text-left">
-                                            <div className="flex items-center justify-start gap-3">
-                                                <Switch
-                                                    checked={activeTestCase.is_hidden}
-                                                    onCheckedChange={(val) =>
-                                                        updateTestCase(activeTestCase.id, {
-                                                            is_hidden: val,
-                                                        })
-                                                    }
-                                                    className="scale-90"
-                                                />
-                                                <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
-                                                    Hidden Test Case
-                                                </Label>
+                                        <div className="max-w-sm space-y-3 text-left">
+                                            <div className="space-y-1.5">
+                                                <div className="flex items-center justify-start gap-3">
+                                                    <Switch
+                                                        checked={activeTestCase.is_hidden}
+                                                        onCheckedChange={(val) =>
+                                                            updateTestCase(activeTestCase.id, {
+                                                                is_hidden: val,
+                                                            })
+                                                        }
+                                                        className="scale-90"
+                                                    />
+                                                    <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                                        Hidden Test Case
+                                                    </Label>
+                                                </div>
+                                                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                                                    Turn on to use this case only for judging. Turn
+                                                    off to show it to participants as a visible
+                                                    example.
+                                                </p>
                                             </div>
-                                            <p className="text-[10px] leading-relaxed text-muted-foreground">
-                                                Turn on to use this case only for judging. Turn off
-                                                to show it to participants as a visible example.
-                                            </p>
+                                            {isSql && (
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center justify-start gap-3">
+                                                        <Switch
+                                                            checked={
+                                                                activeTestCase.is_ordered ?? true
+                                                            }
+                                                            onCheckedChange={(val) =>
+                                                                updateTestCase(activeTestCase.id, {
+                                                                    is_ordered: val,
+                                                                })
+                                                            }
+                                                            className="scale-90"
+                                                        />
+                                                        <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                                            Row Order Matters
+                                                        </Label>
+                                                    </div>
+                                                    <p className="text-[10px] leading-relaxed text-muted-foreground">
+                                                        Turn off if the query has no ORDER BY and
+                                                        row order isn&apos;t guaranteed - rows are
+                                                        then compared as a set.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Textareas inputs */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1 min-h-[280px]">
-                                    <div className="flex flex-col space-y-1.5 h-full">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
-                                                Input
-                                            </Label>
-                                            <TooltipProvider delayDuration={200}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <button
-                                                            type="button"
-                                                            aria-label="About test case input"
-                                                            className="text-muted-foreground/60 hover:text-foreground transition-colors"
-                                                        >
-                                                            <Info className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className="max-w-72">
-                                                        The exact stdin passed to the submitted
-                                                        program for this test case.
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
+                                <div
+                                    className={cn(
+                                        "grid gap-5 flex-1 min-h-[280px]",
+                                        isSql ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2",
+                                    )}
+                                >
+                                    {!isSql && (
+                                        <div className="flex flex-col space-y-1.5 h-full">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                                                    Input
+                                                </Label>
+                                                <TooltipProvider delayDuration={200}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                aria-label="About test case input"
+                                                                className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                                            >
+                                                                <Info className="h-3.5 w-3.5" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-72">
+                                                            The exact stdin passed to the submitted
+                                                            program for this test case.
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                            <Textarea
+                                                value={activeTestCase.input}
+                                                onChange={(e) =>
+                                                    updateTestCase(activeTestCase.id, {
+                                                        input: e.target.value,
+                                                    })
+                                                }
+                                                className="flex-1 resize-none font-mono text-xs bg-background border-border/60 focus-visible:ring-primary/50 rounded-lg p-3 shadow-inner min-h-[150px]"
+                                                placeholder="Enter input here..."
+                                            />
                                         </div>
-                                        <Textarea
-                                            value={activeTestCase.input}
-                                            onChange={(e) =>
-                                                updateTestCase(activeTestCase.id, {
-                                                    input: e.target.value,
-                                                })
-                                            }
-                                            className="flex-1 resize-none font-mono text-xs bg-background border-border/60 focus-visible:ring-primary/50 rounded-lg p-3 shadow-inner min-h-[150px]"
-                                            placeholder="Enter input here..."
-                                        />
-                                    </div>
+                                    )}
 
                                     <div className="flex flex-col space-y-1.5 h-full">
                                         <div className="flex items-center justify-between">
                                             <Label className="text-xs font-semibold text-muted-foreground">
-                                                Expected Output
+                                                {isSql ? "Expected Result Set" : "Expected Output"}
                                             </Label>
                                             <div className="flex items-center gap-2">
                                                 <TooltipProvider delayDuration={200}>
@@ -471,9 +574,9 @@ export function TestCaseManager({
                                                             </span>
                                                         </TooltipTrigger>
                                                         <TooltipContent className="max-w-72">
-                                                            Runs the current solution and driver
-                                                            with this input, then fills Expected
-                                                            Output from the program output.
+                                                            {isSql
+                                                                ? "Runs the solution query against the schema and seed data, then fills the expected result set from the query output."
+                                                                : "Runs the current solution and driver with this input, then fills Expected Output from the program output."}
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
@@ -489,9 +592,9 @@ export function TestCaseManager({
                                                             </button>
                                                         </TooltipTrigger>
                                                         <TooltipContent className="max-w-72">
-                                                            The output the solution must produce for
-                                                            the matching input. Whitespace should
-                                                            match the judge expectation.
+                                                            {isSql
+                                                                ? "The result set the solution query must produce, in SQLite '.mode list' format (header row, then pipe-separated data rows)."
+                                                                : "The output the solution must produce for the matching input. Whitespace should match the judge expectation."}
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
@@ -513,8 +616,20 @@ export function TestCaseManager({
                                                 })
                                             }
                                             className="flex-1 resize-none font-mono text-xs bg-background border-border/60 focus-visible:ring-primary/50 rounded-lg p-3 shadow-inner min-h-[150px]"
-                                            placeholder="Enter expected output here..."
+                                            placeholder={
+                                                isSql
+                                                    ? "Generate or paste the expected result set here..."
+                                                    : "Enter expected output here..."
+                                            }
                                         />
+                                        {isSql && activeTestCase.output?.trim() && (
+                                            <div className="space-y-1">
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                                    Preview
+                                                </span>
+                                                <SqlResultTable text={activeTestCase.output} />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

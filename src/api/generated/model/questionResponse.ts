@@ -8,6 +8,7 @@
 import type { QuestionDifficulty } from './questionDifficulty';
 import type { QuestionTemplateResponse } from './questionTemplateResponse';
 import type { QuestionTestCaseResponse } from './questionTestCaseResponse';
+import type { QuestionType } from './questionType';
 import type { TagResponse } from './tagResponse';
 
 export interface QuestionResponse {
@@ -20,6 +21,8 @@ export interface QuestionResponse {
   question_text: string;
   /** Difficulty level of the question */
   difficulty: QuestionDifficulty;
+  /** Execution model: STANDARD (stdin/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation. */
+  question_type?: QuestionType;
   /**
      * Time limit in milliseconds
      * @exclusiveMinimum 0

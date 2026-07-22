@@ -22,6 +22,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { StudentCodeRunResponse } from "@/api/generated/model";
+import { SqlResultTable } from "@/components/shared/sql-result-table";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -37,7 +38,10 @@ export const LANGUAGES = [
     { id: 54, label: "C++ (GCC)", monaco: "cpp" },
     { id: 50, label: "C (GCC)", monaco: "c" },
     { id: 62, label: "Java", monaco: "java" },
+    { id: 82, label: "SQL (SQLite)", monaco: "sql" },
 ] as const;
+
+const SQL_LANGUAGE_ID = 82;
 
 interface EditorPanelProps {
     selectedLanguageId: number;
@@ -106,6 +110,7 @@ export function EditorPanel({
     submissionsCount,
 }: EditorPanelProps) {
     const activeLang = LANGUAGES.find((l) => l.id === selectedLanguageId);
+    const isSql = selectedLanguageId === SQL_LANGUAGE_ID;
     const { editorTheme } = useContestSessionAppearance();
     const [mounted, setMounted] = useState(false);
     const [activeTestCaseIdx, setActiveTestCaseIdx] = useState<number>(0);
@@ -620,7 +625,9 @@ export function EditorPanel({
                                                             .input !== null && (
                                                             <div className="space-y-1.5">
                                                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                                                    Input
+                                                                    {isSql
+                                                                        ? "Schema & Seed Data"
+                                                                        : "Input"}
                                                                 </div>
                                                                 <pre className="p-3 rounded-lg bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/85 text-slate-800 dark:text-slate-300 font-mono text-[11px] min-h-[40px] whitespace-pre-wrap select-text leading-relaxed">
                                                                     {runResult.results[
@@ -639,45 +646,74 @@ export function EditorPanel({
                                                         {/* Your Output */}
                                                         <div className="space-y-1.5">
                                                             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                                                Your Output
+                                                                {isSql
+                                                                    ? "Your Result"
+                                                                    : "Your Output"}
                                                             </div>
-                                                            <pre className="p-3 rounded-lg bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/85 text-slate-800 dark:text-slate-300 font-mono text-[11px] min-h-[50px] whitespace-pre-wrap select-text leading-relaxed">
-                                                                {runResult.results[
-                                                                    activeTestCaseIdx
-                                                                ].stdout !== undefined &&
-                                                                runResult.results[activeTestCaseIdx]
-                                                                    .stdout !== null ? (
+                                                            {isSql ? (
+                                                                <SqlResultTable
+                                                                    text={
+                                                                        runResult.results[
+                                                                            activeTestCaseIdx
+                                                                        ].stdout
+                                                                    }
+                                                                    emptyLabel="No output"
+                                                                />
+                                                            ) : (
+                                                                <pre className="p-3 rounded-lg bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/85 text-slate-800 dark:text-slate-300 font-mono text-[11px] min-h-[50px] whitespace-pre-wrap select-text leading-relaxed">
+                                                                    {runResult.results[
+                                                                        activeTestCaseIdx
+                                                                    ].stdout !== undefined &&
                                                                     runResult.results[
                                                                         activeTestCaseIdx
-                                                                    ].stdout
-                                                                ) : (
-                                                                    <span className="text-slate-400 dark:text-slate-500 italic">
-                                                                        No output
-                                                                    </span>
-                                                                )}
-                                                            </pre>
+                                                                    ].stdout !== null ? (
+                                                                        runResult.results[
+                                                                            activeTestCaseIdx
+                                                                        ].stdout
+                                                                    ) : (
+                                                                        <span className="text-slate-400 dark:text-slate-500 italic">
+                                                                            No output
+                                                                        </span>
+                                                                    )}
+                                                                </pre>
+                                                            )}
                                                         </div>
 
                                                         {/* Expected Output */}
                                                         <div className="space-y-1.5">
                                                             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                                                Expected Output
+                                                                {isSql
+                                                                    ? "Expected Result"
+                                                                    : "Expected Output"}
                                                             </div>
-                                                            <pre className="p-3 rounded-lg bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/85 text-slate-800 dark:text-slate-300 font-mono text-[11px] min-h-[50px] whitespace-pre-wrap select-text leading-relaxed">
-                                                                {runResult.results[
-                                                                    activeTestCaseIdx
-                                                                ].expected_output !== undefined &&
-                                                                runResult.results[activeTestCaseIdx]
-                                                                    .expected_output !== null ? (
+                                                            {isSql ? (
+                                                                <SqlResultTable
+                                                                    text={
+                                                                        runResult.results[
+                                                                            activeTestCaseIdx
+                                                                        ].expected_output
+                                                                    }
+                                                                    emptyLabel="No expected result"
+                                                                />
+                                                            ) : (
+                                                                <pre className="p-3 rounded-lg bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/85 text-slate-800 dark:text-slate-300 font-mono text-[11px] min-h-[50px] whitespace-pre-wrap select-text leading-relaxed">
+                                                                    {runResult.results[
+                                                                        activeTestCaseIdx
+                                                                    ].expected_output !==
+                                                                        undefined &&
                                                                     runResult.results[
                                                                         activeTestCaseIdx
-                                                                    ].expected_output
-                                                                ) : (
-                                                                    <span className="text-slate-400 dark:text-slate-500 italic">
-                                                                        No expected output
-                                                                    </span>
-                                                                )}
-                                                            </pre>
+                                                                    ].expected_output !== null ? (
+                                                                        runResult.results[
+                                                                            activeTestCaseIdx
+                                                                        ].expected_output
+                                                                    ) : (
+                                                                        <span className="text-slate-400 dark:text-slate-500 italic">
+                                                                            No expected output
+                                                                        </span>
+                                                                    )}
+                                                                </pre>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

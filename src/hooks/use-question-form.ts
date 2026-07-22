@@ -2,12 +2,21 @@ import { useCallback, useMemo, useState } from "react";
 
 import { QuestionDifficulty } from "@/api/generated/model/questionDifficulty";
 import { QuestionResponse } from "@/api/generated/model/questionResponse";
+import { QuestionType } from "@/api/generated/model/questionType";
 import type { TestCase } from "@/components/questions/test-case-manager";
-import { INITIAL_CODES } from "@/constant/question-template";
+import {
+    DEFAULT_SQL_SCHEMA,
+    DEFAULT_SQL_SEED,
+    DEFAULT_SQL_SOLUTION,
+    DEFAULT_SQL_STARTER,
+    INITIAL_CODES,
+    SQL_LANGUAGE_ID,
+} from "@/constant/question-template";
 
 export function useQuestionForm() {
     // Metadata
     const [title, setTitle] = useState("");
+    const [questionType, setQuestionType] = useState<QuestionType>(QuestionType.STANDARD);
     const [difficulty, setDifficulty] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
     const [timeLimit, setTimeLimit] = useState(1000);
     const [memoryLimit, setMemoryLimit] = useState(256);
@@ -31,12 +40,21 @@ export function useQuestionForm() {
     );
     const [driverCodes, setDriverCodes] = useState<Record<number, string>>(INITIAL_CODES.driver);
 
+    // SQL question fields (single-language: SQLite). Schema + seed are shared
+    // across the whole question and compiled into every testcase input at
+    // save time; the solution query drives expected-output generation.
+    const [sqlSchema, setSqlSchema] = useState(DEFAULT_SQL_SCHEMA);
+    const [sqlSeed, setSqlSeed] = useState(DEFAULT_SQL_SEED);
+    const [sqlSolution, setSqlSolution] = useState(DEFAULT_SQL_SOLUTION);
+    const [sqlStarter, setSqlStarter] = useState(DEFAULT_SQL_STARTER);
+
     // Test cases
     const [testCases, setTestCases] = useState<TestCase[]>([]);
 
     const initializeForm = useCallback((data: QuestionResponse, platformLanguages: any[] = []) => {
         if (!data) return;
         setTitle(data.title ?? "");
+        setQuestionType(data.question_type ?? QuestionType.STANDARD);
         setDifficulty(data.difficulty ?? QuestionDifficulty.MEDIUM);
         setTimeLimit(data.time_limit_ms ?? 1000);
         setMemoryLimit(data.memory_limit_mb ?? 256);
@@ -52,6 +70,12 @@ export function useQuestionForm() {
             setOutputFormat(parsedText.output ?? "");
             setConstraints(parsedText.constraints ?? "");
             setNotes(parsedText.notes ?? "");
+            // Shared SQL schema/seed live in a namespaced sub-object; the
+            // compiled testcase.input is a derived artifact and ignored here.
+            if (parsedText.sql) {
+                setSqlSchema(parsedText.sql.schema ?? "");
+                setSqlSeed(parsedText.sql.seed ?? "");
+            }
         } catch {
             setDescription(data.question_text ?? "");
         }
@@ -94,6 +118,16 @@ export function useQuestionForm() {
             setStarterCodes({ ...INITIAL_CODES.starter, ...starters });
             setSolutionCodes({ ...INITIAL_CODES.solution, ...solutions });
             setDriverCodes({ ...INITIAL_CODES.driver, ...drivers });
+
+            // SQL questions carry a single template keyed by the SQLite id:
+            // starter = student's initial query, solution = reference query.
+            const sqlTemplate = data.templates.find(
+                (t) => Number(t.language_id) === SQL_LANGUAGE_ID,
+            );
+            if (sqlTemplate) {
+                setSqlStarter(sqlTemplate.starter_code || DEFAULT_SQL_STARTER);
+                setSqlSolution(sqlTemplate.solution_code || DEFAULT_SQL_SOLUTION);
+            }
         }
 
         if (data.testcases) {
@@ -105,6 +139,7 @@ export function useQuestionForm() {
                     is_hidden: tc.is_hidden,
                     weight: tc.weight,
                     order: tc.order ?? 0,
+                    is_ordered: tc.is_ordered ?? true,
                 })),
             );
         }
@@ -114,6 +149,8 @@ export function useQuestionForm() {
         () => ({
             title,
             setTitle,
+            questionType,
+            setQuestionType,
             difficulty,
             setDifficulty,
             timeLimit,
@@ -133,6 +170,7 @@ export function useQuestionForm() {
         }),
         [
             title,
+            questionType,
             difficulty,
             timeLimit,
             memoryLimit,
@@ -168,8 +206,17 @@ export function useQuestionForm() {
             setSolutionCodes,
             driverCodes,
             setDriverCodes,
+            // SQL single-language fields
+            sqlSchema,
+            setSqlSchema,
+            sqlSeed,
+            setSqlSeed,
+            sqlSolution,
+            setSqlSolution,
+            sqlStarter,
+            setSqlStarter,
         }),
-        [starterCodes, solutionCodes, driverCodes],
+        [starterCodes, solutionCodes, driverCodes, sqlSchema, sqlSeed, sqlSolution, sqlStarter],
     );
 
     const testCasesObj = useMemo(

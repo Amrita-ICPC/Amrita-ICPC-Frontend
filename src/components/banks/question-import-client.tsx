@@ -129,6 +129,7 @@ function QuestionImportPreviewDialog({
                             <ProblemPreview
                                 title={question.title}
                                 difficulty={question.difficulty}
+                                questionType={question.question_type}
                                 timeLimit={question.time_limit_ms}
                                 memoryLimit={question.memory_limit_mb}
                                 score={question.score ?? 100}

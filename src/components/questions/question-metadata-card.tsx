@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { QuestionDifficulty } from "@/api/generated/model/questionDifficulty";
+import { QuestionType } from "@/api/generated/model/questionType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,9 @@ export const MAX_QUESTION_MARK = 10000;
 interface ProblemMetadataCardProps {
     title: string;
     setTitle: (val: string) => void;
+    questionType: QuestionType;
+    setQuestionType: (val: QuestionType) => void;
+    typeLocked?: boolean;
     difficulty: QuestionDifficulty;
     setDifficulty: (val: QuestionDifficulty) => void;
     timeLimit: number;
@@ -72,6 +76,9 @@ const DIFFICULTY_OPTIONS = [
 export function ProblemMetadataCard({
     title,
     setTitle,
+    questionType,
+    setQuestionType,
+    typeLocked = false,
     difficulty,
     setDifficulty,
     timeLimit,
@@ -90,6 +97,7 @@ export function ProblemMetadataCard({
     setTags,
     isContest = true,
 }: ProblemMetadataCardProps) {
+    const isSql = questionType === QuestionType.SQL;
     const queryClient = useQueryClient();
     const { data: languagesData } = usePlatformLanguages();
     const { data: tagsData } = useTags();
@@ -175,6 +183,56 @@ export function ProblemMetadataCard({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
+                </div>
+
+                {/* 1b. Question Type */}
+                <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                        Question Type <span className="text-red-500 font-bold">*</span>
+                    </Label>
+                    <div className="flex gap-3">
+                        {[
+                            {
+                                value: QuestionType.STANDARD,
+                                label: "Standard",
+                                hint: "stdin / stdout program",
+                            },
+                            {
+                                value: QuestionType.SQL,
+                                label: "SQL",
+                                hint: "SQLite query judged on results",
+                            },
+                        ].map((opt) => {
+                            const isActive = questionType === opt.value;
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    disabled={typeLocked}
+                                    onClick={() => setQuestionType(opt.value)}
+                                    className={cn(
+                                        "flex-1 py-2.5 px-4 rounded-lg border text-left transition-all duration-200 outline-none",
+                                        typeLocked
+                                            ? "cursor-not-allowed opacity-70"
+                                            : "cursor-pointer",
+                                        isActive
+                                            ? "border-primary text-primary bg-primary/10 dark:bg-primary/20 dark:border-primary/50"
+                                            : "border-border/60 hover:border-primary/40 bg-card hover:bg-muted/40 text-muted-foreground",
+                                    )}
+                                >
+                                    <span className="block text-xs font-semibold">{opt.label}</span>
+                                    <span className="block text-[10px] text-muted-foreground/70 mt-0.5">
+                                        {opt.hint}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {typeLocked && (
+                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                            Question type cannot be changed after creation.
+                        </p>
+                    )}
                 </div>
 
                 {/* 2. Difficulty Custom Buttons */}
@@ -277,191 +335,215 @@ export function ProblemMetadataCard({
                     )}
 
                     {/* Time Limit */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Time Limit (ms) <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            value={timeLimit}
-                            onChange={(e) => setTimeLimit(Number(e.target.value))}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum execution time allowed per test case.
-                        </p>
-                    </div>
+                    {!isSql && (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Time Limit (ms) <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={timeLimit}
+                                onChange={(e) => setTimeLimit(Number(e.target.value))}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                                Maximum execution time allowed per test case.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Memory Limit */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Memory Limit (MB) <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            value={memoryLimit}
-                            onChange={(e) => setMemoryLimit(Number(e.target.value))}
-                            className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
-                        />
-                        <p className="text-[10px] text-muted-foreground/60 leading-tight">
-                            Maximum memory allocated per test case.
-                        </p>
-                    </div>
+                    {!isSql && (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Memory Limit (MB) <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                value={memoryLimit}
+                                onChange={(e) => setMemoryLimit(Number(e.target.value))}
+                                className="bg-background border-border/60 focus:border-primary/50 transition-colors shadow-sm h-9 text-sm rounded-lg"
+                            />
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+                                Maximum memory allocated per test case.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* 4. Languages and Tags in double columns */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Allowed Languages */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                            Allowed Languages <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <div className="flex flex-col gap-2.5">
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={open}
-                                        className="justify-between bg-background border-border/60 h-9 hover:bg-background/80 transition-colors shadow-sm rounded-lg text-left font-normal px-3"
-                                    >
-                                        <span className="text-muted-foreground text-xs">
-                                            {allowedLanguages.length > 0
-                                                ? `${allowedLanguages.length} selected`
-                                                : "Select allowed languages..."}
-                                        </span>
-                                        <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                    className="w-[var(--radix-popover-trigger-width)] p-0 border-border/40 shadow-xl backdrop-blur-xl bg-background/95"
-                                    align="start"
+                    {isSql ? (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Language
+                            </Label>
+                            <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 h-9">
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-primary/10 text-primary border-primary/20 px-2 py-0.5 text-[10px] font-medium"
                                 >
-                                    <Command className="bg-transparent">
-                                        <CommandInput
-                                            placeholder="Search languages..."
-                                            className="h-9 border-none focus:ring-0 text-xs"
-                                        />
-                                        <CommandList className="max-h-[250px]">
-                                            <CommandEmpty>No languages found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {languages.map((lang: any) => (
-                                                    <CommandItem
-                                                        key={lang.id}
-                                                        value={`${lang.name || ""} ${lang.slug || ""} ${lang.id}`.trim()}
-                                                        onSelect={() => toggleLanguage(lang.id)}
-                                                        className="cursor-pointer py-2 px-3 aria-selected:bg-primary/10 transition-colors text-xs"
-                                                    >
-                                                        <div className="flex items-center gap-2 flex-1">
-                                                            <div
-                                                                className={cn(
-                                                                    "flex h-3.5 w-3.5 items-center justify-center rounded border border-primary/30 transition-all",
-                                                                    allowedLanguages.some(
+                                    SQL (SQLite)
+                                </Badge>
+                                <span className="text-[10px] text-muted-foreground/70">
+                                    Fixed for SQL questions.
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                                Allowed Languages <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                            <div className="flex flex-col gap-2.5">
+                                <Popover open={open} onOpenChange={setOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={open}
+                                            className="justify-between bg-background border-border/60 h-9 hover:bg-background/80 transition-colors shadow-sm rounded-lg text-left font-normal px-3"
+                                        >
+                                            <span className="text-muted-foreground text-xs">
+                                                {allowedLanguages.length > 0
+                                                    ? `${allowedLanguages.length} selected`
+                                                    : "Select allowed languages..."}
+                                            </span>
+                                            <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        className="w-[var(--radix-popover-trigger-width)] p-0 border-border/40 shadow-xl backdrop-blur-xl bg-background/95"
+                                        align="start"
+                                    >
+                                        <Command className="bg-transparent">
+                                            <CommandInput
+                                                placeholder="Search languages..."
+                                                className="h-9 border-none focus:ring-0 text-xs"
+                                            />
+                                            <CommandList className="max-h-[250px]">
+                                                <CommandEmpty>No languages found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {languages.map((lang: any) => (
+                                                        <CommandItem
+                                                            key={lang.id}
+                                                            value={`${lang.name || ""} ${lang.slug || ""} ${lang.id}`.trim()}
+                                                            onSelect={() => toggleLanguage(lang.id)}
+                                                            className="cursor-pointer py-2 px-3 aria-selected:bg-primary/10 transition-colors text-xs"
+                                                        >
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                <div
+                                                                    className={cn(
+                                                                        "flex h-3.5 w-3.5 items-center justify-center rounded border border-primary/30 transition-all",
+                                                                        allowedLanguages.some(
+                                                                            (l) =>
+                                                                                Number(l) ===
+                                                                                Number(lang.id),
+                                                                        )
+                                                                            ? "bg-primary border-primary"
+                                                                            : "bg-transparent",
+                                                                    )}
+                                                                >
+                                                                    {allowedLanguages.some(
                                                                         (l) =>
                                                                             Number(l) ===
                                                                             Number(lang.id),
-                                                                    )
-                                                                        ? "bg-primary border-primary"
-                                                                        : "bg-transparent",
-                                                                )}
-                                                            >
-                                                                {allowedLanguages.some(
-                                                                    (l) =>
-                                                                        Number(l) ===
-                                                                        Number(lang.id),
-                                                                ) && (
-                                                                    <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                                                                    ) && (
+                                                                        <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                                                                    )}
+                                                                </div>
+                                                                <span className="font-medium">
+                                                                    {lang.name ||
+                                                                        lang.label ||
+                                                                        lang.slug ||
+                                                                        `Language ${lang.id}`}
+                                                                </span>
+                                                                {(lang.slug ||
+                                                                    lang.file_extension) && (
+                                                                    <span className="text-[9px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded ml-auto text-muted-foreground font-bold">
+                                                                        {lang.slug ||
+                                                                            lang.file_extension}
+                                                                    </span>
                                                                 )}
                                                             </div>
-                                                            <span className="font-medium">
-                                                                {lang.name ||
-                                                                    lang.label ||
-                                                                    lang.slug ||
-                                                                    `Language ${lang.id}`}
-                                                            </span>
-                                                            {(lang.slug || lang.file_extension) && (
-                                                                <span className="text-[9px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded ml-auto text-muted-foreground font-bold">
-                                                                    {lang.slug ||
-                                                                        lang.file_extension}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                    {allowedLanguages.length > 0 && (
-                                        <div className="flex items-center justify-between p-2 border-t border-border/40 bg-muted/50 backdrop-blur-md">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setAllowedLanguages([]);
-                                                }}
-                                                className="text-[9px] h-7 px-2 hover:bg-red-500/10 hover:text-red-500 font-bold uppercase tracking-wider transition-colors"
-                                            >
-                                                Clear
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setOpen(false);
-                                                }}
-                                                className="text-[9px] h-7 px-2 hover:bg-primary/10 text-primary font-bold uppercase tracking-wider transition-colors"
-                                            >
-                                                Done
-                                            </Button>
-                                        </div>
-                                    )}
-                                </PopoverContent>
-                            </Popover>
-
-                            {/* Languages Badges */}
-                            <div className="flex flex-wrap gap-1.5 min-h-[36px] p-1.5 rounded-lg bg-muted/20 dark:bg-muted/10 border border-border/20 border-dashed">
-                                {allowedLanguages.length === 0 ? (
-                                    <span className="text-[10px] text-muted-foreground/60 italic flex items-center px-1.5">
-                                        No languages selected.
-                                    </span>
-                                ) : (
-                                    allowedLanguages.map((id) => {
-                                        const lang = languages.find(
-                                            (l: any) => Number(l.id) === Number(id),
-                                        );
-                                        if (!lang) return null;
-                                        return (
-                                            <Badge
-                                                key={id}
-                                                variant="secondary"
-                                                className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-2 py-0.5 flex items-center gap-1 group transition-all"
-                                            >
-                                                <span className="font-medium text-[10px]">
-                                                    {lang.name}
-                                                </span>
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                        {allowedLanguages.length > 0 && (
+                                            <div className="flex items-center justify-between p-2 border-t border-border/40 bg-muted/50 backdrop-blur-md">
                                                 <Button
-                                                    type="button"
                                                     variant="ghost"
+                                                    size="sm"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
-                                                        toggleLanguage(Number(id));
+                                                        setAllowedLanguages([]);
                                                     }}
-                                                    className="h-auto w-auto p-0.5 rounded-sm hover:bg-red-500/10 transition-colors"
+                                                    className="text-[9px] h-7 px-2 hover:bg-red-500/10 hover:text-red-500 font-bold uppercase tracking-wider transition-colors"
                                                 >
-                                                    <X className="h-2.5 w-2.5 text-red-500" />
+                                                    Clear
                                                 </Button>
-                                            </Badge>
-                                        );
-                                    })
-                                )}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setOpen(false);
+                                                    }}
+                                                    className="text-[9px] h-7 px-2 hover:bg-primary/10 text-primary font-bold uppercase tracking-wider transition-colors"
+                                                >
+                                                    Done
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </PopoverContent>
+                                </Popover>
+
+                                {/* Languages Badges */}
+                                <div className="flex flex-wrap gap-1.5 min-h-[36px] p-1.5 rounded-lg bg-muted/20 dark:bg-muted/10 border border-border/20 border-dashed">
+                                    {allowedLanguages.length === 0 ? (
+                                        <span className="text-[10px] text-muted-foreground/60 italic flex items-center px-1.5">
+                                            No languages selected.
+                                        </span>
+                                    ) : (
+                                        allowedLanguages.map((id) => {
+                                            const lang = languages.find(
+                                                (l: any) => Number(l.id) === Number(id),
+                                            );
+                                            if (!lang) return null;
+                                            return (
+                                                <Badge
+                                                    key={id}
+                                                    variant="secondary"
+                                                    className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-2 py-0.5 flex items-center gap-1 group transition-all"
+                                                >
+                                                    <span className="font-medium text-[10px]">
+                                                        {lang.name}
+                                                    </span>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            toggleLanguage(Number(id));
+                                                        }}
+                                                        className="h-auto w-auto p-0.5 rounded-sm hover:bg-red-500/10 transition-colors"
+                                                    >
+                                                        <X className="h-2.5 w-2.5 text-red-500" />
+                                                    </Button>
+                                                </Badge>
+                                            );
+                                        })
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Tags Selection */}
                     <div className="space-y-1.5">

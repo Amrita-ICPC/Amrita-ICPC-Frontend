@@ -8,10 +8,16 @@
 
 /**
  * Ephemeral test case for draft testing.
+
+For SQL drafts (``language_id`` matching the configured Judge0 SQLite
+language), ``input`` is the database fixture SQL and ``expected_output``
+is the expected result set, mirroring ``TestCase`` for SQL questions.
  */
 export interface DraftTestCase {
   /** Standard input for the test case */
   input: string;
   /** Expected standard output for comparison */
   expected_output: string;
+  /** SQL drafts only: whether row order in expected_output must match exactly */
+  is_ordered?: boolean;
 }

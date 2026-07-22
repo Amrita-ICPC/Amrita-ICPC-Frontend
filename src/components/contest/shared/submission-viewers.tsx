@@ -177,7 +177,9 @@ export function SourceCodeViewer({
                     ? "go"
                     : normalizedLanguage.includes("rust")
                       ? "rust"
-                      : "plaintext";
+                      : normalizedLanguage.includes("sql")
+                        ? "sql"
+                        : "plaintext";
 
     return (
         <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">

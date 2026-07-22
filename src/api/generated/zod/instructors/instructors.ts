@@ -61,7 +61,7 @@ export const GetInstructorDashboardApiV1InstructorsDashboardGetResponse = zod.ob
   "live": zod.array(zod.object({
   "id": zod.uuid().describe('Contest ID'),
   "name": zod.string().describe('Contest name'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Derived temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -77,7 +77,7 @@ export const GetInstructorDashboardApiV1InstructorsDashboardGetResponse = zod.ob
   "upcoming": zod.array(zod.object({
   "id": zod.uuid().describe('Contest ID'),
   "name": zod.string().describe('Contest name'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Derived temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),
@@ -93,7 +93,7 @@ export const GetInstructorDashboardApiV1InstructorsDashboardGetResponse = zod.ob
   "completed": zod.array(zod.object({
   "id": zod.uuid().describe('Contest ID'),
   "name": zod.string().describe('Contest name'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('Derived temporal run-state (UPCOMING \/ LIVE \/ ENDED)'),

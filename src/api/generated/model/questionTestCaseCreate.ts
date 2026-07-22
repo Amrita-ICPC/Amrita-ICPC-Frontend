@@ -7,10 +7,14 @@
  */
 
 export interface QuestionTestCaseCreate {
+  /** Stdin for STANDARD questions; database fixture SQL (schema + seed data) for SQL questions */
   input: string;
+  /** Expected stdout for STANDARD questions; expected result set (SQLite '.mode list' text) for SQL questions */
   output: string;
   is_hidden?: boolean;
   /** @minimum 1 */
   weight?: number;
   order?: number | null;
+  /** SQL questions only: whether row order in `output` must match exactly, vs. comparing rows as an unordered set */
+  is_ordered?: boolean;
 }

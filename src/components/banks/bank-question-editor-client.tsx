@@ -51,6 +51,7 @@ export default function BankQuestionEditorClient({
             const questionResponse = await createQuestionMutation.mutateAsync({
                 data: {
                     title: payload.title,
+                    question_type: payload.question_type,
                     difficulty: payload.difficulty,
                     question_text: payload.question_text,
                     time_limit_ms: payload.time_limit_ms,
