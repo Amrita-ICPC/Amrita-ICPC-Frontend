@@ -13,7 +13,7 @@ Attributes:
     folder: Storage folder/prefix used for the object key.
     resource_id: Random resource identifier used to scope the upload.
     object_key: Object key stored in MinIO.
-    url: Stable backend URL that redirects through a fresh presigned MinIO URL.
+    url: Public URL derived from the object key.
     bucket_name: MinIO bucket name.
     content_type: MIME type stored for the object.
     size_bytes: Size of the uploaded file in bytes.
@@ -26,7 +26,7 @@ export interface ImageUploadResponse {
   resource_id: string;
   /** MinIO object key */
   object_key: string;
-  /** Stable backend URL for accessing the image */
+  /** Public URL for the uploaded image */
   url: string;
   /** MinIO bucket name */
   bucket_name: string;

@@ -28,6 +28,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     getContestSessionUnavailableMessage,
     isContestSessionCompleted,
+    isContestSessionMissed,
+    isContestSessionTerminal,
 } from "@/lib/contest-session-status";
 import { handleApiError } from "@/lib/handle-api-error";
 import { toast } from "@/lib/hooks/use-toast";
@@ -40,6 +42,25 @@ const RUN_STATUS_STYLES: Record<string, { dot: string; label: string }> = {
     LIVE: { dot: "bg-success", label: "Live Now" },
     UPCOMING: { dot: "bg-warning", label: "Upcoming" },
     ENDED: { dot: "bg-destructive", label: "Ended" },
+};
+
+const COMPLETION_STATUS_STYLES: Record<string, { label: string; className: string }> = {
+    NOT_STARTED: {
+        label: "Not Started",
+        className: "border-transparent bg-info/10 text-info",
+    },
+    IN_PROGRESS: {
+        label: "In Progress",
+        className: "border-transparent bg-primary/10 text-primary",
+    },
+    FINISHED: {
+        label: "Finished",
+        className: "border-transparent bg-success/10 text-success",
+    },
+    MISSED: {
+        label: "Missed",
+        className: "border-transparent bg-warning/10 text-warning",
+    },
 };
 
 function StatusPill({ dot, label, glow = false }: { dot: string; label: string; glow?: boolean }) {
@@ -370,7 +391,11 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
             : "Not Scheduled";
 
     const canStart = !!participation?.session?.can_start;
-    const isSessionCompleted = isContestSessionCompleted(participation?.session);
+    const isRegistered = !!participation?.registration_status?.registered;
+    const completionStatus = isRegistered ? participation?.session?.completion_status : undefined;
+    const isSessionCompleted = isRegistered && isContestSessionCompleted(participation?.session);
+    const isSessionMissed = isRegistered && isContestSessionMissed(participation?.session);
+    const isSessionTerminal = isRegistered && isContestSessionTerminal(participation?.session);
     const effectiveReason = canStart
         ? null
         : getContestSessionUnavailableMessage(participation?.session);
@@ -651,17 +676,28 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     };
                                 }
 
+                                if (isSessionCompleted) {
+                                    return {
+                                        title: "Contest Submitted",
+                                        icon: CheckCircle2,
+                                        iconClass: "text-success",
+                                        bgClass:
+                                            "bg-gradient-to-r from-success/10 to-success/5 border-b border-success/20",
+                                    };
+                                }
+
+                                if (isSessionMissed) {
+                                    return {
+                                        title: "Session Time Expired",
+                                        icon: Clock,
+                                        iconClass: "text-warning",
+                                        bgClass:
+                                            "bg-gradient-to-r from-warning/10 to-warning/5 border-b border-warning/20",
+                                    };
+                                }
+
                                 if (effectiveRunStatus === "LIVE") {
-                                    if (isSessionCompleted) {
-                                        return {
-                                            title: "Contest Submitted",
-                                            icon: CheckCircle2,
-                                            iconClass: "text-success",
-                                            bgClass:
-                                                "bg-gradient-to-r from-success/10 to-success/5 border-b border-success/20",
-                                        };
-                                    }
-                                    if (participation?.session?.already_started && canStart) {
+                                    if (completionStatus === "IN_PROGRESS") {
                                         return {
                                             title: "Session in Progress",
                                             icon: Activity,
@@ -672,7 +708,10 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                     }
                                     if (canStart) {
                                         return {
-                                            title: "You're all set to go!",
+                                            title:
+                                                completionStatus === "NOT_STARTED"
+                                                    ? "Ready to Start"
+                                                    : "You're all set to go!",
                                             icon: Sparkles,
                                             iconClass: "text-primary animate-pulse",
                                             bgClass:
@@ -735,18 +774,36 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                             })();
 
                             const HeaderIcon = headerDetails.icon;
+                            const completionDetails = completionStatus
+                                ? COMPLETION_STATUS_STYLES[completionStatus]
+                                : null;
 
                             return (
                                 <Card className="border-border/60 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
                                     <CardHeader className={cn("py-3.5", headerDetails.bgClass)}>
-                                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                                            <HeaderIcon
-                                                className={cn(
-                                                    "h-5 w-5 shrink-0",
-                                                    headerDetails.iconClass,
-                                                )}
-                                            />
-                                            {headerDetails.title}
+                                        <CardTitle className="flex items-center justify-between gap-3 text-sm font-bold uppercase tracking-wider text-foreground">
+                                            <span className="flex min-w-0 items-center gap-2">
+                                                <HeaderIcon
+                                                    className={cn(
+                                                        "h-5 w-5 shrink-0",
+                                                        headerDetails.iconClass,
+                                                    )}
+                                                />
+                                                <span className="truncate">
+                                                    {headerDetails.title}
+                                                </span>
+                                            </span>
+                                            {completionDetails ? (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "shrink-0 text-[9px] font-extrabold tracking-wider",
+                                                        completionDetails.className,
+                                                    )}
+                                                >
+                                                    {completionDetails.label}
+                                                </Badge>
+                                            ) : null}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-6 space-y-4">
@@ -763,12 +820,13 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                         label="Starts In"
                                                     />
                                                 )}
-                                                {effectiveRunStatus === "LIVE" && (
-                                                    <CountdownTimer
-                                                        targetDate={contest.end_time ?? ""}
-                                                        label="Time Remaining"
-                                                    />
-                                                )}
+                                                {effectiveRunStatus === "LIVE" &&
+                                                    (!isSessionTerminal ? (
+                                                        <CountdownTimer
+                                                            targetDate={contest.end_time ?? ""}
+                                                            label="Time Remaining"
+                                                        />
+                                                    ) : null)}
                                                 {effectiveRunStatus === "ENDED" && (
                                                     <div className="space-y-4 w-full">
                                                         <div className="flex flex-col items-center justify-center p-5 bg-muted/40 rounded-2xl border border-border/50 text-muted-foreground text-center">
@@ -837,10 +895,11 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                             ? "Loading..."
                                                             : isSessionCompleted
                                                               ? "Contest Submitted"
-                                                              : participation?.session
-                                                                      ?.already_started
-                                                                ? "Resume Contest"
-                                                                : "Start Contest"}
+                                                              : isSessionMissed
+                                                                ? "Session Ended"
+                                                                : completionStatus === "IN_PROGRESS"
+                                                                  ? "Resume Contest"
+                                                                  : "Start Contest"}
                                                         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                                                     </Button>
                                                 )}
@@ -852,11 +911,15 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                             "flex gap-3 p-3.5 rounded-2xl border",
                                                             isSessionCompleted
                                                                 ? "border-success/20 bg-success/5 text-success dark:bg-success/10"
-                                                                : "border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10",
+                                                                : isSessionMissed
+                                                                  ? "border-warning/20 bg-warning/5 text-warning dark:bg-warning/10"
+                                                                  : "border-destructive/20 bg-destructive/5 text-destructive dark:bg-destructive/10",
                                                         )}
                                                     >
                                                         {isSessionCompleted ? (
                                                             <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                                                        ) : isSessionMissed ? (
+                                                            <Clock className="h-4 w-4 shrink-0 mt-0.5" />
                                                         ) : (
                                                             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                                                         )}
@@ -864,7 +927,9 @@ export function StudentContestDetailClient({ contestId }: StudentContestDetailCl
                                                             <span className="text-xs font-bold leading-tight">
                                                                 {isSessionCompleted
                                                                     ? "Already Submitted"
-                                                                    : "Access Blocked"}
+                                                                    : isSessionMissed
+                                                                      ? "Session Ended"
+                                                                      : "Access Blocked"}
                                                             </span>
                                                             <span className="text-[11px] opacity-80 leading-normal font-medium">
                                                                 {effectiveReason}

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ContestRunStatus } from './contestRunStatus';
+import type { ContestSessionCompletionStatus } from './contestSessionCompletionStatus';
 
 /**
  * Schema for student contest session status.
@@ -19,4 +20,6 @@ export interface StudentContestSessionStatus {
   run_status: ContestRunStatus;
   /** Whether the student/team has already started the session */
   already_started: boolean;
+  /** Completion state of the session: NOT_STARTED, IN_PROGRESS, FINISHED (explicitly submitted via /finish), or MISSED (timer expired without finishing) */
+  completion_status: ContestSessionCompletionStatus;
 }
