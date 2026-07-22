@@ -22,7 +22,7 @@ export interface ContestSummaryResponse {
   name: string;
   /** Contest description */
   description?: string | null;
-  /** Contest image URL */
+  /** Contest image access URL */
   image?: string | null;
   /** Contest start time (UTC) */
   start_time: string;

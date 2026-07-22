@@ -32,11 +32,12 @@ const LANGUAGES = [
     { id: 54, label: "C++ (GCC)", monaco: "cpp" },
     { id: 50, label: "C (GCC)", monaco: "c" },
     { id: 62, label: "Java", monaco: "java" },
+    { id: 82, label: "SQL (SQLite)", monaco: "sql" },
 ] as const;
 
 export type MonacoLanguage = (typeof LANGUAGES)[number];
 
-function extractExecutionError(err: unknown): string {
+export function extractExecutionError(err: unknown): string {
     if (!err || typeof err !== "object") {
         return "Execution failed. Check your code and test cases, then try again.";
     }

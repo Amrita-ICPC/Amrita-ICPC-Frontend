@@ -197,6 +197,7 @@ const FALLBACK_LANGUAGES: Record<number, { label: string; monaco: string }> = {
     54: { label: "C++ (GCC)", monaco: "cpp" },
     62: { label: "Java", monaco: "java" },
     71: { label: "Python 3", monaco: "python" },
+    82: { label: "SQL (SQLite)", monaco: "sql" },
 };
 
 function templateLanguage(template: PublishedSolutionTemplate) {

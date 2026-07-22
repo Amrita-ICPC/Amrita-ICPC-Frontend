@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { QuestionType } from "@/api/generated/model/questionType";
 import { Button } from "@/components/ui/button";
 import { useQuestionEditorSync } from "@/hooks/use-question-editor-sync";
 import type { useQuestionForm } from "@/hooks/use-question-form";
@@ -20,15 +21,24 @@ import {
     ProblemMetadataCard,
 } from "../questions/question-metadata-card";
 import { ProblemPreview } from "../questions/question-preview";
+import { SqlCodeEditor } from "../questions/sql-code-editor";
 import { TestCaseManager } from "../questions/test-case-manager";
 import { AsyncStateHandler } from "../shared/async-state-handler";
 import { useEditorContext } from "../shared/TipTap";
 import { Skeleton } from "../ui/skeleton";
 
-const ALL_STEPS = ["details", "statement", "starter", "solution", "driver", "testcases"] as const;
-type EditorStep = (typeof ALL_STEPS)[number];
+const ALL_STEPS_STANDARD = [
+    "details",
+    "statement",
+    "starter",
+    "solution",
+    "driver",
+    "testcases",
+] as const;
+const ALL_STEPS_SQL = ["details", "statement", "schema", "seed", "solution", "testcases"] as const;
+type EditorStep = (typeof ALL_STEPS_STANDARD)[number] | (typeof ALL_STEPS_SQL)[number];
 
-const STEP_GROUPS = [
+const STEP_GROUPS_STANDARD = [
     {
         title: "Problem",
         steps: [
@@ -42,6 +52,25 @@ const STEP_GROUPS = [
             { id: "starter", label: "Starter Code" },
             { id: "solution", label: "Solution" },
             { id: "driver", label: "Driver Code" },
+            { id: "testcases", label: "Test Cases" },
+        ],
+    },
+] as const;
+
+const STEP_GROUPS_SQL = [
+    {
+        title: "Problem",
+        steps: [
+            { id: "details", label: "Details" },
+            { id: "statement", label: "Statement" },
+        ],
+    },
+    {
+        title: "Judge Configuration",
+        steps: [
+            { id: "schema", label: "Schema" },
+            { id: "seed", label: "Seed Data" },
+            { id: "solution", label: "Solution Query" },
             { id: "testcases", label: "Test Cases" },
         ],
     },
@@ -69,6 +98,9 @@ export function QuestionEditorShell({
     initialPreview = false,
 }: QuestionEditorShellProps) {
     const { metadata, content, code, testCases, initializeForm } = form;
+    const isSql = metadata.questionType === QuestionType.SQL;
+    const ALL_STEPS: readonly EditorStep[] = isSql ? ALL_STEPS_SQL : ALL_STEPS_STANDARD;
+    const STEP_GROUPS = isSql ? STEP_GROUPS_SQL : STEP_GROUPS_STANDARD;
 
     // Data fetching
     const {
@@ -115,6 +147,8 @@ export function QuestionEditorShell({
         solution: mode === "update",
         testcases: mode === "update",
         driver: mode === "update",
+        schema: mode === "update",
+        seed: mode === "update",
     }));
 
     // View State
@@ -160,9 +194,12 @@ export function QuestionEditorShell({
 
     // Step validity checks
     const isStepValid = (stepId: EditorStep): boolean => {
-        // For starter, solution, and driver code, we require that the step has been visited (if in create mode)
-        // to ensure the user actually reviewed the default templates.
-        if (["starter", "solution", "driver"].includes(stepId) && !visitedSteps[stepId]) {
+        // For code-authoring steps, we require that the step has been visited (if
+        // in create mode) to ensure the user actually reviewed the default templates.
+        if (
+            ["starter", "solution", "driver", "schema", "seed"].includes(stepId) &&
+            !visitedSteps[stepId]
+        ) {
             return false;
         }
 
@@ -176,15 +213,24 @@ export function QuestionEditorShell({
                 return !!metadata.title?.trim() && isScoreValid;
             case "statement":
                 return !!content.description?.trim();
+            case "schema":
+                return !!code.sqlSchema?.trim();
+            case "seed":
+                return !!code.sqlSeed?.trim();
             case "starter":
-                return !!code.starterCodes[workflowEditorLang.id]?.trim();
+                return isSql
+                    ? !!code.sqlStarter?.trim()
+                    : !!code.starterCodes[workflowEditorLang.id]?.trim();
             case "solution":
-                return !!code.solutionCodes[workflowEditorLang.id]?.trim();
+                return isSql
+                    ? !!code.sqlSolution?.trim()
+                    : !!code.solutionCodes[workflowEditorLang.id]?.trim();
             case "testcases":
                 const testCasesValid = testCases.testCases.every((tc) => {
                     const weightValid =
                         tc.weight >= 0 && (!contestId || tc.weight <= metadata.score);
-                    return weightValid;
+                    const resultValid = !isSql || !!tc.output?.trim();
+                    return weightValid && resultValid;
                 });
                 return testCases.testCases.length > 0 && testCasesValid;
             case "driver":
@@ -258,6 +304,7 @@ export function QuestionEditorShell({
                         <ProblemPreview
                             title={metadata.title}
                             difficulty={metadata.difficulty}
+                            questionType={metadata.questionType}
                             timeLimit={metadata.timeLimit}
                             memoryLimit={metadata.memoryLimit}
                             score={metadata.score}
@@ -342,6 +389,9 @@ export function QuestionEditorShell({
                                                 <ProblemMetadataCard
                                                     title={metadata.title}
                                                     setTitle={metadata.setTitle}
+                                                    questionType={metadata.questionType}
+                                                    setQuestionType={metadata.setQuestionType}
+                                                    typeLocked={mode === "update"}
                                                     difficulty={metadata.difficulty}
                                                     setDifficulty={metadata.setDifficulty}
                                                     timeLimit={metadata.timeLimit}
@@ -378,58 +428,96 @@ export function QuestionEditorShell({
                                             </div>
                                         )}
 
-                                        {/* STEPS: CODE EDITORS */}
-                                        {["starter", "solution", "driver"].includes(activeStep) && (
-                                            <div className="w-full pb-4">
-                                                <QuestionCodeEditor
-                                                    title={activeStep}
-                                                    language={workflowEditorLang}
-                                                    onLanguageChange={setWorkflowEditorLang}
-                                                    showExecution={activeStep === "driver"}
-                                                    testCases={testCases.testCases}
-                                                    starterCode={
-                                                        code.starterCodes[workflowEditorLang.id]
-                                                    }
-                                                    solutionCode={
-                                                        code.solutionCodes[workflowEditorLang.id]
-                                                    }
-                                                    driverCode={
-                                                        code.driverCodes[workflowEditorLang.id]
-                                                    }
-                                                    allowedLanguages={metadata.allowedLanguages}
-                                                    value={
-                                                        (activeStep === "starter"
-                                                            ? code.starterCodes[
-                                                                  workflowEditorLang.id
-                                                              ]
-                                                            : activeStep === "solution"
-                                                              ? code.solutionCodes[
-                                                                    workflowEditorLang.id
-                                                                ]
-                                                              : code.driverCodes[
-                                                                    workflowEditorLang.id
-                                                                ]) ?? ""
-                                                    }
-                                                    onChange={(val) => {
-                                                        if (activeStep === "starter")
-                                                            code.setStarterCodes({
-                                                                ...code.starterCodes,
-                                                                [workflowEditorLang.id]: val,
-                                                            });
-                                                        else if (activeStep === "solution")
-                                                            code.setSolutionCodes({
-                                                                ...code.solutionCodes,
-                                                                [workflowEditorLang.id]: val,
-                                                            });
-                                                        else
-                                                            code.setDriverCodes({
-                                                                ...code.driverCodes,
-                                                                [workflowEditorLang.id]: val,
-                                                            });
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
+                                        {/* STEPS: SQL EDITORS (schema/seed/solution) */}
+                                        {isSql &&
+                                            ["schema", "seed", "solution"].includes(activeStep) && (
+                                                <div className="w-full pb-4">
+                                                    <SqlCodeEditor
+                                                        step={
+                                                            activeStep as
+                                                                | "schema"
+                                                                | "seed"
+                                                                | "solution"
+                                                        }
+                                                        value={
+                                                            activeStep === "schema"
+                                                                ? code.sqlSchema
+                                                                : activeStep === "seed"
+                                                                  ? code.sqlSeed
+                                                                  : code.sqlSolution
+                                                        }
+                                                        onChange={(val) => {
+                                                            if (activeStep === "schema")
+                                                                code.setSqlSchema(val);
+                                                            else if (activeStep === "seed")
+                                                                code.setSqlSeed(val);
+                                                            else code.setSqlSolution(val);
+                                                        }}
+                                                        showExecution={activeStep === "solution"}
+                                                        testCases={testCases.testCases}
+                                                        schema={code.sqlSchema}
+                                                        seed={code.sqlSeed}
+                                                    />
+                                                </div>
+                                            )}
+
+                                        {/* STEPS: CODE EDITORS (standard) */}
+                                        {!isSql &&
+                                            ["starter", "solution", "driver"].includes(
+                                                activeStep,
+                                            ) && (
+                                                <div className="w-full pb-4">
+                                                    <QuestionCodeEditor
+                                                        title={activeStep}
+                                                        language={workflowEditorLang}
+                                                        onLanguageChange={setWorkflowEditorLang}
+                                                        showExecution={activeStep === "driver"}
+                                                        testCases={testCases.testCases}
+                                                        starterCode={
+                                                            code.starterCodes[workflowEditorLang.id]
+                                                        }
+                                                        solutionCode={
+                                                            code.solutionCodes[
+                                                                workflowEditorLang.id
+                                                            ]
+                                                        }
+                                                        driverCode={
+                                                            code.driverCodes[workflowEditorLang.id]
+                                                        }
+                                                        allowedLanguages={metadata.allowedLanguages}
+                                                        value={
+                                                            (activeStep === "starter"
+                                                                ? code.starterCodes[
+                                                                      workflowEditorLang.id
+                                                                  ]
+                                                                : activeStep === "solution"
+                                                                  ? code.solutionCodes[
+                                                                        workflowEditorLang.id
+                                                                    ]
+                                                                  : code.driverCodes[
+                                                                        workflowEditorLang.id
+                                                                    ]) ?? ""
+                                                        }
+                                                        onChange={(val) => {
+                                                            if (activeStep === "starter")
+                                                                code.setStarterCodes({
+                                                                    ...code.starterCodes,
+                                                                    [workflowEditorLang.id]: val,
+                                                                });
+                                                            else if (activeStep === "solution")
+                                                                code.setSolutionCodes({
+                                                                    ...code.solutionCodes,
+                                                                    [workflowEditorLang.id]: val,
+                                                                });
+                                                            else
+                                                                code.setDriverCodes({
+                                                                    ...code.driverCodes,
+                                                                    [workflowEditorLang.id]: val,
+                                                                });
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
 
                                         {/* STEP: TEST CASES */}
                                         {activeStep === "testcases" && (
@@ -437,6 +525,12 @@ export function QuestionEditorShell({
                                                 <TestCaseManager
                                                     testCases={testCases.testCases}
                                                     setTestCases={testCases.setTestCases}
+                                                    isSql={isSql}
+                                                    sqlContext={{
+                                                        schema: code.sqlSchema,
+                                                        seed: code.sqlSeed,
+                                                        solutionCode: code.sqlSolution,
+                                                    }}
                                                     executionContext={{
                                                         languageId: workflowEditorLang.id,
                                                         starterCode:

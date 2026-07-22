@@ -13,4 +13,5 @@ export interface QuestionTestCaseResponse {
   is_hidden: boolean;
   weight: number;
   order: number | null;
+  is_ordered?: boolean;
 }

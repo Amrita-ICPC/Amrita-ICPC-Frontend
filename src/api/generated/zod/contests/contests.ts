@@ -50,7 +50,7 @@ export const createContestApiV1ContestsPostBodyShuffleQuestionsDefault = false;
 export const CreateContestApiV1ContestsPostBody = zod.object({
   "name": zod.string().min(1).max(createContestApiV1ContestsPostBodyNameMax).describe('Contest name'),
   "description": zod.union([zod.string().max(createContestApiV1ContestsPostBodyDescriptionOneMax),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "is_public": zod.boolean().default(createContestApiV1ContestsPostBodyIsPublicDefault).describe('Whether contest is public'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
@@ -138,7 +138,7 @@ export const GetAllContestsApiV1ContestsGetResponse = zod.object({
   "id": zod.uuid().describe('Contest ID'),
   "name": zod.string().describe('Contest name'),
   "description": zod.union([zod.string(),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
@@ -243,7 +243,7 @@ export const GetDeletedContestsApiV1ContestsDeletedGetResponse = zod.object({
   "id": zod.uuid().describe('Contest ID'),
   "name": zod.string().describe('Contest name'),
   "description": zod.union([zod.string(),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
   "status": zod.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'DELETED']).describe('Contest lifecycle status'),
@@ -351,7 +351,7 @@ export const GetContestApiV1ContestsContestIdGetResponse = zod.object({
   "data": zod.union([zod.object({
   "name": zod.string().min(1).max(getContestApiV1ContestsContestIdGetResponseDataOneNameMax).describe('Contest name'),
   "description": zod.union([zod.string().max(getContestApiV1ContestsContestIdGetResponseDataOneDescriptionOneMax),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "is_public": zod.boolean().default(getContestApiV1ContestsContestIdGetResponseDataOneIsPublicDefault).describe('Whether contest is public'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
@@ -446,7 +446,7 @@ export const updateContestApiV1ContestsContestIdPatchBodyDescriptionOneMax = 500
 export const UpdateContestApiV1ContestsContestIdPatchBody = zod.object({
   "name": zod.union([zod.string().min(1).max(updateContestApiV1ContestsContestIdPatchBodyNameOneMax),zod.null()]).optional().describe('Contest name'),
   "description": zod.union([zod.string().max(updateContestApiV1ContestsContestIdPatchBodyDescriptionOneMax),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "is_public": zod.union([zod.boolean(),zod.null()]).optional().describe('Whether contest is public'),
   "start_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
@@ -509,7 +509,7 @@ export const UpdateContestApiV1ContestsContestIdPatchResponse = zod.object({
   "data": zod.union([zod.object({
   "name": zod.string().min(1).max(updateContestApiV1ContestsContestIdPatchResponseDataOneNameMax).describe('Contest name'),
   "description": zod.union([zod.string().max(updateContestApiV1ContestsContestIdPatchResponseDataOneDescriptionOneMax),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "is_public": zod.boolean().default(updateContestApiV1ContestsContestIdPatchResponseDataOneIsPublicDefault).describe('Whether contest is public'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),
@@ -994,10 +994,12 @@ export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetRespo
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseMessageDefault = `Success`;
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTitleMax = 255;
 
+export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneQuestionTypeDefault = `STANDARD`;
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin = 0;
 
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin = 0;
 
+export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTestcasesItemIsOrderedDefault = true;
 export const getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
 
 
@@ -1010,6 +1012,7 @@ export const GetContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetRespo
   "title": zod.string().max(getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "question_type": zod.enum(['STANDARD', 'SQL']).default(getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneQuestionTypeDefault).describe('Execution model: STANDARD (stdin\/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation.'),
   "time_limit_ms": zod.number().gt(getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
   "memory_limit_mb": zod.number().gt(getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
   "id": zod.uuid(),
@@ -1022,7 +1025,8 @@ export const GetContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetRespo
   "output": zod.string(),
   "is_hidden": zod.boolean(),
   "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
+  "order": zod.union([zod.number(),zod.null()]),
+  "is_ordered": zod.boolean().default(getContestQuestionApiV1ContestsContestIdQuestionsQuestionIdGetResponseDataOneTestcasesItemIsOrderedDefault)
 })).optional(),
   "templates": zod.array(zod.object({
   "id": zod.union([zod.uuid(),zod.null()]).optional(),
@@ -1081,6 +1085,7 @@ export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch
 
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin = 0;
 
+export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemIsOrderedDefault = true;
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTemplatesOneItemLanguageIdExclusiveMin = 0;
 
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTimeLimitMsOneExclusiveMin = 0;
@@ -1098,11 +1103,12 @@ export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch
   "allowed_languages": zod.union([zod.array(zod.number()),zod.null()]).optional(),
   "tag_ids": zod.union([zod.array(zod.uuid()),zod.null()]).optional(),
   "testcases": zod.union([zod.array(zod.object({
-  "input": zod.string(),
-  "output": zod.string(),
+  "input": zod.string().describe('Stdin for STANDARD questions; database fixture SQL (schema + seed data) for SQL questions'),
+  "output": zod.string().describe('Expected stdout for STANDARD questions; expected result set (SQLite \'.mode list\' text) for SQL questions'),
   "is_hidden": zod.boolean().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemIsHiddenDefault),
   "weight": zod.number().min(1).default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemWeightDefault),
-  "order": zod.union([zod.number().min(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin),zod.null()]).optional()
+  "order": zod.union([zod.number().min(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemOrderOneMin),zod.null()]).optional(),
+  "is_ordered": zod.boolean().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTestcasesOneItemIsOrderedDefault).describe('SQL questions only: whether row order in `output` must match exactly, vs. comparing rows as an unordered set')
 })),zod.null()]).optional(),
   "templates": zod.union([zod.array(zod.object({
   "language_id": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchBodyTemplatesOneItemLanguageIdExclusiveMin),
@@ -1120,10 +1126,12 @@ export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseMessageDefault = `Success`;
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTitleMax = 255;
 
+export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneQuestionTypeDefault = `STANDARD`;
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin = 0;
 
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin = 0;
 
+export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTestcasesItemIsOrderedDefault = true;
 export const updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTagsItemNameMax = 100;
 
 
@@ -1136,6 +1144,7 @@ export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch
   "title": zod.string().max(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTitleMax).describe('The title of the question'),
   "question_text": zod.string().describe('The problem statement and description'),
   "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']).describe('Difficulty level of the question'),
+  "question_type": zod.enum(['STANDARD', 'SQL']).default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneQuestionTypeDefault).describe('Execution model: STANDARD (stdin\/stdout program) or SQL (query judged against a per-testcase database fixture). Immutable after creation.'),
   "time_limit_ms": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTimeLimitMsExclusiveMin).describe('Time limit in milliseconds'),
   "memory_limit_mb": zod.number().gt(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneMemoryLimitMbExclusiveMin).describe('Memory limit in megabytes'),
   "id": zod.uuid(),
@@ -1148,7 +1157,8 @@ export const UpdateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatch
   "output": zod.string(),
   "is_hidden": zod.boolean(),
   "weight": zod.number(),
-  "order": zod.union([zod.number(),zod.null()])
+  "order": zod.union([zod.number(),zod.null()]),
+  "is_ordered": zod.boolean().default(updateContestQuestionApiV1ContestsContestIdQuestionsQuestionIdPatchResponseDataOneTestcasesItemIsOrderedDefault)
 })).optional(),
   "templates": zod.array(zod.object({
   "id": zod.union([zod.uuid(),zod.null()]).optional(),
@@ -1337,7 +1347,7 @@ export const RestoreContestApiV1ContestsContestIdRestorePostResponse = zod.objec
   "data": zod.union([zod.object({
   "name": zod.string().min(1).max(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneNameMax).describe('Contest name'),
   "description": zod.union([zod.string().max(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneDescriptionOneMax),zod.null()]).optional().describe('Contest description'),
-  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image URL'),
+  "image": zod.union([zod.string(),zod.null()]).optional().describe('Contest image access URL'),
   "is_public": zod.boolean().default(restoreContestApiV1ContestsContestIdRestorePostResponseDataOneIsPublicDefault).describe('Whether contest is public'),
   "start_time": zod.iso.datetime({"offset":true}).describe('Contest start time (UTC)'),
   "end_time": zod.union([zod.iso.datetime({"offset":true}),zod.null()]).optional().describe('Contest end time (UTC)'),

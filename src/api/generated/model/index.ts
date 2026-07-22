@@ -221,6 +221,7 @@ export * from './questionTemplateCreate';
 export * from './questionTemplateResponse';
 export * from './questionTestCaseCreate';
 export * from './questionTestCaseResponse';
+export * from './questionType';
 export * from './questionUpdate';
 export * from './recentSubmissionSchema';
 export * from './registrationState';

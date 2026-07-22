@@ -11,8 +11,8 @@ import * as zod from 'zod';
 /**
  * Upload an image and return storage metadata.
 
-This endpoint stores the image in MinIO under a key shaped like:
-`contest/<random_uuid>/<random_name>`.
+This endpoint stores the image in MinIO under a key shaped like
+`contest/<random_uuid>/<random_name>` and returns a stable backend URL.
 
 Args:
     request: Framework request context.
@@ -21,7 +21,7 @@ Args:
     service: Injected ImageService.
 
 Returns:
-    APIResponse[ImageUploadResponse]: Upload metadata with `object_key` and `url`.
+    APIResponse[ImageUploadResponse]: Upload metadata with `object_key` and a stable `url`.
 
 Raises:
     UnauthorizedError: If the caller is not authenticated.
@@ -33,5 +33,14 @@ Raises:
  */
 export const UploadImageApiV1UploadPostBody = zod.object({
   "file": zod.instanceof(File)
+})
+
+/**
+ * Redirect a stable backend image URL to a fresh presigned MinIO URL.
+ * @summary Download image
+ */
+export const DownloadImageApiV1ImagesBucketNameObjectKeyGetParams = zod.object({
+  "bucket_name": zod.string(),
+  "object_key": zod.string()
 })
 

@@ -17,7 +17,7 @@ export interface ContestUpdate {
   name?: string | null;
   /** Contest description */
   description?: string | null;
-  /** Contest image URL */
+  /** Contest image access URL */
   image?: string | null;
   /** Whether contest is public */
   is_public?: boolean | null;

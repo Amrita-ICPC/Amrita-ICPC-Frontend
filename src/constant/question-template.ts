@@ -1,3 +1,50 @@
+export const SQL_LANGUAGE_ID = 82;
+
+export const DEFAULT_SQL_SCHEMA = `-- Schema: define the tables the query runs against.
+CREATE TABLE departments (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE employees (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    department_id INTEGER,
+    salary INTEGER,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+);`;
+
+export const DEFAULT_SQL_SEED = `-- Seed: insert the data the query is evaluated against.
+-- Marketing has no employees (exercises the "right join" side below); Dave
+-- has no department (exercises the "left join" side below).
+INSERT INTO departments (id, name) VALUES
+    (1, 'Engineering'),
+    (2, 'Sales'),
+    (3, 'Marketing');
+
+INSERT INTO employees (id, name, department_id, salary) VALUES
+    (1, 'Alice', 1, 90000),
+    (2, 'Bob', 1, 85000),
+    (3, 'Carol', 2, 70000),
+    (4, 'Dave', NULL, 60000);`;
+
+export const DEFAULT_SQL_SOLUTION = `-- Reference query used to generate the expected result set.
+-- Judge0's SQLite (3.27.2) has no RIGHT JOIN keyword (added upstream only in
+-- SQLite 3.39+), so a right join is expressed by swapping the table order in
+-- a LEFT JOIN instead. UNION-ing both directions emulates a full outer join:
+-- Dave (no department) comes from the first LEFT JOIN, Marketing (no
+-- employees) comes from the second -- the "right join" case.
+SELECT e.name AS employee, d.name AS department
+FROM employees e
+LEFT JOIN departments d ON e.department_id = d.id
+UNION
+SELECT e.name AS employee, d.name AS department
+FROM departments d
+LEFT JOIN employees e ON e.department_id = d.id
+ORDER BY department, employee;`;
+
+export const DEFAULT_SQL_STARTER = `-- Write your query here`;
+
 export const INITIAL_CODES = {
     starter: {
         71: "# Starter Code (Python)\ndef add(a, b):\n    # Write your code here\n    pass",

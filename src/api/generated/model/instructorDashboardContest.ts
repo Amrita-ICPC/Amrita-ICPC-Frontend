@@ -17,7 +17,7 @@ export interface InstructorDashboardContest {
   id: string;
   /** Contest name */
   name: string;
-  /** Contest image URL */
+  /** Contest image access URL */
   image?: string | null;
   /** Contest start time (UTC) */
   start_time: string;

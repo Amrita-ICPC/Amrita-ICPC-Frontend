@@ -6,13 +6,22 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
@@ -30,8 +39,8 @@ import { axiosWithAuth } from '../../../lib/api-client';
 /**
  * Upload an image and return storage metadata.
 
-This endpoint stores the image in MinIO under a key shaped like:
-`contest/<random_uuid>/<random_name>`.
+This endpoint stores the image in MinIO under a key shaped like
+`contest/<random_uuid>/<random_name>` and returns a stable backend URL.
 
 Args:
     request: Framework request context.
@@ -40,7 +49,7 @@ Args:
     service: Injected ImageService.
 
 Returns:
-    APIResponse[ImageUploadResponse]: Upload metadata with `object_key` and `url`.
+    APIResponse[ImageUploadResponse]: Upload metadata with `object_key` and a stable `url`.
 
 Raises:
     UnauthorizedError: If the caller is not authenticated.
@@ -112,3 +121,103 @@ export const useUploadImageApiV1UploadPost = <TError = ExceptionResponse | HTTPV
       > => {
       return useMutation(getUploadImageApiV1UploadPostMutationOptions(options), queryClient);
     }
+    /**
+ * Redirect a stable backend image URL to a fresh presigned MinIO URL.
+ * @summary Download image
+ */
+export const downloadImageApiV1ImagesBucketNameObjectKeyGet = (
+    bucketName: string,
+    objectKey: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<unknown>(
+      {url: `/api/v1/images/${bucketName}/${objectKey}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getDownloadImageApiV1ImagesBucketNameObjectKeyGetQueryKey = (bucketName: string,
+    objectKey: string,) => {
+    return [
+    `/api/v1/images/${bucketName}/${objectKey}`
+    ] as const;
+    }
+
+
+export const getDownloadImageApiV1ImagesBucketNameObjectKeyGetQueryOptions = <TData = Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError = unknown | ExceptionResponse | HTTPValidationError>(bucketName: string,
+    objectKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadImageApiV1ImagesBucketNameObjectKeyGetQueryKey(bucketName,objectKey);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>> = ({ signal }) => downloadImageApiV1ImagesBucketNameObjectKeyGet(bucketName,objectKey, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: bucketName !== null && bucketName !== undefined && objectKey !== null && objectKey !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DownloadImageApiV1ImagesBucketNameObjectKeyGetQueryResult = NonNullable<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>>
+export type DownloadImageApiV1ImagesBucketNameObjectKeyGetQueryError = unknown | ExceptionResponse | HTTPValidationError
+
+
+export function useDownloadImageApiV1ImagesBucketNameObjectKeyGet<TData = Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError = unknown | ExceptionResponse | HTTPValidationError>(
+ bucketName: string,
+    objectKey: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>,
+          TError,
+          Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownloadImageApiV1ImagesBucketNameObjectKeyGet<TData = Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError = unknown | ExceptionResponse | HTTPValidationError>(
+ bucketName: string,
+    objectKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>,
+          TError,
+          Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownloadImageApiV1ImagesBucketNameObjectKeyGet<TData = Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError = unknown | ExceptionResponse | HTTPValidationError>(
+ bucketName: string,
+    objectKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Download image
+ */
+
+export function useDownloadImageApiV1ImagesBucketNameObjectKeyGet<TData = Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError = unknown | ExceptionResponse | HTTPValidationError>(
+ bucketName: string,
+    objectKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadImageApiV1ImagesBucketNameObjectKeyGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDownloadImageApiV1ImagesBucketNameObjectKeyGetQueryOptions(bucketName,objectKey,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
