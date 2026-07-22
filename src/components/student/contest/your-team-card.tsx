@@ -413,9 +413,19 @@ export function YourTeamCard({
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={onConfirmTeam}>
-                                                    Yes, Confirm Team
+                                                <AlertDialogCancel disabled={isConfirming}>
+                                                    Cancel
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={onConfirmTeam}
+                                                    disabled={isConfirming}
+                                                >
+                                                    {isConfirming ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : null}
+                                                    {isConfirming
+                                                        ? "Confirming..."
+                                                        : "Yes, Confirm Team"}
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
@@ -445,9 +455,20 @@ export function YourTeamCard({
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Back</AlertDialogCancel>
-                                                <AlertDialogAction onClick={onCancelTeam}>
-                                                    Yes, Cancel Registration
+                                                <AlertDialogCancel disabled={isCancelling}>
+                                                    Back
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={onCancelTeam}
+                                                    disabled={isCancelling}
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    {isCancelling ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : null}
+                                                    {isCancelling
+                                                        ? "Cancelling..."
+                                                        : "Yes, Cancel Registration"}
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>

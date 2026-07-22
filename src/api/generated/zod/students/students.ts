@@ -182,7 +182,8 @@ export const GetStudentContestStatusApiV1StudentsContestsContestIdParticipationM
   "can_start": zod.boolean().describe('Whether the student\/team can start the contest'),
   "reason": zod.union([zod.string(),zod.null()]).optional().describe('Reason if the student\/team cannot start'),
   "run_status": zod.enum(['UPCOMING', 'LIVE', 'ENDED']).describe('The temporal run state of the contest'),
-  "already_started": zod.boolean().describe('Whether the student\/team has already started the session')
+  "already_started": zod.boolean().describe('Whether the student\/team has already started the session'),
+  "completion_status": zod.enum(['NOT_STARTED', 'IN_PROGRESS', 'FINISHED', 'MISSED']).describe('Completion state of the session: NOT_STARTED, IN_PROGRESS, FINISHED (explicitly submitted via \/finish), or MISSED (timer expired without finishing)')
 }).describe('Contest session status for the student'),
   "team": zod.union([zod.object({
   "id": zod.uuid().describe('Team ID'),
@@ -1820,22 +1821,24 @@ export const GetContestQuestionDetailsApiV1StudentsContestsContestIdQuestionsQue
 })
 
 /**
- * Retrieve questions for a contest in practice mode. Only available once
-the contest's results have been published, for students who participated.
- * @summary Get practice questions for a contest after results are published
+ * Retrieve questions for a contest for post-results review. Only available
+once the contest's results have been published, for students who
+participated. Independent of the live contest session endpoint above --
+does not require an active/unexpired session.
+ * @summary Get questions for a contest after results are published
  */
-export const GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetParams = zod.object({
+export const GetResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetParams = zod.object({
   "contest_id": zod.uuid()
 })
 
-export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseSuccessDefault = true;
-export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseStatusDefault = 200;
-export const getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseMessageDefault = `Success`;
+export const getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseSuccessDefault = true;
+export const getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseStatusDefault = 200;
+export const getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseMessageDefault = `Success`;
 
-export const GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponse = zod.object({
-  "success": zod.boolean().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseSuccessDefault),
-  "status": zod.number().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseStatusDefault),
-  "message": zod.string().default(getPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestionsGetResponseMessageDefault),
+export const GetResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponse = zod.object({
+  "success": zod.boolean().default(getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseSuccessDefault),
+  "status": zod.number().default(getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseStatusDefault),
+  "message": zod.string().default(getResultsQuestionsApiV1StudentsContestsContestIdResultsQuestionsGetResponseMessageDefault),
   "data": zod.union([zod.object({
   "questions": zod.array(zod.object({
   "id": zod.uuid().describe('The ID of the question'),
@@ -1860,26 +1863,28 @@ export const GetPracticeQuestionsApiV1StudentsContestsContestIdPracticeQuestions
 
 /**
  * Retrieve full details of a specific question, including testcases and
-per-language reference solutions, for practice. Only available once the
-contest's results have been published, for students who participated.
- * @summary Get contest question details with solution for practice
+per-language reference solutions, for post-results review. Only available
+once the contest's results have been published, for students who
+participated. Independent of the live contest session endpoint above --
+does not require an active/unexpired session.
+ * @summary Get contest question details with solution after results are published
  */
-export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetParams = zod.object({
+export const GetResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetParams = zod.object({
   "contest_id": zod.uuid(),
   "question_id": zod.uuid()
 })
 
-export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseSuccessDefault = true;
-export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseStatusDefault = 200;
-export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseMessageDefault = `Success`;
-export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
+export const getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseSuccessDefault = true;
+export const getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseStatusDefault = 200;
+export const getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseMessageDefault = `Success`;
+export const getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseDataOneTagsItemNameMax = 100;
 
-export const getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneIsPracticeDefault = false;
+export const getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseDataOneIsPracticeDefault = false;
 
-export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponse = zod.object({
-  "success": zod.boolean().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseSuccessDefault),
-  "status": zod.number().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseStatusDefault),
-  "message": zod.string().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseMessageDefault),
+export const GetResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponse = zod.object({
+  "success": zod.boolean().default(getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseSuccessDefault),
+  "status": zod.number().default(getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseStatusDefault),
+  "message": zod.string().default(getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseMessageDefault),
   "data": zod.union([zod.object({
   "id": zod.uuid(),
   "title": zod.string(),
@@ -1889,7 +1894,7 @@ export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQue
   "memory_limit_mb": zod.number(),
   "allowed_languages": zod.array(zod.string()).optional(),
   "tags": zod.array(zod.object({
-  "name": zod.string().max(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneTagsItemNameMax).describe('The name of the tag'),
+  "name": zod.string().max(getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseDataOneTagsItemNameMax).describe('The name of the tag'),
   "id": zod.uuid()
 })).optional(),
   "templates": zod.array(zod.object({
@@ -1906,7 +1911,7 @@ export const GetPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQue
   "order": zod.number()
 })).optional(),
   "max_submission": zod.union([zod.number(),zod.null()]).optional().describe('Maximum submissions allowed for this question'),
-  "is_practice": zod.boolean().default(getPracticeQuestionDetailsApiV1StudentsContestsContestIdPracticeQuestionsQuestionIdGetResponseDataOneIsPracticeDefault).describe('True when viewed after contest results were published (practice mode)')
+  "is_practice": zod.boolean().default(getResultsQuestionDetailsApiV1StudentsContestsContestIdResultsQuestionsQuestionIdGetResponseDataOneIsPracticeDefault).describe('True when viewed after contest results were published (practice mode)')
 }),zod.null()]).optional(),
   "pagination": zod.union([zod.object({
   "total": zod.number(),

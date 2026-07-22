@@ -108,7 +108,7 @@ function RegistrationTimeRemaining({ targetDate }: { targetDate: string }) {
 interface IndividualRegistrationStatusCardProps {
     team: any;
     contest: any;
-    onCancelRegistration: () => void;
+    onCancelRegistration?: () => void;
     isCancelling: boolean;
 }
 
@@ -150,35 +150,41 @@ function IndividualRegistrationStatusCard({
                     </span>
                 </div>
 
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button
-                            variant="destructive"
-                            className="w-full font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
-                            disabled={isCancelling}
-                        >
-                            Cancel Registration
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Cancel Registration?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This will cancel your registration for this contest. This action
-                                cannot be undone.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Back</AlertDialogCancel>
-                            <AlertDialogAction
-                                onClick={onCancelRegistration}
-                                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                {onCancelRegistration ? (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="destructive"
+                                className="w-full font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                                disabled={isCancelling}
                             >
-                                Yes, Cancel Registration
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                                Cancel Registration
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Cancel Registration?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will cancel your registration for this contest. This action
+                                    cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isCancelling}>Back</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={onCancelRegistration}
+                                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                    disabled={isCancelling}
+                                >
+                                    {isCancelling ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : null}
+                                    {isCancelling ? "Cancelling..." : "Yes, Cancel Registration"}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                ) : null}
             </CardContent>
         </Card>
     );
@@ -363,6 +369,10 @@ export function ContestTeamCards({
     const currentUserId = session?.user?.id;
     const contestId = contest.id;
     const team = participation?.team;
+    const completionStatus = participation?.session?.completion_status;
+    const canCancelRegistration = completionStatus
+        ? completionStatus === "NOT_STARTED"
+        : !participation?.session?.already_started;
 
     // ── Mutation hooks ────────────────────────────────────────────────────────
     const participationQueryKey = contestId
@@ -418,7 +428,7 @@ export function ContestTeamCards({
     };
 
     const handleCancelTeam = () => {
-        if (!contestId || !team?.id) return;
+        if (!canCancelRegistration || !contestId || !team?.id) return;
         toast.promise(
             new Promise((resolve, reject) =>
                 updateTeamStatus(
@@ -456,7 +466,7 @@ export function ContestTeamCards({
                 <IndividualRegistrationStatusCard
                     team={team}
                     contest={contest}
-                    onCancelRegistration={handleCancelTeam}
+                    onCancelRegistration={canCancelRegistration ? handleCancelTeam : undefined}
                     isCancelling={isUpdatingStatus}
                 />
             );
@@ -470,7 +480,7 @@ export function ContestTeamCards({
                 currentUserId={currentUserId}
                 onConfirmTeam={handleConfirmTeam}
                 isConfirming={isUpdatingStatus}
-                onCancelTeam={handleCancelTeam}
+                onCancelTeam={canCancelRegistration ? handleCancelTeam : undefined}
                 isCancelling={isUpdatingStatus}
                 onEditTeam={(newName) => handleEditTeam(newName)}
                 isEditingTeam={isEditingTeam}

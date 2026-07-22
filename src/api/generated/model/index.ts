@@ -118,6 +118,7 @@ export * from './contestQuestionStatus';
 export * from './contestResultsResponse';
 export * from './contestRunStatus';
 export * from './contestRuntimeDetails';
+export * from './contestSessionCompletionStatus';
 export * from './contestSessionStatus';
 export * from './contestsListResponse';
 export * from './contestStatus';

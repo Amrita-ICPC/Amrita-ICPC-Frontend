@@ -6,7 +6,11 @@ import { use, useEffect } from "react";
 import { toast } from "sonner";
 
 import { useGetStudentContestStatusApiV1StudentsContestsContestIdParticipationMeGet } from "@/api/generated/students/students";
-import { getContestSessionUnavailableMessage } from "@/lib/contest-session-status";
+import {
+    getContestSessionUnavailableMessage,
+    isContestSessionCompleted,
+    isContestSessionMissed,
+} from "@/lib/contest-session-status";
 import { ContestSessionAppearanceProvider } from "@/lib/providers/contest-session-appearance-provider";
 import { ContestSessionProvider } from "@/lib/providers/contest-session-provider";
 import { SessionTimerProvider } from "@/lib/providers/session-timer-provider";
@@ -29,7 +33,9 @@ export default function SessionLayout({ children, params }: LayoutProps) {
             const canStart = participation?.session?.can_start;
             if (!canStart) {
                 const reason = getContestSessionUnavailableMessage(participation.session);
-                toast.error(reason);
+                if (isContestSessionCompleted(participation.session)) toast.info(reason);
+                else if (isContestSessionMissed(participation.session)) toast.warning(reason);
+                else toast.error(reason);
                 router.replace(`/student/contest/${id}`);
             }
         }
