@@ -5,6 +5,7 @@ import {
     BookOpen,
     Check,
     ChevronLeft,
+    Eye,
     FileQuestion,
     Loader2,
     Search,
@@ -19,7 +20,12 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { getBankQuestionsApiV1BanksBankIdQuestionsGet } from "@/api/generated/bank-questions/bank-questions";
-import type { BankResponse, QuestionListSummaryResponse } from "@/api/generated/model";
+import type {
+    BankResponse,
+    QuestionListSummaryResponse,
+    QuestionResponse,
+} from "@/api/generated/model";
+import { ProblemPreview } from "@/components/questions/question-preview";
 import { AppPagination } from "@/components/shared/app-pagination";
 import { AsyncStateHandler } from "@/components/shared/async-state-handler";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -27,6 +33,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -39,6 +52,7 @@ import {
     useGetBankQuestions,
 } from "@/query/bank-query";
 import { contestQuestionsKey, useCloneQuestionsFromBank } from "@/query/contest-query";
+import { useGetQuestion } from "@/query/question-query";
 
 type Destination = "bank" | "contest";
 type SelectedQuestion = Pick<
@@ -60,6 +74,87 @@ const difficultyStyles: Record<string, string> = {
     HARD: "border-transparent bg-rose-500/10 text-rose-600 dark:text-rose-400",
 };
 
+function parseQuestionContent(questionText: string) {
+    try {
+        const parsed = JSON.parse(questionText) as Record<string, unknown>;
+        return {
+            description: typeof parsed.description === "string" ? parsed.description : "",
+            inputFormat: typeof parsed.input === "string" ? parsed.input : "",
+            outputFormat: typeof parsed.output === "string" ? parsed.output : "",
+            constraints: typeof parsed.constraints === "string" ? parsed.constraints : "",
+            notes: typeof parsed.notes === "string" ? parsed.notes : "",
+        };
+    } catch {
+        return {
+            description: questionText,
+            inputFormat: "",
+            outputFormat: "",
+            constraints: "",
+            notes: "",
+        };
+    }
+}
+
+function QuestionImportPreviewDialog({
+    questionId,
+    onOpenChange,
+}: {
+    questionId: string | null;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const { data, isLoading, isError, error, refetch } = useGetQuestion(questionId ?? "", {
+        query: { enabled: Boolean(questionId) },
+    });
+    const question = data?.data as (QuestionResponse & { score?: number }) | null | undefined;
+    const content = question ? parseQuestionContent(question.question_text) : null;
+
+    return (
+        <Dialog open={Boolean(questionId)} onOpenChange={onOpenChange}>
+            <DialogContent className="flex h-[90vh] max-w-[min(1000px,calc(100vw-2rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(1000px,calc(100vw-2rem))]">
+                <DialogHeader className="shrink-0 border-b border-border/60 px-6 py-4 text-left">
+                    <DialogTitle>Question preview</DialogTitle>
+                    <DialogDescription>
+                        Review the complete problem before adding it to your selection.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="min-h-0 flex-1 overflow-y-auto bg-background p-6">
+                    <AsyncStateHandler
+                        isLoading={isLoading}
+                        isError={isError || (!isLoading && !question)}
+                        error={error}
+                        onRetry={refetch}
+                        errorTitle="Could not load question"
+                    >
+                        {question && content ? (
+                            <ProblemPreview
+                                title={question.title}
+                                difficulty={question.difficulty}
+                                timeLimit={question.time_limit_ms}
+                                memoryLimit={question.memory_limit_mb}
+                                score={question.score ?? 100}
+                                description={content.description}
+                                inputFormat={content.inputFormat}
+                                outputFormat={content.outputFormat}
+                                constraints={content.constraints}
+                                notes={content.notes}
+                                testCases={(question.testcases ?? []).map((testCase, index) => ({
+                                    id: testCase.id ?? `${question.id}-${index}`,
+                                    input: testCase.input,
+                                    output: testCase.output,
+                                    is_hidden: testCase.is_hidden,
+                                    weight: testCase.weight,
+                                    order: testCase.order ?? index + 1,
+                                }))}
+                                onBack={() => onOpenChange(false)}
+                            />
+                        ) : null}
+                    </AsyncStateHandler>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export function QuestionImportClient({ targetId, destination }: QuestionImportClientProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -74,6 +169,7 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
     const [defaultDuration, setDefaultDuration] = useState("");
     const [isImporting, setIsImporting] = useState(false);
     const [isSelectingAll, setIsSelectingAll] = useState(false);
+    const [previewQuestionId, setPreviewQuestionId] = useState<string | null>(null);
     const pageSize = 10;
 
     const debouncedBankSearch = useDebounce(bankSearch, 400);
@@ -565,6 +661,20 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                                         ))}
                                                     </div>
                                                 </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        setPreviewQuestionId(question.id);
+                                                    }}
+                                                    aria-label={`Preview ${question.title}`}
+                                                >
+                                                    <Eye className="size-4" />
+                                                    Preview
+                                                </Button>
                                             </div>
                                         ))}
                                         {!questions.length && (
@@ -644,6 +754,17 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                                                             size="icon"
                                                             className="size-6 shrink-0"
                                                             onClick={() =>
+                                                                setPreviewQuestionId(question.id)
+                                                            }
+                                                            aria-label={`Preview ${question.title}`}
+                                                        >
+                                                            <Eye className="size-3.5" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-6 shrink-0"
+                                                            onClick={() =>
                                                                 setSelected((current) => {
                                                                     const next = { ...current };
                                                                     delete next[question.id];
@@ -665,6 +786,10 @@ export function QuestionImportClient({ targetId, destination }: QuestionImportCl
                     </CardContent>
                 </Card>
             </div>
+            <QuestionImportPreviewDialog
+                questionId={previewQuestionId}
+                onOpenChange={(open) => !open && setPreviewQuestionId(null)}
+            />
         </div>
     );
 }
