@@ -162,11 +162,11 @@ function ScoreEditor({
     onMaxScoreUpdated: (score: number) => void;
 }) {
     const queryClient = useQueryClient();
-    const [draft, setDraft] = React.useState(maxScore > 0 ? maxScore.toString() : "");
+    const [draft, setDraft] = React.useState(maxScore >= 0 ? maxScore.toString() : "");
     const parsedScore = Number(draft);
-    const isPositiveInteger = Number.isInteger(parsedScore) && parsedScore > 0;
-    const isAtLeastObtained = isPositiveInteger && parsedScore >= obtainedScore;
-    const isValidScore = isPositiveInteger && isAtLeastObtained;
+    const isNonNegativeInteger =
+        draft.trim() !== "" && Number.isInteger(parsedScore) && parsedScore >= 0;
+    const isValidScore = isNonNegativeInteger;
     const hasChanged = isValidScore && parsedScore !== maxScore;
 
     const mutation =
@@ -246,7 +246,7 @@ function ScoreEditor({
                 <Input
                     id={`max-score-${questionId}`}
                     type="number"
-                    min={Math.max(1, obtainedScore)}
+                    min={0}
                     step={1}
                     inputMode="numeric"
                     value={draft}
@@ -268,12 +268,9 @@ function ScoreEditor({
                     )}
                 </Button>
             </div>
-            {draft && !isPositiveInteger ? (
-                <p className="mt-1.5 text-xs text-destructive">Enter a positive whole number.</p>
-            ) : draft && !isAtLeastObtained ? (
+            {draft.trim() !== "" && !isNonNegativeInteger ? (
                 <p className="mt-1.5 text-xs text-destructive">
-                    Maximum marks cannot be lower than the student&apos;s {obtainedScore} earned
-                    marks.
+                    Enter a non-negative whole number (0 or greater).
                 </p>
             ) : null}
         </form>
