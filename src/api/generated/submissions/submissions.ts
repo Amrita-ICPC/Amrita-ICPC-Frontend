@@ -6,16 +6,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -25,7 +29,8 @@ import type {
   APIResponseSubmissionTestCaseListResponse,
   ExceptionResponse,
   GetSubmissionTestcasesApiV1SubmissionsSubmissionIdTestcasesGetParams,
-  HTTPValidationError
+  HTTPValidationError,
+  UpdateSubmissionScoreRequest
 } from '../model';
 
 import { axiosWithAuth } from '../../../lib/api-client';
@@ -227,3 +232,68 @@ export function useGetSubmissionTestcasesApiV1SubmissionsSubmissionIdTestcasesGe
 
 
 
+/**
+ * Staff-only. Lets an instructor/manager/admin manually set or override the mark awarded for a specific submission, whether it has been auto-evaluated yet or not. A question can have multiple submissions per student; this targets exactly one submission by ID.
+ * @summary Override a submission's score
+ */
+export const updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch = (
+    submissionId: string,
+    updateSubmissionScoreRequest: UpdateSubmissionScoreRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosWithAuth<APIResponseSubmissionDetailResponse>(
+      {url: `/api/v1/submissions/${submissionId}/score`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateSubmissionScoreRequest, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatchMutationOptions = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>, TError,{submissionId: string;data: UpdateSubmissionScoreRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>, TError,{submissionId: string;data: UpdateSubmissionScoreRequest}, TContext> => {
+
+const mutationKey = ['updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>, {submissionId: string;data: UpdateSubmissionScoreRequest}> = (props) => {
+          const {submissionId,data} = props ?? {};
+
+          return  updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch(submissionId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>>
+    export type UpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatchMutationBody = UpdateSubmissionScoreRequest
+    export type UpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatchMutationError = ExceptionResponse | HTTPValidationError
+
+    /**
+ * @summary Override a submission's score
+ */
+export const useUpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch = <TError = ExceptionResponse | HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>, TError,{submissionId: string;data: UpdateSubmissionScoreRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatch>>,
+        TError,
+        {submissionId: string;data: UpdateSubmissionScoreRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateSubmissionScoreApiV1SubmissionsSubmissionIdScorePatchMutationOptions(options), queryClient);
+    }
