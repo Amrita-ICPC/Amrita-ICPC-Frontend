@@ -8,7 +8,6 @@ import {
     contestQuestionsKey,
     useAddQuestionToContest,
     useUpdateContestQuestion,
-    useUpdateContestQuestionScore,
 } from "@/query/contest-query";
 import { useCreateQuestion } from "@/query/question-query";
 
@@ -82,19 +81,18 @@ export default function ContestQuestionEditorPage({
         },
     });
 
-    const updateScoreMutation = useUpdateContestQuestionScore();
-
+    // Note: the backend currently has no endpoint to update a question's score
+    // once it's linked to a contest (nor one that returns its current
+    // order/duration/max_submission, which would be needed to safely re-link
+    // it). The score field stays editable in the UI, but changes made here
+    // are not persisted until that capability exists on the backend.
     const onUpdate = async () => {
         await updateMutation.mutateAsync({
             contestId,
             questionId: questionId!,
             data: payload,
         });
-        await updateScoreMutation.mutateAsync({
-            contestId,
-            questionId: questionId!,
-            data: { score: payload.score },
-        });
+
         router.push(`/contest/${contestId}`);
         router.refresh();
     };
